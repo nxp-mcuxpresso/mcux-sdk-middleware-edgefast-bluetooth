@@ -1,0 +1,8 @@
+Release Name: EdgeFast Protocol Abstraction Layer
+Release Version: 1.1.0
+Outgoing License: BSD-3-Clause
+License File: COPYING-BSD-3                   
+Format: source code, header files                 
+Description: EdgeFast Bluetooth PAL               
+Origin: NXP (BSD-3-Clause) 
+        Zephyr BT/BLE Host stack (Apache-2.0) -  https://github.com/zephyrproject-rtos/zephyr/tree/v2.6-branch/subsys/bluetooth

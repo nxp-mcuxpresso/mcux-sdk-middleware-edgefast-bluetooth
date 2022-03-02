@@ -6,7 +6,8 @@ This reposirtory is a part of MCUXpresso SDK overall delivery which is composed 
 This repository is under BSD-3-Clause license, license copy please check [COPYING_BSD-3](COPYING-BSD-3).
 
 ## EdgeFast Bluetooth Examples
-EdgeFast bluetooth examples are located in [examples/${boards}/edgefast_bluetooth_examples] and the following examples are provided now:
+EdgeFast bluetooth examples are located in examples/${boards}/edgefast_bluetooth_examples. 
+Different from SDK 2.11.0 package release, only the following examples are provided and macro CONFIG_BT_SMP and CONFIG_BT_SETTINGS is disabled by default.
 - wireless_uart
 - central_ht
 - peripheral_ht
