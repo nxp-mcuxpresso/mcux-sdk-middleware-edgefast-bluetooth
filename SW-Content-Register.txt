@@ -1,5 +1,5 @@
 Release Name: EdgeFast Protocol Abstraction Layer
-Release Version: 1.1.0
+Release Version: 1.2.0
 Outgoing License: BSD-3-Clause
 License File: COPYING-BSD-3                   
 Format: source code, header files                 

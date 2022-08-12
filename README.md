@@ -7,16 +7,6 @@ This repository is under BSD-3-Clause license, license copy please check [COPYIN
 
 ## EdgeFast Bluetooth Examples
 EdgeFast bluetooth examples are located in examples/${boards}/edgefast_bluetooth_examples. 
-Different from SDK 2.11.0 package release, only the following examples are provided and macro CONFIG_BT_SMP and CONFIG_BT_SETTINGS is disabled by default.
-- wireless_uart
-- central_ht
-- peripheral_ht
-- central_pxm
-- peripheral_pxr
-- central_hpc
-- peripheral_hps
-- central_ipsp
-- peripheral_ipsp
 
 ## Supported NXP Boards
 EdgeFast bluetooth examples are supported in the following NXP boards now:
@@ -25,6 +15,7 @@ EdgeFast bluetooth examples are supported in the following NXP boards now:
 - MIMXRT1170-EVK
 - EVK-MIMXRT595
 - EVK-MIMXRT685
+- EVKBIMXRT1050
 
 ## Contribution
 Contributions are not accepted now, and will be opened in the future. 

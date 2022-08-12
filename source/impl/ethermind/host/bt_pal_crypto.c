@@ -27,8 +27,11 @@
 
 #if (((defined(CONFIG_BT_SMP)) && (CONFIG_BT_SMP)))
 #if CONFIG_BT_AES_128_ENCRYPT_SW
-#include "SecLib.h"
-#include "CryptoLibSW.h"
+#include "mbedtls/aes.h"
+#include "mbedtls/entropy.h"
+#include "mbedtls/ctr_drbg.h"
+static mbedtls_entropy_context entropy;
+static mbedtls_ctr_drbg_context rng_ctx;
 #endif /* CONFIG_BT_AES_128_ENCRYPT_SW */
 #else
 #include "BT_common.h"
@@ -106,7 +109,22 @@ static int bt_aes_128_encrypt(const uint8_t in[16],
 {
 #if (((defined(CONFIG_BT_SMP)) && (CONFIG_BT_SMP)))
 #if CONFIG_BT_AES_128_ENCRYPT_SW
-    AES_128_Encrypt(in, key, out);
+	mbedtls_aes_context ctx;
+
+	mbedtls_aes_init(&ctx);
+
+	if(0 != mbedtls_aes_setkey_enc(&ctx, (const unsigned char *)key, 128))
+	{
+		return -1;
+	}
+
+	if(0 != mbedtls_aes_crypt_ecb(&ctx, MBEDTLS_AES_ENCRYPT, (const unsigned char *)in, (unsigned char *)out))
+	{
+		return -1;
+	}
+
+	mbedtls_aes_free(&ctx);
+
     return 0;
 #else
     struct bt_hci_cmd_le_encrypt_rp_cb cb;
@@ -239,7 +257,16 @@ static int prng_reseed()
     }
 #if (((defined(CONFIG_BT_SMP)) && (CONFIG_BT_SMP)))
 #if CONFIG_BT_AES_128_ENCRYPT_SW
-    (void)SecLib_set_rng_seed(*((uint32_t *)seed));
+
+	mbedtls_entropy_init(&entropy);
+
+	mbedtls_ctr_drbg_init(&rng_ctx);
+
+	if(0 != mbedtls_ctr_drbg_seed(&rng_ctx, mbedtls_entropy_func, &entropy, NULL, 0))
+	{
+		return -1;
+	}
+
 #endif /* CONFIG_BT_AES_128_ENCRYPT_SW */
 #else
     srand(*((uint32_t *)seed));
@@ -273,7 +300,10 @@ int bt_rand(void *buf, size_t len)
     {
 #if (((defined(CONFIG_BT_SMP)) && (CONFIG_BT_SMP)))
 #if CONFIG_BT_AES_128_ENCRYPT_SW
-        rng = SecLib_get_random();
+		if(0 != mbedtls_ctr_drbg_random(&rng_ctx, (unsigned char *)&rng, 4))
+		{
+			return -1;
+		}
 #endif /* CONFIG_BT_AES_128_ENCRYPT_SW */
 #else
         rng = (uint32_t)rand();
@@ -392,8 +422,8 @@ int bt_aes_128_cmac_setup(bt_aes_128_cmac_state_t *state, const uint8_t key[16])
                             0x00u, 0x00u, 0x00u, 0x00u,
                             0x00u, 0x00u, 0x00u, 0x00u,
                             0x00u, 0x00u, 0x00u, 0x87u};
-    uint8_t L[16];
-    uint8_t Z[16];
+    uint8_t L[16] = { 0 };
+    uint8_t Z[16] = { 0 };
     uint8_t tmp[16] = {0};
 
 	if (NULL == state)
