@@ -118,6 +118,20 @@ Select this for LE Peripheral role support.
     #define CONFIG_BT_EXT_ADV 0
 #endif
 
+/*! @brief Timeout for limited advertising in 1s units.
+ * The default value is 30, and the valid range should be 1-180.
+ */
+#ifndef CONFIG_BT_LIM_ADV_TIMEOUT
+    #define CONFIG_BT_LIM_ADV_TIMEOUT 30
+#endif
+
+/*! @brief Maximum size of a fragmented periodic advertising report.
+ * The default value is 0, and the valid range should be 0-1650.
+ */
+#ifndef CONFIG_BT_PER_ADV_SYNC_BUF_SIZE
+    #define CONFIG_BT_PER_ADV_SYNC_BUF_SIZE 0
+#endif
+
 #if CONFIG_BT_EXT_ADV
 /*! @brief Support starting advertising through legacy commands, if the macro is set to 0,feature is disabled, if 1, feature is enabled.
  * Select this to enable the use of the Legacy Advertising HCI commands.
@@ -643,13 +657,13 @@ Select this for LE Peripheral role support.
 /*! @brief "Minimum encryption key size accepted in octets, rangeing from 7 to 16
  * This option sets the minimum encryption key size accepted during pairing.
  */
-#ifndef BT_SMP_MIN_ENC_KEY_SIZE
+#ifndef CONFIG_BT_SMP_MIN_ENC_KEY_SIZE
 #if (defined(CONFIG_BT_SMP_SC_ONLY) && (CONFIG_BT_SMP_SC_ONLY > 0))
-#define BT_SMP_MIN_ENC_KEY_SIZE 16
+#define CONFIG_BT_SMP_MIN_ENC_KEY_SIZE 16
 #else
-#define BT_SMP_MIN_ENC_KEY_SIZE 7
+#define CONFIG_BT_SMP_MIN_ENC_KEY_SIZE 7
 #endif /* CONFIG_BT_SMP_SC_ONLY */
-#endif /* BT_SMP_MIN_ENC_KEY_SIZE */
+#endif /* CONFIG_BT_SMP_MIN_ENC_KEY_SIZE */
 
 #endif /* CONFIG_BT_SMP */
 
