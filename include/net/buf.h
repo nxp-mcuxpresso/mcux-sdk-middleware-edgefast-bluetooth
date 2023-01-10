@@ -14,6 +14,7 @@
 #include <stddef.h>
 #include <zephyr/types.h>
 #include <sys/util.h>
+#include <toolchain.h>
 
 #ifndef CONFIG_NET_BUF_USER_DATA_SIZE
 #define CONFIG_NET_BUF_USER_DATA_SIZE 0
@@ -1365,7 +1366,6 @@ void net_buf_reset(struct net_buf *buf);
  */
 void net_buf_simple_reserve(struct net_buf_simple *buf, size_t reserve);
 
-#if 0
 /**
  * @brief Put a buffer into a list
  *
@@ -1389,7 +1389,6 @@ void net_buf_slist_put(sys_slist_t *list, struct net_buf *buf);
  * @return New buffer or NULL if the FIFO is empty.
  */
 struct net_buf *net_buf_slist_get(sys_slist_t *list);
-#endif
 
 /**
  * @brief Put a buffer to the end of a FIFO.
