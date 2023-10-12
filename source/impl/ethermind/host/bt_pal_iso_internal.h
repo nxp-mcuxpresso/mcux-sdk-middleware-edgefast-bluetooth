@@ -11,8 +11,6 @@
 
 #include <bluetooth/iso.h>
 
-#define BT_ISO_MAX_SEQ_NUM 0xFFFF
-
 struct iso_data {
 	/** BT_BUF_ISO_IN */
 	uint8_t  type;
@@ -73,10 +71,6 @@ struct bt_iso_big {
 };
 
 #define iso(buf) ((struct iso_data *)net_buf_user_data(buf))
-
-#if (defined(CONFIG_BT_ISO_MAX_CHAN) && (CONFIG_BT_ISO_MAX_CHAN > 0))
-extern struct bt_conn iso_conns[CONFIG_BT_ISO_MAX_CHAN];
-#endif
 
 /* Process ISO buffer */
 void hci_iso(struct net_buf *buf);

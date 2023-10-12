@@ -92,9 +92,11 @@ struct bt_delayed_work_queue
         BT_WORK_INITIALIZER(work_handler)
 
 int bt_work_queue_init(void);
+void *bt_work_queue_task_handle(void);
 
 int bt_work_init(struct bt_work *work, bt_work_handler_t handler);
 void bt_work_submit(struct bt_work *work);
+void bt_work_cancel(struct bt_work *work);
 
 void bt_delayed_work_init(struct bt_delayed_work *work, bt_work_handler_t handler);
 int bt_delayed_work_remaining_get(struct bt_delayed_work *work);
@@ -107,6 +109,7 @@ int bt_delayed_work_cancel(struct bt_delayed_work *work);
 #define k_work bt_work
 #define k_work_init bt_work_init
 #define k_work_submit bt_work_submit
+#define k_work_cancel bt_work_cancel
 
 #define k_work_delayable bt_delayed_work
 #define k_work_init_delayable bt_delayed_work_init
@@ -116,5 +119,15 @@ int bt_delayed_work_cancel(struct bt_delayed_work *work);
 #define k_work_cancel_delayable bt_delayed_work_cancel
 
 struct k_work_delayable * k_work_delayable_from_work(struct k_work *work);
+
+#define Z_WORK_DELAYABLE_INITIALIZER(work_handler) { \
+	.work = { \
+		.handler = work_handler, \
+	}, \
+}
+
+#define K_WORK_DELAYABLE_DEFINE(work, work_handler) \
+	struct k_work_delayable work \
+	  = Z_WORK_DELAYABLE_INITIALIZER(work_handler)
 
 #endif /* _WORK_QUEUE_H_ */

@@ -524,6 +524,7 @@ static shell_status_t cmd_write_without_rsp(shell_handle_t shell,
 	}
 
 	repeat = 0U;
+	err = 0;
 
 	if (argc > 4) {
 		repeat = strtoul(argv[4], NULL, 16);
@@ -750,7 +751,7 @@ static shell_status_t cmd_show_db(shell_handle_t shell, int32_t argc, char *argv
 	total_len += stats.ccc_count * sizeof(struct _bt_gatt_ccc);
 
 	shell_print(shell, "=================================================");
-	shell_print(shell, "Total: %u services %u attributes (%zu bytes)",
+	shell_print(shell, "Total: %u services %u attributes (%u bytes)",
 		    stats.svc_count, stats.attr_count, total_len);
 
 	return kStatus_SHELL_Success;
@@ -957,75 +958,75 @@ static void notify_cb(struct bt_conn *conn, void *user_data)
 	shell_print(shell, "Nofication sent to conn %p", conn);
 }
 
+static uint8_t found_attr(const struct bt_gatt_attr *attr, uint16_t handle,
+			  void *user_data)
+{
+	const struct bt_gatt_attr **found = user_data;
+
+	*found = attr;
+
+	return BT_GATT_ITER_STOP;
+}
+
+static const struct bt_gatt_attr *find_attr(uint16_t handle)
+{
+	const struct bt_gatt_attr *attr = NULL;
+
+	bt_gatt_foreach_attr(handle, handle, found_attr, &attr);
+
+	return attr;
+}
 static shell_status_t cmd_notify(shell_handle_t shell, int32_t argc, char *argv[])
 {
-	const size_t max_cnt = CONFIG_BT_L2CAP_TX_BUF_COUNT;
-	struct bt_gatt_notify_params params[CONFIG_BT_L2CAP_TX_BUF_COUNT];
-	const size_t min_cnt = 1U;
-	unsigned long data;
-	unsigned long cnt;
-	uint16_t cnt_u16;
-	int err = 0;
+	const struct bt_gatt_attr *attr;
+	int err;
+	size_t data_len;
+	unsigned long handle;
+	static char data[BT_ATT_MAX_ATTRIBUTE_LEN];
 
-	if (!default_conn) {
-		shell_error(shell, "Not connected.");
+	const char *arg_handle = argv[1];
+	const char *arg_data = argv[2];
+	size_t arg_data_len = strlen(arg_data);
 
+	err = 0;
+	handle = shell_strtoul(arg_handle, 16, &err);
+	if (err) {
+		shell_error(shell, "Handle '%s': Not a valid hex number.", arg_handle);
 		return kStatus_SHELL_Error;
 	}
 
-	if (!echo_enabled) {
-		shell_error(shell, "No clients have enabled notifications for the vnd1_echo CCC.");
+	if (!IN_RANGE(handle, BT_ATT_FIRST_ATTRIBUTE_HANDLE, BT_ATT_LAST_ATTRIBUTE_HANDLE)) {
+		shell_error(shell, "Handle 0x%lx: Impossible value.", handle);
 		return kStatus_SHELL_Error;
 	}
 
-	cnt = shell_strtoul(argv[1], 10, &err);
-	if (err != 0) {
-		shell_error(shell, "Invalid count parameter: %s", argv[1]);
-
+	if ((arg_data_len / 2) > BT_ATT_MAX_ATTRIBUTE_LEN) {
+		shell_error(shell, "Data: Size exceeds legal attribute size.");
 		return kStatus_SHELL_Error;
 	}
 
-	if (!IN_RANGE(cnt, min_cnt, max_cnt)) {
-		shell_error(shell, "Invalid count value %lu (range %zu to %zu)",
-			    cnt, min_cnt, max_cnt);
-
+	data_len = hex2bin(arg_data, arg_data_len, (uint8_t *)data, sizeof(data));
+	if (data_len == 0 && arg_data_len != 0) {
+		shell_error(shell, "Data: Bad hex.");
 		return kStatus_SHELL_Error;
 	}
 
-	cnt_u16 = (uint16_t)cnt;
-
-	if (argc > 2) {
-		data = shell_strtoul(argv[2], 16, &err);
-		if (err != 0) {
-			shell_error(shell, "Invalid data parameter: %s", argv[1]);
-
-			return kStatus_SHELL_Error;
-		}
+	attr = find_attr(handle);
+	if (!attr) {
+		shell_error(shell, "Handle 0x%lx: Local attribute not found.", handle);
+		return kStatus_SHELL_Error;
 	}
 
-	(void)memset(params, 0, sizeof(params));
-
-	for (uint16_t i = 0U; i < cnt_u16; i++) {
-		params[i].uuid = 0;
-		params[i].attr = vnd1_attrs;
-		params[i].data = &data;
-		params[i].len = sizeof(data);
-		params[i].func = notify_cb;
-		params[i].user_data = (void *)shell;
-		SET_CHAN_OPT_ANY(params[i]);
+	err = bt_gatt_notify(NULL, attr, data, data_len);
+	if (err) {
+		shell_error(shell, "bt_gatt_notify errno %d (%s)", -err, strerror(-err));
 	}
 
-	err = bt_gatt_notify_multiple(default_conn, cnt_u16, params);
-	if (err != 0) {
-		shell_error(shell, "bt_gatt_notify_multiple failed: %d", err);
-	} else {
-		shell_print(shell, "Send %u notifications", cnt_u16);
-	}
-
-	return (shell_status_t)err;
+	return kStatus_SHELL_Success;
 }
 
 #if (defined(CONFIG_BT_GATT_NOTIFY_MULTIPLE) && (CONFIG_BT_GATT_NOTIFY_MULTIPLE > 0))
+
 static shell_status_t cmd_notify_mult(shell_handle_t shell, int32_t argc, char *argv[])
 {
 	const size_t max_cnt = CONFIG_BT_L2CAP_TX_BUF_COUNT;
@@ -1190,7 +1191,7 @@ static uint8_t get_cb(const struct bt_gatt_attr *attr, uint16_t handle,
 
 	ret = attr->read(NULL, attr, (void *)buf, sizeof(buf), 0);
 	if (ret < 0) {
-		shell_print(shell, "Failed to read: %zd", ret);
+		shell_print(shell, "Failed to read: %d", ret);
 		return BT_GATT_ITER_STOP;
 	}
 
@@ -1243,7 +1244,7 @@ static uint8_t set_cb(const struct bt_gatt_attr *attr, uint16_t handle,
 	ret = attr->write(NULL, attr, (void *)buf, i, 0, 0);
 	if (ret < 0) {
 		data->err = ret;
-		shell_error(data->shell, "Failed to write: %zd", ret);
+		shell_error(data->shell, "Failed to write: %d", ret);
 		return BT_GATT_ITER_STOP;
 	}
 

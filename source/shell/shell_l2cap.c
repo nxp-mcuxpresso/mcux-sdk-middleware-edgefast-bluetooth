@@ -234,11 +234,13 @@ static int l2cap_accept_policy(struct bt_conn *conn)
 	int i;
 
 	if (l2cap_policy == L2CAP_POLICY_16BYTE_KEY) {
+#if ((defined(CONFIG_BT_SMP) && ((CONFIG_BT_SMP) > 0U)) || (defined(CONFIG_BT_BREDR) && ((CONFIG_BT_BREDR) > 0U)))
 		uint8_t enc_key_size = bt_conn_enc_key_size(conn);
 
 		if (enc_key_size && enc_key_size < BT_ENC_KEY_SIZE_MAX) {
 			return -EPERM;
 		}
+#endif
 	} else if (l2cap_policy == L2CAP_POLICY_ALLOWLIST) {
 		for (i = 0; i < ARRAY_SIZE(l2cap_allowlist); i++) {
 			if (l2cap_allowlist[i] == conn) {
@@ -321,7 +323,7 @@ static shell_status_t cmd_register(shell_handle_t shell, int32_t argc, char *arg
 }
 
 #if (defined(CONFIG_BT_L2CAP_ECRED) && (CONFIG_BT_L2CAP_ECRED> 0))
-static int cmd_ecred_reconfigure(shell_handle_t shell, int32_t argc, char *argv[])
+static shell_status_t cmd_ecred_reconfigure(shell_handle_t shell, int32_t argc, char *argv[])
 {
 	struct bt_l2cap_chan *l2cap_ecred_chans[] = { &l2ch_chan.ch.chan, NULL };
 	uint16_t mtu;
@@ -354,27 +356,27 @@ static int cmd_ecred_reconfigure(shell_handle_t shell, int32_t argc, char *argv[
 	return err;
 }
 
-static int cmd_ecred_connect(shell_handle_t shell, int32_t argc, char *argv[])
+static shell_status_t cmd_ecred_connect(shell_handle_t shell, int32_t argc, char *argv[])
 {
 	struct bt_l2cap_chan *l2cap_ecred_chans[] = { &l2ch_chan.ch.chan, NULL };
 	uint16_t psm;
 	int err = 0;
 
 	if (!default_conn) {
-		shell_error(sh, "Not connected");
+		shell_error(shell, "Not connected");
 
-		return -ENOEXEC;
+		return kStatus_SHELL_Error;
 	}
 
 	if (l2ch_chan.ch.chan.conn) {
-		shell_error(sh, "Channel already in use");
+		shell_error(shell, "Channel already in use");
 
-		return -ENOEXEC;
+		return kStatus_SHELL_Error;
 	}
 
 	psm = shell_strtoul(argv[1], 16, &err);
 	if (err) {
-		shell_error(sh, "Unable to parse PSM (err %d)", err);
+		shell_error(shell, "Unable to parse PSM (err %d)", err);
 
 		return err;
 	}
@@ -384,7 +386,7 @@ static int cmd_ecred_connect(shell_handle_t shell, int32_t argc, char *argv[])
 
 		sec = shell_strtoul(argv[2], 10, &err);
 		if (err) {
-			shell_error(sh, "Unable to parse security level (err %d)", err);
+			shell_error(shell, "Unable to parse security level (err %d)", err);
 
 			return err;
 		}
@@ -395,10 +397,10 @@ static int cmd_ecred_connect(shell_handle_t shell, int32_t argc, char *argv[])
 
 	err = bt_l2cap_ecred_chan_connect(default_conn, l2cap_ecred_chans, psm);
 	if (err < 0) {
-		shell_error(sh, "Unable to connect to psm %u (err %d)", psm,
+		shell_error(shell, "Unable to connect to psm %u (err %d)", psm,
 			    err);
 	} else {
-		shell_print(sh, "L2CAP connection pending");
+		shell_print(shell, "L2CAP connection pending");
 	}
 
 	return err;
@@ -603,7 +605,7 @@ SHELL_STATIC_SUBCMD_SET_CREATE(l2cap_cmds,
 	SHELL_SUBCMD_SET_END
 );
 
-static shell_status_t cmd_l2cap(shell_handle_t shell, int32_t argc, char **argv)
+static shell_status_t cmd_l2cap(shell_handle_t shell, int32_t argc, char *argv[])
 {
 	if (argc == 1) {
 		shell_help(shell);

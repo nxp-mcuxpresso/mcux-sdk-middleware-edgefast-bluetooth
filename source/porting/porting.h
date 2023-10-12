@@ -17,6 +17,7 @@
 #include <sys/printk.h>
 #include <sys/slist.h>
 #include <sys/util.h>
+#include <sys/check.h>
 
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/addr.h>
@@ -26,10 +27,13 @@
 
 #include <bluetooth/buf.h>
 
+#include "fifo/fifo.h"
+
 #define k_sleep OSA_TimeDelay
 
 #define K_MSEC BT_MSEC
 #define K_NO_WAIT osaWaitNone_c
+#define USEC_PER_MSEC 1000U
 
 /* TODO: K_KERNEL_STACK_MEMBER */
 #define K_KERNEL_STACK_MEMBER(s, size) size_t (s)[size]
@@ -140,4 +144,9 @@ const char *bt_uuid_str(const struct bt_uuid *uuid);
 
 size_t strnlen(const char *s, size_t maxlen);
 
+uint32_t crc32_ieee(const uint8_t *data, size_t len);
+static inline atomic_ptr_val_t atomic_ptr_clear(atomic_ptr_t *target)
+{
+	return atomic_ptr_set(target, NULL);
+}
 #endif /* __EDGEFAST_BT_BLE_PORTING_H__ */

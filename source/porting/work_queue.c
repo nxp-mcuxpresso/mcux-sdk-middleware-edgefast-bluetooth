@@ -46,7 +46,7 @@ static void work_queue_trigger_delayed_work(void)
 static void work_queue_task(void *param)
 {
     struct bt_work_queue *work_queue = (struct bt_work_queue *)param;
-    struct bt_work *work;
+    struct bt_work *work = NULL;
     bt_work_handler_t handler;
     uint32_t timeout;
     osa_status_t ret;
@@ -63,7 +63,7 @@ static void work_queue_task(void *param)
         ret = OSA_MsgQGet(work_queue->queue, &work, timeout);
         if ( KOSA_StatusSuccess == ret )
         {
-            BT_INFO("%p, new task delegation\n", work);
+            LOG_INF("%p, new task delegation\n", work);
             handler = work->handler;
 
             /* Reset pending state so it can be resubmitted by handler */
@@ -73,11 +73,11 @@ static void work_queue_task(void *param)
                 if (NULL != handler)
                 {
                     handler(work);
-                    BT_INFO("%p, task delegation excuted\n", work);
+                    LOG_INF("%p, task delegation excuted\n", work);
                 }
                 else
                 {
-                    BT_INFO("%p, invalid handler\n", work);
+                    LOG_INF("%p, invalid handler\n", work);
                 }
             }
         }
@@ -135,6 +135,11 @@ int bt_work_queue_init(void)
     return (KOSA_StatusSuccess == ret) ? -1 : 0;
 }
 
+void *bt_work_queue_task_handle(void)
+{
+    return s_workQueueHead.thread;
+}
+
 int bt_work_init(struct bt_work *work, bt_work_handler_t handler)
 {
     assert(NULL != work);
@@ -157,6 +162,12 @@ static void bt_work_submit_to_queue(struct bt_work_queue *work_queue,
 void bt_work_submit(struct bt_work *work)
 {
     bt_work_submit_to_queue(&s_workQueueHead, work);
+}
+
+void bt_work_cancel(struct bt_work *work)
+{
+    /* Here we could not remove from queue, so just mark it as "BT_WORK_STATE_NONE". */
+    work->state = BT_WORK_STATE_NONE;
 }
 
 /* delayed work queue start */
@@ -223,7 +234,7 @@ void bt_delayed_work_queue_insert_sort(struct bt_delayed_work_queue *work_queue,
     }
     work->work.state |= BT_WORK_STATE_DELAY_PENDING;
 
-    BT_INFO("%p, delay task submit with timeOut %d\n",work, work->timeOut);
+    LOG_INF("%p, delay task submit with timeOut %d\n",work, work->timeOut);
     work->work.next = NULL;
 
     (void)OSA_MutexLock(work_queue->mutex, osaWaitForever_c);
@@ -391,7 +402,7 @@ static void delayed_work_queue_tick_update(struct bt_delayed_work_queue *work_qu
                 else
                 {
                     p->timeOut = 0;
-                    BT_INFO("%p, delay task timeout\n",(uint32_t)p);
+                    LOG_INF("%p, delay task timeout\n",(uint32_t)p);
                     bt_delayed_work_queue_remove(work_queue, p);
                     temp = (void *)p;
                     bt_work_submit((struct bt_work *)temp);
@@ -429,7 +440,7 @@ int bt_delayed_work_submit(struct bt_delayed_work *work, int32_t delay)
     }
     else
     {
-        BT_WARN("%p, delay task has been submit %d\n", work, delay);
+        LOG_WRN("%p, delay task has been submit %d\n", work, delay);
     }
 
     return 0;

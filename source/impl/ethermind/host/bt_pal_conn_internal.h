@@ -37,6 +37,7 @@ enum {
 	BT_CONN_BR_PAIRING_INITIATOR,	/* local host starts authentication */
 	BT_CONN_CLEANUP,                /* Disconnected, pending cleanup */
 	BT_CONN_PERIPHERAL_PARAM_UPDATE,/* If periph param update timer fired */
+	BT_CONN_PERIPHERAL_PARAM_AUTO_UPDATE, /* If periph param auto update on timer fired */
 	BT_CONN_PERIPHERAL_PARAM_SET,	/* If periph param were set from app */
 	BT_CONN_PERIPHERAL_PARAM_L2CAP,	/* If should force L2CAP for CPUP */
 	BT_CONN_FORCE_PAIR,             /* Pairing even with existing keys. */
@@ -74,6 +75,9 @@ struct bt_conn_le {
 	uint16_t			pending_latency;
 	uint16_t			pending_timeout;
 
+#if (defined(CONFIG_BT_GAP_AUTO_UPDATE_CONN_PARAMS) && (CONFIG_BT_GAP_AUTO_UPDATE_CONN_PARAMS > 0U))
+	uint8_t  conn_param_retry_countdown;
+#endif
 	uint8_t			features[8];
 
 	struct bt_keys		*keys;
@@ -130,17 +134,6 @@ struct bt_conn_iso {
 		/* BIS ID within the BIG*/
 		uint8_t			bis_id;
 	};
-
-#if (defined(CONFIG_BT_ISO_UNICAST) && (CONFIG_BT_ISO_UNICAST > 0)) || \
-	(defined(CONFIG_BT_ISO_BROADCASTER) && (CONFIG_BT_ISO_BROADCASTER > 0))
-	/** @brief 16-bit sequence number that shall be incremented per SDU interval
-	 *
-	 *  Stored as 32-bit to handle wrapping: Only once the value has
-	 *  become greater than 0xFFFF will values less than the
-	 *  current are allowed again.
-	 */
-	uint32_t seq_num;
-#endif /* CONFIG_BT_ISO_UNICAST) || CONFIG_BT_ISO_BROADCASTER */
 
 	/** Stored information about the ISO stream */
 	struct bt_iso_info info;
@@ -277,6 +270,15 @@ void bt_conn_recv(struct bt_conn *conn, struct net_buf *buf, uint8_t flags);
 int bt_conn_send_cb(struct bt_conn *conn, struct net_buf *buf,
 		    bt_conn_tx_cb_t cb, void *user_data);
 
+/* Thin wrapper over `bt_conn_send_cb`
+ *
+ * Used to set the TS_Flag bit in `buf`'s metadata.
+ *
+ * Return values & buf ownership same as parent.
+ */
+int bt_conn_send_iso_cb(struct bt_conn *conn, struct net_buf *buf,
+			bt_conn_tx_cb_t cb, bool has_ts);
+
 static inline int bt_conn_send(struct bt_conn *conn, struct net_buf *buf)
 {
 	return bt_conn_send_cb(conn, buf, NULL, NULL);
@@ -382,6 +384,9 @@ void notify_le_phy_updated(struct bt_conn *conn);
 bool le_param_req(struct bt_conn *conn, struct bt_le_conn_param *param);
 
 #if (defined(CONFIG_BT_SMP) && ((CONFIG_BT_SMP) > 0U))
+/* If role specific LTK is present */
+bool bt_conn_ltk_present(const struct bt_conn *conn);
+
 /* rand and ediv should be in BT order */
 int bt_conn_le_start_encryption(struct bt_conn *conn, uint8_t rand[8],
 				uint8_t ediv[2], const uint8_t *ltk, size_t len);
@@ -441,10 +446,11 @@ struct net_buf *bt_conn_create_frag_timeout(size_t reserve,
 /* Initialize connection management */
 int bt_conn_init(void);
 
+/* Reset states of connections and set state to BT_CONN_DISCONNECTED. */
+void bt_conn_cleanup_all(void);
 /* Selects based on connection type right semaphore for ACL packets */
 osa_semaphore_handle_t bt_conn_get_pkts(struct bt_conn *conn);
 
-/* k_poll related helpers for the TX thread */
 void bt_conn_process_tx(struct bt_conn *conn);
 
 /* false - continue, true - stop */

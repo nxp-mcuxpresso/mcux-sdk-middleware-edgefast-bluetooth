@@ -59,6 +59,10 @@ extern struct net_buf_pool _net_buf_pool_list[];
 
 struct net_buf_pool *net_buf_pool_get(int id)
 {
+#if defined(__ICCARM__)
+	(void)_net_buf_pool_list_end;
+#endif /* __ICCARM__ */
+
 	return &_net_buf_pool_list[id];
 }
 
@@ -253,9 +257,9 @@ struct net_buf *net_buf_alloc_len(struct net_buf_pool *pool, size_t size,
 #endif
 {
 	uint32_t alloc_start = OSA_TimeGetMsec();
-	struct net_buf *buf;
-	unsigned int key;
+	struct net_buf *buf = NULL;
 	osa_status_t ret;
+	OSA_SR_ALLOC();
 
 	__ASSERT_NO_MSG(pool);
 
@@ -275,7 +279,7 @@ struct net_buf *net_buf_alloc_len(struct net_buf_pool *pool, size_t size,
 	/* We need to lock interrupts temporarily to prevent race conditions
 	 * when accessing pool->uninit_count.
 	 */
-	key = DisableGlobalIRQ();
+	OSA_ENTER_CRITICAL();
 
 	/* If there are uninitialized buffers we're guaranteed to succeed
 	 * with the allocation one way or another.
@@ -292,19 +296,19 @@ struct net_buf *net_buf_alloc_len(struct net_buf_pool *pool, size_t size,
 
             ret = OSA_MsgQGet(pool->free, &buf, osaWaitNone_c);
 			if (KOSA_StatusSuccess == ret) {
-				EnableGlobalIRQ(key);
+				OSA_EXIT_CRITICAL();
 				goto success;
 			}
 		}
 
 		uninit_count = pool->uninit_count--;
-		EnableGlobalIRQ(key);
+		OSA_EXIT_CRITICAL();
 
 		buf = pool_get_uninit(pool, uninit_count);
 		goto success;
 	}
 
-	EnableGlobalIRQ(key);
+	OSA_EXIT_CRITICAL();
 
 #if (defined(CONFIG_NET_BUF_LOG) && (CONFIG_NET_BUF_LOG_LEVEL >= LOG_LEVEL_WRN))
 	if (timeout == osaWaitForever_c) {
@@ -436,7 +440,8 @@ struct net_buf *net_buf_get_debug(osa_msgq_handle_t fifo, k_timeout_t timeout,
 struct net_buf *net_buf_get(osa_msgq_handle_t fifo, k_timeout_t timeout)
 #endif
 {
-	struct net_buf *buf, *frag;
+	struct net_buf *buf = NULL;
+	struct net_buf *frag = NULL;
 	osa_status_t ret;
 
 	NET_BUF_DBG("%s():%d: fifo %p timeout %d", func, line, fifo, timeout);
