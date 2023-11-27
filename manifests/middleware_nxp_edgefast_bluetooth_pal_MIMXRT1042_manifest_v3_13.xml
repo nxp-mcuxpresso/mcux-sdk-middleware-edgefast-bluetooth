@@ -21,24 +21,24 @@
     <definition extID="component.log.backend.debugconsole.MIMXRT1042"/>
     <definition extID="component.common_task.MIMXRT1042"/>
   </externalDefinitions>
-  <ksdk id="MCUXpressoSDK2140_middleware_nxp_edgefast_bluetooth_pal_MIMXRT1042_manifest_v3_13" name="MCUXpressoSDK2140_middleware_nxp_edgefast_bluetooth_pal_MIMXRT1042_manifest_v3_13" version="2.14.0"/>
+  <ksdk id="MCUXpressoSDK2140_middleware_nxp_edgefast_bluetooth_pal_MIMXRT1042_manifest_v3_13" name="MCUXpressoSDK2140_middleware_nxp_edgefast_bluetooth_pal_MIMXRT1042_manifest_v3_13" version="2.14.0" revision="2.14.0"/>
   <components>
-    <component id="middleware.edgefast_bluetooth.config.template.MIMXRT1042" name="middleware.edgefast_bluetooth.config.template" brief="edgefast_bluetooth PAL configuration template" version="1.0.0" full_name="middleware.edgefast_bluetooth.config.template" devices="MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path="../middleware/edgefast_bluetooth" project_base_path="source">
-      <source relative_path="../../output/templates/config" project_relative_path="./" type="c_include">
+    <component id="middleware.edgefast_bluetooth.config.template.MIMXRT1042" name="middleware.edgefast_bluetooth.config.template" brief="edgefast_bluetooth PAL configuration template" version="1.0.0" full_name="middleware.edgefast_bluetooth.config.template" devices="MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path=".././" project_base_path="source">
+      <source relative_path="./output/templates/config" project_relative_path="./" type="c_include">
         <files mask="edgefast_bluetooth_config.h"/>
       </source>
-      <source relative_path="../../output/templates/app_bluetooth_config" project_relative_path="./" config="true" type="c_preinclude">
+      <source relative_path="./output/templates/app_bluetooth_config" project_relative_path="./" config="true" type="c_preinclude">
         <files mask="app_bluetooth_config.h"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_config_template.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../output/templates/config" project_relative_path="./" type="c_include"/>
-        <include_path relative_path="../../output/templates/app_bluetooth_config" project_relative_path="./" type="c_include"/>
+        <include_path relative_path="./output/templates/config" project_relative_path="./" type="c_include"/>
+        <include_path relative_path="./output/templates/app_bluetooth_config" project_relative_path="./" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.sdio.template.evkmimxrt1040.MIMXRT1042" name="EdgeFast Bluetooth configuration template of SDIO" brief="Template configuration file to be edited by user." version="1.0.0" full_name="EdgeFast Bluetooth configuration template of SDIO" devices="MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path="../boards/evkmimxrt1040/edgefast_bluetooth_examples/template" project_base_path="source">
+    <component id="middleware.edgefast_bluetooth.sdio.template.evkmimxrt1040.MIMXRT1042" name="EdgeFast Bluetooth configuration template of SDIO" brief="Template configuration file to be edited by user." version="1.0.0" full_name="EdgeFast Bluetooth configuration template of SDIO" devices="MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path="../../../boards/evkmimxrt1040/edgefast_bluetooth_examples/template" project_base_path="source">
       <source exclude="true" relative_path="./" project_relative_path="template" type="doc">
         <files mask="dummy.txt" hidden="true"/>
       </source>
@@ -46,7 +46,7 @@
         <files mask="middleware_edgefast_bluetooth_sdio_template_evkmimxrt1040.cmake" hidden="true"/>
       </source>
     </component>
-    <component id="middleware.edgefast_bluetooth.mcux.linker.template.evkmimxrt1040.MIMXRT1042" name="EdgeFast Bluetooth configuration template of MCUX Linker" brief="Template configuration file to be edited by user." version="1.0.0" full_name="EdgeFast Bluetooth configuration template of MCUX Linker" devices="MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path="../boards/evkmimxrt1040/edgefast_bluetooth_examples/template" project_base_path="source">
+    <component id="middleware.edgefast_bluetooth.mcux.linker.template.evkmimxrt1040.MIMXRT1042" name="EdgeFast Bluetooth configuration template of MCUX Linker" brief="Template configuration file to be edited by user." version="1.0.0" full_name="EdgeFast Bluetooth configuration template of MCUX Linker" devices="MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path="../../../boards/evkmimxrt1040/edgefast_bluetooth_examples/template" project_base_path="source">
       <source toolchain="mcuxpresso" relative_path="./" project_relative_path="linkscripts" config="true" type="src">
         <files mask="data.ldt"/>
         <files mask="end_text.ldt"/>
@@ -61,7 +61,7 @@
         <files mask="middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt1040.cmake" hidden="true"/>
       </source>
     </component>
-    <component id="middleware.edgefast_bluetooth.pal.MIMXRT1042" name="middleware.edgefast_bluetooth.pal" brief="edgefast_bluetooth Abstraction Layer" version="1.0.0" full_name="middleware.edgefast_bluetooth.pal" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="edgefast/bluetooth">
+    <component id="middleware.edgefast_bluetooth.pal.MIMXRT1042" name="middleware.edgefast_bluetooth.pal" brief="edgefast_bluetooth Abstraction Layer" version="1.0.0" full_name="middleware.edgefast_bluetooth.pal" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <dependencies>
         <all>
           <any_of>
@@ -104,28 +104,28 @@
           <component_dependency value="middleware.edgefast_bluetooth.pal.db_gen.ethermind.MIMXRT1042"/>
         </all>
       </dependencies>
-      <source exclude="true" relative_path="../../boards/template" project_relative_path="./" type="doc">
+      <source exclude="true" relative_path="./boards/template" project_relative_path="./" type="doc">
         <files mask="dummy.txt" hidden="true"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_pal.cmake" hidden="true"/>
       </source>
     </component>
-    <component id="middleware.edgefast_bluetooth.common.ethermind.hci.MIMXRT1042" name="middleware.edgefast_bluetooth.common.ethermind.hci" brief="edgefast_bluetooth HCI" version="1.0.0" full_name="middleware.edgefast_bluetooth.common.ethermind.hci" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/wireless/ethermind" project_base_path="bt_ble">
+    <component id="middleware.edgefast_bluetooth.common.ethermind.hci.MIMXRT1042" name="middleware.edgefast_bluetooth.common.ethermind.hci" brief="edgefast_bluetooth HCI" version="1.0.0" full_name="middleware.edgefast_bluetooth.common.ethermind.hci" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
       <dependencies>
         <all>
           <component_dependency value="middleware.edgefast_bluetooth.pal.MIMXRT1042"/>
           <component_dependency value="middleware.edgefast_bluetooth.common.ethermind.hci_uart.MIMXRT1042"/>
         </all>
       </dependencies>
-      <source exclude="true" relative_path="../../port/pal/mcux/bluetooth" project_relative_path="./" type="doc">
+      <source exclude="true" relative_path="../../../port/pal/mcux/bluetooth" project_relative_path="./" type="doc">
         <files mask="dummy.txt" hidden="true"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_common_ethermind_hci.cmake" hidden="true"/>
       </source>
     </component>
-    <component id="middleware.edgefast_bluetooth.common.ethermind.hci_uart.MIMXRT1042" name="middleware.edgefast_bluetooth.common.ethermind.hci_uart" brief="edgefast_bluetooth HCI UART" version="1.0.0" full_name="middleware.edgefast_bluetooth.common.ethermind.hci_uart" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/wireless/ethermind" project_base_path="bt_ble">
+    <component id="middleware.edgefast_bluetooth.common.ethermind.hci_uart.MIMXRT1042" name="middleware.edgefast_bluetooth.common.ethermind.hci_uart" brief="edgefast_bluetooth HCI UART" version="1.0.0" full_name="middleware.edgefast_bluetooth.common.ethermind.hci_uart" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
       <defines>
         <define name="DEBUG_CONSOLE_TRANSFER_NON_BLOCKING" value="1"/>
         <define name="SERIAL_PORT_TYPE_UART" value="1"/>
@@ -141,10 +141,10 @@
           <component_dependency value="component.serial_manager_uart.MIMXRT1042"/>
         </all>
       </dependencies>
-      <source relative_path="../../port/pal/mcux/bluetooth" project_relative_path="port/pal/mcux/bluetooth" type="src">
+      <source relative_path="../../../port/pal/mcux/bluetooth" project_relative_path="port/pal/mcux/bluetooth" type="src">
         <files mask="hci_uart.c"/>
       </source>
-      <source relative_path="../../port/pal/mcux/bluetooth" project_relative_path="port/pal/mcux/bluetooth" type="c_include">
+      <source relative_path="../../../port/pal/mcux/bluetooth" project_relative_path="port/pal/mcux/bluetooth" type="c_include">
         <files mask="hci_uart.h"/>
         <files mask="hci_uart_internal.h"/>
       </source>
@@ -152,7 +152,7 @@
         <files mask="middleware_edgefast_bluetooth_common_ethermind_hci_uart.cmake" hidden="true"/>
       </source>
     </component>
-    <component id="middleware.edgefast_bluetooth.common.ethermind.MIMXRT1042" name="middleware.edgefast_bluetooth.common.ethermind" brief="edgefast_bluetooth bt_ble host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.common.ethermind" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path="../middleware/wireless/ethermind" project_base_path="bt_ble">
+    <component id="middleware.edgefast_bluetooth.common.ethermind.MIMXRT1042" name="middleware.edgefast_bluetooth.common.ethermind" brief="edgefast_bluetooth bt_ble host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.common.ethermind" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
       <defines>
         <define name="LFS_NO_INTRINSICS" value="1"/>
         <define name="LFS_NO_ERROR" value="1"/>
@@ -170,7 +170,7 @@
           <component_dependency value="component.osa.MIMXRT1042"/>
         </all>
       </dependencies>
-      <source relative_path="../../bluetooth/export/eOSAL" project_relative_path="bluetooth/export/eOSAL" type="c_include">
+      <source relative_path="../../../bluetooth/export/eOSAL" project_relative_path="bluetooth/export/eOSAL" type="c_include">
         <files mask="eBT_assert.h"/>
         <files mask="eBT_config.h"/>
         <files mask="eBT_debug_api.h"/>
@@ -179,7 +179,7 @@
         <files mask="eBT_serial.h"/>
         <files mask="eBT_timer.h"/>
       </source>
-      <source relative_path="../../bluetooth/export/include" project_relative_path="bluetooth/export/include" type="c_include">
+      <source relative_path="../../../bluetooth/export/include" project_relative_path="bluetooth/export/include" type="c_include">
         <files mask="BT_a2dp_api.h"/>
         <files mask="BT_api.h"/>
         <files mask="BT_assigned_numbers.h"/>
@@ -234,77 +234,77 @@
         <files mask="l2cap.h"/>
         <files mask="write_task.h"/>
       </source>
-      <source relative_path="../../bluetooth/export/vendor" project_relative_path="bluetooth/export/vendor" type="c_include">
+      <source relative_path="../../../bluetooth/export/vendor" project_relative_path="bluetooth/export/vendor" type="c_include">
         <files mask="vendor_specific_commands.h"/>
         <files mask="vendor_specific_init.h"/>
       </source>
-      <source relative_path="../../bluetooth/export/vendor" project_relative_path="bluetooth/export/vendor" type="src">
+      <source relative_path="../../../bluetooth/export/vendor" project_relative_path="bluetooth/export/vendor" type="src">
         <files mask="vendor_specific_init.c"/>
       </source>
-      <source relative_path="../../bluetooth/private/protocols/att" project_relative_path="bluetooth/private/protocols/att" type="c_include">
+      <source relative_path="../../../bluetooth/private/protocols/att" project_relative_path="bluetooth/private/protocols/att" type="c_include">
         <files mask="att.h"/>
       </source>
-      <source relative_path="../../bluetooth/private/protocols/avctp" project_relative_path="bluetooth/private/protocols/avctp" type="c_include">
+      <source relative_path="../../../bluetooth/private/protocols/avctp" project_relative_path="bluetooth/private/protocols/avctp" type="c_include">
         <files mask="avctp.h"/>
       </source>
-      <source relative_path="../../bluetooth/private/protocols/avdtp" project_relative_path="bluetooth/private/protocols/avdtp" type="c_include">
+      <source relative_path="../../../bluetooth/private/protocols/avdtp" project_relative_path="bluetooth/private/protocols/avdtp" type="c_include">
         <files mask="avdtp.h"/>
       </source>
-      <source relative_path="../../bluetooth/private/protocols/bnep" project_relative_path="bluetooth/private/protocols/bnep" type="c_include">
+      <source relative_path="../../../bluetooth/private/protocols/bnep" project_relative_path="bluetooth/private/protocols/bnep" type="c_include">
         <files mask="bnep.h"/>
       </source>
-      <source relative_path="../../bluetooth/private/protocols/dbase" project_relative_path="bluetooth/private/protocols/dbase" type="c_include">
+      <source relative_path="../../../bluetooth/private/protocols/dbase" project_relative_path="bluetooth/private/protocols/dbase" type="c_include">
         <files mask="database.h"/>
       </source>
-      <source relative_path="../../bluetooth/private/protocols/hci_1.2" project_relative_path="bluetooth/private/protocols/hci_1.2" type="c_include">
+      <source relative_path="../../../bluetooth/private/protocols/hci_1.2" project_relative_path="bluetooth/private/protocols/hci_1.2" type="c_include">
         <files mask="hci_h.h"/>
       </source>
-      <source relative_path="../../bluetooth/private/protocols/mcap" project_relative_path="bluetooth/private/protocols/mcap" type="c_include">
+      <source relative_path="../../../bluetooth/private/protocols/mcap" project_relative_path="bluetooth/private/protocols/mcap" type="c_include">
         <files mask="mcap.h"/>
       </source>
-      <source relative_path="../../bluetooth/private/protocols/obex" project_relative_path="bluetooth/private/protocols/obex" type="c_include">
+      <source relative_path="../../../bluetooth/private/protocols/obex" project_relative_path="bluetooth/private/protocols/obex" type="c_include">
         <files mask="obex.h"/>
       </source>
-      <source relative_path="../../bluetooth/private/protocols/rfcomm" project_relative_path="bluetooth/private/protocols/rfcomm" type="c_include">
+      <source relative_path="../../../bluetooth/private/protocols/rfcomm" project_relative_path="bluetooth/private/protocols/rfcomm" type="c_include">
         <files mask="rfcomm.h"/>
       </source>
-      <source relative_path="../../bluetooth/private/protocols/sdp" project_relative_path="bluetooth/private/protocols/sdp" type="c_include">
+      <source relative_path="../../../bluetooth/private/protocols/sdp" project_relative_path="bluetooth/private/protocols/sdp" type="c_include">
         <files mask="sdp.h"/>
       </source>
-      <source relative_path="../../bluetooth/private/protocols/sm" project_relative_path="bluetooth/private/protocols/sm" type="c_include">
+      <source relative_path="../../../bluetooth/private/protocols/sm" project_relative_path="bluetooth/private/protocols/sm" type="c_include">
         <files mask="sm.h"/>
         <files mask="sm_extern.h"/>
         <files mask="sm_internal.h"/>
       </source>
-      <source relative_path="../../bluetooth/private/protocols/smp" project_relative_path="bluetooth/private/protocols/smp" type="c_include">
+      <source relative_path="../../../bluetooth/private/protocols/smp" project_relative_path="bluetooth/private/protocols/smp" type="c_include">
         <files mask="smp.h"/>
         <files mask="smp_extern.h"/>
         <files mask="smp_fsm.h"/>
         <files mask="smp_fsm_engine.h"/>
         <files mask="smp_internal.h"/>
       </source>
-      <source relative_path="../../bluetooth/private/utils/aes_cmac" project_relative_path="bluetooth/private/utils/aes_cmac" type="c_include">
+      <source relative_path="../../../bluetooth/private/utils/aes_cmac" project_relative_path="bluetooth/private/utils/aes_cmac" type="c_include">
         <files mask="aes_cmac.h"/>
       </source>
-      <source relative_path="../../bluetooth/private/utils/at_parser" project_relative_path="bluetooth/private/utils/at_parser" type="c_include">
+      <source relative_path="../../../bluetooth/private/utils/at_parser" project_relative_path="bluetooth/private/utils/at_parser" type="c_include">
         <files mask="at_parser_hsp_hfp.h"/>
       </source>
-      <source relative_path="../../bluetooth/private/utils/object_parser" project_relative_path="bluetooth/private/utils/object_parser" type="c_include">
+      <source relative_path="../../../bluetooth/private/utils/object_parser" project_relative_path="bluetooth/private/utils/object_parser" type="c_include">
         <files mask="object_parser_api.h"/>
         <files mask="tokenizer.h"/>
       </source>
-      <source relative_path="../../bluetooth/private/utils/racp" project_relative_path="bluetooth/private/utils/racp" type="c_include">
+      <source relative_path="../../../bluetooth/private/utils/racp" project_relative_path="bluetooth/private/utils/racp" type="c_include">
         <files mask="racp.h"/>
       </source>
-      <source relative_path="../../bluetooth/private/utils/storage" project_relative_path="bluetooth/private/utils/storage" type="c_include">
+      <source relative_path="../../../bluetooth/private/utils/storage" project_relative_path="bluetooth/private/utils/storage" type="c_include">
         <files mask="storage.h"/>
       </source>
-      <source relative_path="../../bluetooth/private/utils/xml_parser" project_relative_path="bluetooth/private/utils/xml_parser" type="c_include">
+      <source relative_path="../../../bluetooth/private/utils/xml_parser" project_relative_path="bluetooth/private/utils/xml_parser" type="c_include">
         <files mask="xml_common_defines.h"/>
         <files mask="xml_encoder.h"/>
         <files mask="xml_parser.h"/>
       </source>
-      <source relative_path="../../port/osal/src/freertos" project_relative_path="port/osal/src/freertos" type="c_include">
+      <source relative_path="../../../port/osal/src/freertos" project_relative_path="port/osal/src/freertos" type="c_include">
         <files mask="EM_assert.h"/>
         <files mask="EM_config.h"/>
         <files mask="EM_debug.h"/>
@@ -316,7 +316,7 @@
         <files mask="EM_timer.h"/>
         <files mask="EM_timer_internal.h"/>
       </source>
-      <source relative_path="../../port/osal/src/freertos" project_relative_path="port/osal/src/freertos" type="src">
+      <source relative_path="../../../port/osal/src/freertos" project_relative_path="port/osal/src/freertos" type="src">
         <files mask="EM_config.c"/>
         <files mask="EM_debug.c"/>
         <files mask="EM_fops.c"/>
@@ -324,7 +324,7 @@
         <files mask="EM_serial.c"/>
         <files mask="EM_timer.c"/>
       </source>
-      <source relative_path="../../port/pal/mcux/bluetooth" project_relative_path="port/pal/mcux/bluetooth" type="c_include">
+      <source relative_path="../../../port/pal/mcux/bluetooth" project_relative_path="port/pal/mcux/bluetooth" type="c_include">
         <files mask="BT_assert.h"/>
         <files mask="BT_config.h"/>
         <files mask="BT_debug.h"/>
@@ -345,7 +345,7 @@
         <files mask="write_task_pl.h"/>
         <files mask="littlefs_pl.h"/>
       </source>
-      <source relative_path="../../port/pal/mcux/bluetooth" project_relative_path="port/pal/mcux/bluetooth" type="src">
+      <source relative_path="../../../port/pal/mcux/bluetooth" project_relative_path="port/pal/mcux/bluetooth" type="src">
         <files mask="BT_status_pl.c"/>
         <files mask="BT_storage_pl.c"/>
         <files mask="btsnoop_pl.c"/>
@@ -359,7 +359,7 @@
         <files mask="write_task_pl.c"/>
         <files mask="littlefs_pl.c"/>
       </source>
-      <source relative_path="../../port/pal/mcux/ethal" project_relative_path="port/pal/mcux/ethal" type="c_include">
+      <source relative_path="../../../port/pal/mcux/ethal" project_relative_path="port/pal/mcux/ethal" type="c_include">
         <files mask="ethal_assert.h"/>
         <files mask="ethal_config.h"/>
         <files mask="ethal_debug.h"/>
@@ -371,7 +371,7 @@
         <files mask="ethal_timer.h"/>
         <files mask="ethal_timer_internal.h"/>
       </source>
-      <source relative_path="../../port/pal/mcux/ethal" project_relative_path="port/pal/mcux/ethal" type="src">
+      <source relative_path="../../../port/pal/mcux/ethal" project_relative_path="port/pal/mcux/ethal" type="src">
         <files mask="ethal_config.c"/>
         <files mask="ethal_debug.c"/>
         <files mask="ethal_fops.c"/>
@@ -379,22 +379,22 @@
         <files mask="ethal_serial.c"/>
         <files mask="ethal_timer.c"/>
       </source>
-      <source relative_path="../../port/pal/mcux/sbc" project_relative_path="port/pal/mcux/sbc" type="c_include">
+      <source relative_path="../../../port/pal/mcux/sbc" project_relative_path="port/pal/mcux/sbc" type="c_include">
         <files mask="sbc_os.h"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../port/pal/mcux/toolspec/mcuxpresso" project_relative_path="port/pal/mcux/toolspec/mcuxpresso" type="src">
+      <source toolchain="mcuxpresso" relative_path="../../../port/pal/mcux/toolspec/mcuxpresso" project_relative_path="port/pal/mcux/toolspec/mcuxpresso" type="src">
         <files mask="toolspec.c"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../port/pal/mcux/toolspec/mcuxpresso" project_relative_path="port/pal/mcux/toolspec/mcuxpresso" type="c_include">
+      <source toolchain="mcuxpresso" relative_path="../../../port/pal/mcux/toolspec/mcuxpresso" project_relative_path="port/pal/mcux/toolspec/mcuxpresso" type="c_include">
         <files mask="toolspec.h"/>
       </source>
-      <source relative_path="../../port/pal/mcux" project_relative_path="port/pal/mcux" type="src">
+      <source relative_path="../../../port/pal/mcux" project_relative_path="port/pal/mcux" type="src">
         <files mask="EM_platform.c"/>
       </source>
-      <source relative_path="../../port/pal/mcux" project_relative_path="port/pal/mcux" type="c_include">
+      <source relative_path="../../../port/pal/mcux" project_relative_path="port/pal/mcux" type="c_include">
         <files mask="EM_platform.h"/>
       </source>
-      <source relative_path="../../bluetooth/private/utils/sbc" project_relative_path="bluetooth/private/utils/sbc" type="c_include">
+      <source relative_path="../../../bluetooth/private/utils/sbc" project_relative_path="bluetooth/private/utils/sbc" type="c_include">
         <files mask="sbc_api.h"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
@@ -431,7 +431,7 @@
         <include_path relative_path="../../../bluetooth/private/utils/sbc" project_relative_path="bluetooth/private/utils/sbc" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.wifi_nxp.controller.base.MIMXRT1042" name="middleware.edgefast_bluetooth.wifi_nxp.controller.base" brief="edgefast_bluetooth wifi_nxp controller" version="1.0.0" full_name="middleware.edgefast_bluetooth.wifi_nxp.controller.base" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/wireless/ethermind" project_base_path="bt_ble">
+    <component id="middleware.edgefast_bluetooth.wifi_nxp.controller.base.MIMXRT1042" name="middleware.edgefast_bluetooth.wifi_nxp.controller.base" brief="edgefast_bluetooth wifi_nxp controller" version="1.0.0" full_name="middleware.edgefast_bluetooth.wifi_nxp.controller.base" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
       <dependencies>
         <all>
           <component_dependency value="middleware.edgefast_bluetooth.common.ethermind.MIMXRT1042"/>
@@ -439,11 +439,11 @@
           <component_dependency value="middleware.edgefast_bluetooth.sdio.template.evkmimxrt1040.MIMXRT1042"/>
         </all>
       </dependencies>
-      <source relative_path="../../port/pal/mcux/bluetooth/controller" project_relative_path="port/pal/mcux/bluetooth/controller" type="c_include">
+      <source relative_path="../../../port/pal/mcux/bluetooth/controller" project_relative_path="port/pal/mcux/bluetooth/controller" type="c_include">
         <files mask="controller.h"/>
         <files mask="controller_hci_uart.h"/>
       </source>
-      <source relative_path="../../port/pal/mcux/bluetooth/controller" project_relative_path="port/pal/mcux/bluetooth/controller" type="src">
+      <source relative_path="../../../port/pal/mcux/bluetooth/controller" project_relative_path="port/pal/mcux/bluetooth/controller" type="src">
         <files mask="controller_wifi_nxp.c"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
@@ -453,26 +453,26 @@
         <include_path relative_path="../../../port/pal/mcux/bluetooth/controller" project_relative_path="port/pal/mcux/bluetooth/controller" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.k32w061.controller.MIMXRT1042" name="middleware.edgefast_bluetooth.k32w061.controller" brief="edgefast_bluetooth k32w061 controller" version="1.0.0" full_name="middleware.edgefast_bluetooth.k32w061.controller" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/wireless/ethermind" project_base_path="bt_ble">
+    <component id="middleware.edgefast_bluetooth.k32w061.controller.MIMXRT1042" name="middleware.edgefast_bluetooth.k32w061.controller" brief="edgefast_bluetooth k32w061 controller" version="1.0.0" full_name="middleware.edgefast_bluetooth.k32w061.controller" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.common.ethermind.MIMXRT1042"/>
       </dependencies>
-      <source relative_path="../../port/pal/mcux/bluetooth/controller/k32w061" project_relative_path="port/pal/mcux/bluetooth/controller/k32w061" type="doc">
+      <source relative_path="../../../port/pal/mcux/bluetooth/controller/k32w061" project_relative_path="port/pal/mcux/bluetooth/controller/k32w061" type="doc">
         <files mask="DK6-RN-0065-Production-Flash-Programmer.pdf" hidden="true"/>
         <files mask="JN-SW-4407+DK6+Production+Flash+Programmer+v2282.exe" hidden="true"/>
         <files mask="readme.txt"/>
       </source>
-      <source relative_path="../../port/pal/mcux/bluetooth/controller/k32w061" project_relative_path="port/pal/mcux/bluetooth/controller/k32w061" type="other">
+      <source relative_path="../../../port/pal/mcux/bluetooth/controller/k32w061" project_relative_path="port/pal/mcux/bluetooth/controller/k32w061" type="other">
         <files mask="hci_black_box_bm.bin"/>
         <files mask="ot-rcp.bin"/>
         <files mask="ot_rcp_ble_hci_bb_bm_2_uart.bin"/>
         <files mask="ot_rcp_ble_hci_bb_bm_single_uart.bin"/>
       </source>
-      <source relative_path="../../port/pal/mcux/bluetooth/controller" project_relative_path="port/pal/mcux/bluetooth/controller" type="c_include">
+      <source relative_path="../../../port/pal/mcux/bluetooth/controller" project_relative_path="port/pal/mcux/bluetooth/controller" type="c_include">
         <files mask="controller.h"/>
         <files mask="controller_hci_uart.h"/>
       </source>
-      <source relative_path="../../port/pal/mcux/bluetooth/controller" project_relative_path="port/pal/mcux/bluetooth/controller" type="src">
+      <source relative_path="../../../port/pal/mcux/bluetooth/controller" project_relative_path="port/pal/mcux/bluetooth/controller" type="src">
         <files mask="controller_k32w.c"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
@@ -482,16 +482,16 @@
         <include_path relative_path="../../../port/pal/mcux/bluetooth/controller" project_relative_path="port/pal/mcux/bluetooth/controller" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.config.ethermind.MIMXRT1042" name="middleware.edgefast_bluetooth.config.ethermind" brief="edgefast_bluetooth configuration for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.config.ethermind" devices="MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path="../middleware/wireless/ethermind" project_base_path="bt_ble">
+    <component id="middleware.edgefast_bluetooth.config.ethermind.MIMXRT1042" name="middleware.edgefast_bluetooth.config.ethermind" brief="edgefast_bluetooth configuration for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.config.ethermind" devices="MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.common.ethermind.MIMXRT1042"/>
       </dependencies>
-      <source relative_path="../../bluetooth/private/lib/mcux/default/config" project_relative_path="bluetooth/private/lib/config" type="c_include">
+      <source relative_path="../../../bluetooth/private/lib/mcux/default/config" project_relative_path="bluetooth/private/lib/config" type="c_include">
         <files mask="BT_features.h"/>
         <files mask="BT_limits.h"/>
         <files mask="db_gen.h"/>
       </source>
-      <source exclude="true" relative_path="../../bluetooth/private/lib/mcux/default/config" project_relative_path="bluetooth/private/lib/config" type="doc">
+      <source exclude="true" relative_path="../../../bluetooth/private/lib/mcux/default/config" project_relative_path="bluetooth/private/lib/config" type="doc">
         <files mask="dummy.txt" hidden="true"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
@@ -501,11 +501,11 @@
         <include_path relative_path="../../../bluetooth/private/lib/mcux/default/config" project_relative_path="bluetooth/private/lib/config" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.extension.common.ethermind.MIMXRT1042" name="middleware.edgefast_bluetooth.extension.common.ethermind" brief="edgefast_bluetooth extension for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.extension.common.ethermind" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path="../middleware/wireless/ethermind" project_base_path="bt_ble">
+    <component id="middleware.edgefast_bluetooth.extension.common.ethermind.MIMXRT1042" name="middleware.edgefast_bluetooth.extension.common.ethermind" brief="edgefast_bluetooth extension for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.extension.common.ethermind" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.common.ethermind.MIMXRT1042"/>
       </dependencies>
-      <source relative_path="../../bluetooth/export/extension" project_relative_path="bluetooth/export/extension" type="src">
+      <source relative_path="../../../bluetooth/export/extension" project_relative_path="bluetooth/export/extension" type="src">
         <files mask="aes_cmac_pl.c"/>
         <files mask="BT_common_pl.c"/>
         <files mask="device_queue_pl.c"/>
@@ -514,7 +514,7 @@
         <files mask="smp_pl.c"/>
         <files mask="gatt_db_pl.c"/>
       </source>
-      <source relative_path="../../bluetooth/export/extension" project_relative_path="bluetooth/export/extension" type="c_include">
+      <source relative_path="../../../bluetooth/export/extension" project_relative_path="bluetooth/export/extension" type="c_include">
         <files mask="aes_cmac_pl.h"/>
         <files mask="BT_common_pl.h"/>
         <files mask="device_queue_pl.h"/>
@@ -530,7 +530,7 @@
         <include_path relative_path="../../../bluetooth/export/extension" project_relative_path="bluetooth/export/extension" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.btble.ethermind.cm7f.MIMXRT1042" name="middleware.edgefast_bluetooth.btble.ethermind.cm7f" brief="edgefast_bluetooth bt_ble Host stack(including BR and BLE)" version="1.0.0" full_name="middleware.edgefast_bluetooth.btble.ethermind.cm7f" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="edgefast/bluetooth">
+    <component id="middleware.edgefast_bluetooth.btble.ethermind.cm7f.MIMXRT1042" name="middleware.edgefast_bluetooth.btble.ethermind.cm7f" brief="edgefast_bluetooth bt_ble Host stack(including BR and BLE)" version="1.0.0" full_name="middleware.edgefast_bluetooth.btble.ethermind.cm7f" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <dependencies>
         <all>
           <not>
@@ -544,7 +544,7 @@
           <component_dependency value="middleware.edgefast_bluetooth.btble.ethermind.lib.cm7f.MIMXRT1042"/>
         </all>
       </dependencies>
-      <source relative_path="../../source/impl/ethermind/host" project_relative_path="source" type="src">
+      <source relative_path="./source/impl/ethermind/host" project_relative_path="source" type="src">
         <files mask="bt_pal_a2dp.c"/>
         <files mask="bt_pal_avrcp.c"/>
         <files mask="bt_pal_avrcp_al_internal.c"/>
@@ -579,7 +579,7 @@
         <files mask="bt_pal_hfp_ag.c"/>
         <files mask="bt_pal_hfp_hf.c"/>
       </source>
-      <source relative_path="../../source/impl/ethermind/host" project_relative_path="source" type="c_include">
+      <source relative_path="./source/impl/ethermind/host" project_relative_path="source" type="c_include">
         <files mask="bt_pal_a2dp_internal.h"/>
         <files mask="bt_pal_avrcp_al_api.h"/>
         <files mask="bt_pal_avrcp_al_internal.h"/>
@@ -610,10 +610,10 @@
         <files mask="bt_pal_ssp.h"/>
         <files mask="bt_pal_hfp_internal.h"/>
       </source>
-      <source relative_path="../../source/impl/ethermind/host/a2dp_codec/sbc" project_relative_path="source/a2dp_codec/sbc" type="src">
+      <source relative_path="./source/impl/ethermind/host/a2dp_codec/sbc" project_relative_path="source/a2dp_codec/sbc" type="src">
         <files mask="a2dp_codec_sbc.c"/>
       </source>
-      <source relative_path="../../include/bluetooth" project_relative_path="include/bluetooth" type="c_include">
+      <source relative_path="./include/bluetooth" project_relative_path="include/bluetooth" type="c_include">
         <files mask="a2dp.h"/>
         <files mask="avrcp.h"/>
         <files mask="a2dp_codec_sbc.h"/>
@@ -641,18 +641,18 @@
         <files mask="testing.h"/>
         <files mask="uuid.h"/>
       </source>
-      <source relative_path="../../source/impl/ethermind/common" project_relative_path="common" type="src">
+      <source relative_path="./source/impl/ethermind/common" project_relative_path="common" type="src">
         <files mask="addr.c"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_btble_ethermind_cm7f.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../source" project_relative_path="source" type="c_include"/>
-        <include_path relative_path="../../include" project_relative_path="include" type="c_include"/>
+        <include_path relative_path="./source" project_relative_path="source" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.ble.ethermind.cm7f.MIMXRT1042" name="middleware.edgefast_bluetooth.ble.ethermind.cm7f" brief="edgefast_bluetooth bt_ble Host stack(including BLE only)" version="1.0.0" full_name="middleware.edgefast_bluetooth.ble.ethermind.cm7f" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="edgefast/bluetooth">
+    <component id="middleware.edgefast_bluetooth.ble.ethermind.cm7f.MIMXRT1042" name="middleware.edgefast_bluetooth.ble.ethermind.cm7f" brief="edgefast_bluetooth bt_ble Host stack(including BLE only)" version="1.0.0" full_name="middleware.edgefast_bluetooth.ble.ethermind.cm7f" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <defines>
         <define name="CFG_BLE" value=""/>
       </defines>
@@ -669,7 +669,7 @@
           <component_dependency value="middleware.edgefast_bluetooth.ble.ethermind.lib.cm7f.MIMXRT1042"/>
         </all>
       </dependencies>
-      <source relative_path="../../source/impl/ethermind/host" project_relative_path="source" type="src">
+      <source relative_path="./source/impl/ethermind/host" project_relative_path="source" type="src">
         <files mask="bt_pal_att.c"/>
         <files mask="bt_pal_conn.c"/>
         <files mask="bt_pal_crypto.c"/>
@@ -693,7 +693,7 @@
         <files mask="bt_pal_smp_null.c"/>
         <files mask="bt_pal_uuid.c"/>
       </source>
-      <source relative_path="../../source/impl/ethermind/host" project_relative_path="source" type="c_include">
+      <source relative_path="./source/impl/ethermind/host" project_relative_path="source" type="c_include">
         <files mask="bt_pal_att_internal.h"/>
         <files mask="bt_pal_conn_internal.h"/>
         <files mask="bt_pal_crypto_internal.h"/>
@@ -715,7 +715,7 @@
         <files mask="bt_pal_smp.h"/>
         <files mask="bt_pal_ssp.h"/>
       </source>
-      <source relative_path="../../include/bluetooth" project_relative_path="include/bluetooth" type="c_include">
+      <source relative_path="./include/bluetooth" project_relative_path="include/bluetooth" type="c_include">
         <files mask="addr.h"/>
         <files mask="att.h"/>
         <files mask="bluetooth.h"/>
@@ -734,18 +734,18 @@
         <files mask="testing.h"/>
         <files mask="uuid.h"/>
       </source>
-      <source relative_path="../../source/impl/ethermind/common" project_relative_path="common" type="src">
+      <source relative_path="./source/impl/ethermind/common" project_relative_path="common" type="src">
         <files mask="addr.c"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_ble_ethermind_cm7f.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../source" project_relative_path="source" type="c_include"/>
-        <include_path relative_path="../../include" project_relative_path="include" type="c_include"/>
+        <include_path relative_path="./source" project_relative_path="source" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.br.ethermind.cm7f.MIMXRT1042" name="middleware.edgefast_bluetooth.br.ethermind.cm7f" brief="edgefast_bluetooth bt_ble Host stack(including BR only)" version="1.0.0" full_name="middleware.edgefast_bluetooth.br.ethermind.cm7f" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="edgefast/bluetooth">
+    <component id="middleware.edgefast_bluetooth.br.ethermind.cm7f.MIMXRT1042" name="middleware.edgefast_bluetooth.br.ethermind.cm7f" brief="edgefast_bluetooth bt_ble Host stack(including BR only)" version="1.0.0" full_name="middleware.edgefast_bluetooth.br.ethermind.cm7f" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <dependencies>
         <all>
           <not>
@@ -759,7 +759,7 @@
           <component_dependency value="middleware.edgefast_bluetooth.br.ethermind.lib.cm7f.MIMXRT1042"/>
         </all>
       </dependencies>
-      <source relative_path="../../source/impl/ethermind/host" project_relative_path="source" type="src">
+      <source relative_path="./source/impl/ethermind/host" project_relative_path="source" type="src">
         <files mask="bt_pal_a2dp.c"/>
         <files mask="bt_pal_avrcp.c"/>
         <files mask="bt_pal_avrcp_al_internal.c"/>
@@ -791,7 +791,7 @@
         <files mask="bt_pal_hfp_ag.c"/>
         <files mask="bt_pal_hfp_hf.c"/>
       </source>
-      <source relative_path="../../source/impl/ethermind/host" project_relative_path="source" type="c_include">
+      <source relative_path="./source/impl/ethermind/host" project_relative_path="source" type="c_include">
         <files mask="bt_pal_a2dp_internal.h"/>
         <files mask="bt_pal_avrcp_al_api.h"/>
         <files mask="bt_pal_avrcp_al_internal.h"/>
@@ -821,10 +821,10 @@
         <files mask="bt_pal_ssp.h"/>
         <files mask="bt_pal_hfp_internal.h"/>
       </source>
-      <source relative_path="../../source/impl/ethermind/host/a2dp_codec/sbc" project_relative_path="source/a2dp_codec/sbc" type="src">
+      <source relative_path="./source/impl/ethermind/host/a2dp_codec/sbc" project_relative_path="source/a2dp_codec/sbc" type="src">
         <files mask="a2dp_codec_sbc.c"/>
       </source>
-      <source relative_path="../../include/bluetooth" project_relative_path="include/bluetooth" type="c_include">
+      <source relative_path="./include/bluetooth" project_relative_path="include/bluetooth" type="c_include">
         <files mask="a2dp.h"/>
         <files mask="avrcp.h"/>
         <files mask="a2dp_codec_sbc.h"/>
@@ -852,206 +852,206 @@
         <files mask="testing.h"/>
         <files mask="uuid.h"/>
       </source>
-      <source relative_path="../../source/impl/ethermind/common" project_relative_path="common" type="src">
+      <source relative_path="./source/impl/ethermind/common" project_relative_path="common" type="src">
         <files mask="addr.c"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_br_ethermind_cm7f.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../source" project_relative_path="source" type="c_include"/>
-        <include_path relative_path="../../include" project_relative_path="include" type="c_include"/>
+        <include_path relative_path="./source" project_relative_path="source" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.profile.hrs.MIMXRT1042" name="middleware.edgefast_bluetooth.profile.hrs" brief="edgefast_bluetooth profile hrs" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.hrs" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="edgefast/bluetooth">
+    <component id="middleware.edgefast_bluetooth.profile.hrs.MIMXRT1042" name="middleware.edgefast_bluetooth.profile.hrs" brief="edgefast_bluetooth profile hrs" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.hrs" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.pal.MIMXRT1042"/>
       </dependencies>
-      <source relative_path="../../source/services" project_relative_path="source/services" type="src">
+      <source relative_path="./source/services" project_relative_path="source/services" type="src">
         <files mask="hrs.c"/>
       </source>
-      <source relative_path="../../include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
+      <source relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
         <files mask="hrs.h"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_profile_hrs.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../source/services" project_relative_path="source/services" type="c_include"/>
-        <include_path relative_path="../../include" project_relative_path="include/bluetooth/services" type="c_include"/>
+        <include_path relative_path="./source/services" project_relative_path="source/services" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include/bluetooth/services" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.profile.bas.MIMXRT1042" name="middleware.edgefast_bluetooth.profile.bas" brief="edgefast_bluetooth profile bas" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.bas" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="edgefast/bluetooth">
+    <component id="middleware.edgefast_bluetooth.profile.bas.MIMXRT1042" name="middleware.edgefast_bluetooth.profile.bas" brief="edgefast_bluetooth profile bas" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.bas" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.pal.MIMXRT1042"/>
       </dependencies>
-      <source relative_path="../../source/services" project_relative_path="source/services" type="src">
+      <source relative_path="./source/services" project_relative_path="source/services" type="src">
         <files mask="bas.c"/>
       </source>
-      <source relative_path="../../include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
+      <source relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
         <files mask="bas.h"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_profile_bas.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../source/services" project_relative_path="source/services" type="c_include"/>
-        <include_path relative_path="../../include" project_relative_path="include/bluetooth/services" type="c_include"/>
+        <include_path relative_path="./source/services" project_relative_path="source/services" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include/bluetooth/services" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.profile.dis.MIMXRT1042" name="middleware.edgefast_bluetooth.profile.dis" brief="edgefast_bluetooth profile dis" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.dis" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="edgefast/bluetooth">
+    <component id="middleware.edgefast_bluetooth.profile.dis.MIMXRT1042" name="middleware.edgefast_bluetooth.profile.dis" brief="edgefast_bluetooth profile dis" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.dis" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.pal.MIMXRT1042"/>
       </dependencies>
-      <source relative_path="../../source/services" project_relative_path="source/services" type="src">
+      <source relative_path="./source/services" project_relative_path="source/services" type="src">
         <files mask="dis.c"/>
       </source>
-      <source relative_path="../../include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
+      <source relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
         <files mask="dis.h"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_profile_dis.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../source/services" project_relative_path="source/services" type="c_include"/>
-        <include_path relative_path="../../include" project_relative_path="include/bluetooth/services" type="c_include"/>
+        <include_path relative_path="./source/services" project_relative_path="source/services" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include/bluetooth/services" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.profile.hts.MIMXRT1042" name="middleware.edgefast_bluetooth.profile.hts" brief="edgefast_bluetooth profile hts" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.hts" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="edgefast/bluetooth">
+    <component id="middleware.edgefast_bluetooth.profile.hts.MIMXRT1042" name="middleware.edgefast_bluetooth.profile.hts" brief="edgefast_bluetooth profile hts" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.hts" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.pal.MIMXRT1042"/>
       </dependencies>
-      <source relative_path="../../source/services" project_relative_path="source/services" type="src">
+      <source relative_path="./source/services" project_relative_path="source/services" type="src">
         <files mask="hts.c"/>
       </source>
-      <source relative_path="../../include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
+      <source relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
         <files mask="hts.h"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_profile_hts.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../source/services" project_relative_path="source/services" type="c_include"/>
-        <include_path relative_path="../../include" project_relative_path="include/bluetooth/services" type="c_include"/>
+        <include_path relative_path="./source/services" project_relative_path="source/services" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include/bluetooth/services" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.profile.hps.MIMXRT1042" name="middleware.edgefast_bluetooth.profile.hps" brief="edgefast_bluetooth profile hps" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.hps" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="edgefast/bluetooth">
+    <component id="middleware.edgefast_bluetooth.profile.hps.MIMXRT1042" name="middleware.edgefast_bluetooth.profile.hps" brief="edgefast_bluetooth profile hps" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.hps" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.pal.MIMXRT1042"/>
       </dependencies>
-      <source relative_path="../../source/services" project_relative_path="source/services" type="src">
+      <source relative_path="./source/services" project_relative_path="source/services" type="src">
         <files mask="hps.c"/>
       </source>
-      <source relative_path="../../include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
+      <source relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
         <files mask="hps.h"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_profile_hps.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../source/services" project_relative_path="source/services" type="c_include"/>
-        <include_path relative_path="../../include" project_relative_path="include/bluetooth/services" type="c_include"/>
+        <include_path relative_path="./source/services" project_relative_path="source/services" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include/bluetooth/services" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.profile.pxr.MIMXRT1042" name="middleware.edgefast_bluetooth.profile.pxr" brief="edgefast_bluetooth profile pxr" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.pxr" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="edgefast/bluetooth">
+    <component id="middleware.edgefast_bluetooth.profile.pxr.MIMXRT1042" name="middleware.edgefast_bluetooth.profile.pxr" brief="edgefast_bluetooth profile pxr" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.pxr" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.pal.MIMXRT1042"/>
       </dependencies>
-      <source relative_path="../../source/services" project_relative_path="source/services" type="src">
+      <source relative_path="./source/services" project_relative_path="source/services" type="src">
         <files mask="pxr.c"/>
       </source>
-      <source relative_path="../../include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
+      <source relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
         <files mask="pxr.h"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_profile_pxr.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../source/services" project_relative_path="source/services" type="c_include"/>
-        <include_path relative_path="../../include" project_relative_path="include/bluetooth/services" type="c_include"/>
+        <include_path relative_path="./source/services" project_relative_path="source/services" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include/bluetooth/services" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.profile.ipsp.MIMXRT1042" name="middleware.edgefast_bluetooth.profile.ipsp" brief="edgefast_bluetooth profile ipsp" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.ipsp" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="edgefast/bluetooth">
+    <component id="middleware.edgefast_bluetooth.profile.ipsp.MIMXRT1042" name="middleware.edgefast_bluetooth.profile.ipsp" brief="edgefast_bluetooth profile ipsp" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.ipsp" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.pal.MIMXRT1042"/>
       </dependencies>
-      <source relative_path="../../source/services" project_relative_path="source/services" type="src">
+      <source relative_path="./source/services" project_relative_path="source/services" type="src">
         <files mask="ipsp.c"/>
       </source>
-      <source relative_path="../../include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
+      <source relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
         <files mask="ipsp.h"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_profile_ipsp.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../source/services" project_relative_path="source/services" type="c_include"/>
-        <include_path relative_path="../../include" project_relative_path="include/bluetooth/services" type="c_include"/>
+        <include_path relative_path="./source/services" project_relative_path="source/services" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include/bluetooth/services" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.profile.wu.MIMXRT1042" name="middleware.edgefast_bluetooth.profile.wu" brief="edgefast_bluetooth profile wu" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.wu" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="edgefast/bluetooth">
+    <component id="middleware.edgefast_bluetooth.profile.wu.MIMXRT1042" name="middleware.edgefast_bluetooth.profile.wu" brief="edgefast_bluetooth profile wu" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.wu" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.pal.MIMXRT1042"/>
       </dependencies>
-      <source relative_path="../../source/services" project_relative_path="source/services" type="src">
+      <source relative_path="./source/services" project_relative_path="source/services" type="src">
         <files mask="wu.c"/>
       </source>
-      <source relative_path="../../include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
+      <source relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
         <files mask="wu.h"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_profile_wu.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../source/services" project_relative_path="source/services" type="c_include"/>
-        <include_path relative_path="../../include" project_relative_path="include/bluetooth/services" type="c_include"/>
+        <include_path relative_path="./source/services" project_relative_path="source/services" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include/bluetooth/services" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.profile.fmp.MIMXRT1042" name="middleware.edgefast_bluetooth.profile.fmp" brief="edgefast_bluetooth profile fmp" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.fmp" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="edgefast/bluetooth">
+    <component id="middleware.edgefast_bluetooth.profile.fmp.MIMXRT1042" name="middleware.edgefast_bluetooth.profile.fmp" brief="edgefast_bluetooth profile fmp" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.fmp" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.pal.MIMXRT1042"/>
       </dependencies>
-      <source relative_path="../../source/services" project_relative_path="source/services" type="src">
+      <source relative_path="./source/services" project_relative_path="source/services" type="src">
         <files mask="fmp.c"/>
       </source>
-      <source relative_path="../../include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
+      <source relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
         <files mask="fmp.h"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_profile_fmp.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../source/services" project_relative_path="source/services" type="c_include"/>
-        <include_path relative_path="../../include" project_relative_path="include/bluetooth/services" type="c_include"/>
+        <include_path relative_path="./source/services" project_relative_path="source/services" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include/bluetooth/services" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.profile.tip.MIMXRT1042" name="middleware.edgefast_bluetooth.profile.tip" brief="edgefast_bluetooth profile tip" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.tip" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="edgefast/bluetooth">
+    <component id="middleware.edgefast_bluetooth.profile.tip.MIMXRT1042" name="middleware.edgefast_bluetooth.profile.tip" brief="edgefast_bluetooth profile tip" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.tip" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.pal.MIMXRT1042"/>
       </dependencies>
-      <source relative_path="../../source/services" project_relative_path="source/services" type="src">
+      <source relative_path="./source/services" project_relative_path="source/services" type="src">
         <files mask="tip.c"/>
       </source>
-      <source relative_path="../../include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
+      <source relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
         <files mask="tip.h"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_profile_tip.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../source/services" project_relative_path="source/services" type="c_include"/>
-        <include_path relative_path="../../include" project_relative_path="include/bluetooth/services" type="c_include"/>
+        <include_path relative_path="./source/services" project_relative_path="source/services" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include/bluetooth/services" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.pal.platform.ethermind.MIMXRT1042" name="middleware.edgefast_bluetooth.pal.platform.ethermind" brief="edgefast_bluetooth PAL platform for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.pal.platform.ethermind" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="bt_ble">
+    <component id="middleware.edgefast_bluetooth.pal.platform.ethermind.MIMXRT1042" name="middleware.edgefast_bluetooth.pal.platform.ethermind" brief="edgefast_bluetooth PAL platform for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.pal.platform.ethermind" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="bt_ble">
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.pal.MIMXRT1042"/>
       </dependencies>
-      <source relative_path="../../source/impl/ethermind/platform" project_relative_path="port/pal/mcux/edgefast_support" type="src">
+      <source relative_path="./source/impl/ethermind/platform" project_relative_path="port/pal/mcux/edgefast_support" type="src">
         <files mask="bt_ble_platform.c"/>
         <files mask="bt_ble_settings.c"/>
       </source>
-      <source relative_path="../../source/impl/ethermind/platform" project_relative_path="port/pal/mcux/edgefast_support" type="c_include">
+      <source relative_path="./source/impl/ethermind/platform" project_relative_path="port/pal/mcux/edgefast_support" type="c_include">
         <files mask="bt_ble_platform.h"/>
         <files mask="bt_ble_settings.h"/>
       </source>
@@ -1059,69 +1059,69 @@
         <files mask="middleware_edgefast_bluetooth_pal_platform_ethermind.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../source/impl/ethermind/platform" project_relative_path="port/pal/mcux/edgefast_support" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/platform" project_relative_path="port/pal/mcux/edgefast_support" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.pal.host_msd_fatfs.ethermind.MIMXRT1042" name="middleware.edgefast_bluetooth.pal.host_msd_fatfs.ethermind" brief="edgefast_bluetooth host_msd_fatfs for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.pal.host_msd_fatfs.ethermind" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="bt_ble">
+    <component id="middleware.edgefast_bluetooth.pal.host_msd_fatfs.ethermind.MIMXRT1042" name="middleware.edgefast_bluetooth.pal.host_msd_fatfs.ethermind" brief="edgefast_bluetooth host_msd_fatfs for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.pal.host_msd_fatfs.ethermind" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="bt_ble">
       <dependencies>
         <all>
           <component_dependency value="middleware.edgefast_bluetooth.pal.MIMXRT1042"/>
           <component_dependency value="middleware.fatfs.usb.MIMXRT1042"/>
         </all>
       </dependencies>
-      <source relative_path="../../source/impl/ethermind/platform" project_relative_path="port/pal/mcux/edgefast_support" type="src">
+      <source relative_path="./source/impl/ethermind/platform" project_relative_path="port/pal/mcux/edgefast_support" type="src">
         <files mask="host_msd_fatfs.c"/>
       </source>
-      <source relative_path="../../source/impl/ethermind/platform" project_relative_path="port/pal/mcux/edgefast_support" type="c_include">
+      <source relative_path="./source/impl/ethermind/platform" project_relative_path="port/pal/mcux/edgefast_support" type="c_include">
         <files mask="host_msd_fatfs.h"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_pal_host_msd_fatfs_ethermind.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../source/impl/ethermind/platform" project_relative_path="port/pal/mcux/edgefast_support" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/platform" project_relative_path="port/pal/mcux/edgefast_support" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.pal.db_gen.ethermind.MIMXRT1042" name="middleware.edgefast_bluetooth.pal.db_gen.ethermind" brief="edgefast_bluetooth db_gen for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.pal.db_gen.ethermind" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="bt_ble">
+    <component id="middleware.edgefast_bluetooth.pal.db_gen.ethermind.MIMXRT1042" name="middleware.edgefast_bluetooth.pal.db_gen.ethermind" brief="edgefast_bluetooth db_gen for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.pal.db_gen.ethermind" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="bt_ble">
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.pal.MIMXRT1042"/>
       </dependencies>
-      <source relative_path="../../source/impl/ethermind" project_relative_path="port/pal/mcux/edgefast_support" type="src">
+      <source relative_path="./source/impl/ethermind" project_relative_path="port/pal/mcux/edgefast_support" type="src">
         <files mask="bt_db_gen.c"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_pal_db_gen_ethermind.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../source/impl/ethermind" project_relative_path="port/pal/mcux/edgefast_support" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind" project_relative_path="port/pal/mcux/edgefast_support" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.porting.atomic.MIMXRT1042" name="middleware.edgefast_bluetooth.porting.atomic" brief="edgefast_bluetooth porting.atomic" version="1.0.0" full_name="middleware.edgefast_bluetooth.porting.atomic" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="edgefast/bluetooth">
+    <component id="middleware.edgefast_bluetooth.porting.atomic.MIMXRT1042" name="middleware.edgefast_bluetooth.porting.atomic" brief="edgefast_bluetooth porting.atomic" version="1.0.0" full_name="middleware.edgefast_bluetooth.porting.atomic" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.pal.MIMXRT1042"/>
       </dependencies>
-      <source relative_path="../../source/porting" project_relative_path="porting" type="src">
+      <source relative_path="./source/porting" project_relative_path="porting" type="src">
         <files mask="atomic_c.c"/>
       </source>
-      <source relative_path="../../include/sys" project_relative_path="include/sys" type="c_include">
+      <source relative_path="./include/sys" project_relative_path="include/sys" type="c_include">
         <files mask="atomic.h"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_porting_atomic.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../source/porting" project_relative_path="porting" type="c_include"/>
-        <include_path relative_path="../../include" project_relative_path="include" type="c_include"/>
+        <include_path relative_path="./source/porting" project_relative_path="porting" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.porting.list.MIMXRT1042" name="middleware.edgefast_bluetooth.porting.list" brief="edgefast_bluetooth porting.list" version="1.0.0" full_name="middleware.edgefast_bluetooth.porting.list" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="edgefast/bluetooth">
+    <component id="middleware.edgefast_bluetooth.porting.list.MIMXRT1042" name="middleware.edgefast_bluetooth.porting.list" brief="edgefast_bluetooth porting.list" version="1.0.0" full_name="middleware.edgefast_bluetooth.porting.list" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.pal.MIMXRT1042"/>
       </dependencies>
-      <source relative_path="../../source/porting" project_relative_path="porting" type="src">
+      <source relative_path="./source/porting" project_relative_path="porting" type="src">
         <files mask="slist.c"/>
       </source>
-      <source relative_path="../../include/sys" project_relative_path="include/sys" type="c_include">
+      <source relative_path="./include/sys" project_relative_path="include/sys" type="c_include">
         <files mask="slist.h"/>
         <files mask="dlist.h"/>
       </source>
@@ -1129,90 +1129,90 @@
         <files mask="middleware_edgefast_bluetooth_porting_list.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../source/porting" project_relative_path="porting" type="c_include"/>
-        <include_path relative_path="../../include" project_relative_path="include" type="c_include"/>
+        <include_path relative_path="./source/porting" project_relative_path="porting" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.porting.net.MIMXRT1042" name="middleware.edgefast_bluetooth.porting.net" brief="edgefast_bluetooth porting.netbuf" version="1.0.0" full_name="middleware.edgefast_bluetooth.porting.net" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="edgefast/bluetooth">
+    <component id="middleware.edgefast_bluetooth.porting.net.MIMXRT1042" name="middleware.edgefast_bluetooth.porting.net" brief="edgefast_bluetooth porting.netbuf" version="1.0.0" full_name="middleware.edgefast_bluetooth.porting.net" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.pal.MIMXRT1042"/>
       </dependencies>
-      <source relative_path="../../source/porting" project_relative_path="porting" type="src">
+      <source relative_path="./source/porting" project_relative_path="porting" type="src">
         <files mask="buf.c"/>
       </source>
-      <source relative_path="../../include/net" project_relative_path="include/net" type="c_include">
+      <source relative_path="./include/net" project_relative_path="include/net" type="c_include">
         <files mask="buf.h"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_porting_net.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../source/porting" project_relative_path="porting" type="c_include"/>
-        <include_path relative_path="../../include" project_relative_path="include" type="c_include"/>
+        <include_path relative_path="./source/porting" project_relative_path="porting" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.porting.toolchain.MIMXRT1042" name="middleware.edgefast_bluetooth.porting.toolchain" brief="edgefast_bluetooth porting.toolchain" version="1.0.0" full_name="middleware.edgefast_bluetooth.porting.toolchain" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="edgefast/bluetooth">
+    <component id="middleware.edgefast_bluetooth.porting.toolchain.MIMXRT1042" name="middleware.edgefast_bluetooth.porting.toolchain" brief="edgefast_bluetooth porting.toolchain" version="1.0.0" full_name="middleware.edgefast_bluetooth.porting.toolchain" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <defines>
         <define name="CONFIG_ARM" value="1"/>
       </defines>
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.pal.MIMXRT1042"/>
       </dependencies>
-      <source relative_path="../../include/toolchain" project_relative_path="include/toolchain" type="c_include">
+      <source relative_path="./include/toolchain" project_relative_path="include/toolchain" type="c_include">
         <files mask="common.h"/>
         <files mask="gcc.h"/>
         <files mask="iar.h"/>
         <files mask="armcc.h"/>
       </source>
-      <source relative_path="../../include" project_relative_path="include" type="c_include">
+      <source relative_path="./include" project_relative_path="include" type="c_include">
         <files mask="toolchain.h"/>
       </source>
-      <source exclude="true" relative_path="../../boards/template" project_relative_path="./" type="doc">
+      <source exclude="true" relative_path="./boards/template" project_relative_path="./" type="doc">
         <files mask="dummy.txt" hidden="true"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_porting_toolchain.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../include" project_relative_path="include" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.porting.work_queue.MIMXRT1042" name="middleware.edgefast_bluetooth.porting.work_queue" brief="edgefast_bluetooth porting.work_queue" version="1.0.0" full_name="middleware.edgefast_bluetooth.porting.work_queue" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="edgefast/bluetooth">
+    <component id="middleware.edgefast_bluetooth.porting.work_queue.MIMXRT1042" name="middleware.edgefast_bluetooth.porting.work_queue" brief="edgefast_bluetooth porting.work_queue" version="1.0.0" full_name="middleware.edgefast_bluetooth.porting.work_queue" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.pal.MIMXRT1042"/>
       </dependencies>
-      <source relative_path="../../source/porting" project_relative_path="porting" type="src">
+      <source relative_path="./source/porting" project_relative_path="porting" type="src">
         <files mask="work_queue.c"/>
       </source>
-      <source relative_path="../../include/sys" project_relative_path="include/sys" type="c_include">
+      <source relative_path="./include/sys" project_relative_path="include/sys" type="c_include">
         <files mask="work_queue.h"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_porting_work_queue.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../source/porting" project_relative_path="porting" type="c_include"/>
-        <include_path relative_path="../../include" project_relative_path="include" type="c_include"/>
+        <include_path relative_path="./source/porting" project_relative_path="porting" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.template.MIMXRT1042" name="EdgeFast Bluetooth configuration template" brief="Template configuration file to be edited by user." version="1.0.0" full_name="EdgeFast Bluetooth configuration template" devices="MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path="../middleware/edgefast_bluetooth" project_base_path="source">
+    <component id="middleware.edgefast_bluetooth.template.MIMXRT1042" name="EdgeFast Bluetooth configuration template" brief="Template configuration file to be edited by user." version="1.0.0" full_name="EdgeFast Bluetooth configuration template" devices="MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path=".././" project_base_path="source">
       <dependencies>
         <all>
           <component_dependency value="middleware.edgefast_bluetooth.config.template.MIMXRT1042"/>
           <component_dependency value="middleware.edgefast_bluetooth.mcux.linker.template.evkmimxrt1040.MIMXRT1042"/>
         </all>
       </dependencies>
-      <source relative_path="../../output/templates/config/mbedtls" project_relative_path="./" config="true" type="c_include">
+      <source relative_path="./output/templates/config/mbedtls" project_relative_path="./" config="true" type="c_include">
         <files mask="mbedtls_config_client.h"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_template.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../output/templates/config/mbedtls" project_relative_path="./" type="c_include"/>
+        <include_path relative_path="./output/templates/config/mbedtls" project_relative_path="./" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.porting.MIMXRT1042" name="middleware.edgefast_bluetooth.porting" brief="edgefast_bluetooth porting" version="1.0.0" full_name="middleware.edgefast_bluetooth.porting" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="edgefast/bluetooth">
+    <component id="middleware.edgefast_bluetooth.porting.MIMXRT1042" name="middleware.edgefast_bluetooth.porting" brief="edgefast_bluetooth porting" version="1.0.0" full_name="middleware.edgefast_bluetooth.porting" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <defines>
         <define name="LOG_ENABLE_ASYNC_MODE" value="1"/>
         <define name="LOG_MAX_ARGUMENT_COUNT" value="10"/>
@@ -1230,7 +1230,7 @@
           <component_dependency value="component.log.backend.debugconsole.MIMXRT1042"/>
         </all>
       </dependencies>
-      <source relative_path="../../include/sys" project_relative_path="include/sys" type="c_include">
+      <source relative_path="./include/sys" project_relative_path="include/sys" type="c_include">
         <files mask="util.h"/>
         <files mask="util_internal.h"/>
         <files mask="util_loops.h"/>
@@ -1239,28 +1239,28 @@
         <files mask="check.h"/>
         <files mask="byteorder.h"/>
       </source>
-      <source relative_path="../../include/zephyr" project_relative_path="include/zephyr" type="c_include">
+      <source relative_path="./include/zephyr" project_relative_path="include/zephyr" type="c_include">
         <files mask="types.h"/>
       </source>
-      <source relative_path="../../source/porting" project_relative_path="porting" type="src">
+      <source relative_path="./source/porting" project_relative_path="porting" type="src">
         <files mask="porting.c"/>
         <files mask="utf8.c"/>
       </source>
-      <source relative_path="../../source/porting" project_relative_path="porting" type="c_include">
+      <source relative_path="./source/porting" project_relative_path="porting" type="c_include">
         <files mask="porting.h"/>
       </source>
-      <source relative_path="../../source/porting/errno" project_relative_path="porting/errno" type="c_include">
+      <source relative_path="./source/porting/errno" project_relative_path="porting/errno" type="c_include">
         <files mask="errno.h"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_porting.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../include" project_relative_path="include" type="c_include"/>
-        <include_path relative_path="../../source/porting" project_relative_path="porting" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
+        <include_path relative_path="./source/porting" project_relative_path="porting" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.shell.MIMXRT1042" name="middleware.edgefast_bluetooth.shell" brief="edgefast_bluetooth shell" version="1.0.0" full_name="middleware.edgefast_bluetooth.shell" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="edgefast/bluetooth">
+    <component id="middleware.edgefast_bluetooth.shell.MIMXRT1042" name="middleware.edgefast_bluetooth.shell" brief="edgefast_bluetooth shell" version="1.0.0" full_name="middleware.edgefast_bluetooth.shell" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <defines>
         <define name="SHELL_ADVANCE" value="1"/>
         <define name="DEBUG_CONSOLE_RX_ENABLE" value="0"/>
@@ -1274,7 +1274,7 @@
           <component_dependency value="middleware.edgefast_bluetooth.btble.ethermind.cm7f.MIMXRT1042"/>
         </all>
       </dependencies>
-      <source relative_path="../../source/shell" project_relative_path="shell" type="src">
+      <source relative_path="./source/shell" project_relative_path="shell" type="src">
         <files mask="shell_bt.c"/>
         <files mask="shell_bredr.c"/>
         <files mask="shell_gatt.c"/>
@@ -1287,7 +1287,7 @@
         <files mask="shell_test_mode.c"/>
         <files mask="shell_iso.c"/>
       </source>
-      <source relative_path="../../source/shell" project_relative_path="shell" type="c_include">
+      <source relative_path="./source/shell" project_relative_path="shell" type="c_include">
         <files mask="shell_bt.h"/>
         <files mask="shell_hci.h"/>
         <files mask="fsl_shell.h"/>
@@ -1297,11 +1297,11 @@
         <files mask="middleware_edgefast_bluetooth_shell.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../include" project_relative_path="include" type="c_include"/>
-        <include_path relative_path="../../source/shell" project_relative_path="shell" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
+        <include_path relative_path="./source/shell" project_relative_path="shell" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.shell_ble.MIMXRT1042" name="middleware.edgefast_bluetooth.shell_ble" brief="edgefast_bluetooth shell_ble" version="1.0.0" full_name="middleware.edgefast_bluetooth.shell_ble" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/edgefast_bluetooth" project_base_path="edgefast/bluetooth">
+    <component id="middleware.edgefast_bluetooth.shell_ble.MIMXRT1042" name="middleware.edgefast_bluetooth.shell_ble" brief="edgefast_bluetooth shell_ble" version="1.0.0" full_name="middleware.edgefast_bluetooth.shell_ble" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <defines>
         <define name="SHELL_ADVANCE" value="1"/>
         <define name="DEBUG_CONSOLE_RX_ENABLE" value="0"/>
@@ -1315,7 +1315,7 @@
           <component_dependency value="middleware.edgefast_bluetooth.ble.ethermind.cm7f.MIMXRT1042"/>
         </all>
       </dependencies>
-      <source relative_path="../../source/shell" project_relative_path="shell" type="src">
+      <source relative_path="./source/shell" project_relative_path="shell" type="src">
         <files mask="shell_bt.c"/>
         <files mask="shell_gatt.c"/>
         <files mask="shell_hci.c"/>
@@ -1323,7 +1323,7 @@
         <files mask="fsl_shell.c"/>
         <files mask="shell_test_mode.c"/>
       </source>
-      <source relative_path="../../source/shell" project_relative_path="shell" type="c_include">
+      <source relative_path="./source/shell" project_relative_path="shell" type="c_include">
         <files mask="shell_bt.h"/>
         <files mask="shell_hci.h"/>
         <files mask="fsl_shell.h"/>
@@ -1333,322 +1333,322 @@
         <files mask="middleware_edgefast_bluetooth_shell_ble.cmake" hidden="true"/>
       </source>
       <include_paths>
-        <include_path relative_path="../../include" project_relative_path="include" type="c_include"/>
-        <include_path relative_path="../../source/shell" project_relative_path="shell" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
+        <include_path relative_path="./source/shell" project_relative_path="shell" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.btble.ethermind.lib.cm7f.MIMXRT1042" name="middleware.edgefast_bluetooth.btble.ethermind.lib.cm7f" brief="btble libraries for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.btble.ethermind.lib.cm7f" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/wireless/ethermind" project_base_path="bt_ble">
+    <component id="middleware.edgefast_bluetooth.btble.ethermind.lib.cm7f.MIMXRT1042" name="middleware.edgefast_bluetooth.btble.ethermind.lib.cm7f" brief="btble libraries for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.btble.ethermind.lib.cm7f" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.btble.ethermind.cm7f.MIMXRT1042"/>
       </dependencies>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_a2dp.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_avrcp.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_bip.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_bpp.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_core.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_ctn.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_ftp.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_ga.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_gatt.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_hfp.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_hid.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_map.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_opp.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_pan.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_pbap.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_protocol.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_sap.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_spp.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_util.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_sbc_common.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_sbc_decoder.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_sbc_encoder.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_a2dp.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_avrcp.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_bip.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_bpp.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_core.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_ctn.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_ftp.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_ga.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_gatt.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_hfp.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_hid.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_map.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_opp.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_pan.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_pbap.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_protocol.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_sap.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_spp.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_util.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_sbc_common.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_sbc_decoder.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_sbc_encoder.a"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_btble_ethermind_lib_cm7f.cmake" hidden="true"/>
       </source>
     </component>
-    <component id="middleware.edgefast_bluetooth.br.ethermind.lib.cm7f.MIMXRT1042" name="middleware.edgefast_bluetooth.br.ethermind.lib.cm7f" brief="BR libraries for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.br.ethermind.lib.cm7f" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/wireless/ethermind" project_base_path="bt_ble">
+    <component id="middleware.edgefast_bluetooth.br.ethermind.lib.cm7f.MIMXRT1042" name="middleware.edgefast_bluetooth.br.ethermind.lib.cm7f" brief="BR libraries for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.br.ethermind.lib.cm7f" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.br.ethermind.cm7f.MIMXRT1042"/>
       </dependencies>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_a2dp.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_avrcp.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_bip.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_bpp.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_core.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_ctn.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_ftp.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_ga.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_gatt.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_hfp.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_hid.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_map.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_opp.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_pan.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_pbap.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_protocol.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_sap.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_spp.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_util.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_sbc_common.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_sbc_decoder.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_sbc_encoder.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_a2dp.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_avrcp.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_bip.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_bpp.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_core.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_ctn.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_ftp.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_ga.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_gatt.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_hfp.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_hid.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_map.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_opp.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_pan.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_pbap.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_protocol.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_sap.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_spp.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_bt_util.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_sbc_common.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_sbc_decoder.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_sbc_encoder.a"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_br_ethermind_lib_cm7f.cmake" hidden="true"/>
       </source>
     </component>
-    <component id="middleware.edgefast_bluetooth.ble.ethermind.lib.cm7f.MIMXRT1042" name="middleware.edgefast_bluetooth.ble.ethermind.lib.cm7f" brief="BLE libraries for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.ble.ethermind.lib.cm7f" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../middleware/wireless/ethermind" project_base_path="bt_ble">
+    <component id="middleware.edgefast_bluetooth.ble.ethermind.lib.cm7f.MIMXRT1042" name="middleware.edgefast_bluetooth.ble.ethermind.lib.cm7f" brief="BLE libraries for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.ble.ethermind.lib.cm7f" devices="MIMXRT1042xxxxB" device_cores="core0_MIMXRT1042xxxxB" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
       <dependencies>
         <component_dependency value="middleware.edgefast_bluetooth.ble.ethermind.cm7f.MIMXRT1042"/>
       </dependencies>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/ble/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/ble/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_ble_core.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/ble/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/ble/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_ble_gatt.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/ble/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/ble/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_ble_protocol.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/ble/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/ble/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_ble_util.a"/>
       </source>
-      <source toolchain="armgcc" relative_path="../../bluetooth/private/lib/mcux/default/ble/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/ble/cm7f/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_ble_ga.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/ble/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/ble/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_ble_core.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/ble/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/ble/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_ble_gatt.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/ble/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/ble/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_ble_protocol.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/ble/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/ble/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_ble_util.a"/>
       </source>
-      <source toolchain="mcuxpresso" relative_path="../../bluetooth/private/lib/mcux/default/ble/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/ble/cm7f/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="core0_MIMXRT1042xxxxB">
         <files mask="libethermind_ble_ga.a"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
