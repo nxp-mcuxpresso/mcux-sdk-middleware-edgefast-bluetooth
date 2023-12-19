@@ -1198,6 +1198,7 @@ void bt_hfp_ag_close_audio(struct bt_hfp_ag *hfp_ag)
         {
             BT_ERR("SCO Connection for HFP-Unit not found\n");
         }
+        bt_conn_unref(hfp_ag->bt_so_conn);
         hfp_ag->bt_so_conn = NULL;
     }
 }

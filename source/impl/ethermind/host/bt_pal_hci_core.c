@@ -1856,6 +1856,7 @@ int bt_unpair(uint8_t id, const bt_addr_le_t *addr)
 	bt_addr_le_t peer_addr;
 	SMP_BD_ADDR bdaddr;
 	API_RESULT retval;
+	DEVICE_LINK_TYPE    link_type;
 #if (defined(CONFIG_BT_BREDR) && (CONFIG_BT_BREDR > 0))
 	uint8_t count;
 #endif
@@ -1884,7 +1885,11 @@ int bt_unpair(uint8_t id, const bt_addr_le_t *addr)
 			{
 				peer_addr.type = BT_ADDR_LE_PUBLIC;
 				memcpy(peer_addr.a.val, br_list[i].bd_addr, sizeof(peer_addr.a.val));
-				unpair(id, &peer_addr);
+
+                if (bt_addr_le_cmp(&peer_addr, BT_ADDR_LE_ANY))
+                {
+                    unpair(id, &peer_addr);
+                }
 			}
 		}
 #endif
@@ -1893,9 +1898,16 @@ int bt_unpair(uint8_t id, const bt_addr_le_t *addr)
 		{
             uint8_t bd_handle = (uint8_t)(i - 1);
 			retval = BT_smp_get_bd_addr (&bd_handle, &bdaddr);
+            /* Clear residual data. */
+            bt_addr_le_copy(&peer_addr, BT_ADDR_LE_ANY);
 			if (API_SUCCESS == retval)
 			{
-                DEVICE_LINK_TYPE    link_type;
+              	memcpy(peer_addr.a.val, bdaddr.addr, sizeof(peer_addr.a.val));
+				if (!bt_addr_le_cmp(&peer_addr, BT_ADDR_LE_ANY))
+				{
+                    continue;
+				}
+
                 retval = device_queue_get_link_type
                 (
                      &link_type,
@@ -2843,7 +2855,7 @@ static void hci_tx_thread(void *param)
             }
         }
 #if (defined(CONFIG_BT_ISO) && (CONFIG_BT_ISO > 0))
-        else if (BT_DEV_SEND_ISO & flags)
+        if (BT_DEV_SEND_ISO & flags)
         {
             struct bt_conn *conn;
             do
@@ -2856,7 +2868,7 @@ static void hci_tx_thread(void *param)
             } while (KOSA_StatusSuccess == ret);
         }
 #endif /* CONFIG_BT_ISO */
-        else if (BT_DEV_CONN_CHANGED & flags)
+        if (BT_DEV_CONN_CHANGED & flags)
         {
             struct bt_conn *conn;
             do
@@ -2867,9 +2879,6 @@ static void hci_tx_thread(void *param)
                     bt_conn_process_tx(conn);
                 }
             } while (KOSA_StatusSuccess == ret);
-        }
-        else
-        {
         }
 
 		/* Make sure we don't hog the CPU if there's all the time

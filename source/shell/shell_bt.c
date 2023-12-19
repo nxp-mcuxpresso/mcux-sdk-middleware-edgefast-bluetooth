@@ -198,17 +198,7 @@ static void scan_recv(const struct bt_le_scan_recv_info *info,
 		return;
 	}
 
-	shell_print(ctx_shell, "[DEVICE]: %s, AD evt type %u, RSSI %i %s "
-		    "C:%u S:%u D:%d SR:%u E:%u Prim: %s, Secn: %s, "
-		    "Interval: 0x%04x (%u ms), SID: 0x%x",
-		    le_addr, info->adv_type, info->rssi, name,
-		    (info->adv_props & BT_GAP_ADV_PROP_CONNECTABLE) != 0,
-		    (info->adv_props & BT_GAP_ADV_PROP_SCANNABLE) != 0,
-		    (info->adv_props & BT_GAP_ADV_PROP_DIRECTED) != 0,
-		    (info->adv_props & BT_GAP_ADV_PROP_SCAN_RESPONSE) != 0,
-		    (info->adv_props & BT_GAP_ADV_PROP_EXT_ADV) != 0,
-		    phy2str(info->primary_phy), phy2str(info->secondary_phy),
-		    info->interval, info->interval * 5 / 4, info->sid);
+        shell_print(ctx_shell, "%s, RSSI %i %s ", le_addr, info->rssi, name);
 	/* Store address for later use */
 #if (defined(CONFIG_BT_CENTRAL) && (CONFIG_BT_CENTRAL> 0))
 	auto_connect.addr_set = true;
@@ -2229,8 +2219,9 @@ static shell_status_t cmd_auto_conn(shell_handle_t shell, int32_t argc, char *ar
 		shell_help(shell);
 		return kStatus_SHELL_PrintCmdHelp;
 	}
-
+#if 0
 	return kStatus_SHELL_Success;
+#endif
 }
 #endif /* !defined(CONFIG_BT_FILTER_ACCEPT_LIST) */
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2021-2022 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -328,7 +328,10 @@ static shell_status_t hci_cmd_interface(shell_handle_t shell, int32_t argc, char
     if (err)
     {
         shell_print(shell, "HCI command failed (err %d)\n", err);
-        net_buf_unref(rsp);
+        if(rsp)
+        {
+          net_buf_unref(rsp);
+        }
         return kStatus_SHELL_Error;
     }
     else

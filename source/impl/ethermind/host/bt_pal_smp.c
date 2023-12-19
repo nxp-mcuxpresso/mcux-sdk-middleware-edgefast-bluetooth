@@ -6973,7 +6973,8 @@ static void hci_acl_smp_handler(struct net_buf *buf)
         }
 
         smp->status = hdr->pdu.status;
-		k_work_schedule(&smp->auth_complete, BT_MSEC(1));
+        k_work_cancel_delayable(&smp->auth_complete);
+        k_work_submit(&smp->auth_complete.work);
 		/* Take the semaphore until security level updated, don't need wait too long. */
 		osa_status_t status = OSA_SemaphoreWait(conn->sem_security_level_updated, 1);
 		if(KOSA_StatusSuccess != status)

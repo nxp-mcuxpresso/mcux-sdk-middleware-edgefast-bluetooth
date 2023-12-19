@@ -31,6 +31,20 @@
 #include "fsl_component_log.h"
 LOG_MODULE_DEFINE(LOG_MODULE_NAME, kLOG_LevelTrace);
 
+#ifndef CONTROLLER_ID
+#if (USB_HOST_CONFIG_KHCI > 0U)
+    #define CONTROLLER_ID kUSB_ControllerKhci0
+#elif (USB_HOST_CONFIG_EHCI > 0U)
+    #define CONTROLLER_ID kUSB_ControllerEhci0
+#elif (USB_HOST_CONFIG_OHCI > 0U)
+    #define CONTROLLER_ID kUSB_ControllerOhci0
+#elif (USB_HOST_CONFIG_IP3516HS > 0U)
+    #define CONTROLLER_ID kUSB_ControllerIp3516Hs0
+#else
+    #error The CONTROLLER_ID is not defined!
+#endif /* USB_HOST_CONFIG_KHCI */
+#endif /* CONTROLLER_ID */
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/

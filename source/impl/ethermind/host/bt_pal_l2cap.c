@@ -4244,6 +4244,7 @@ static API_RESULT ethermind_ecbfc_get_edgefast_state(DEVICE_HANDLE *handle, stru
     assert(NULL != state->l2cap_att_sig_chan);
     if (NULL == state->l2cap_att_sig_chan)
     {
+		bt_conn_unref(state->conn);
         return API_FAILURE;
     }
 
@@ -4258,6 +4259,7 @@ static API_RESULT ethermind_ecbfc_get_edgefast_state(DEVICE_HANDLE *handle, stru
 
     if (state->buf == NULL)
     {
+		bt_conn_unref(state->conn);
         return API_FAILURE;
     }
 
@@ -4335,6 +4337,7 @@ static API_RESULT ethermind_l2ca_ecbfc_connect_ind_cb
     {
         return API_FAILURE;
     }
+	bt_conn_unref(state.conn);
 
     buf = state.buf;
     l2cap_att_sig_chan = state.l2cap_att_sig_chan;
@@ -4416,6 +4419,7 @@ static API_RESULT ethermind_l2ca_ecbfc_connect_cnf_cb
             }
         }
     }
+	bt_conn_unref(state.conn);
     hdr.len = sizeof(rsp) + param->num_cids * 2u;
     (void)net_buf_add_mem(buf, &hdr, sizeof(hdr));
 
@@ -4458,6 +4462,7 @@ static API_RESULT ethermind_l2ca_ecbfc_reconfig_ind_cb
     {
         return API_FAILURE;
     }
+	bt_conn_unref(state.conn);
 
     buf = state.buf;
     l2cap_att_sig_chan = state.l2cap_att_sig_chan;
@@ -4520,6 +4525,7 @@ static API_RESULT ethermind_l2ca_ecbfc_reconfig_cnf_cb
 			}
 		}
 	}
+	bt_conn_unref(state.conn);
     hdr.len = sizeof(rsp);
     (void)net_buf_add_mem(buf, &hdr, sizeof(hdr));
 
