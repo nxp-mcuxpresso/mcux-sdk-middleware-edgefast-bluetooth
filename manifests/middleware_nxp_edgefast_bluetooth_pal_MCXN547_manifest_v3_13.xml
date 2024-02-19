@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ksdk:manifest xmlns:ksdk="http://nxp.com/ksdk/2.0/ksdk_manifest_v3.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="SDK_2.x_middleware_nxp_edgefast_bluetooth_pal_MCXN547_manifest_v3_13" name="EdgeFast BT/BLE stack" brief="EdgeFast BT/BLE stack" format_version="3.13" api_version="2.0.0" xsi:schemaLocation="http://nxp.com/ksdk/2.0/ksdk_manifest_v3.0.xsd http://nxp.com/mcuxpresso/sdk/sdk_manifest_v3.13.xsd">
+
+  <externalDefinitions>
+    <definition extID="MCXN547"/>
+    <definition extID="armgcc"/>
+    <definition extID="mcuxpresso"/>
+  </externalDefinitions>
+  <ksdk id="MCUXpressoSDK2140_middleware_nxp_edgefast_bluetooth_pal_MCXN547_manifest_v3_13" name="MCUXpressoSDK2140_middleware_nxp_edgefast_bluetooth_pal_MCXN547_manifest_v3_13" version="2.14.0" revision="2.14.0"/>
+  <components>
+    <component id="middleware.edgefast_bluetooth.le_audio.config.template.MCXN547" name="middleware.edgefast_bluetooth.le_audio.config.template" brief="edgefast_bluetooth configuration template for LE audio" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.config.template" devices="MCXN547" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <source exclude="true" relative_path="./output/templates/config" project_relative_path="output/templates/config" type="c_include">
+        <files mask="edgefast_bluetooth_audio_config.h" hidden="true"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_config_template.cmake" hidden="true"/>
+      </source>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.cap.MCXN547" name="middleware.edgefast_bluetooth.le_audio.cap" brief="edgefast_bluetooth le_audio.cap" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.cap" devices="MCXN547" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_cap.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="cap.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="cap_acceptor.c"/>
+        <files mask="cap_initiator.c"/>
+        <files mask="cap_stream.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="cap_internal.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_cap.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.aics.MCXN547" name="middleware.edgefast_bluetooth.le_audio.aics" brief="edgefast_bluetooth le_audio.aics" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.aics" devices="MCXN547" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_aics.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="aics.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="aics.c"/>
+        <files mask="aics_client.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="aics_internal.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_aics.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.vocs.MCXN547" name="middleware.edgefast_bluetooth.le_audio.vocs" brief="edgefast_bluetooth le_audio.vocs" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.vocs" devices="MCXN547" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_vocs.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="vocs.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="vocs.c"/>
+        <files mask="vocs_client.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="vocs_internal.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_vocs.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.csip.MCXN547" name="middleware.edgefast_bluetooth.le_audio.csip" brief="edgefast_bluetooth le_audio.csis" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.csip" devices="MCXN547" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_csip.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="csip.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="csip_crypto.c"/>
+        <files mask="csip_set_coordinator.c"/>
+        <files mask="csip_set_member.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="csip_crypto.h"/>
+        <files mask="csip_internal.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_csip.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.ccid.MCXN547" name="middleware.edgefast_bluetooth.le_audio.ccid" brief="edgefast_bluetooth le_audio.ccid" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.ccid" devices="MCXN547" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="ccid_internal.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="ccid.c"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_ccid.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.bap.MCXN547" name="middleware.edgefast_bluetooth.le_audio.bap" brief="edgefast_bluetooth le_audio.baps" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.bap" devices="MCXN547" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_ascs.h"/>
+        <files mask="config_bap.h"/>
+        <files mask="config_pacs.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="audio.h"/>
+        <files mask="bap_lc3_preset.h"/>
+        <files mask="bap.h"/>
+        <files mask="lc3.h"/>
+        <files mask="pacs.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="ascs_internal.h"/>
+        <files mask="audio_internal.h"/>
+        <files mask="bap_iso.h"/>
+        <files mask="bap_endpoint.h"/>
+        <files mask="pacs_internal.h"/>
+        <files mask="bap_stream.h"/>
+        <files mask="bap_unicast_client_internal.h"/>
+        <files mask="bap_unicast_server.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="ascs.c"/>
+        <files mask="bap_iso.c"/>
+        <files mask="audio.c"/>
+        <files mask="bap_broadcast_sink.c"/>
+        <files mask="bap_broadcast_source.c"/>
+        <files mask="codec.c"/>
+        <files mask="pacs.c"/>
+        <files mask="bap_stream.c"/>
+        <files mask="bap_unicast_client.c"/>
+        <files mask="bap_unicast_server.c"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_bap.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind" project_relative_path="source" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.has.MCXN547" name="middleware.edgefast_bluetooth.le_audio.has" brief="edgefast_bluetooth le_audio.has" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.has" devices="MCXN547" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_has.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="has.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="has_client.c"/>
+        <files mask="has.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="has_internal.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_has.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.tbs.MCXN547" name="middleware.edgefast_bluetooth.le_audio.tbs" brief="edgefast_bluetooth le_audio.tbs" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.tbs" devices="MCXN547" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_tbs.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="tbs.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="tbs_client.c"/>
+        <files mask="tbs.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="tbs_internal.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_tbs.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.tmap.MCXN547" name="middleware.edgefast_bluetooth.le_audio.tmap" brief="edgefast_bluetooth le_audio.tmap" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.tmap" devices="MCXN547" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_tmap.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="tmap.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="tmap.c"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_tmap.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.config.template.MCXN547" name="middleware.edgefast_bluetooth.config.template" brief="edgefast_bluetooth PAL configuration template" version="1.0.0" full_name="middleware.edgefast_bluetooth.config.template" devices="MCXN547" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path=".././" project_base_path="source">
+      <source relative_path="./output/templates/config" project_relative_path="./" config="true" type="c_include">
+        <files mask="edgefast_bluetooth_config.h"/>
+        <files mask="edgefast_bluetooth_debug_config.h"/>
+      </source>
+      <source relative_path="./output/templates/app_bluetooth_config" project_relative_path="./" config="true" type="c_preinclude">
+        <files mask="app_bluetooth_config.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_config_template.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./output/templates/config" project_relative_path="./" type="c_include"/>
+        <include_path relative_path="./output/templates/app_bluetooth_config" project_relative_path="./" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.liblc3codec.MCXN547" name="middleware.edgefast_bluetooth.liblc3codec" brief="edgefast_bluetooth liblc3codec" version="1.0.0" full_name="middleware.edgefast_bluetooth.liblc3codec" devices="MCXN547" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././lib" project_base_path="edgefast/lib">
+      <source relative_path=".lc3codec/include" project_relative_path="liblc3codec/include" type="c_include">
+        <files mask="lc3.h"/>
+        <files mask="lc3_private.h"/>
+      </source>
+      <source relative_path=".lc3codec/src" project_relative_path="liblc3codec/src" type="src">
+        <files mask="attdet.c"/>
+        <files mask="bits.c"/>
+        <files mask="bwdet.c"/>
+        <files mask="energy.c"/>
+        <files mask="lc3.c"/>
+        <files mask="ltpf.c"/>
+        <files mask="mdct.c"/>
+        <files mask="plc.c"/>
+        <files mask="sns.c"/>
+        <files mask="spec.c"/>
+        <files mask="tables.c"/>
+        <files mask="tns.c"/>
+      </source>
+      <source relative_path=".lc3codec/src" project_relative_path="liblc3codec/src" type="c_include">
+        <files mask="attdet.h"/>
+        <files mask="bits.h"/>
+        <files mask="bwdet.h"/>
+        <files mask="common.h"/>
+        <files mask="energy.h"/>
+        <files mask="ltpf.h"/>
+        <files mask="mdct.h"/>
+        <files mask="plc.h"/>
+        <files mask="sns.h"/>
+        <files mask="spec.h"/>
+        <files mask="tables.h"/>
+        <files mask="tns.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_liblc3codec.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path=".lc3codec/include" project_relative_path="liblc3codec/include" type="c_include"/>
+        <include_path relative_path=".lc3codec" project_relative_path="liblc3codec" type="c_include"/>
+        <include_path relative_path="./" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.asrc_sw.MCXN547" name="middleware.edgefast_bluetooth.asrc_sw" brief="edgefast_bluetooth asrc_sw" version="1.0.0" full_name="middleware.edgefast_bluetooth.asrc_sw" devices="MCXN547" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././lib" project_base_path="edgefast/lib">
+      <source relative_path="../asrc_sw" project_relative_path="asrc_sw" type="c_include">
+        <files mask="srCvtFrm.h"/>
+      </source>
+      <source relative_path="../asrc_sw" project_relative_path="asrc_sw" type="src">
+        <files mask="srCvtFrm.c"/>
+      </source>
+      <source relative_path="../asrc_sw" project_relative_path="asrc_sw" type="other">
+        <files mask="downSmplAllRates.dat"/>
+        <files mask="upSmpl_32_32_rev.dat"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_asrc_sw.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="../asrc_sw/include" project_relative_path="asrc_sw/include" type="c_include"/>
+        <include_path relative_path="../asrc_sw" project_relative_path="asrc_sw" type="c_include"/>
+        <include_path relative_path="./" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.sdio.template.mcxn5xxevk.MCXN547" name="EdgeFast Bluetooth configuration template of SDIO" brief="Template configuration file to be edited by user." version="1.0.0" full_name="EdgeFast Bluetooth configuration template of SDIO" devices="MCXN547" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path="../../../boards/mcxn5xxevk/edgefast_bluetooth_examples/template" project_base_path="source">
+      <source exclude="true" relative_path="./" project_relative_path="template" type="doc">
+        <files mask="dummy.txt" hidden="true"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_sdio_template_mcxn5xxevk.cmake" hidden="true"/>
+      </source>
+    </component>
+    <component id="middleware.edgefast_bluetooth.mcux.linker.template.mcxn5xxevk.MCXN547" name="EdgeFast Bluetooth configuration template of MCUX Linker" brief="Template configuration file to be edited by user." version="1.0.0" full_name="EdgeFast Bluetooth configuration template of MCUX Linker" devices="MCXN547" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path="../../../boards/mcxn5xxevk/edgefast_bluetooth_examples/template" project_base_path="source">
+      <source toolchain="mcuxpresso" relative_path="./" project_relative_path="linkscripts" config="true" type="src">
+        <files mask="data.ldt"/>
+        <files mask="end_text.ldt"/>
+        <files mask="main_data.ldt"/>
+        <files mask="main_text.ldt"/>
+        <files mask="symbols.ldt"/>
+      </source>
+      <source exclude="true" relative_path="./" project_relative_path="template" type="doc">
+        <files mask="dummy.txt" hidden="true"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_mcux_linker_template_mcxn5xxevk.cmake" hidden="true"/>
+      </source>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.vcp.MCXN547" name="middleware.edgefast_bluetooth.le_audio.vcs" brief="edgefast_bluetooth le_audio.vcs" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.vcs" devices="MCXN547" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.le_audio.aics.MCXN547"/>
+          <component_dependency value="middleware.edgefast_bluetooth.le_audio.vocs.MCXN547"/>
+        </all>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_vcp.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="vcp.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="vcp_internal.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="vcp_vol_ctlr.c"/>
+        <files mask="vcp_vol_rend.c"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_vcp.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.micp.MCXN547" name="middleware.edgefast_bluetooth.le_audio.micp" brief="edgefast_bluetooth le_audio.micp" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.micp" devices="MCXN547" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <component_dependency value="middleware.edgefast_bluetooth.le_audio.aics.MCXN547"/>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_micp.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="micp.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="micp_mic_ctlr.c"/>
+        <files mask="micp_mic_dev.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="micp_internal.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_micp.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.mcs.MCXN547" name="middleware.edgefast_bluetooth.le_audio.mcs" brief="edgefast_bluetooth le_audio.mcs" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.mcs" devices="MCXN547" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <component_dependency value="middleware.edgefast_bluetooth.le_audio.ccid.MCXN547"/>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_mcs.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="mcs.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="mcs.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="mcs_internal.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_mcs.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.mcc.MCXN547" name="middleware.edgefast_bluetooth.le_audio.mcc" brief="edgefast_bluetooth le_audio.mcc" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.mcc" devices="MCXN547" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <component_dependency value="middleware.edgefast_bluetooth.le_audio.ccid.MCXN547"/>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_mcs.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="mcc.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="mcc.c"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_mcc.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.mpl.MCXN547" name="middleware.edgefast_bluetooth.le_audio.mpl" brief="edgefast_bluetooth le_audio.mpl" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.mpl" devices="MCXN547" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <component_dependency value="middleware.edgefast_bluetooth.le_audio.ccid.MCXN547"/>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_mpl.h"/>
+        <files mask="config_mctl.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="media_proxy.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="media_proxy.c"/>
+        <files mask="mpl.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="media_proxy_internal.h"/>
+        <files mask="mpl_internal.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_mpl.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.bass.MCXN547" name="middleware.edgefast_bluetooth.le_audio.bass" brief="edgefast_bluetooth le_audio.bass" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.bass" devices="MCXN547" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <component_dependency value="middleware.edgefast_bluetooth.le_audio.ccid.MCXN547"/>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_bass.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="bap.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="bap_broadcast_assistant.c"/>
+        <files mask="bap_scan_delegator.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="bap_internal.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_bass.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.template.MCXN547" name="EdgeFast Bluetooth configuration template" brief="Template configuration file to be edited by user." version="1.0.0" full_name="EdgeFast Bluetooth configuration template" devices="MCXN547" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path=".././" project_base_path="source">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.config.template.MCXN547"/>
+          <component_dependency value="middleware.edgefast_bluetooth.mcux.linker.template.mcxn5xxevk.MCXN547"/>
+        </all>
+      </dependencies>
+      <source relative_path="./output/templates/config/mbedtls" project_relative_path="./" config="true" type="c_include">
+        <files mask="mbedtls_config_client.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_template.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./output/templates/config/mbedtls" project_relative_path="./" type="c_include"/>
+      </include_paths>
+    </component>
+  </components>
+</ksdk:manifest>
