@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2020 SixOctets Systems
  * Copyright (c) 2019 Aaron Tsui <aaron.tsui@outlook.com>
- * Copyright 2021-2022 NXP
+ * Copyright 2021-2024 NXP
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -19,6 +19,10 @@
 #include <bluetooth/uuid.h>
 #include <bluetooth/gatt.h>
 #include <bluetooth/services/hts.h>
+
+#if defined(APP_USE_SENSORS) && (APP_USE_SENSORS > 0)
+#include <sensors.h>
+#endif /* APP_USE_SENSORS */
 
 #define BT_DIS_MANUF     "NXP"
 #define BT_DIS_NAME      "HTS Demo"
@@ -100,6 +104,12 @@ void bt_hts_indicate(void)
             return;
         }
 
+#if defined(APP_USE_SENSORS) && (APP_USE_SENSORS > 0)
+        SENSORS_TriggerTemperatureMeasurement();
+        SENSORS_RefreshTemperatureValue();
+        temperature = (uint32_t)SENSORS_GetTemperature();
+#endif /* APP_USE_SENSORS */
+
         PRINTF("temperature is %dC\n", temperature);
         temp_measurement.flags = hts_unit_celsius_c;
         temp_measurement.flags += hts_include_temp_type;
@@ -117,11 +127,13 @@ void bt_hts_indicate(void)
             indicating = 0U;
         }
 
+#if !defined(APP_USE_SENSORS) || (APP_USE_SENSORS == 0)
         temperature++;
         if (temperature == 25U)
         {
             temperature = 20U;
         }
+#endif
 
         temp_type++;
         if (temp_type > hts_tympanum)

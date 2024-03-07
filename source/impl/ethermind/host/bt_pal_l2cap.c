@@ -363,8 +363,6 @@ void bt_l2cap_chan_del(struct bt_l2cap_chan *chan)
 		ops->disconnected(chan);
 	}
 
-	chan->conn = NULL;
-
 destroy:
 #if (defined(CONFIG_BT_L2CAP_DYNAMIC_CHANNEL) && ((CONFIG_BT_L2CAP_DYNAMIC_CHANNEL) > 0U))
 	/* Reset internal members of common channel */
@@ -376,6 +374,7 @@ destroy:
 	BT_L2CAP_LE_CHAN(chan)->psm = 0U;
 #endif
 #endif
+	chan->conn = NULL;
 	if (chan->destroy) {
 		chan->destroy(chan);
 	}
@@ -4713,7 +4712,8 @@ static API_RESULT ethermind_l2ca_ecbfc_reconfig_cnf_cb
 	conn = state.conn;
     buf = state.buf;
     l2cap_att_sig_chan = state.l2cap_att_sig_chan;
-    
+
+    memset(&hdr, 0, sizeof(hdr));
     hdr.code = BT_L2CAP_ECRED_RECONF_RSP;
 	/* Find the pending ident for the device. */
 	SYS_SLIST_FOR_EACH_CONTAINER(&conn->channels, chan, node, struct bt_l2cap_chan) {

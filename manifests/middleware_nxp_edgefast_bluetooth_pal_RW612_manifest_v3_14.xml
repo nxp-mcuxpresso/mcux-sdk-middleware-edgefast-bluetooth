@@ -1,0 +1,2389 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ksdk:manifest xmlns:ksdk="http://nxp.com/ksdk/2.0/ksdk_manifest_v3.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="SDK_2.x_middleware_nxp_edgefast_bluetooth_pal_RW612_manifest_v3_14" name="EdgeFast BT/BLE stack" brief="EdgeFast BT/BLE stack" format_version="3.14" api_version="2.0.0" xsi:schemaLocation="http://nxp.com/ksdk/2.0/ksdk_manifest_v3.0.xsd http://nxp.com/mcuxpresso/sdk/sdk_manifest_v3.14.xsd">
+
+  <externalDefinitions>
+    <definition extID="RW612"/>
+    <definition extID="armgcc"/>
+    <definition extID="rdrw612bga"/>
+    <definition extID="mcuxpresso"/>
+    <definition extID="middleware.freertos-kernel.heap_4.RW612"/>
+    <definition extID="middleware.freertos-kernel.RW612"/>
+    <definition extID="middleware.mbedtls.RW612"/>
+    <definition extID="middleware.usb.host.stack.RW612"/>
+    <definition extID="cm33_RW612"/>
+    <definition extID="middleware.littlefs.RW612"/>
+    <definition extID="middleware.fatfs.RW612"/>
+    <definition extID="component.osa.RW612"/>
+    <definition extID="middleware.fatfs.usb.RW612"/>
+    <definition extID="component.log.RW612"/>
+    <definition extID="component.log.backend.debugconsole.RW612"/>
+    <definition extID="component.common_task.RW612"/>
+  </externalDefinitions>
+  <ksdk id="MCUXpressoSDK215000_middleware_nxp_edgefast_bluetooth_pal_RW612_manifest_v3_14" name="MCUXpressoSDK215000_middleware_nxp_edgefast_bluetooth_pal_RW612_manifest_v3_14" version="2.15.000" revision="2.15.000"/>
+  <components>
+    <component id="middleware.edgefast_bluetooth.le_audio.config.template.RW612" name="middleware.edgefast_bluetooth.le_audio.config.template" brief="edgefast_bluetooth configuration template for LE audio" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.config.template" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <device_dependency value="RW612"/>
+      </dependencies>
+      <source exclude="true" relative_path="./output/templates/config" project_relative_path="output/templates/config" type="c_include">
+        <files mask="edgefast_bluetooth_audio_config.h" hidden="true"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_config_template.cmake" hidden="true"/>
+      </source>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.cap.RW612" name="middleware.edgefast_bluetooth.le_audio.cap" brief="edgefast_bluetooth le_audio.cap" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.cap" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <device_dependency value="RW612"/>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_cap.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="cap.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="cap_acceptor.c"/>
+        <files mask="cap_initiator.c"/>
+        <files mask="cap_stream.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="cap_internal.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_cap.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.aics.RW612" name="middleware.edgefast_bluetooth.le_audio.aics" brief="edgefast_bluetooth le_audio.aics" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.aics" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <device_dependency value="RW612"/>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_aics.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="aics.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="aics.c"/>
+        <files mask="aics_client.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="aics_internal.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_aics.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.vocs.RW612" name="middleware.edgefast_bluetooth.le_audio.vocs" brief="edgefast_bluetooth le_audio.vocs" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.vocs" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <device_dependency value="RW612"/>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_vocs.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="vocs.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="vocs.c"/>
+        <files mask="vocs_client.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="vocs_internal.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_vocs.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.csip.RW612" name="middleware.edgefast_bluetooth.le_audio.csip" brief="edgefast_bluetooth le_audio.csis" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.csip" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <device_dependency value="RW612"/>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_csip.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="csip.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="csip_crypto.c"/>
+        <files mask="csip_set_coordinator.c"/>
+        <files mask="csip_set_member.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="csip_crypto.h"/>
+        <files mask="csip_internal.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_csip.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.ccid.RW612" name="middleware.edgefast_bluetooth.le_audio.ccid" brief="edgefast_bluetooth le_audio.ccid" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.ccid" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <device_dependency value="RW612"/>
+      </dependencies>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="ccid_internal.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="ccid.c"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_ccid.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.bap.RW612" name="middleware.edgefast_bluetooth.le_audio.bap" brief="edgefast_bluetooth le_audio.baps" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.bap" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <device_dependency value="RW612"/>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_ascs.h"/>
+        <files mask="config_bap.h"/>
+        <files mask="config_pacs.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="audio.h"/>
+        <files mask="bap_lc3_preset.h"/>
+        <files mask="bap.h"/>
+        <files mask="lc3.h"/>
+        <files mask="pacs.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="ascs_internal.h"/>
+        <files mask="audio_internal.h"/>
+        <files mask="bap_iso.h"/>
+        <files mask="bap_endpoint.h"/>
+        <files mask="pacs_internal.h"/>
+        <files mask="bap_stream.h"/>
+        <files mask="bap_unicast_client_internal.h"/>
+        <files mask="bap_unicast_server.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="ascs.c"/>
+        <files mask="bap_iso.c"/>
+        <files mask="audio.c"/>
+        <files mask="bap_broadcast_sink.c"/>
+        <files mask="bap_broadcast_source.c"/>
+        <files mask="codec.c"/>
+        <files mask="pacs.c"/>
+        <files mask="bap_stream.c"/>
+        <files mask="bap_unicast_client.c"/>
+        <files mask="bap_unicast_server.c"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_bap.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind" project_relative_path="source" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.has.RW612" name="middleware.edgefast_bluetooth.le_audio.has" brief="edgefast_bluetooth le_audio.has" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.has" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <device_dependency value="RW612"/>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_has.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="has.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="has_client.c"/>
+        <files mask="has.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="has_internal.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_has.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.tbs.RW612" name="middleware.edgefast_bluetooth.le_audio.tbs" brief="edgefast_bluetooth le_audio.tbs" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.tbs" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <device_dependency value="RW612"/>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_tbs.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="tbs.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="tbs_client.c"/>
+        <files mask="tbs.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="tbs_internal.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_tbs.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.tmap.RW612" name="middleware.edgefast_bluetooth.le_audio.tmap" brief="edgefast_bluetooth le_audio.tmap" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.tmap" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <device_dependency value="RW612"/>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_tmap.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="tmap.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="tmap.c"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_tmap.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.config.template.RW612" name="middleware.edgefast_bluetooth.config.template" brief="edgefast_bluetooth PAL configuration template" version="1.0.0" full_name="middleware.edgefast_bluetooth.config.template" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path=".././" project_base_path="source">
+      <dependencies>
+        <device_dependency value="RW612"/>
+      </dependencies>
+      <source relative_path="./output/templates/config" project_relative_path="./" config="true" type="c_include">
+        <files mask="edgefast_bluetooth_config.h"/>
+        <files mask="edgefast_bluetooth_debug_config.h"/>
+      </source>
+      <source relative_path="./output/templates/app_bluetooth_config" project_relative_path="./" config="true" type="c_preinclude">
+        <files mask="app_bluetooth_config.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_config_template.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./output/templates/config" project_relative_path="./" type="c_include"/>
+        <include_path relative_path="./output/templates/app_bluetooth_config" project_relative_path="./" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.liblc3codec.RW612" name="middleware.edgefast_bluetooth.liblc3codec" brief="edgefast_bluetooth liblc3codec" version="1.0.0" full_name="middleware.edgefast_bluetooth.liblc3codec" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././lib" project_base_path="edgefast/lib">
+      <dependencies>
+        <device_dependency value="RW612"/>
+      </dependencies>
+      <source relative_path=".lc3codec/include" project_relative_path="liblc3codec/include" type="c_include">
+        <files mask="lc3.h"/>
+        <files mask="lc3_private.h"/>
+      </source>
+      <source relative_path=".lc3codec/src" project_relative_path="liblc3codec/src" type="src">
+        <files mask="attdet.c"/>
+        <files mask="bits.c"/>
+        <files mask="bwdet.c"/>
+        <files mask="energy.c"/>
+        <files mask="lc3.c"/>
+        <files mask="ltpf.c"/>
+        <files mask="mdct.c"/>
+        <files mask="plc.c"/>
+        <files mask="sns.c"/>
+        <files mask="spec.c"/>
+        <files mask="tables.c"/>
+        <files mask="tns.c"/>
+      </source>
+      <source relative_path=".lc3codec/src" project_relative_path="liblc3codec/src" type="c_include">
+        <files mask="attdet.h"/>
+        <files mask="bits.h"/>
+        <files mask="bwdet.h"/>
+        <files mask="common.h"/>
+        <files mask="energy.h"/>
+        <files mask="ltpf.h"/>
+        <files mask="mdct.h"/>
+        <files mask="plc.h"/>
+        <files mask="sns.h"/>
+        <files mask="spec.h"/>
+        <files mask="tables.h"/>
+        <files mask="tns.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_liblc3codec.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path=".lc3codec/include" project_relative_path="liblc3codec/include" type="c_include"/>
+        <include_path relative_path=".lc3codec" project_relative_path="liblc3codec" type="c_include"/>
+        <include_path relative_path="./" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.asrc_sw.RW612" name="middleware.edgefast_bluetooth.asrc_sw" brief="edgefast_bluetooth asrc_sw" version="1.0.0" full_name="middleware.edgefast_bluetooth.asrc_sw" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././lib" project_base_path="edgefast/lib">
+      <dependencies>
+        <device_dependency value="RW612"/>
+      </dependencies>
+      <source relative_path="../asrc_sw" project_relative_path="asrc_sw" type="c_include">
+        <files mask="srCvtFrm.h"/>
+      </source>
+      <source relative_path="../asrc_sw" project_relative_path="asrc_sw" type="src">
+        <files mask="srCvtFrm.c"/>
+      </source>
+      <source relative_path="../asrc_sw" project_relative_path="asrc_sw" type="other">
+        <files mask="downSmplAllRates.dat"/>
+        <files mask="upSmpl_32_32_rev.dat"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_asrc_sw.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="../asrc_sw/include" project_relative_path="asrc_sw/include" type="c_include"/>
+        <include_path relative_path="../asrc_sw" project_relative_path="asrc_sw" type="c_include"/>
+        <include_path relative_path="./" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.mcux.linker.template.rdrw612bga.RW612" name="EdgeFast Bluetooth configuration template of MCUX Linker" brief="Template configuration file to be edited by user." version="1.0.0" full_name="EdgeFast Bluetooth configuration template of MCUX Linker" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path="../../../boards/rdrw612bga/edgefast_bluetooth_examples/template/linker/mcux" project_base_path="./">
+      <dependencies>
+        <all>
+          <board_dependency value="rdrw612bga"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source toolchain="mcuxpresso" relative_path="./" project_relative_path="linkscripts" type="src">
+        <files mask="end_text.ldt"/>
+        <files mask="main_data.ldt"/>
+        <files mask="main_text.ldt"/>
+        <files mask="symbols.ldt"/>
+      </source>
+      <source exclude="true" relative_path="./" project_relative_path="template" type="doc">
+        <files mask="dummy.txt" hidden="true"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_mcux_linker_template_rdrw612bga.cmake" hidden="true"/>
+      </source>
+    </component>
+    <component id="middleware.edgefast_bluetooth.pal.RW612" name="middleware.edgefast_bluetooth.pal" brief="edgefast_bluetooth Abstraction Layer" version="1.0.0" full_name="middleware.edgefast_bluetooth.pal" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <any_of>
+            <all>
+              <not>
+                <component_dependency value="middleware.edgefast_bluetooth.br.ethermind.cm33nodsp.RW612"/>
+              </not>
+              <not>
+                <component_dependency value="middleware.edgefast_bluetooth.btble.ethermind.cm33nodsp.RW612"/>
+              </not>
+              <component_dependency value="middleware.edgefast_bluetooth.ble.ethermind.cm33nodsp.RW612"/>
+              <device_core_dependency value="cm33_RW612"/>
+            </all>
+            <all>
+              <not>
+                <component_dependency value="middleware.edgefast_bluetooth.ble.ethermind.cm33nodsp.RW612"/>
+              </not>
+              <not>
+                <component_dependency value="middleware.edgefast_bluetooth.btble.ethermind.cm33nodsp.RW612"/>
+              </not>
+              <component_dependency value="middleware.edgefast_bluetooth.br.ethermind.cm33nodsp.RW612"/>
+              <device_core_dependency value="cm33_RW612"/>
+            </all>
+            <all>
+              <not>
+                <component_dependency value="middleware.edgefast_bluetooth.ble.ethermind.cm33nodsp.RW612"/>
+              </not>
+              <not>
+                <component_dependency value="middleware.edgefast_bluetooth.br.ethermind.cm33nodsp.RW612"/>
+              </not>
+              <component_dependency value="middleware.edgefast_bluetooth.btble.ethermind.cm33nodsp.RW612"/>
+              <device_core_dependency value="cm33_RW612"/>
+            </all>
+          </any_of>
+          <component_dependency value="middleware.freertos-kernel.heap_4.RW612"/>
+          <component_dependency value="middleware.freertos-kernel.RW612"/>
+          <component_dependency value="middleware.mbedtls.RW612"/>
+          <component_dependency value="middleware.usb.host.stack.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.common.ethermind.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.porting.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.platform.ethermind.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.crypto.ethermind.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.host_msd_fatfs.ethermind.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.db_gen.ethermind.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source exclude="true" relative_path="./boards/template" project_relative_path="./" type="doc">
+        <files mask="dummy.txt" hidden="true"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_pal.cmake" hidden="true"/>
+      </source>
+    </component>
+    <component id="middleware.edgefast_bluetooth.common.ethermind.hci.RW612" name="middleware.edgefast_bluetooth.common.ethermind.hci" brief="edgefast_bluetooth HCI" version="1.0.0" full_name="middleware.edgefast_bluetooth.common.ethermind.hci" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.common.ethermind.hci_platform.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source exclude="true" relative_path="../../../port/pal/mcux/bluetooth" project_relative_path="./" type="doc">
+        <files mask="dummy.txt" hidden="true"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_common_ethermind_hci.cmake" hidden="true"/>
+      </source>
+    </component>
+    <component id="middleware.edgefast_bluetooth.common.ethermind.hci_platform.RW612" name="middleware.edgefast_bluetooth.common.ethermind.hci_platform" brief="edgefast_bluetooth HCI based on framework platform" version="1.0.0" full_name="middleware.edgefast_bluetooth.common.ethermind.hci_platform" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.common.ethermind.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.rw610.controller.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="../../../port/pal/mcux/bluetooth" project_relative_path="port/pal/mcux/bluetooth" type="src">
+        <files mask="hci_platform.c"/>
+      </source>
+      <source relative_path="../../../port/pal/mcux/bluetooth" project_relative_path="port/pal/mcux/bluetooth" type="c_include">
+        <files mask="hci_platform.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_common_ethermind_hci_platform.cmake" hidden="true"/>
+      </source>
+    </component>
+    <component id="middleware.edgefast_bluetooth.common.ethermind.RW612" name="middleware.edgefast_bluetooth.common.ethermind" brief="edgefast_bluetooth bt_ble host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.common.ethermind" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
+      <defines>
+        <define name="LFS_NO_INTRINSICS" value="1"/>
+        <define name="LFS_NO_ERROR" value="1"/>
+        <define name="FSL_OSA_TASK_ENABLE" value="1"/>
+        <define name="FSL_OSA_MAIN_FUNC_ENABLE" value="0"/>
+      </defines>
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.extension.common.ethermind.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.common.ethermind.hci.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.config.ethermind.RW612"/>
+          <component_dependency value="middleware.littlefs.RW612"/>
+          <component_dependency value="middleware.fatfs.RW612"/>
+          <component_dependency value="component.osa.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="../../../bluetooth/export/eOSAL" project_relative_path="bluetooth/export/eOSAL" type="c_include">
+        <files mask="eBT_assert.h"/>
+        <files mask="eBT_config.h"/>
+        <files mask="eBT_debug_api.h"/>
+        <files mask="eBT_fops.h"/>
+        <files mask="eBT_os.h"/>
+        <files mask="eBT_serial.h"/>
+        <files mask="eBT_timer.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/export/include" project_relative_path="bluetooth/export/include" type="c_include">
+        <files mask="BT_a2dp_api.h"/>
+        <files mask="BT_analyzer.h"/>
+        <files mask="BT_api.h"/>
+        <files mask="BT_assigned_numbers.h"/>
+        <files mask="BT_at_parser_api.h"/>
+        <files mask="BT_att_api.h"/>
+        <files mask="BT_avctp_api.h"/>
+        <files mask="BT_avdtp_api.h"/>
+        <files mask="BT_avrcp_api.h"/>
+        <files mask="BT_avrcp_ca_api.h"/>
+        <files mask="BT_bip_api.h"/>
+        <files mask="BT_bnep_api.h"/>
+        <files mask="BT_bottom_half.h"/>
+        <files mask="BT_bpp_api.h"/>
+        <files mask="BT_common.h"/>
+        <files mask="BT_ctn_api.h"/>
+        <files mask="BT_dbase_api.h"/>
+        <files mask="BT_device_queue.h"/>
+        <files mask="BT_error.h"/>
+        <files mask="BT_ftp_api.h"/>
+        <files mask="BT_gap_api.h"/>
+        <files mask="BT_gatt_db_api.h"/>
+        <files mask="BT_hci_api.h"/>
+        <files mask="BT_hdp_api.h"/>
+        <files mask="BT_hfp_ag_api.h"/>
+        <files mask="BT_hfp_unit_api.h"/>
+        <files mask="BT_hid_device_api.h"/>
+        <files mask="BT_hid_host_api.h"/>
+        <files mask="BT_irobex_api.h"/>
+        <files mask="BT_jpl_api.h"/>
+        <files mask="BT_map_api.h"/>
+        <files mask="BT_mcap_api.h"/>
+        <files mask="BT_obex_api.h"/>
+        <files mask="BT_opp_api.h"/>
+        <files mask="BT_pan_api.h"/>
+        <files mask="BT_pbap_api.h"/>
+        <files mask="BT_racp.h"/>
+        <files mask="BT_rfcomm_api.h"/>
+        <files mask="BT_sap_api.h"/>
+        <files mask="BT_sdp_api.h"/>
+        <files mask="BT_security.h"/>
+        <files mask="BT_sm_api.h"/>
+        <files mask="BT_smp_api.h"/>
+        <files mask="BT_snoop.h"/>
+        <files mask="BT_spp_api.h"/>
+        <files mask="BT_status.h"/>
+        <files mask="BT_storage.h"/>
+        <files mask="BT_version.h"/>
+        <files mask="fsm_defines.h"/>
+        <files mask="fsm_engine.h"/>
+        <files mask="gatt_defines.h"/>
+        <files mask="hci_transport.h"/>
+        <files mask="l2cap.h"/>
+        <files mask="write_task.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/export/vendor" project_relative_path="bluetooth/export/vendor" type="c_include">
+        <files mask="vendor_specific_commands.h"/>
+        <files mask="vendor_specific_init.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/export/vendor" project_relative_path="bluetooth/export/vendor" type="src">
+        <files mask="vendor_specific_init.c"/>
+      </source>
+      <source relative_path="../../../bluetooth/private/protocols/att" project_relative_path="bluetooth/private/protocols/att" type="c_include">
+        <files mask="att.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/private/protocols/avctp" project_relative_path="bluetooth/private/protocols/avctp" type="c_include">
+        <files mask="avctp.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/private/protocols/avdtp" project_relative_path="bluetooth/private/protocols/avdtp" type="c_include">
+        <files mask="avdtp.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/private/protocols/bnep" project_relative_path="bluetooth/private/protocols/bnep" type="c_include">
+        <files mask="bnep.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/private/protocols/dbase" project_relative_path="bluetooth/private/protocols/dbase" type="c_include">
+        <files mask="database.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/private/protocols/hci_1.2" project_relative_path="bluetooth/private/protocols/hci_1.2" type="c_include">
+        <files mask="hci_h.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/private/protocols/mcap" project_relative_path="bluetooth/private/protocols/mcap" type="c_include">
+        <files mask="mcap.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/private/protocols/obex" project_relative_path="bluetooth/private/protocols/obex" type="c_include">
+        <files mask="obex.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/private/protocols/rfcomm" project_relative_path="bluetooth/private/protocols/rfcomm" type="c_include">
+        <files mask="rfcomm.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/private/protocols/sdp" project_relative_path="bluetooth/private/protocols/sdp" type="c_include">
+        <files mask="sdp.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/private/protocols/sm" project_relative_path="bluetooth/private/protocols/sm" type="c_include">
+        <files mask="sm.h"/>
+        <files mask="sm_extern.h"/>
+        <files mask="sm_internal.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/private/protocols/smp" project_relative_path="bluetooth/private/protocols/smp" type="c_include">
+        <files mask="smp.h"/>
+        <files mask="smp_extern.h"/>
+        <files mask="smp_fsm.h"/>
+        <files mask="smp_fsm_engine.h"/>
+        <files mask="smp_internal.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/private/utils/aes_cmac" project_relative_path="bluetooth/private/utils/aes_cmac" type="c_include">
+        <files mask="aes_cmac.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/private/utils/at_parser" project_relative_path="bluetooth/private/utils/at_parser" type="c_include">
+        <files mask="at_parser_hsp_hfp.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/private/utils/object_parser" project_relative_path="bluetooth/private/utils/object_parser" type="c_include">
+        <files mask="object_parser_api.h"/>
+        <files mask="tokenizer.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/private/utils/racp" project_relative_path="bluetooth/private/utils/racp" type="c_include">
+        <files mask="racp.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/private/utils/storage" project_relative_path="bluetooth/private/utils/storage" type="c_include">
+        <files mask="storage.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/private/utils/xml_parser" project_relative_path="bluetooth/private/utils/xml_parser" type="c_include">
+        <files mask="xml_common_defines.h"/>
+        <files mask="xml_encoder.h"/>
+        <files mask="xml_parser.h"/>
+      </source>
+      <source relative_path="../../../port/osal/src/freertos" project_relative_path="port/osal/src/freertos" type="c_include">
+        <files mask="EM_assert.h"/>
+        <files mask="EM_config.h"/>
+        <files mask="EM_debug.h"/>
+        <files mask="EM_debug_api.h"/>
+        <files mask="EM_debug_internal.h"/>
+        <files mask="EM_fops.h"/>
+        <files mask="EM_os.h"/>
+        <files mask="EM_serial.h"/>
+        <files mask="EM_timer.h"/>
+        <files mask="EM_timer_internal.h"/>
+      </source>
+      <source relative_path="../../../port/osal/src/freertos" project_relative_path="port/osal/src/freertos" type="src">
+        <files mask="EM_config.c"/>
+        <files mask="EM_debug.c"/>
+        <files mask="EM_fops.c"/>
+        <files mask="EM_os.c"/>
+        <files mask="EM_serial.c"/>
+        <files mask="EM_timer.c"/>
+      </source>
+      <source relative_path="../../../port/pal/mcux/bluetooth" project_relative_path="port/pal/mcux/bluetooth" type="c_include">
+        <files mask="BT_assert.h"/>
+        <files mask="BT_config.h"/>
+        <files mask="BT_debug.h"/>
+        <files mask="BT_debug_api.h"/>
+        <files mask="BT_fops.h"/>
+        <files mask="BT_os.h"/>
+        <files mask="BT_storage_pl.h"/>
+        <files mask="BT_timer.h"/>
+        <files mask="btsnoop_pl.h"/>
+        <files mask="sco_audio_pl.h"/>
+        <files mask="ctn_pl.h"/>
+        <files mask="ftp_pl.h"/>
+        <files mask="hci_uart_internal.h"/>
+        <files mask="map_pl.h"/>
+        <files mask="obex_pl.h"/>
+        <files mask="pbap_pl.h"/>
+        <files mask="write_task_extern_pl.h"/>
+        <files mask="write_task_pl.h"/>
+        <files mask="littlefs_pl.h"/>
+        <files mask="fw_loader_uart.h"/>
+      </source>
+      <source relative_path="../../../port/pal/mcux/bluetooth" project_relative_path="port/pal/mcux/bluetooth" type="src">
+        <files mask="BT_status_pl.c"/>
+        <files mask="BT_storage_pl.c"/>
+        <files mask="btsnoop_pl.c"/>
+        <files mask="sco_audio_pl.c"/>
+        <files mask="ctn_pl.c"/>
+        <files mask="ftp_pl.c"/>
+        <files mask="ht_read_task_pl.c"/>
+        <files mask="map_pl.c"/>
+        <files mask="obex_pl.c"/>
+        <files mask="pbap_pl.c"/>
+        <files mask="write_task_pl.c"/>
+        <files mask="littlefs_pl.c"/>
+        <files mask="fw_loader_uart.c"/>
+      </source>
+      <source relative_path="../../../port/pal/mcux/ethal" project_relative_path="port/pal/mcux/ethal" type="c_include">
+        <files mask="ethal_assert.h"/>
+        <files mask="ethal_config.h"/>
+        <files mask="ethal_debug.h"/>
+        <files mask="ethal_debug_api.h"/>
+        <files mask="ethal_debug_internal.h"/>
+        <files mask="ethal_fops.h"/>
+        <files mask="ethal_os.h"/>
+        <files mask="ethal_serial.h"/>
+        <files mask="ethal_timer.h"/>
+        <files mask="ethal_timer_internal.h"/>
+      </source>
+      <source relative_path="../../../port/pal/mcux/ethal" project_relative_path="port/pal/mcux/ethal" type="src">
+        <files mask="ethal_config.c"/>
+        <files mask="ethal_debug.c"/>
+        <files mask="ethal_fops.c"/>
+        <files mask="ethal_os.c"/>
+        <files mask="ethal_serial.c"/>
+        <files mask="ethal_timer.c"/>
+      </source>
+      <source relative_path="../../../port/pal/mcux/sbc" project_relative_path="port/pal/mcux/sbc" type="c_include">
+        <files mask="sbc_os.h"/>
+      </source>
+      <source toolchain="mcuxpresso" relative_path="../../../port/pal/mcux/toolspec/mcuxpresso" project_relative_path="port/pal/mcux/toolspec/mcuxpresso" type="src">
+        <files mask="toolspec.c"/>
+      </source>
+      <source toolchain="mcuxpresso" relative_path="../../../port/pal/mcux/toolspec/mcuxpresso" project_relative_path="port/pal/mcux/toolspec/mcuxpresso" type="c_include">
+        <files mask="toolspec.h"/>
+      </source>
+      <source relative_path="../../../port/pal/mcux" project_relative_path="port/pal/mcux" type="src">
+        <files mask="EM_platform.c"/>
+      </source>
+      <source relative_path="../../../port/pal/mcux" project_relative_path="port/pal/mcux" type="c_include">
+        <files mask="EM_platform.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/private/utils/sbc" project_relative_path="bluetooth/private/utils/sbc" type="c_include">
+        <files mask="sbc_api.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_common_ethermind.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="../../../bluetooth/export/eOSAL" project_relative_path="bluetooth/export/eOSAL" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/export/include" project_relative_path="bluetooth/export/include" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/export/vendor" project_relative_path="bluetooth/export/vendor" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/private/protocols/att" project_relative_path="bluetooth/private/protocols/att" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/private/protocols/avctp" project_relative_path="bluetooth/private/protocols/avctp" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/private/protocols/avdtp" project_relative_path="bluetooth/private/protocols/avdtp" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/private/protocols/bnep" project_relative_path="bluetooth/private/protocols/bnep" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/private/protocols/dbase" project_relative_path="bluetooth/private/protocols/dbase" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/private/protocols/hci_1.2" project_relative_path="bluetooth/private/protocols/hci_1.2" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/private/protocols/mcap" project_relative_path="bluetooth/private/protocols/mcap" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/private/protocols/obex" project_relative_path="bluetooth/private/protocols/obex" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/private/protocols/rfcomm" project_relative_path="bluetooth/private/protocols/rfcomm" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/private/protocols/sdp" project_relative_path="bluetooth/private/protocols/sdp" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/private/protocols/sm" project_relative_path="bluetooth/private/protocols/sm" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/private/protocols/smp" project_relative_path="bluetooth/private/protocols/smp" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/private/utils/aes_cmac" project_relative_path="bluetooth/private/utils/aes_cmac" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/private/utils/at_parser" project_relative_path="bluetooth/private/utils/at_parser" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/private/utils/object_parser" project_relative_path="bluetooth/private/utils/object_parser" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/private/utils/racp" project_relative_path="bluetooth/private/utils/racp" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/private/utils/storage" project_relative_path="bluetooth/private/utils/storage" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/private/utils/xml_parser" project_relative_path="bluetooth/private/utils/xml_parser" type="c_include"/>
+        <include_path relative_path="../../../port/pal/mcux/bluetooth" project_relative_path="port/pal/mcux/bluetooth" type="c_include"/>
+        <include_path relative_path="../../../port/pal/mcux/ethal" project_relative_path="port/pal/mcux/ethal" type="c_include"/>
+        <include_path relative_path="../../../port/pal/mcux/toolspec/mcuxpresso" project_relative_path="port/pal/mcux/toolspec/mcuxpresso" toolchain="mcuxpresso" type="c_include"/>
+        <include_path relative_path="../../../port/pal/mcux/sbc" project_relative_path="port/pal/mcux/sbc" type="c_include"/>
+        <include_path relative_path="../../../port/osal/src/freertos" project_relative_path="port/osal/src/freertos" type="c_include"/>
+        <include_path relative_path="../../../port/pal/mcux" project_relative_path="port/pal/mcux" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/private/utils/sbc" project_relative_path="bluetooth/private/utils/sbc" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.common.ethermind.lc3.RW612" name="middleware.edgefast_bluetooth.common.ethermind.lc3" brief="edgefast_bluetooth bt_ble host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.common.ethermind.lc3" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
+      <defines>
+        <define name="LC3_DSP" value="1"/>
+      </defines>
+      <dependencies>
+        <all>
+          <any_of>
+            <all>
+              <not>
+                <component_dependency value="middleware.edgefast_bluetooth.br.ethermind.lib.lc3.cm33nodsp.RW612"/>
+              </not>
+              <not>
+                <component_dependency value="middleware.edgefast_bluetooth.btble.ethermind.lib.lc3.cm33nodsp.RW612"/>
+              </not>
+              <component_dependency value="middleware.edgefast_bluetooth.ble.ethermind.lib.lc3.cm33nodsp.RW612"/>
+              <device_core_dependency value="cm33_RW612"/>
+            </all>
+            <all>
+              <not>
+                <component_dependency value="middleware.edgefast_bluetooth.ble.ethermind.lib.lc3.cm33nodsp.RW612"/>
+              </not>
+              <not>
+                <component_dependency value="middleware.edgefast_bluetooth.btble.ethermind.lib.lc3.cm33nodsp.RW612"/>
+              </not>
+              <component_dependency value="middleware.edgefast_bluetooth.br.ethermind.lib.lc3.cm33nodsp.RW612"/>
+              <device_core_dependency value="cm33_RW612"/>
+            </all>
+            <all>
+              <not>
+                <component_dependency value="middleware.edgefast_bluetooth.ble.ethermind.lib.lc3.cm33nodsp.RW612"/>
+              </not>
+              <not>
+                <component_dependency value="middleware.edgefast_bluetooth.br.ethermind.lib.lc3.cm33nodsp.RW612"/>
+              </not>
+              <component_dependency value="middleware.edgefast_bluetooth.btble.ethermind.lib.lc3.cm33nodsp.RW612"/>
+              <device_core_dependency value="cm33_RW612"/>
+            </all>
+          </any_of>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="../../../port/pal/mcux/lc3" project_relative_path="port/pal/mcux/lc3" type="c_include">
+        <files mask="LC3_os.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/private/utils/lc3/export/include" project_relative_path="bluetooth/private/utils/lc3" type="c_include">
+        <files mask="LC3_api.h"/>
+      </source>
+      <source relative_path="../../../bluetooth/private/utils/lc3/private/fixed/config" project_relative_path="bluetooth/private/utils/lc3/config" type="c_include">
+        <files mask="LC3_limits.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_common_ethermind_lc3.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="../../../port/pal/mcux/lc3" project_relative_path="port/pal/mcux/lc3" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/private/utils/lc3/export/include" project_relative_path="bluetooth/private/utils/lc3" type="c_include"/>
+        <include_path relative_path="../../../bluetooth/private/utils/lc3/private/fixed/config" project_relative_path="bluetooth/private/utils/lc3/config" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.rw610.controller.RW612" name="middleware.edgefast_bluetooth.rw610.controller" brief="edgefast_bluetooth rw610 controller" version="1.0.0" full_name="middleware.edgefast_bluetooth.rw610.controller" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.common.ethermind.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="../../../port/pal/mcux/bluetooth/controller" project_relative_path="port/pal/mcux/bluetooth/controller" type="c_include">
+        <files mask="controller.h"/>
+      </source>
+      <source relative_path="../../../port/pal/mcux/bluetooth/controller" project_relative_path="port/pal/mcux/bluetooth/controller" type="src">
+        <files mask="controller_rw610.c"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_rw610_controller.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="../../../port/pal/mcux/bluetooth/controller" project_relative_path="port/pal/mcux/bluetooth/controller" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.config.ethermind.RW612" name="middleware.edgefast_bluetooth.config.ethermind" brief="edgefast_bluetooth configuration for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.config.ethermind" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.common.ethermind.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="../../../bluetooth/private/lib/mcux/default/config" project_relative_path="bluetooth/private/lib/config" type="c_include">
+        <files mask="BT_features.h"/>
+        <files mask="BT_limits.h"/>
+        <files mask="db_gen.h"/>
+      </source>
+      <source exclude="true" relative_path="../../../bluetooth/private/lib/mcux/default/config" project_relative_path="bluetooth/private/lib/config" type="doc">
+        <files mask="dummy.txt" hidden="true"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_config_ethermind.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="../../../bluetooth/private/lib/mcux/default/config" project_relative_path="bluetooth/private/lib/config" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.extension.common.ethermind.RW612" name="middleware.edgefast_bluetooth.extension.common.ethermind" brief="edgefast_bluetooth extension for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.extension.common.ethermind" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.common.ethermind.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="../../../bluetooth/export/extension" project_relative_path="bluetooth/export/extension" type="src">
+        <files mask="aes_cmac_pl.c"/>
+        <files mask="BT_common_pl.c"/>
+        <files mask="device_queue_pl.c"/>
+        <files mask="sm_pl.c"/>
+        <files mask="sm_ssp_pl.c"/>
+        <files mask="smp_pl.c"/>
+        <files mask="gatt_db_pl.c"/>
+      </source>
+      <source relative_path="../../../bluetooth/export/extension" project_relative_path="bluetooth/export/extension" type="c_include">
+        <files mask="aes_cmac_pl.h"/>
+        <files mask="BT_common_pl.h"/>
+        <files mask="device_queue_pl.h"/>
+        <files mask="sm_pl.h"/>
+        <files mask="sm_ssp_pl.h"/>
+        <files mask="smp_pl.h"/>
+        <files mask="gatt_db_pl.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_extension_common_ethermind.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="../../../bluetooth/export/extension" project_relative_path="bluetooth/export/extension" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.btble.ethermind.cm33nodsp.RW612" name="middleware.edgefast_bluetooth.btble.ethermind.cm33nodsp" brief="edgefast_bluetooth bt_ble Host stack(including BR and BLE)" version="1.0.0" full_name="middleware.edgefast_bluetooth.btble.ethermind.cm33nodsp" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <not>
+            <component_dependency value="middleware.edgefast_bluetooth.ble.ethermind.lib.cm33nodsp.RW612"/>
+          </not>
+          <not>
+            <component_dependency value="middleware.edgefast_bluetooth.br.ethermind.lib.cm33nodsp.RW612"/>
+          </not>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.template.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.btble.ethermind.lib.cm33nodsp.RW612"/>
+          <device_dependency value="RW612"/>
+          <device_core_dependency value="cm33_RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/impl/ethermind/host" project_relative_path="source/host" type="src">
+        <files mask="bt_pal_a2dp.c"/>
+        <files mask="bt_pal_avrcp.c"/>
+        <files mask="bt_pal_avrcp_al_internal.c"/>
+        <files mask="bt_pal_avrcp_al_api.c"/>
+        <files mask="bt_pal_att.c"/>
+        <files mask="bt_pal_conn.c"/>
+        <files mask="bt_pal_data.c"/>
+        <files mask="bt_pal_ead.c"/>
+        <files mask="bt_pal_crypto.c"/>
+        <files mask="bt_pal_gatt.c"/>
+        <files mask="bt_pal_hci_core.c"/>
+        <files mask="bt_pal_adv.c"/>
+        <files mask="bt_pal_br.c"/>
+        <files mask="bt_pal_id.c"/>
+        <files mask="bt_pal_iso.c"/>
+        <files mask="bt_pal_scan.c"/>
+        <files mask="bt_pal_ecc.c"/>
+        <files mask="bt_pal_addr.c"/>
+        <files mask="bt_pal_buf.c"/>
+        <files mask="bt_pal_direction.c"/>
+        <files mask="bt_pal_keys.c"/>
+        <files mask="bt_pal_keys_br.c"/>
+        <files mask="bt_pal_l2cap.c"/>
+        <files mask="bt_pal_l2cap_br.c"/>
+        <files mask="bt_pal_monitor.c"/>
+        <files mask="bt_pal_rfcomm.c"/>
+        <files mask="bt_pal_spp.c"/>
+        <files mask="bt_pal_rpa.c"/>
+        <files mask="bt_pal_settings.c"/>
+        <files mask="bt_pal_sdp.c"/>
+        <files mask="bt_pal_smp.c"/>
+        <files mask="bt_pal_ssp.c"/>
+        <files mask="bt_pal_uuid.c"/>
+        <files mask="bt_pal_hfp_ag.c"/>
+        <files mask="bt_pal_hfp_hf.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/host" project_relative_path="source/host" type="c_include">
+        <files mask="bt_pal_a2dp_internal.h"/>
+        <files mask="bt_pal_avrcp_al_api.h"/>
+        <files mask="bt_pal_avrcp_al_internal.h"/>
+        <files mask="bt_pal_avrcp_internal.h"/>
+        <files mask="bt_pal_at.h"/>
+        <files mask="bt_pal_att_internal.h"/>
+        <files mask="bt_pal_avdtp_internal.h"/>
+        <files mask="bt_pal_conn_internal.h"/>
+        <files mask="bt_pal_crypto_internal.h"/>
+        <files mask="bt_pal_gatt_internal.h"/>
+        <files mask="bt_pal_hci_core.h"/>
+        <files mask="bt_pal_adv.h"/>
+        <files mask="bt_pal_br.h"/>
+        <files mask="bt_pal_id.h"/>
+        <files mask="bt_pal_iso_internal.h"/>
+        <files mask="bt_pal_scan.h"/>
+        <files mask="bt_pal_ecc.h"/>
+        <files mask="bt_pal_addr_internal.h"/>
+        <files mask="bt_pal_direction_internal.h"/>
+        <files mask="bt_pal_hci_ecc.h"/>
+        <files mask="bt_pal_keys.h"/>
+        <files mask="bt_pal_l2cap_internal.h"/>
+        <files mask="bt_pal_monitor.h"/>
+        <files mask="bt_pal_rfcomm_internal.h"/>
+        <files mask="bt_pal_rpa.h"/>
+        <files mask="bt_pal_settings.h"/>
+        <files mask="bt_pal_sdp_internal.h"/>
+        <files mask="bt_pal_smp.h"/>
+        <files mask="bt_pal_ssp.h"/>
+        <files mask="bt_pal_hfp_internal.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/host/a2dp_codec/sbc" project_relative_path="source/host/a2dp_codec/sbc" type="src">
+        <files mask="a2dp_codec_sbc.c"/>
+      </source>
+      <source relative_path="./include/bluetooth" project_relative_path="include/bluetooth" type="c_include">
+        <files mask="a2dp.h"/>
+        <files mask="avrcp.h"/>
+        <files mask="a2dp_codec_sbc.h"/>
+        <files mask="addr.h"/>
+        <files mask="att.h"/>
+        <files mask="avdtp.h"/>
+        <files mask="bluetooth.h"/>
+        <files mask="direction.h"/>
+        <files mask="buf.h"/>
+        <files mask="l2cap.h"/>
+        <files mask="rfcomm.h"/>
+        <files mask="spp.h"/>
+        <files mask="sdp.h"/>
+        <files mask="conn.h"/>
+        <files mask="crypto.h"/>
+        <files mask="gap.h"/>
+        <files mask="gatt.h"/>
+        <files mask="hci.h"/>
+        <files mask="byteorder.h"/>
+        <files mask="hci_types.h"/>
+        <files mask="ead.h"/>
+        <files mask="hci_raw.h"/>
+        <files mask="hci_vs.h"/>
+        <files mask="hfp_hf.h"/>
+        <files mask="hfp_ag.h"/>
+        <files mask="iso.h"/>
+        <files mask="testing.h"/>
+        <files mask="uuid.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/common" project_relative_path="common" type="src">
+        <files mask="addr.c"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_btble_ethermind_cm33nodsp.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/impl/ethermind/host" project_relative_path="source/host" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.ble.ethermind.cm33nodsp.RW612" name="middleware.edgefast_bluetooth.ble.ethermind.cm33nodsp" brief="edgefast_bluetooth bt_ble Host stack(including BLE only)" version="1.0.0" full_name="middleware.edgefast_bluetooth.ble.ethermind.cm33nodsp" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <defines>
+        <define name="CFG_BLE" value=""/>
+      </defines>
+      <dependencies>
+        <all>
+          <not>
+            <component_dependency value="middleware.edgefast_bluetooth.br.ethermind.lib.cm33nodsp.RW612"/>
+          </not>
+          <not>
+            <component_dependency value="middleware.edgefast_bluetooth.btble.ethermind.lib.cm33nodsp.RW612"/>
+          </not>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.template.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.ble.ethermind.lib.cm33nodsp.RW612"/>
+          <device_dependency value="RW612"/>
+          <device_core_dependency value="cm33_RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/impl/ethermind/host" project_relative_path="source/host" type="src">
+        <files mask="bt_pal_att.c"/>
+        <files mask="bt_pal_conn.c"/>
+        <files mask="bt_pal_data.c"/>
+        <files mask="bt_pal_ead.c"/>
+        <files mask="bt_pal_crypto.c"/>
+        <files mask="bt_pal_gatt.c"/>
+        <files mask="bt_pal_hci_core.c"/>
+        <files mask="bt_pal_adv.c"/>
+        <files mask="bt_pal_br.c"/>
+        <files mask="bt_pal_id.c"/>
+        <files mask="bt_pal_iso.c"/>
+        <files mask="bt_pal_scan.c"/>
+        <files mask="bt_pal_ecc.c"/>
+        <files mask="bt_pal_addr.c"/>
+        <files mask="bt_pal_buf.c"/>
+        <files mask="bt_pal_direction.c"/>
+        <files mask="bt_pal_keys.c"/>
+        <files mask="bt_pal_l2cap.c"/>
+        <files mask="bt_pal_monitor.c"/>
+        <files mask="bt_pal_rpa.c"/>
+        <files mask="bt_pal_settings.c"/>
+        <files mask="bt_pal_smp.c"/>
+        <files mask="bt_pal_smp_null.c"/>
+        <files mask="bt_pal_uuid.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/host" project_relative_path="source/host" type="c_include">
+        <files mask="bt_pal_att_internal.h"/>
+        <files mask="bt_pal_conn_internal.h"/>
+        <files mask="bt_pal_crypto_internal.h"/>
+        <files mask="bt_pal_gatt_internal.h"/>
+        <files mask="bt_pal_hci_core.h"/>
+        <files mask="bt_pal_adv.h"/>
+        <files mask="bt_pal_br.h"/>
+        <files mask="bt_pal_id.h"/>
+        <files mask="bt_pal_iso_internal.h"/>
+        <files mask="bt_pal_scan.h"/>
+        <files mask="bt_pal_ecc.h"/>
+        <files mask="bt_pal_addr_internal.h"/>
+        <files mask="bt_pal_direction_internal.h"/>
+        <files mask="bt_pal_hci_ecc.h"/>
+        <files mask="bt_pal_keys.h"/>
+        <files mask="bt_pal_l2cap_internal.h"/>
+        <files mask="bt_pal_monitor.h"/>
+        <files mask="bt_pal_rpa.h"/>
+        <files mask="bt_pal_settings.h"/>
+        <files mask="bt_pal_smp.h"/>
+        <files mask="bt_pal_ssp.h"/>
+      </source>
+      <source relative_path="./include/bluetooth" project_relative_path="include/bluetooth" type="c_include">
+        <files mask="addr.h"/>
+        <files mask="att.h"/>
+        <files mask="bluetooth.h"/>
+        <files mask="direction.h"/>
+        <files mask="buf.h"/>
+        <files mask="l2cap.h"/>
+        <files mask="conn.h"/>
+        <files mask="crypto.h"/>
+        <files mask="gap.h"/>
+        <files mask="gatt.h"/>
+        <files mask="hci.h"/>
+        <files mask="hci_types.h"/>
+        <files mask="ead.h"/>
+        <files mask="byteorder.h"/>
+        <files mask="hci_raw.h"/>
+        <files mask="hci_vs.h"/>
+        <files mask="iso.h"/>
+        <files mask="testing.h"/>
+        <files mask="uuid.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/common" project_relative_path="common" type="src">
+        <files mask="addr.c"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_ble_ethermind_cm33nodsp.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/impl/ethermind/host" project_relative_path="source/host" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.br.ethermind.cm33nodsp.RW612" name="middleware.edgefast_bluetooth.br.ethermind.cm33nodsp" brief="edgefast_bluetooth bt_ble Host stack(including BR only)" version="1.0.0" full_name="middleware.edgefast_bluetooth.br.ethermind.cm33nodsp" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <not>
+            <component_dependency value="middleware.edgefast_bluetooth.ble.ethermind.lib.cm33nodsp.RW612"/>
+          </not>
+          <not>
+            <component_dependency value="middleware.edgefast_bluetooth.btble.ethermind.lib.cm33nodsp.RW612"/>
+          </not>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.template.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.br.ethermind.lib.cm33nodsp.RW612"/>
+          <device_dependency value="RW612"/>
+          <device_core_dependency value="cm33_RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/impl/ethermind/host" project_relative_path="source/host" type="src">
+        <files mask="bt_pal_a2dp.c"/>
+        <files mask="bt_pal_avrcp.c"/>
+        <files mask="bt_pal_avrcp_al_internal.c"/>
+        <files mask="bt_pal_avrcp_al_api.c"/>
+        <files mask="bt_pal_conn.c"/>
+        <files mask="bt_pal_data.c"/>
+        <files mask="bt_pal_ead.c"/>
+        <files mask="bt_pal_crypto.c"/>
+        <files mask="bt_pal_hci_core.c"/>
+        <files mask="bt_pal_adv.c"/>
+        <files mask="bt_pal_br.c"/>
+        <files mask="bt_pal_id.c"/>
+        <files mask="bt_pal_scan.c"/>
+        <files mask="bt_pal_ecc.c"/>
+        <files mask="bt_pal_addr.c"/>
+        <files mask="bt_pal_buf.c"/>
+        <files mask="bt_pal_direction.c"/>
+        <files mask="bt_pal_keys.c"/>
+        <files mask="bt_pal_keys_br.c"/>
+        <files mask="bt_pal_l2cap.c"/>
+        <files mask="bt_pal_l2cap_br.c"/>
+        <files mask="bt_pal_monitor.c"/>
+        <files mask="bt_pal_rfcomm.c"/>
+        <files mask="bt_pal_spp.c"/>
+        <files mask="bt_pal_rpa.c"/>
+        <files mask="bt_pal_settings.c"/>
+        <files mask="bt_pal_sdp.c"/>
+        <files mask="bt_pal_smp.c"/>
+        <files mask="bt_pal_ssp.c"/>
+        <files mask="bt_pal_uuid.c"/>
+        <files mask="bt_pal_hfp_ag.c"/>
+        <files mask="bt_pal_hfp_hf.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/host" project_relative_path="source/host" type="c_include">
+        <files mask="bt_pal_a2dp_internal.h"/>
+        <files mask="bt_pal_avrcp_al_api.h"/>
+        <files mask="bt_pal_avrcp_al_internal.h"/>
+        <files mask="bt_pal_avrcp_internal.h"/>
+        <files mask="bt_pal_at.h"/>
+        <files mask="bt_pal_att_internal.h"/>
+        <files mask="bt_pal_avdtp_internal.h"/>
+        <files mask="bt_pal_conn_internal.h"/>
+        <files mask="bt_pal_crypto_internal.h"/>
+        <files mask="bt_pal_gatt_internal.h"/>
+        <files mask="bt_pal_hci_core.h"/>
+        <files mask="bt_pal_adv.h"/>
+        <files mask="bt_pal_br.h"/>
+        <files mask="bt_pal_id.h"/>
+        <files mask="bt_pal_scan.h"/>
+        <files mask="bt_pal_ecc.h"/>
+        <files mask="bt_pal_addr_internal.h"/>
+        <files mask="bt_pal_direction_internal.h"/>
+        <files mask="bt_pal_hci_ecc.h"/>
+        <files mask="bt_pal_keys.h"/>
+        <files mask="bt_pal_l2cap_internal.h"/>
+        <files mask="bt_pal_monitor.h"/>
+        <files mask="bt_pal_rfcomm_internal.h"/>
+        <files mask="bt_pal_rpa.h"/>
+        <files mask="bt_pal_settings.h"/>
+        <files mask="bt_pal_sdp_internal.h"/>
+        <files mask="bt_pal_smp.h"/>
+        <files mask="bt_pal_ssp.h"/>
+        <files mask="bt_pal_hfp_internal.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/host/a2dp_codec/sbc" project_relative_path="source/host/a2dp_codec/sbc" type="src">
+        <files mask="a2dp_codec_sbc.c"/>
+      </source>
+      <source relative_path="./include/bluetooth" project_relative_path="include/bluetooth" type="c_include">
+        <files mask="a2dp.h"/>
+        <files mask="avrcp.h"/>
+        <files mask="a2dp_codec_sbc.h"/>
+        <files mask="addr.h"/>
+        <files mask="att.h"/>
+        <files mask="avdtp.h"/>
+        <files mask="bluetooth.h"/>
+        <files mask="direction.h"/>
+        <files mask="buf.h"/>
+        <files mask="l2cap.h"/>
+        <files mask="rfcomm.h"/>
+        <files mask="spp.h"/>
+        <files mask="sdp.h"/>
+        <files mask="conn.h"/>
+        <files mask="crypto.h"/>
+        <files mask="gap.h"/>
+        <files mask="gatt.h"/>
+        <files mask="hci.h"/>
+        <files mask="byteorder.h"/>
+        <files mask="hci_types.h"/>
+        <files mask="ead.h"/>
+        <files mask="hci_raw.h"/>
+        <files mask="hci_vs.h"/>
+        <files mask="hfp_hf.h"/>
+        <files mask="hfp_ag.h"/>
+        <files mask="iso.h"/>
+        <files mask="testing.h"/>
+        <files mask="uuid.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/common" project_relative_path="common" type="src">
+        <files mask="addr.c"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_br_ethermind_cm33nodsp.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/impl/ethermind/host" project_relative_path="source/host" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.vcp.RW612" name="middleware.edgefast_bluetooth.le_audio.vcs" brief="edgefast_bluetooth le_audio.vcs" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.vcs" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.le_audio.aics.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.le_audio.vocs.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_vcp.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="vcp.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="vcp_internal.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="vcp_vol_ctlr.c"/>
+        <files mask="vcp_vol_rend.c"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_vcp.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.micp.RW612" name="middleware.edgefast_bluetooth.le_audio.micp" brief="edgefast_bluetooth le_audio.micp" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.micp" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.le_audio.aics.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_micp.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="micp.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="micp_mic_ctlr.c"/>
+        <files mask="micp_mic_dev.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="micp_internal.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_micp.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.mcs.RW612" name="middleware.edgefast_bluetooth.le_audio.mcs" brief="edgefast_bluetooth le_audio.mcs" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.mcs" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.le_audio.ccid.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_mcs.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="mcs.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="mcs.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="mcs_internal.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_mcs.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.mcc.RW612" name="middleware.edgefast_bluetooth.le_audio.mcc" brief="edgefast_bluetooth le_audio.mcc" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.mcc" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.le_audio.ccid.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_mcs.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="mcc.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="mcc.c"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_mcc.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.mpl.RW612" name="middleware.edgefast_bluetooth.le_audio.mpl" brief="edgefast_bluetooth le_audio.mpl" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.mpl" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.le_audio.ccid.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_mpl.h"/>
+        <files mask="config_mctl.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="media_proxy.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="media_proxy.c"/>
+        <files mask="mpl.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="media_proxy_internal.h"/>
+        <files mask="mpl_internal.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_mpl.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.bass.RW612" name="middleware.edgefast_bluetooth.le_audio.bass" brief="edgefast_bluetooth le_audio.bass" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.bass" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.le_audio.ccid.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_bass.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="bap.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="bap_broadcast_assistant.c"/>
+        <files mask="bap_scan_delegator.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="bap_internal.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_bass.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.profile.hrs.RW612" name="middleware.edgefast_bluetooth.profile.hrs" brief="edgefast_bluetooth profile hrs" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.hrs" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/services" project_relative_path="source/services" type="src">
+        <files mask="hrs.c"/>
+      </source>
+      <source relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
+        <files mask="hrs.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_profile_hrs.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/services" project_relative_path="source/services" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include/bluetooth/services" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.profile.bas.RW612" name="middleware.edgefast_bluetooth.profile.bas" brief="edgefast_bluetooth profile bas" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.bas" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/services" project_relative_path="source/services" type="src">
+        <files mask="bas.c"/>
+      </source>
+      <source relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
+        <files mask="bas.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_profile_bas.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/services" project_relative_path="source/services" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include/bluetooth/services" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.profile.dis.RW612" name="middleware.edgefast_bluetooth.profile.dis" brief="edgefast_bluetooth profile dis" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.dis" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/services" project_relative_path="source/services" type="src">
+        <files mask="dis.c"/>
+      </source>
+      <source relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
+        <files mask="dis.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_profile_dis.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/services" project_relative_path="source/services" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include/bluetooth/services" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.profile.hts.RW612" name="middleware.edgefast_bluetooth.profile.hts" brief="edgefast_bluetooth profile hts" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.hts" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/services" project_relative_path="source/services" type="src">
+        <files mask="hts.c"/>
+      </source>
+      <source relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
+        <files mask="hts.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_profile_hts.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/services" project_relative_path="source/services" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include/bluetooth/services" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.profile.ias.RW612" name="middleware.edgefast_bluetooth.profile.ias" brief="edgefast_bluetooth profile ias" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.ias" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/services/ias" project_relative_path="source/services/ias" type="src">
+        <files mask="ias.c"/>
+        <files mask="ias_client.c"/>
+      </source>
+      <source relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
+        <files mask="ias.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_profile_ias.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/services" project_relative_path="source/services/ias" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include/bluetooth/services" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.profile.hps.RW612" name="middleware.edgefast_bluetooth.profile.hps" brief="edgefast_bluetooth profile hps" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.hps" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/services" project_relative_path="source/services" type="src">
+        <files mask="hps.c"/>
+      </source>
+      <source relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
+        <files mask="hps.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_profile_hps.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/services" project_relative_path="source/services" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include/bluetooth/services" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.profile.pxr.RW612" name="middleware.edgefast_bluetooth.profile.pxr" brief="edgefast_bluetooth profile pxr" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.pxr" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/services" project_relative_path="source/services" type="src">
+        <files mask="pxr.c"/>
+      </source>
+      <source relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
+        <files mask="pxr.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_profile_pxr.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/services" project_relative_path="source/services" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include/bluetooth/services" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.profile.ipsp.RW612" name="middleware.edgefast_bluetooth.profile.ipsp" brief="edgefast_bluetooth profile ipsp" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.ipsp" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/services" project_relative_path="source/services" type="src">
+        <files mask="ipsp.c"/>
+      </source>
+      <source relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
+        <files mask="ipsp.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_profile_ipsp.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/services" project_relative_path="source/services" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include/bluetooth/services" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.profile.ots.RW612" name="middleware.edgefast_bluetooth.profile.ots" brief="edgefast_bluetooth profile ots" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.ots" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/services/ots" project_relative_path="source/services/ots" type="src">
+        <files mask="ots.c"/>
+        <files mask="ots_client.c"/>
+        <files mask="ots_dir_list.c"/>
+        <files mask="ots_l2cap.c"/>
+        <files mask="ots_oacp.c"/>
+        <files mask="ots_obj_manager.c"/>
+        <files mask="ots_olcp.c"/>
+      </source>
+      <source relative_path="./source/services/ots" project_relative_path="source/services/ots" type="c_include">
+        <files mask="ots_client_internal.h"/>
+        <files mask="ots_dir_list_internal.h"/>
+        <files mask="ots_internal.h"/>
+        <files mask="ots_l2cap_internal.h"/>
+        <files mask="ots_oacp_internal.h"/>
+        <files mask="ots_obj_manager_internal.h"/>
+        <files mask="ots_olcp_internal.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
+        <files mask="ots.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/services/config" project_relative_path="include/bluetooth/services/config" type="c_include">
+        <files mask="config_ots.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_profile_ots.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/services" project_relative_path="source/services" type="c_include"/>
+        <include_path relative_path="./source/services/ots" project_relative_path="source/services/ots" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/services/config" project_relative_path="include/bluetooth/services/config" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.profile.wu.RW612" name="middleware.edgefast_bluetooth.profile.wu" brief="edgefast_bluetooth profile wu" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.wu" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/services" project_relative_path="source/services" type="src">
+        <files mask="wu.c"/>
+      </source>
+      <source relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
+        <files mask="wu.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_profile_wu.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/services" project_relative_path="source/services" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include/bluetooth/services" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.profile.fmp.RW612" name="middleware.edgefast_bluetooth.profile.fmp" brief="edgefast_bluetooth profile fmp" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.fmp" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/services" project_relative_path="source/services" type="src">
+        <files mask="fmp.c"/>
+      </source>
+      <source relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
+        <files mask="fmp.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_profile_fmp.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/services" project_relative_path="source/services" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include/bluetooth/services" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.profile.tip.RW612" name="middleware.edgefast_bluetooth.profile.tip" brief="edgefast_bluetooth profile tip" version="1.0.0" full_name="middleware.edgefast_bluetooth.profile.tip" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/services" project_relative_path="source/services" type="src">
+        <files mask="tip.c"/>
+      </source>
+      <source relative_path="./include/bluetooth/services" project_relative_path="include/bluetooth/services" type="c_include">
+        <files mask="tip.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_profile_tip.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/services" project_relative_path="source/services" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include/bluetooth/services" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.pal.crypto.ethermind.RW612" name="middleware.edgefast_bluetooth.pal.crypto.ethermind" brief="edgefast_bluetooth PAL crypto support for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.pal.crypto.ethermind" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/impl/ethermind/crypto" project_relative_path="crypto" type="src">
+        <files mask="bt_crypto.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/crypto" project_relative_path="crypto" type="c_include">
+        <files mask="bt_crypto.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_pal_crypto_ethermind.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/impl/ethermind/crypto" project_relative_path="crypto" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/host" project_relative_path="source" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.pal.platform.ethermind.RW612" name="middleware.edgefast_bluetooth.pal.platform.ethermind" brief="edgefast_bluetooth PAL platform for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.pal.platform.ethermind" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="bt_ble">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/impl/ethermind/platform" project_relative_path="port/pal/mcux/edgefast_support" type="src">
+        <files mask="bt_ble_platform.c"/>
+        <files mask="bt_ble_settings.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/platform" project_relative_path="port/pal/mcux/edgefast_support" type="c_include">
+        <files mask="bt_ble_platform.h"/>
+        <files mask="bt_ble_settings.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_pal_platform_ethermind.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/impl/ethermind/platform" project_relative_path="port/pal/mcux/edgefast_support" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.pal.host_msd_fatfs.ethermind.RW612" name="middleware.edgefast_bluetooth.pal.host_msd_fatfs.ethermind" brief="edgefast_bluetooth host_msd_fatfs for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.pal.host_msd_fatfs.ethermind" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="bt_ble">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <component_dependency value="middleware.fatfs.usb.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/impl/ethermind/platform" project_relative_path="port/pal/mcux/edgefast_support" type="src">
+        <files mask="host_msd_fatfs.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/platform" project_relative_path="port/pal/mcux/edgefast_support" type="c_include">
+        <files mask="host_msd_fatfs.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_pal_host_msd_fatfs_ethermind.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/impl/ethermind/platform" project_relative_path="port/pal/mcux/edgefast_support" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.pal.db_gen.ethermind.RW612" name="middleware.edgefast_bluetooth.pal.db_gen.ethermind" brief="edgefast_bluetooth db_gen for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.pal.db_gen.ethermind" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="bt_ble">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/impl/ethermind" project_relative_path="port/pal/mcux/edgefast_support" type="src">
+        <files mask="bt_db_gen.c"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_pal_db_gen_ethermind.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/impl/ethermind" project_relative_path="port/pal/mcux/edgefast_support" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.porting.atomic.RW612" name="middleware.edgefast_bluetooth.porting.atomic" brief="edgefast_bluetooth porting.atomic" version="1.0.0" full_name="middleware.edgefast_bluetooth.porting.atomic" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/porting" project_relative_path="porting" type="src">
+        <files mask="atomic_c.c"/>
+      </source>
+      <source relative_path="./include/sys" project_relative_path="include/sys" type="c_include">
+        <files mask="atomic.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_porting_atomic.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/porting" project_relative_path="porting" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.porting.list.RW612" name="middleware.edgefast_bluetooth.porting.list" brief="edgefast_bluetooth porting.list" version="1.0.0" full_name="middleware.edgefast_bluetooth.porting.list" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/porting" project_relative_path="porting" type="src">
+        <files mask="slist.c"/>
+      </source>
+      <source relative_path="./include/sys" project_relative_path="include/sys" type="c_include">
+        <files mask="slist.h"/>
+        <files mask="dlist.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_porting_list.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/porting" project_relative_path="porting" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.porting.net.RW612" name="middleware.edgefast_bluetooth.porting.net" brief="edgefast_bluetooth porting.netbuf" version="1.0.0" full_name="middleware.edgefast_bluetooth.porting.net" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/porting" project_relative_path="porting" type="src">
+        <files mask="buf.c"/>
+      </source>
+      <source relative_path="./include/net" project_relative_path="include/net" type="c_include">
+        <files mask="buf.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_porting_net.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/porting" project_relative_path="porting" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.porting.toolchain.RW612" name="middleware.edgefast_bluetooth.porting.toolchain" brief="edgefast_bluetooth porting.toolchain" version="1.0.0" full_name="middleware.edgefast_bluetooth.porting.toolchain" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <defines>
+        <define name="CONFIG_ARM" value="1"/>
+      </defines>
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./include/toolchain" project_relative_path="include/toolchain" type="c_include">
+        <files mask="common.h"/>
+        <files mask="gcc.h"/>
+        <files mask="iar.h"/>
+        <files mask="armcc.h"/>
+      </source>
+      <source relative_path="./include" project_relative_path="include" type="c_include">
+        <files mask="toolchain.h"/>
+      </source>
+      <source exclude="true" relative_path="./boards/template" project_relative_path="./" type="doc">
+        <files mask="dummy.txt" hidden="true"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_porting_toolchain.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.porting.work_queue.RW612" name="middleware.edgefast_bluetooth.porting.work_queue" brief="edgefast_bluetooth porting.work_queue" version="1.0.0" full_name="middleware.edgefast_bluetooth.porting.work_queue" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/porting" project_relative_path="porting" type="src">
+        <files mask="work_queue.c"/>
+      </source>
+      <source relative_path="./include/sys" project_relative_path="include/sys" type="c_include">
+        <files mask="work_queue.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_porting_work_queue.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/porting" project_relative_path="porting" type="c_include"/>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.sdio.template.rdrw612bga.RW612" name="EdgeFast Bluetooth configuration template of SDIO" brief="Template configuration file to be edited by user." version="1.0.0" full_name="EdgeFast Bluetooth configuration template of SDIO" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path="../../../boards/rdrw612bga/edgefast_bluetooth_examples/template" project_base_path="source">
+      <dependencies>
+        <device_dependency value="RW612"/>
+      </dependencies>
+      <source exclude="true" relative_path="./" project_relative_path="template" type="doc">
+        <files mask="dummy.txt" hidden="true"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_sdio_template_rdrw612bga.cmake" hidden="true"/>
+      </source>
+    </component>
+    <component id="middleware.edgefast_bluetooth.template.RW612" name="EdgeFast Bluetooth configuration template" brief="Template configuration file to be edited by user." version="1.0.0" full_name="EdgeFast Bluetooth configuration template" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path=".././" project_base_path="source">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.config.template.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.mcux.linker.template.rdrw612bga.RW612"/>
+          <board_dependency value="rdrw612bga"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./output/templates/config/mbedtls" project_relative_path="./" config="true" type="c_include">
+        <files mask="mbedtls_config_client.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_template.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./output/templates/config/mbedtls" project_relative_path="./" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.porting.RW612" name="middleware.edgefast_bluetooth.porting" brief="edgefast_bluetooth porting" version="1.0.0" full_name="middleware.edgefast_bluetooth.porting" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <defines>
+        <define name="LOG_ENABLE_ASYNC_MODE" value="1"/>
+        <define name="LOG_MAX_ARGUMENT_COUNT" value="10"/>
+        <define name="LOG_ENABLE_OVERWRITE" value="0"/>
+      </defines>
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.porting.work_queue.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.porting.toolchain.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.porting.net.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.porting.list.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.porting.atomic.RW612"/>
+          <component_dependency value="component.log.RW612"/>
+          <component_dependency value="component.log.backend.debugconsole.RW612"/>
+          <device_dependency value="RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./include/sys" project_relative_path="include/sys" type="c_include">
+        <files mask="util.h"/>
+        <files mask="util_internal.h"/>
+        <files mask="util_loops.h"/>
+        <files mask="util_macro.h"/>
+        <files mask="printk.h"/>
+        <files mask="check.h"/>
+        <files mask="byteorder.h"/>
+        <files mask="ring_buffer.h"/>
+        <files mask="ffs.h"/>
+      </source>
+      <source relative_path="./include/zephyr" project_relative_path="include/zephyr" type="c_include">
+        <files mask="types.h"/>
+      </source>
+      <source relative_path="./source/porting" project_relative_path="porting" type="src">
+        <files mask="ring_buffer.c"/>
+        <files mask="porting.c"/>
+        <files mask="utf8.c"/>
+      </source>
+      <source relative_path="./source/porting" project_relative_path="porting" type="c_include">
+        <files mask="porting.h"/>
+      </source>
+      <source relative_path="./source/porting/errno" project_relative_path="porting/errno" type="c_include">
+        <files mask="errno.h"/>
+      </source>
+      <source relative_path="./source/porting/fifo" project_relative_path="porting/fifo" type="src">
+        <files mask="fifo.c"/>
+      </source>
+      <source relative_path="./source/porting/fifo" project_relative_path="porting/fifo" type="c_include">
+        <files mask="fifo.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_porting.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
+        <include_path relative_path="./source/porting" project_relative_path="porting" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.shell.RW612" name="middleware.edgefast_bluetooth.shell" brief="edgefast_bluetooth shell" version="1.0.0" full_name="middleware.edgefast_bluetooth.shell" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <defines>
+        <define name="SHELL_ADVANCE" value="1"/>
+        <define name="DEBUG_CONSOLE_RX_ENABLE" value="0"/>
+        <define name="OSA_USED" value="1"/>
+        <define name="SHELL_USE_COMMON_TASK" value="0"/>
+      </defines>
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <component_dependency value="component.common_task.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.btble.ethermind.cm33nodsp.RW612"/>
+          <device_dependency value="RW612"/>
+          <device_core_dependency value="cm33_RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/shell" project_relative_path="shell" type="src">
+        <files mask="shell_bt.c"/>
+        <files mask="shell_bredr.c"/>
+        <files mask="shell_gatt.c"/>
+        <files mask="shell_hci.c"/>
+        <files mask="shell_l2cap.c"/>
+        <files mask="shell_rfcomm.c"/>
+        <files mask="fsl_shell.c"/>
+        <files mask="shell_a2dp.c"/>
+        <files mask="shell_avrcp.c"/>
+        <files mask="shell_test_mode.c"/>
+        <files mask="shell_iso.c"/>
+      </source>
+      <source relative_path="./source/shell" project_relative_path="shell" type="c_include">
+        <files mask="shell_bt.h"/>
+        <files mask="shell_hci.h"/>
+        <files mask="fsl_shell.h"/>
+        <files mask="shell_test_mode.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_shell.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
+        <include_path relative_path="./source/shell" project_relative_path="shell" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.shell.le_audio.RW612" name="middleware.edgefast_bluetooth.shell" brief="edgefast_bluetooth shell" version="1.0.0" full_name="middleware.edgefast_bluetooth.shell" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <defines>
+        <define name="SHELL_ADVANCE" value="1"/>
+        <define name="DEBUG_CONSOLE_RX_ENABLE" value="0"/>
+        <define name="OSA_USED" value="1"/>
+        <define name="SHELL_USE_COMMON_TASK" value="0"/>
+      </defines>
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <component_dependency value="component.common_task.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.btble.ethermind.cm33nodsp.RW612"/>
+          <device_dependency value="RW612"/>
+          <device_core_dependency value="cm33_RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/impl/ethermind/audio/shell" project_relative_path="shell/audio" type="c_include">
+        <files mask="audio.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio/shell" project_relative_path="shell/audio" type="src">
+        <files mask="bap_broadcast_assistant.c"/>
+        <files mask="bap_scan_delegator.c"/>
+        <files mask="bap.c"/>
+        <files mask="cap_acceptor.c"/>
+        <files mask="cap_initiator.c"/>
+        <files mask="csip_set_coordinator.c"/>
+        <files mask="csip_set_member.c"/>
+        <files mask="has_client.c"/>
+        <files mask="has.c"/>
+        <files mask="mcc.c"/>
+        <files mask="media_controller.c"/>
+        <files mask="micp_mic_ctlr.c"/>
+        <files mask="micp_mic_dev.c"/>
+        <files mask="mpl.c"/>
+        <files mask="tbs_client.c"/>
+        <files mask="tbs.c"/>
+        <files mask="tmap.c"/>
+        <files mask="vcp_vol_ctlr.c"/>
+        <files mask="vcp_vol_rend.c"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_shell_le_audio.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
+        <include_path relative_path="./source/shell" project_relative_path="shell" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio/shell" project_relative_path="shell/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.shell_ble.RW612" name="middleware.edgefast_bluetooth.shell_ble" brief="edgefast_bluetooth shell_ble" version="1.0.0" full_name="middleware.edgefast_bluetooth.shell_ble" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <defines>
+        <define name="SHELL_ADVANCE" value="1"/>
+        <define name="DEBUG_CONSOLE_RX_ENABLE" value="0"/>
+        <define name="OSA_USED" value="1"/>
+        <define name="SHELL_USE_COMMON_TASK" value="0"/>
+      </defines>
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.pal.RW612"/>
+          <component_dependency value="component.common_task.RW612"/>
+          <component_dependency value="middleware.edgefast_bluetooth.ble.ethermind.cm33nodsp.RW612"/>
+          <device_dependency value="RW612"/>
+          <device_core_dependency value="cm33_RW612"/>
+        </all>
+      </dependencies>
+      <source relative_path="./source/shell" project_relative_path="shell" type="src">
+        <files mask="shell_bt.c"/>
+        <files mask="shell_gatt.c"/>
+        <files mask="shell_hci.c"/>
+        <files mask="shell_l2cap.c"/>
+        <files mask="fsl_shell.c"/>
+        <files mask="shell_test_mode.c"/>
+      </source>
+      <source relative_path="./source/shell" project_relative_path="shell" type="c_include">
+        <files mask="shell_bt.h"/>
+        <files mask="shell_hci.h"/>
+        <files mask="fsl_shell.h"/>
+        <files mask="shell_test_mode.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_shell_ble.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include" project_relative_path="include" type="c_include"/>
+        <include_path relative_path="./source/shell" project_relative_path="shell" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.btble.ethermind.lib.cm33nodsp.RW612" name="middleware.edgefast_bluetooth.btble.ethermind.lib.cm33nodsp" brief="btble libraries for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.btble.ethermind.lib.cm33nodsp" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.btble.ethermind.cm33nodsp.RW612"/>
+          <device_dependency value="RW612"/>
+          <device_core_dependency value="cm33_RW612"/>
+        </all>
+      </dependencies>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_a2dp.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_avrcp.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_bip.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_bpp.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_core.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_ctn.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_ftp.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_ga.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_gatt.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_ga.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_hfp.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_hid.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_map.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_opp.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_pan.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_pbap.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_protocol.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_sap.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_spp.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_util.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_sbc_common.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_sbc_decoder.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_sbc_encoder.a"/>
+      </source>
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_ga.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_btble_ethermind_lib_cm33nodsp.cmake" hidden="true"/>
+      </source>
+    </component>
+    <component id="middleware.edgefast_bluetooth.br.ethermind.lib.cm33nodsp.RW612" name="middleware.edgefast_bluetooth.br.ethermind.lib.cm33nodsp" brief="BR libraries for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.br.ethermind.lib.cm33nodsp" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.br.ethermind.cm33nodsp.RW612"/>
+          <device_dependency value="RW612"/>
+          <device_core_dependency value="cm33_RW612"/>
+        </all>
+      </dependencies>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_a2dp.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_avrcp.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_bip.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_bpp.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_core.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_ctn.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_ftp.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_ga.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_gatt.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_ga.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_hfp.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_hid.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_map.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_opp.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_pan.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_pbap.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_protocol.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_sap.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_spp.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_util.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_sbc_common.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_sbc_decoder.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_sbc_encoder.a"/>
+      </source>
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_bt_ga.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_br_ethermind_lib_cm33nodsp.cmake" hidden="true"/>
+      </source>
+    </component>
+    <component id="middleware.edgefast_bluetooth.ble.ethermind.lib.cm33nodsp.RW612" name="middleware.edgefast_bluetooth.ble.ethermind.lib.cm33nodsp" brief="BLE libraries for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.ble.ethermind.lib.cm33nodsp" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.ble.ethermind.cm33nodsp.RW612"/>
+          <device_dependency value="RW612"/>
+          <device_core_dependency value="cm33_RW612"/>
+        </all>
+      </dependencies>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/ble/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_ble_core.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/ble/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_ble_gatt.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/ble/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_ble_protocol.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/ble/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_ble_util.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/ble/cm33nodsp/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_ble_ga.a"/>
+      </source>
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/ble/cm33nodsp/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_ble_core.a"/>
+      </source>
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/ble/cm33nodsp/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_ble_gatt.a"/>
+      </source>
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/ble/cm33nodsp/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_ble_protocol.a"/>
+      </source>
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/ble/cm33nodsp/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_ble_util.a"/>
+      </source>
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/ble/cm33nodsp/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_ble_ga.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_ble_ethermind_lib_cm33nodsp.cmake" hidden="true"/>
+      </source>
+    </component>
+    <component id="middleware.edgefast_bluetooth.btble.ethermind.lib.lc3.cm33nodsp.RW612" name="middleware.edgefast_bluetooth.btble.ethermind.lib.lc3.cm33nodsp" brief="btble libraries for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.btble.ethermind.lib.lc3.cm33nodsp" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.btble.ethermind.cm33nodsp.RW612"/>
+          <device_dependency value="RW612"/>
+          <device_core_dependency value="cm33_RW612"/>
+        </all>
+      </dependencies>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_lc3_common.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_lc3_decoder.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_lc3_encoder.a"/>
+      </source>
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_lc3_common.a"/>
+      </source>
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_lc3_decoder.a"/>
+      </source>
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_lc3_encoder.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_btble_ethermind_lib_lc3_cm33nodsp.cmake" hidden="true"/>
+      </source>
+    </component>
+    <component id="middleware.edgefast_bluetooth.br.ethermind.lib.lc3.cm33nodsp.RW612" name="middleware.edgefast_bluetooth.br.ethermind.lib.lc3.cm33nodsp" brief="BR libraries for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.br.ethermind.lib.lc3.cm33nodsp" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.br.ethermind.cm33nodsp.RW612"/>
+          <device_dependency value="RW612"/>
+          <device_core_dependency value="cm33_RW612"/>
+        </all>
+      </dependencies>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_lc3_common.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_lc3_decoder.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33/gcc" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_lc3_encoder.a"/>
+      </source>
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_lc3_common.a"/>
+      </source>
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_lc3_decoder.a"/>
+      </source>
+      <source toolchain="mcuxpresso" relative_path="../../../bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso" project_relative_path="bluetooth/private/lib" type="lib" device_cores="cm33_RW612">
+        <files mask="libethermind_lc3_encoder.a"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_br_ethermind_lib_lc3_cm33nodsp.cmake" hidden="true"/>
+      </source>
+    </component>
+    <component id="middleware.edgefast_bluetooth.ble.ethermind.lib.lc3.cm33nodsp.RW612" name="middleware.edgefast_bluetooth.ble.ethermind.lib.lc3.cm33nodsp" brief="BLE libraries for bt_ble Host stack" version="1.0.0" full_name="middleware.edgefast_bluetooth.ble.ethermind.lib.lc3.cm33nodsp" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.edgefast_bluetooth.ble.ethermind.cm33nodsp.RW612"/>
+          <device_dependency value="RW612"/>
+          <device_core_dependency value="cm33_RW612"/>
+        </all>
+      </dependencies>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_ble_ethermind_lib_lc3_cm33nodsp.cmake" hidden="true"/>
+      </source>
+    </component>
+  </components>
+</ksdk:manifest>

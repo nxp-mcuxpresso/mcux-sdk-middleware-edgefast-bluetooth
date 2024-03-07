@@ -456,6 +456,7 @@ static struct net_buf *get_first_buf_matching_chan(struct k_fifo *fifo, struct b
 		struct net_buf *buf;
 		struct net_buf *ret = NULL;
 
+		memset(&skipped, 0, sizeof(skipped));
 		k_fifo_init(&skipped);
 
 		while ((buf = net_buf_get(fifo, K_NO_WAIT))) {
