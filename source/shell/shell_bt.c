@@ -165,6 +165,37 @@ static struct bt_scan_filter {
 static const char scan_response_label[] = "[DEVICE]: ";
 static bool scan_verbose_output;
 
+/* armgcc and mcux not defined strncasecmp(), so we need implement one. */
+#if (defined(__CC_ARM) || (defined(__ARMCC_VERSION))) || \
+    (defined(__GNUC__) || (defined(_LINKER) && defined(__GCC_LINKER_CMD__)))
+
+static int my_strncasecmp(const char*s1, const char*s2, int n)
+{
+	if(n == 0)
+	{
+		return 0;
+	}
+    
+	do {
+		if(tolower(*s1) != tolower(*s2))
+		{
+			return (int)(tolower(*s1) - tolower(*s2));
+		}
+
+		if(*s1++ == 0)
+		{
+			break;
+		}
+
+		s2++;
+
+	} while(--n != 0);
+    
+	return 0;
+}
+
+#endif
+
 /**
  * @brief Compares two strings without case sensitivy
  *
@@ -190,7 +221,13 @@ static bool is_substring(const char *substr, const char *str)
 				return false;
 			}
 
+/* armgcc and mcux not defined strncasecmp(), so we need a implement one. */
+#if (defined(__CC_ARM) || (defined(__ARMCC_VERSION))) || \
+    (defined(__GNUC__) || (defined(_LINKER) && defined(__GCC_LINKER_CMD__)))
+			if (my_strncasecmp(substr, &str[pos], sub_str_len) == 0) {
+#else
 			if (strncasecmp(substr, &str[pos], sub_str_len) == 0) {
+#endif
 				return true;
 			}
 		}
@@ -430,9 +467,9 @@ static void scan_recv(const struct bt_le_scan_recv_info *info,
 	bt_data_parse(buf, data_cb, name);
 	bt_addr_le_to_str(info->addr, le_addr, sizeof(le_addr));
 
-	shell_print(ctx_shell, "[DEVICE]: %s, AD evt type %u, RSSI %i %s "
+	PRINTF("[DEVICE]: %s, AD evt type %u, RSSI %i %s "
 		    "C:%u S:%u D:%d SR:%u E:%u Prim: %s, Secn: %s, "
-		    "Interval: 0x%04x (%u us), SID: 0x%x",
+		    "Interval: 0x%04x (%u us), SID: 0x%x\n",
 		    le_addr, info->adv_type, info->rssi, name,
 		    (info->adv_props & BT_GAP_ADV_PROP_CONNECTABLE) != 0,
 		    (info->adv_props & BT_GAP_ADV_PROP_SCANNABLE) != 0,

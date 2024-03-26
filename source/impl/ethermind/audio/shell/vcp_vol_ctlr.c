@@ -328,16 +328,21 @@ static struct bt_vcp_vol_ctlr_cb vcp_cbs = {
 
 static shell_status_t cmd_vcp_vol_ctlr_discover(shell_handle_t sh, int32_t argc, char *argv[])
 {
+	static bool cb_registered;
 	int result;
 
 	if (!ctx_shell) {
 		ctx_shell = sh;
 	}
 
-	result = bt_vcp_vol_ctlr_cb_register(&vcp_cbs);
-	if (result != 0) {
-		shell_print(sh, "CB register failed: %d", result);
-		return (shell_status_t)result;
+	if (!cb_registered) {
+		result = bt_vcp_vol_ctlr_cb_register(&vcp_cbs);
+		if (result != 0) {
+			shell_print(sh, "CB register failed: %d", result);
+			return (shell_status_t)result;
+		}
+
+		cb_registered = true;
 	}
 
 	if (default_conn == NULL) {

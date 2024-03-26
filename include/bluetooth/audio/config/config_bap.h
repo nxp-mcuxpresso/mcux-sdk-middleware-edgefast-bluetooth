@@ -499,6 +499,26 @@
 
 #endif
 
+/*! @brief Bluetooth Audio Stream sequence number debug
+ * Use this option to enable Bluetooth Audio Stream sequence number debugging logs for
+ * the Bluetooth Audio functionality. This will provide a warning if the application
+ * provides unexpected sequence numbers.
+ * 
+ */
+#ifndef CONFIG_BT_BAP_DEBUG_STREAM_SEQ_NUM
+    #define CONFIG_BT_BAP_DEBUG_STREAM_SEQ_NUM 0
+#endif
+
+#if (defined(CONFIG_BT_BAP_BROADCAST_SINK) && (CONFIG_BT_BAP_BROADCAST_SINK > 0)) || \
+    (defined(CONFIG_BT_BAP_BROADCAST_ASSISTANT) && (CONFIG_BT_BAP_BROADCAST_ASSISTANT > 0)) || \
+    (defined(CONFIG_BT_BAP_SCAN_DELEGATOR) && (CONFIG_BT_BAP_SCAN_DELEGATOR > 0))
+
+    #ifndef CONFIG_BT_BAP_BASE
+        #define CONFIG_BT_BAP_BASE 1
+    #endif
+
+#endif
+
 #include "config_pacs.h"
 #include "config_ascs.h"
 

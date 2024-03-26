@@ -363,8 +363,6 @@ void bt_l2cap_chan_del(struct bt_l2cap_chan *chan)
 		ops->disconnected(chan);
 	}
 
-	chan->conn = NULL;
-
 destroy:
 #if (defined(CONFIG_BT_L2CAP_DYNAMIC_CHANNEL) && ((CONFIG_BT_L2CAP_DYNAMIC_CHANNEL) > 0U))
 	/* Reset internal members of common channel */
@@ -376,6 +374,7 @@ destroy:
 	BT_L2CAP_LE_CHAN(chan)->psm = 0U;
 #endif
 #endif
+	chan->conn = NULL;
 	if (chan->destroy) {
 		chan->destroy(chan);
 	}
@@ -4198,6 +4197,7 @@ API_RESULT ethermind_l2ca_disconnect_ind_cb(UINT16 lcid)
 	chan = conn_scan.chan;
 	if (NULL != chan)
 	{
+		(void)l2cap_remove_rx_cid(chan->chan.conn, dcid);
 		bt_l2cap_chan_del(&chan->chan);
 	}
 

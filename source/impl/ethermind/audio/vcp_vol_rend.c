@@ -117,7 +117,11 @@ static void notify_work_reschedule(struct bt_vcp_vol_rend *inst, enum vol_rend_n
 	if (err < 0) {
 		LOG_ERR("Failed to reschedule %s notification err %d", vol_rend_notify_str(notify),
 			err);
-	} else {
+#if 0
+	} else if (!K_TIMEOUT_EQ(delay, osaWaitNone_c)) {
+#else
+	} else if (delay != osaWaitNone_c) {
+#endif
 		LOG_DBG("%s notification scheduled in %dms", vol_rend_notify_str(notify),
 			k_ticks_to_ms_floor32(k_work_delayable_remaining_get(&inst->notify_work)));
 	}
@@ -153,7 +157,7 @@ static void notify_work_handler(struct k_work *work)
 
 static void value_changed(struct bt_vcp_vol_rend *inst, enum vol_rend_notify notify)
 {
-	notify_work_reschedule(inst, notify, K_NO_WAIT);
+	notify_work_reschedule(inst, notify, osaWaitNone_c);
 }
 
 static ssize_t write_vcs_control(struct bt_conn *conn,

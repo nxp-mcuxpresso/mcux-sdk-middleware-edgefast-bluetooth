@@ -574,10 +574,10 @@ static int cap_ac_unicast_start(const struct bap_unicast_ac_param *param,
 			stream_cnt++;
 
 			if (param->conn_cnt > 1) {
-				const int err =
-					codec_set_chan_alloc(stream_param->codec_cfg, (enum bt_audio_location)BIT(i));
+				const int err = bt_audio_codec_cfg_set_chan_allocation(
+					stream_param->codec_cfg, (enum bt_audio_location)BIT(i));
 
-				if (err != 0) {
+				if (err < 0) {
 					shell_error(ctx_shell,
 						    "Failed to set channel allocation for "
 						    "snk[%zu][%zu]: %d",
@@ -601,10 +601,10 @@ static int cap_ac_unicast_start(const struct bap_unicast_ac_param *param,
 			stream_cnt++;
 
 			if (param->conn_cnt > 1) {
-				const int err =
-					codec_set_chan_alloc(stream_param->codec_cfg, (enum bt_audio_location)BIT(i));
+				const int err = bt_audio_codec_cfg_set_chan_allocation(
+					stream_param->codec_cfg, (enum bt_audio_location)BIT(i));
 
-				if (err != 0) {
+				if (err < 0) {
 					shell_error(ctx_shell,
 						    "Failed to set channel allocation for "
 						    "src[%zu][%zu]: %d",
@@ -690,7 +690,7 @@ int cap_ac_unicast(shell_handle_t sh, size_t argc, char **argv,
 	}
 
 	if (snk_cnt > 0U) {
-		snk_named_preset = bap_get_named_preset(true, argv[1]);
+		snk_named_preset = bap_get_named_preset(true, BT_AUDIO_DIR_SINK, argv[1]);
 		if (snk_named_preset == NULL) {
 			shell_error(sh, "Unable to parse snk_named_preset %s", argv[1]);
 			return kStatus_SHELL_Error;
@@ -700,7 +700,7 @@ int cap_ac_unicast(shell_handle_t sh, size_t argc, char **argv,
 	if (src_cnt > 0U) {
 		const char *preset_arg = argc > 2 ? argv[2] : argv[1];
 
-		src_named_preset = bap_get_named_preset(true, preset_arg);
+		src_named_preset = bap_get_named_preset(true, BT_AUDIO_DIR_SOURCE, preset_arg);
 		if (src_named_preset == NULL) {
 			shell_error(sh, "Unable to parse src_named_preset %s", argv[1]);
 			return kStatus_SHELL_Error;
@@ -1031,7 +1031,7 @@ static shell_status_t cmd_cap_ac_11_ii(shell_handle_t sh, int32_t argc, char *ar
 #endif /* CONFIG_BT_BAP_UNICAST_CLIENT */
 
 #if defined(CONFIG_BT_BAP_BROADCAST_SOURCE) && (CONFIG_BT_BAP_BROADCAST_SOURCE > 0)
-static int cap_ac_broadcast(shell_handle_t sh, size_t argc, char **argv,
+int cap_ac_broadcast(shell_handle_t sh, size_t argc, char **argv,
 			    const struct bap_broadcast_ac_param *param)
 {
 	/* TODO: Use CAP API when the CAP shell has broadcast support */
@@ -1060,7 +1060,7 @@ static int cap_ac_broadcast(shell_handle_t sh, size_t argc, char **argv,
 		return kStatus_SHELL_Error;
 	}
 
-	named_preset = bap_get_named_preset(false, argv[1]);
+	named_preset = bap_get_named_preset(false, BT_AUDIO_DIR_SOURCE, argv[1]);
 	if (named_preset == NULL) {
 		shell_error(sh, "Unable to parse named_preset %s", argv[1]);
 		return kStatus_SHELL_Error;
@@ -1136,8 +1136,8 @@ static shell_status_t cmd_cap_ac_14(shell_handle_t sh, int32_t argc, char *argv[
 {
 	const struct bap_broadcast_ac_param param = {
 		.name = "AC_13",
-		.stream_cnt = 1U,
-		.chan_cnt = 2U,
+		.stream_cnt = 2U,
+		.chan_cnt = 1U,
 	};
 
 	return (shell_status_t)cap_ac_broadcast(sh, argc, argv, &param);

@@ -150,6 +150,7 @@ static void pa_timer_handler(struct k_work *work)
 	}
 }
 
+#if defined(CONFIG_BT_PER_ADV_SYNC_TRANSFER_SENDER) && (CONFIG_BT_PER_ADV_SYNC_TRANSFER_SENDER > 0)
 static int pa_sync_past(struct bt_conn *conn,
 			struct sync_state *state,
 			uint16_t pa_interval)
@@ -173,6 +174,7 @@ static int pa_sync_past(struct bt_conn *conn,
 
 	return err;
 }
+#endif /* CONFIG_BT_PER_ADV_SYNC_TRANSFER_SENDER */
 
 static int pa_sync_no_past(struct sync_state *state,
 			    uint16_t pa_interval)
@@ -444,9 +446,11 @@ static shell_status_t cmd_bap_scan_delegator_sync_pa(shell_handle_t sh, int32_t 
 		return kStatus_SHELL_Error;
 	}
 
-	if (past_preference &&
-	    state->past_avail &&
-	    state->conn != NULL) {
+	if (0) {
+#if defined(CONFIG_BT_PER_ADV_SYNC_TRANSFER_SENDER) && (CONFIG_BT_PER_ADV_SYNC_TRANSFER_SENDER > 0)
+	} else if (past_preference &&
+		   state->past_avail &&
+		   state->conn != NULL) {
 		shell_info(sh, "Syncing with PAST");
 
 		err = pa_sync_past(state->conn, state, state->pa_interval);
@@ -461,7 +465,7 @@ static shell_status_t cmd_bap_scan_delegator_sync_pa(shell_handle_t sh, int32_t 
 
 			return kStatus_SHELL_Error;
 		}
-
+#endif /* CONFIG_BT_PER_ADV_SYNC_TRANSFER_SENDER */
 	} else {
 		shell_info(sh, "Syncing without PAST");
 		err = pa_sync_no_past(state, state->pa_interval);

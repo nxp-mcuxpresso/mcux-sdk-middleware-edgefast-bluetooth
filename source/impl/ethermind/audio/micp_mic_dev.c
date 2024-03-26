@@ -118,7 +118,7 @@ static ssize_t write_mute(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 
 		micp_inst.mute = *val;
 
-		err = k_work_reschedule(&micp_inst.notify_work, K_NO_WAIT);
+		err = k_work_reschedule(&micp_inst.notify_work, osaWaitNone_c);
 		if (err < 0) {
 			LOG_ERR("Failed to schedule mute state notification err %d", err);
 		}

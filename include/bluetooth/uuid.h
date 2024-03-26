@@ -5090,60 +5090,60 @@ struct bt_uuid_128 {
  */
 #define BT_UUID_GATT_SL \
 	BT_UUID_DECLARE_16(BT_UUID_GATT_SL_VAL)
+
 /**
- *  @brief RTUS Characteristic Time Update State UUID value
+ *  @brief Gaming Service UUID value
  */
-#define BT_UUID_RTUS_TIME_UPDATE_STATE_VAL 0x2a17
+#define BT_UUID_GMAS_VAL 0x1858
 /**
- *  @brief RTUS Characteristic Time Update State
+ *  @brief Common Audio Service
  */
-#define BT_UUID_RTUS_TIME_UPDATE_STATE \
-	BT_UUID_DECLARE_16(BT_UUID_RTUS_TIME_UPDATE_STATE_VAL)
+#define BT_UUID_GMAS	 BT_UUID_DECLARE_16(BT_UUID_GMAS_VAL)
+
 /**
- *  @brief RTUS Characteristic Time Update COntrol Point UUID value
+ *  @brief Gaming Audio Profile Role UUID value
  */
-#define BT_UUID_RTUS_CONTROL_POINT_VAL 0x2a16
+#define BT_UUID_GMAP_ROLE_VAL 0x2C00
 /**
- *  @brief RTUS Characteristic Time Update COntrol Point
+ *  @brief Gaming Audio Profile Role
  */
-#define BT_UUID_RTUS_CONTROL_POINT \
-	BT_UUID_DECLARE_16(BT_UUID_RTUS_CONTROL_POINT_VAL)
+#define BT_UUID_GMAP_ROLE     BT_UUID_DECLARE_16(BT_UUID_GMAP_ROLE_VAL)
+
 /**
- *  @brief CTS Characteristic Local Time Information UUID value
+ *  @brief Gaming Audio Profile Unicast Game Gateway Features UUID value
  */
-#define BT_UUID_CTS_LOCAL_TIME_INFORMATION_VAL 0x2A0F
+#define BT_UUID_GMAP_UGG_FEAT_VAL 0x2C01
 /**
- *  @brief CTS Characteristic Local Time Information
+ *  @brief Gaming Audio Profile Unicast Game Gateway Features
  */
-#define BT_UUID_CTS_LOCAL_TIME_INFORMATION \
-	BT_UUID_DECLARE_16(BT_UUID_CTS_LOCAL_TIME_INFORMATION_VAL)
+#define BT_UUID_GMAP_UGG_FEAT	  BT_UUID_DECLARE_16(BT_UUID_GMAP_UGG_FEAT_VAL)
+
 /**
- *  @brief CTS Characteristic Reference Time Information UUID value
+ *  @brief Gaming Audio Profile Unicast Game Terminal Features UUID value
  */
-#define BT_UUID_CTS_REFERENCE_TIME_INFORMATION_VAL 0x2A14
+#define BT_UUID_GMAP_UGT_FEAT_VAL 0x2C02
 /**
- *  @brief CTS Characteristic Reference Time Information
+ *  @brief Gaming Audio Profile Unicast Game Terminal Features
  */
-#define BT_UUID_CTS_REFERENCE_TIME_INFORMATION \
-	BT_UUID_DECLARE_16(BT_UUID_CTS_REFERENCE_TIME_INFORMATION_VAL)
+#define BT_UUID_GMAP_UGT_FEAT	  BT_UUID_DECLARE_16(BT_UUID_GMAP_UGT_FEAT_VAL)
+
 /**
- *  @brief Next DST Change UUID value
+ *  @brief Gaming Audio Profile Broadcast Game Sender Features UUID value
  */
-#define BT_UUID_NDTS_VAL 0x1807
+#define BT_UUID_GMAP_BGS_FEAT_VAL 0x2C03
 /**
- *  @brief Next DST Change
+ *  @brief Gaming Audio Profile Broadcast Game Sender Features
  */
-#define BT_UUID_NDTS \
-	BT_UUID_DECLARE_16(BT_UUID_NDTS_VAL)
+#define BT_UUID_GMAP_BGS_FEAT	  BT_UUID_DECLARE_16(BT_UUID_GMAP_BGS_FEAT_VAL)
+
 /**
- *  @brief NDTS Time with DST UUID value
+ *  @brief Gaming Audio Profile Broadcast Game Receiver Features UUID value
  */
-#define BT_UUID_NDTS_TIME_WITH_DTS_VAL 0x2A11
+#define BT_UUID_GMAP_BGR_FEAT_VAL 0x2C04
 /**
- *  @brief Time with DST
+ *  @brief Gaming Audio Profile Broadcast Game Receiver Features
  */
-#define BT_UUID_NDTS_TIME_WITH_DTS \
-	BT_UUID_DECLARE_16(BT_UUID_NDTS_TIME_WITH_DTS_VAL)
+#define BT_UUID_GMAP_BGR_FEAT	  BT_UUID_DECLARE_16(BT_UUID_GMAP_BGR_FEAT_VAL)
 
 /*
  * Protocol UUIDs

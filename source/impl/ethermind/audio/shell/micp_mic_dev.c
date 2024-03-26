@@ -501,7 +501,7 @@ static shell_status_t cmd_micp_mic_dev_aics_gain_set(shell_handle_t sh, int32_t 
 	}
 
 	if (!IN_RANGE(gain, INT8_MIN, INT8_MAX)) {
-		shell_error(shell, "Gain shall be %d-%d, was %ld",
+		shell_error(sh, "Gain shall be %d-%d, was %ld",
 			    INT8_MIN, INT8_MAX, gain);
 
 		return kStatus_SHELL_Error;

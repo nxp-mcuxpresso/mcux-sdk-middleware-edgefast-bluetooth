@@ -43,7 +43,7 @@ LOG_MODULE_DEFINE(LOG_MODULE_NAME, kLOG_LevelTrace);
 
 
 #ifndef BT_ATT_MAX_GROUP_COUNT
-#define BT_ATT_MAX_GROUP_COUNT 4u
+#define BT_ATT_MAX_GROUP_COUNT 10u
 #endif /* BT_ATT_MAX_RSP_LENGTH */
 
 #ifndef BT_ATT_MAX_LIST_COUNT
@@ -2612,6 +2612,10 @@ static uint8_t att_read_mult_vl_req(struct bt_att_chan *chan, struct net_buf *bu
         {
             ret = BT_ATT_ERR_UNLIKELY;
         }
+
+	if (IS_ENABLED(CONFIG_BT_ATT_ENFORCE_FLOW)) {
+		atomic_clear_bit(chan->flags, ATT_PENDING_RSP);
+	}
 
 	return ret;
 }

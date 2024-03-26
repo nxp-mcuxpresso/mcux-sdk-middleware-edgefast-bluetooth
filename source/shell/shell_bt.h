@@ -84,6 +84,9 @@ void bt_ShellBapScanDelegatorInit(shell_handle_t shell);
 #if (defined(CONFIG_BT_CAP_INITIATOR) && (CONFIG_BT_CAP_INITIATOR > 0))
 void bt_ShellCapInitiatorInit(shell_handle_t shell);
 #endif
+#if (defined(CONFIG_BT_CAP_COMMANDER) && (CONFIG_BT_CAP_COMMANDER > 0))
+void bt_ShellCapCommanderInit(shell_handle_t shell);
+#endif
 #if (defined(CONFIG_BT_CAP_ACCEPTOR_SET_MEMBER) && (CONFIG_BT_CAP_ACCEPTOR_SET_MEMBER > 0))
 void bt_ShellCapAcceptorInit(shell_handle_t shell);
 #endif
@@ -92,6 +95,9 @@ void bt_ShellCsipSetCoordinatorInit(shell_handle_t shell);
 #endif
 #if (defined(CONFIG_BT_CSIP_SET_MEMBER) && (CONFIG_BT_CSIP_SET_MEMBER > 0))
 void bt_ShellCsipSetMemberInit(shell_handle_t shell);
+#endif
+#if (defined(CONFIG_BT_GMAP) && (CONFIG_BT_GMAP > 0))
+void bt_ShellGmapInit(shell_handle_t shell);
 #endif
 #if (defined(CONFIG_BT_HAS_CLIENT) && (CONFIG_BT_HAS_CLIENT > 0))
 void bt_ShellHasClientInit(shell_handle_t shell);
@@ -113,6 +119,9 @@ void bt_ShellMicpInit(shell_handle_t shell);
 #endif
 #if (defined(CONFIG_BT_MPL) && (CONFIG_BT_MPL > 0))
 void bt_ShellMplInit(shell_handle_t shell);
+#endif
+#if (defined(CONFIG_BT_PBP) && (CONFIG_BT_PBP > 0))
+void bt_ShellPbpInit(shell_handle_t shell);
 #endif
 #if (defined(CONFIG_BT_TBS_CLIENT) && (CONFIG_BT_TBS_CLIENT > 0))
 void bt_ShellTbsClientInit(shell_handle_t shell);

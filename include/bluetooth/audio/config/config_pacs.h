@@ -17,6 +17,27 @@
 
 #if (defined(CONFIG_BT_PAC_SNK) && (CONFIG_BT_PAC_SNK > 0))
 
+/*! @brief Supported Sink Contexts
+ * The Supported Sink Contexts exposes the server’s support for
+ * reception of audio data associated with specific Context Types:
+ * 0x0001: Unspecified
+ * 0x0002: Conversational
+ * 0x0004: Media
+ * 0x0008: Instructional
+ * 0x0010: AttentionSeeking
+ * 0x0020: ImmediateAlert
+ * 0x0040: ManMachine
+ * 0x0080: EmergencyAlert
+ * 0x0100: Ringtone
+ * 0x0200: TV
+ *
+ * default 0x03ff
+ * range 0x0000 ~ 0x03ff
+ */
+#ifndef CONFIG_BT_PACS_SNK_CONTEXT
+    #define CONFIG_BT_PACS_SNK_CONTEXT 0x03ff
+#endif
+
 /*! @brief Sink PAC Notifiable Support
  * This option enables support for clients to be notified on the Sink
  * PAC Characteristic changes.
@@ -77,6 +98,27 @@
 #endif
 
 #if (defined(CONFIG_BT_PAC_SRC) && (CONFIG_BT_PAC_SRC > 0))
+
+/*! @brief Supported Source Contexts
+ * The Supported Source Contexts exposes the server’s support for
+ * transmission of audio data associated with specific Context Types:
+ * 0x0001: Unspecified
+ * 0x0002: Conversational
+ * 0x0004: Media
+ * 0x0008: Instructional
+ * 0x0010: AttentionSeeking
+ * 0x0020: ImmediateAlert
+ * 0x0040: ManMachine
+ * 0x0080: EmergencyAlert
+ * 0x0100: Ringtone
+ * 0x0200: TV
+ *
+ * default 0x03ff
+ * range 0x0000 ~ 0x03ff
+ */
+#ifndef CONFIG_BT_PACS_SRC_CONTEXT
+    #define CONFIG_BT_PACS_SRC_CONTEXT 0x03ff
+#endif
 
 /*! @brief Source PAC Notifiable Support
  * This option enables support for clients to be notified on the Source

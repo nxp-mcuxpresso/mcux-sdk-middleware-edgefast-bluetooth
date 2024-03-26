@@ -88,7 +88,7 @@ static void notify_work_reschedule(struct bt_vocs_server *inst, enum bt_vocs_not
 
 	atomic_set_bit(inst->notify, notify);
 
-	err = k_work_reschedule(&inst->notify_work, K_NO_WAIT);
+	err = k_work_reschedule(&inst->notify_work, osaWaitNone_c);
 	if (err < 0) {
 		LOG_ERR("Failed to reschedule %s notification err %d",
 			vocs_notify_str(notify), err);
@@ -130,7 +130,7 @@ static void notify_work_handler(struct k_work *work)
 
 static void value_changed(struct bt_vocs_server *inst, enum bt_vocs_notify notify)
 {
-	notify_work_reschedule(inst, notify, K_NO_WAIT);
+	notify_work_reschedule(inst, notify, osaWaitNone_c);
 }
 #else
 #define value_changed(...)

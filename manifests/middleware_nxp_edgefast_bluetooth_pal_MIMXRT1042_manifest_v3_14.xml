@@ -26,7 +26,7 @@
     <definition extID="component.log.backend.debugconsole.MIMXRT1042"/>
     <definition extID="component.common_task.MIMXRT1042"/>
   </externalDefinitions>
-  <ksdk id="MCUXpressoSDK2150_middleware_nxp_edgefast_bluetooth_pal_MIMXRT1042_manifest_v3_14" name="MCUXpressoSDK2150_middleware_nxp_edgefast_bluetooth_pal_MIMXRT1042_manifest_v3_14" version="2.15.0" revision="2.15.0"/>
+  <ksdk id="MCUXpressoSDK215100_middleware_nxp_edgefast_bluetooth_pal_MIMXRT1042_manifest_v3_14" name="MCUXpressoSDK215100_middleware_nxp_edgefast_bluetooth_pal_MIMXRT1042_manifest_v3_14" version="2.15.100" revision="2.15.100"/>
   <components>
     <component id="middleware.edgefast_bluetooth.le_audio.config.template.MIMXRT1042" name="middleware.edgefast_bluetooth.le_audio.config.template" brief="edgefast_bluetooth configuration template for LE audio" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.config.template" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <dependencies>
@@ -51,6 +51,8 @@
       </source>
       <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
         <files mask="cap_acceptor.c"/>
+        <files mask="cap_commander.c"/>
+        <files mask="cap_common.c"/>
         <files mask="cap_initiator.c"/>
         <files mask="cap_stream.c"/>
       </source>
@@ -195,6 +197,7 @@
         <files mask="ascs.c"/>
         <files mask="bap_iso.c"/>
         <files mask="audio.c"/>
+        <files mask="bap_base.c"/>
         <files mask="bap_broadcast_sink.c"/>
         <files mask="bap_broadcast_source.c"/>
         <files mask="codec.c"/>
@@ -280,6 +283,52 @@
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_le_audio_tmap.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.gmap.MIMXRT1042" name="middleware.edgefast_bluetooth.le_audio.gmap" brief="edgefast_bluetooth le_audio.gmap" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.gmap" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <device_dependency value="MIMXRT1042xxxxB"/>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_gmap.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="gmap.h"/>
+        <files mask="gmap_lc3_preset.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="gmap_client.c"/>
+        <files mask="gmap_server.c"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_gmap.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.pbp.MIMXRT1042" name="middleware.edgefast_bluetooth.le_audio.pbp" brief="edgefast_bluetooth le_audio.pbp" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.pbp" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <device_dependency value="MIMXRT1042xxxxB"/>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_pbp.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="pbp.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="pbp.c"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_pbp.cmake" hidden="true"/>
       </source>
       <include_paths>
         <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
@@ -1420,6 +1469,9 @@
       <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
         <files mask="mcc.c"/>
       </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="mcc_internal.h"/>
+      </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_le_audio_mcc.cmake" hidden="true"/>
       </source>
@@ -2101,6 +2153,7 @@
         <files mask="bap_scan_delegator.c"/>
         <files mask="bap.c"/>
         <files mask="cap_acceptor.c"/>
+        <files mask="cap_commander.c"/>
         <files mask="cap_initiator.c"/>
         <files mask="csip_set_coordinator.c"/>
         <files mask="csip_set_member.c"/>
@@ -2114,6 +2167,8 @@
         <files mask="tbs_client.c"/>
         <files mask="tbs.c"/>
         <files mask="tmap.c"/>
+        <files mask="gmap.c"/>
+        <files mask="pbp.c"/>
         <files mask="vcp_vol_ctlr.c"/>
         <files mask="vcp_vol_rend.c"/>
       </source>

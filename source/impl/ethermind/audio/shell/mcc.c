@@ -1539,7 +1539,8 @@ static shell_status_t cmd_mcc_send_search_ioptest(shell_handle_t sh, int32_t arg
 	return (shell_status_t)result;
 }
 
-#if defined(CONFIG_BT_MCC_LOG_LEVEL_DBG) && defined(CONFIG_BT_TESTING)
+#if (defined(CONFIG_BT_DEBUG_MCC) && (CONFIG_BT_DEBUG_MCC > 0)) && \
+    (defined(CONFIG_BT_TESTING) && (CONFIG_BT_TESTING > 0))
 static shell_status_t cmd_mcc_test_send_search_iop_invalid_type(shell_handle_t sh, int32_t argc, char *argv[])
 {
 	int result;
@@ -1584,7 +1585,7 @@ static shell_status_t cmd_mcc_test_send_search_invalid_sci_len(shell_handle_t sh
 
 	return (shell_status_t)result;
 }
-#endif /* CONFIG_BT_MCC_LOG_LEVEL_DBG && CONFIG_BT_TESTING */
+#endif /* CONFIG_BT_DEBUG_MCC && CONFIG_BT_TESTING */
 
 static shell_status_t cmd_mcc_read_search_results_obj_id(shell_handle_t sh, int32_t argc, char *argv[])
 {

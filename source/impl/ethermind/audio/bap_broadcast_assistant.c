@@ -179,12 +179,14 @@ static int parse_recv_state(const void *data, uint16_t length,
 			return BT_GATT_ERR(BT_ATT_ERR_INVALID_ATTRIBUTE_LEN);
 		}
 
+#if BT_BAP_SCAN_DELEGATOR_MAX_METADATA_LEN < 255 /* walkaround for below compare always false issue. */
 		if (subgroup->metadata_len > sizeof(subgroup->metadata)) {
 			LOG_DBG("Metadata too long: %u/%zu",
 			       subgroup->metadata_len,
 			       sizeof(subgroup->metadata));
 			return BT_GATT_ERR(BT_ATT_ERR_INVALID_ATTRIBUTE_LEN);
 		}
+#endif
 
 		metadata = net_buf_simple_pull_mem(&buf,
 						   subgroup->metadata_len);
@@ -785,7 +787,8 @@ int bt_bap_broadcast_assistant_add_src(struct bt_conn *conn,
 
 		subgroup = net_buf_simple_add(&cp_buf, subgroup_size);
 
-		subgroup->bis_sync = param->subgroups[i].bis_sync;
+		/* The BIS Index bitfield to be sent must use BIT(0) for BIS Index 1 */
+		subgroup->bis_sync = param->subgroups[i].bis_sync >> 1;
 
 		CHECKIF(param->pa_sync == 0 && subgroup->bis_sync != 0) {
 			LOG_DBG("Only syncing to BIS is not allowed");
@@ -877,7 +880,8 @@ int bt_bap_broadcast_assistant_mod_src(struct bt_conn *conn,
 		}
 		subgroup = net_buf_simple_add(&cp_buf, subgroup_size);
 
-		subgroup->bis_sync = param->subgroups[i].bis_sync;
+		/* The BIS Index bitfield to be sent must use BIT(0) for BIS Index 1 */
+		subgroup->bis_sync = param->subgroups[i].bis_sync >> 1;
 
 		CHECKIF(param->pa_sync == 0 && subgroup->bis_sync != 0) {
 			LOG_DBG("Only syncing to BIS is not allowed");
