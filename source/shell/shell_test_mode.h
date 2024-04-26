@@ -18,6 +18,7 @@
 STRUCT_PACKED_PRE
 struct bt_hci_le_config {
 	uint8_t  tx_power;
+	uint8_t  feloss;
 } STRUCT_PACKED_POST;
 
 

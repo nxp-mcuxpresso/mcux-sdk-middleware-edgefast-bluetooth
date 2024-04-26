@@ -361,8 +361,14 @@ static shell_status_t le_set_tx_power(shell_handle_t shell, int32_t argc, char *
     	cp = net_buf_add(buf, sizeof(*cp));
 
     	cp->tx_power = strtol(argv[1],NULL,16);
+        cp->feloss= strtol(argv[2],NULL,16);
+        if(cp->feloss >= 1)
+        {
+            cp->feloss = 1;
+        }
 
     	shell_print(shell, "tx_power= %x\n", cp->tx_power);
+        shell_print(shell, "feloss= %x\n", cp->feloss);
 
     	err = bt_hci_cmd_send_sync(BT_HCI_OP_LE_SET_TX_POWER, buf, &rsp);
     }
