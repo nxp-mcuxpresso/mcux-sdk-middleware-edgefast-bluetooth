@@ -23,10 +23,11 @@
     <definition extID="middleware.wifi.fwdnld.MIMXRT595S"/>
     <definition extID="middleware.fatfs.usb.MIMXRT595S"/>
     <definition extID="component.log.MIMXRT595S"/>
-    <definition extID="component.log.backend.debugconsole.MIMXRT595S"/>
+    <definition extID="utility.debug_console.MIMXRT595S"/>
+    <definition extID="utility.debug_console_lite.MIMXRT595S"/>
     <definition extID="component.common_task.MIMXRT595S"/>
   </externalDefinitions>
-  <ksdk id="MCUXpressoSDK2150_middleware_nxp_edgefast_bluetooth_pal_MIMXRT595S_manifest_v3_14" name="MCUXpressoSDK2150_middleware_nxp_edgefast_bluetooth_pal_MIMXRT595S_manifest_v3_14" version="2.15.0" revision="2.15.0"/>
+  <ksdk id="MCUXpressoSDK216000_middleware_nxp_edgefast_bluetooth_pal_MIMXRT595S_manifest_v3_14" name="MCUXpressoSDK216000_middleware_nxp_edgefast_bluetooth_pal_MIMXRT595S_manifest_v3_14" version="2.16.000" revision="2.16.000"/>
   <components>
     <component id="middleware.edgefast_bluetooth.le_audio.config.template.MIMXRT595S" name="middleware.edgefast_bluetooth.le_audio.config.template" brief="edgefast_bluetooth configuration template for LE audio" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.config.template" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <dependencies>
@@ -51,6 +52,8 @@
       </source>
       <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
         <files mask="cap_acceptor.c"/>
+        <files mask="cap_commander.c"/>
+        <files mask="cap_common.c"/>
         <files mask="cap_initiator.c"/>
         <files mask="cap_stream.c"/>
       </source>
@@ -195,6 +198,7 @@
         <files mask="ascs.c"/>
         <files mask="bap_iso.c"/>
         <files mask="audio.c"/>
+        <files mask="bap_base.c"/>
         <files mask="bap_broadcast_sink.c"/>
         <files mask="bap_broadcast_source.c"/>
         <files mask="codec.c"/>
@@ -287,6 +291,52 @@
         <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
       </include_paths>
     </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.gmap.MIMXRT595S" name="middleware.edgefast_bluetooth.le_audio.gmap" brief="edgefast_bluetooth le_audio.gmap" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.gmap" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <device_dependency value="MIMXRT595S"/>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_gmap.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="gmap.h"/>
+        <files mask="gmap_lc3_preset.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="gmap_client.c"/>
+        <files mask="gmap_server.c"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_gmap.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.pbp.MIMXRT595S" name="middleware.edgefast_bluetooth.le_audio.pbp" brief="edgefast_bluetooth le_audio.pbp" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.pbp" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <device_dependency value="MIMXRT595S"/>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_pbp.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="pbp.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="pbp.c"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_pbp.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
     <component id="middleware.edgefast_bluetooth.config.template.MIMXRT595S" name="middleware.edgefast_bluetooth.config.template" brief="edgefast_bluetooth PAL configuration template" version="1.0.0" full_name="middleware.edgefast_bluetooth.config.template" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path=".././" project_base_path="source">
       <dependencies>
         <device_dependency value="MIMXRT595S"/>
@@ -304,6 +354,23 @@
       <include_paths>
         <include_path relative_path="./output/templates/config" project_relative_path="./" type="c_include"/>
         <include_path relative_path="./output/templates/app_bluetooth_config" project_relative_path="./" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.controller_ind_reset.MIMXRT595S" name="middleware.edgefast_bluetooth.controller_ind_reset" brief="edgefast_bluetooth ind_reset" version="1.0.0" full_name="middleware.edgefast_bluetooth.controller_ind_reset" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <device_dependency value="MIMXRT595S"/>
+      </dependencies>
+      <source relative_path="./source/impl/ethermind/controller/ind_reset" project_relative_path="controller/ind_reset" type="src">
+        <files mask="controller_ind_reset.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/controller/ind_reset" project_relative_path="controller/ind_reset" type="c_include">
+        <files mask="controller_ind_reset.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_controller_ind_reset.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/impl/ethermind/controller/ind_reset" project_relative_path="controller/ind_reset" type="c_include"/>
       </include_paths>
     </component>
     <component id="middleware.edgefast_bluetooth.liblc3codec.MIMXRT595S" name="middleware.edgefast_bluetooth.liblc3codec" brief="edgefast_bluetooth liblc3codec" version="1.0.0" full_name="middleware.edgefast_bluetooth.liblc3codec" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././lib" project_base_path="edgefast/lib">
@@ -1038,6 +1105,8 @@
         <files mask="bt_pal_hci_ecc.h"/>
         <files mask="bt_pal_keys.h"/>
         <files mask="bt_pal_l2cap_internal.h"/>
+        <files mask="bt_pal_l2cap_br_internal.h"/>
+        <files mask="bt_pal_l2cap_br_interface.h"/>
         <files mask="bt_pal_monitor.h"/>
         <files mask="bt_pal_rfcomm_internal.h"/>
         <files mask="bt_pal_rpa.h"/>
@@ -1153,6 +1222,8 @@
         <files mask="bt_pal_hci_ecc.h"/>
         <files mask="bt_pal_keys.h"/>
         <files mask="bt_pal_l2cap_internal.h"/>
+        <files mask="bt_pal_l2cap_br_internal.h"/>
+        <files mask="bt_pal_l2cap_br_interface.h"/>
         <files mask="bt_pal_monitor.h"/>
         <files mask="bt_pal_rpa.h"/>
         <files mask="bt_pal_settings.h"/>
@@ -1263,6 +1334,8 @@
         <files mask="bt_pal_hci_ecc.h"/>
         <files mask="bt_pal_keys.h"/>
         <files mask="bt_pal_l2cap_internal.h"/>
+        <files mask="bt_pal_l2cap_br_internal.h"/>
+        <files mask="bt_pal_l2cap_br_interface.h"/>
         <files mask="bt_pal_monitor.h"/>
         <files mask="bt_pal_rfcomm_internal.h"/>
         <files mask="bt_pal_rpa.h"/>
@@ -1418,6 +1491,9 @@
       </source>
       <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
         <files mask="mcc.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="mcc_internal.h"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_le_audio_mcc.cmake" hidden="true"/>
@@ -1983,6 +2059,20 @@
       </defines>
       <dependencies>
         <all>
+          <any_of>
+            <all>
+              <not>
+                <component_dependency value="utility.debug_console_lite.MIMXRT595S"/>
+              </not>
+              <component_dependency value="utility.debug_console.MIMXRT595S"/>
+            </all>
+            <all>
+              <not>
+                <component_dependency value="utility.debug_console.MIMXRT595S"/>
+              </not>
+              <component_dependency value="utility.debug_console_lite.MIMXRT595S"/>
+            </all>
+          </any_of>
           <component_dependency value="middleware.edgefast_bluetooth.pal.MIMXRT595S"/>
           <component_dependency value="middleware.edgefast_bluetooth.porting.work_queue.MIMXRT595S"/>
           <component_dependency value="middleware.edgefast_bluetooth.porting.toolchain.MIMXRT595S"/>
@@ -1990,7 +2080,6 @@
           <component_dependency value="middleware.edgefast_bluetooth.porting.list.MIMXRT595S"/>
           <component_dependency value="middleware.edgefast_bluetooth.porting.atomic.MIMXRT595S"/>
           <component_dependency value="component.log.MIMXRT595S"/>
-          <component_dependency value="component.log.backend.debugconsole.MIMXRT595S"/>
           <device_dependency value="MIMXRT595S"/>
         </all>
       </dependencies>
@@ -2100,6 +2189,7 @@
         <files mask="bap_scan_delegator.c"/>
         <files mask="bap.c"/>
         <files mask="cap_acceptor.c"/>
+        <files mask="cap_commander.c"/>
         <files mask="cap_initiator.c"/>
         <files mask="csip_set_coordinator.c"/>
         <files mask="csip_set_member.c"/>
@@ -2113,6 +2203,8 @@
         <files mask="tbs_client.c"/>
         <files mask="tbs.c"/>
         <files mask="tmap.c"/>
+        <files mask="gmap.c"/>
+        <files mask="pbp.c"/>
         <files mask="vcp_vol_ctlr.c"/>
         <files mask="vcp_vol_rend.c"/>
       </source>

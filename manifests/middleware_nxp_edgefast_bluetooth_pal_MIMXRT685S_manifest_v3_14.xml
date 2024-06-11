@@ -8,7 +8,7 @@
     <definition extID="middleware.sdmmc.sdio.MIMXRT685S"/>
     <definition extID="middleware.sdmmc.host.usdhc.freertos.MIMXRT685S"/>
     <definition extID="component.rt_gpio_adapter.MIMXRT685S"/>
-    <definition extID="mimxrt685audevk"/>
+    <definition extID="evkmimxrt685"/>
     <definition extID="mcuxpresso"/>
     <definition extID="middleware.freertos-kernel.heap_4.MIMXRT685S"/>
     <definition extID="middleware.freertos-kernel.MIMXRT685S"/>
@@ -21,12 +21,14 @@
     <definition extID="middleware.fatfs.MIMXRT685S"/>
     <definition extID="component.osa.MIMXRT685S"/>
     <definition extID="middleware.wifi.fwdnld.MIMXRT685S"/>
+    <definition extID="mimxrt685audevk"/>
     <definition extID="middleware.fatfs.usb.MIMXRT685S"/>
     <definition extID="component.log.MIMXRT685S"/>
-    <definition extID="component.log.backend.debugconsole.MIMXRT685S"/>
+    <definition extID="utility.debug_console.MIMXRT685S"/>
+    <definition extID="utility.debug_console_lite.MIMXRT685S"/>
     <definition extID="component.common_task.MIMXRT685S"/>
   </externalDefinitions>
-  <ksdk id="MCUXpressoSDK2150_middleware_nxp_edgefast_bluetooth_pal_MIMXRT685S_manifest_v3_14" name="MCUXpressoSDK2150_middleware_nxp_edgefast_bluetooth_pal_MIMXRT685S_manifest_v3_14" version="2.15.0" revision="2.15.0"/>
+  <ksdk id="MCUXpressoSDK216000_middleware_nxp_edgefast_bluetooth_pal_MIMXRT685S_manifest_v3_14" name="MCUXpressoSDK216000_middleware_nxp_edgefast_bluetooth_pal_MIMXRT685S_manifest_v3_14" version="2.16.000" revision="2.16.000"/>
   <components>
     <component id="middleware.edgefast_bluetooth.le_audio.config.template.MIMXRT685S" name="middleware.edgefast_bluetooth.le_audio.config.template" brief="edgefast_bluetooth configuration template for LE audio" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.config.template" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <dependencies>
@@ -51,6 +53,8 @@
       </source>
       <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
         <files mask="cap_acceptor.c"/>
+        <files mask="cap_commander.c"/>
+        <files mask="cap_common.c"/>
         <files mask="cap_initiator.c"/>
         <files mask="cap_stream.c"/>
       </source>
@@ -195,6 +199,7 @@
         <files mask="ascs.c"/>
         <files mask="bap_iso.c"/>
         <files mask="audio.c"/>
+        <files mask="bap_base.c"/>
         <files mask="bap_broadcast_sink.c"/>
         <files mask="bap_broadcast_source.c"/>
         <files mask="codec.c"/>
@@ -287,6 +292,52 @@
         <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
       </include_paths>
     </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.gmap.MIMXRT685S" name="middleware.edgefast_bluetooth.le_audio.gmap" brief="edgefast_bluetooth le_audio.gmap" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.gmap" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <device_dependency value="MIMXRT685S"/>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_gmap.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="gmap.h"/>
+        <files mask="gmap_lc3_preset.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="gmap_client.c"/>
+        <files mask="gmap_server.c"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_gmap.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.le_audio.pbp.MIMXRT685S" name="middleware.edgefast_bluetooth.le_audio.pbp" brief="edgefast_bluetooth le_audio.pbp" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.pbp" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <device_dependency value="MIMXRT685S"/>
+      </dependencies>
+      <source relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include">
+        <files mask="config_pbp.h"/>
+      </source>
+      <source relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include">
+        <files mask="pbp.h"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
+        <files mask="pbp.c"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_le_audio_pbp.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./include/bluetooth/audio" project_relative_path="include/bluetooth/audio" type="c_include"/>
+        <include_path relative_path="./include/bluetooth/audio/config" project_relative_path="include/bluetooth/audio/config" type="c_include"/>
+        <include_path relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include"/>
+      </include_paths>
+    </component>
     <component id="middleware.edgefast_bluetooth.config.template.MIMXRT685S" name="middleware.edgefast_bluetooth.config.template" brief="edgefast_bluetooth PAL configuration template" version="1.0.0" full_name="middleware.edgefast_bluetooth.config.template" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path=".././" project_base_path="source">
       <dependencies>
         <device_dependency value="MIMXRT685S"/>
@@ -304,6 +355,23 @@
       <include_paths>
         <include_path relative_path="./output/templates/config" project_relative_path="./" type="c_include"/>
         <include_path relative_path="./output/templates/app_bluetooth_config" project_relative_path="./" type="c_include"/>
+      </include_paths>
+    </component>
+    <component id="middleware.edgefast_bluetooth.controller_ind_reset.MIMXRT685S" name="middleware.edgefast_bluetooth.controller_ind_reset" brief="edgefast_bluetooth ind_reset" version="1.0.0" full_name="middleware.edgefast_bluetooth.controller_ind_reset" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
+      <dependencies>
+        <device_dependency value="MIMXRT685S"/>
+      </dependencies>
+      <source relative_path="./source/impl/ethermind/controller/ind_reset" project_relative_path="controller/ind_reset" type="src">
+        <files mask="controller_ind_reset.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/controller/ind_reset" project_relative_path="controller/ind_reset" type="c_include">
+        <files mask="controller_ind_reset.h"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_controller_ind_reset.cmake" hidden="true"/>
+      </source>
+      <include_paths>
+        <include_path relative_path="./source/impl/ethermind/controller/ind_reset" project_relative_path="controller/ind_reset" type="c_include"/>
       </include_paths>
     </component>
     <component id="middleware.edgefast_bluetooth.liblc3codec.MIMXRT685S" name="middleware.edgefast_bluetooth.liblc3codec" brief="edgefast_bluetooth liblc3codec" version="1.0.0" full_name="middleware.edgefast_bluetooth.liblc3codec" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././lib" project_base_path="edgefast/lib">
@@ -374,14 +442,14 @@
         <include_path relative_path="./" type="c_include"/>
       </include_paths>
     </component>
-    <component id="middleware.edgefast_bluetooth.sdio.template.mimxrt685audevk.MIMXRT685S" name="EdgeFast Bluetooth configuration template of SDIO" brief="Template configuration file to be edited by user." version="1.0.0" full_name="EdgeFast Bluetooth configuration template of SDIO" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path="../../../boards/mimxrt685audevk/edgefast_bluetooth_examples/template" project_base_path="source">
+    <component id="middleware.edgefast_bluetooth.sdio.template.evkmimxrt685.MIMXRT685S" name="EdgeFast Bluetooth configuration template of SDIO" brief="Template configuration file to be edited by user." version="1.0.0" full_name="EdgeFast Bluetooth configuration template of SDIO" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path="../../../boards/evkmimxrt685/edgefast_bluetooth_examples/template" project_base_path="source">
       <dependencies>
         <all>
           <component_dependency value="middleware.sdmmc.host.usdhc.MIMXRT685S"/>
           <component_dependency value="middleware.sdmmc.sdio.MIMXRT685S"/>
           <component_dependency value="middleware.sdmmc.host.usdhc.freertos.MIMXRT685S"/>
           <component_dependency value="component.rt_gpio_adapter.MIMXRT685S"/>
-          <board_dependency value="mimxrt685audevk"/>
+          <board_dependency value="evkmimxrt685"/>
           <device_dependency value="MIMXRT685S"/>
         </all>
       </dependencies>
@@ -389,13 +457,13 @@
         <files mask="dummy.txt" hidden="true"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
-        <files mask="middleware_edgefast_bluetooth_sdio_template_mimxrt685audevk.cmake" hidden="true"/>
+        <files mask="middleware_edgefast_bluetooth_sdio_template_evkmimxrt685.cmake" hidden="true"/>
       </source>
     </component>
-    <component id="middleware.edgefast_bluetooth.mcux.linker.template.mimxrt685audevk.MIMXRT685S" name="EdgeFast Bluetooth configuration template of MCUX Linker" brief="Template configuration file to be edited by user." version="1.0.0" full_name="EdgeFast Bluetooth configuration template of MCUX Linker" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path="../../../boards/mimxrt685audevk/edgefast_bluetooth_examples/template" project_base_path="source">
+    <component id="middleware.edgefast_bluetooth.mcux.linker.template.evkmimxrt685.MIMXRT685S" name="EdgeFast Bluetooth configuration template of MCUX Linker" brief="Template configuration file to be edited by user." version="1.0.0" full_name="EdgeFast Bluetooth configuration template of MCUX Linker" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path="../../../boards/evkmimxrt685/edgefast_bluetooth_examples/template" project_base_path="source">
       <dependencies>
         <all>
-          <board_dependency value="mimxrt685audevk"/>
+          <board_dependency value="evkmimxrt685"/>
           <device_dependency value="MIMXRT685S"/>
         </all>
       </dependencies>
@@ -409,7 +477,7 @@
         <files mask="dummy.txt" hidden="true"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
-        <files mask="middleware_edgefast_bluetooth_mcux_linker_template_mimxrt685audevk.cmake" hidden="true"/>
+        <files mask="middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt685.cmake" hidden="true"/>
       </source>
     </component>
     <component id="middleware.edgefast_bluetooth.pal.MIMXRT685S" name="middleware.edgefast_bluetooth.pal" brief="edgefast_bluetooth Abstraction Layer" version="1.0.0" full_name="middleware.edgefast_bluetooth.pal" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
@@ -855,10 +923,18 @@
     <component id="middleware.edgefast_bluetooth.wifi_nxp.controller.base.MIMXRT685S" name="middleware.edgefast_bluetooth.wifi_nxp.controller.base" brief="edgefast_bluetooth wifi_nxp controller" version="1.0.0" full_name="middleware.edgefast_bluetooth.wifi_nxp.controller.base" category="Wireless/Middleware Edgefast Bluetooth" user_visible="true" type="middleware" package_base_path="../../wireless/ethermind" project_base_path="bt_ble">
       <dependencies>
         <all>
+          <any_of>
+            <all>
+              <component_dependency value="middleware.edgefast_bluetooth.sdio.template.evkmimxrt685.MIMXRT685S"/>
+              <board_dependency value="evkmimxrt685"/>
+            </all>
+            <all>
+              <component_dependency value="middleware.edgefast_bluetooth.sdio.template.mimxrt685audevk.MIMXRT685S"/>
+              <board_dependency value="mimxrt685audevk"/>
+            </all>
+          </any_of>
           <component_dependency value="middleware.edgefast_bluetooth.common.ethermind.MIMXRT685S"/>
           <component_dependency value="middleware.wifi.fwdnld.MIMXRT685S"/>
-          <component_dependency value="middleware.edgefast_bluetooth.sdio.template.mimxrt685audevk.MIMXRT685S"/>
-          <board_dependency value="mimxrt685audevk"/>
           <device_dependency value="MIMXRT685S"/>
         </all>
       </dependencies>
@@ -1038,6 +1114,8 @@
         <files mask="bt_pal_hci_ecc.h"/>
         <files mask="bt_pal_keys.h"/>
         <files mask="bt_pal_l2cap_internal.h"/>
+        <files mask="bt_pal_l2cap_br_internal.h"/>
+        <files mask="bt_pal_l2cap_br_interface.h"/>
         <files mask="bt_pal_monitor.h"/>
         <files mask="bt_pal_rfcomm_internal.h"/>
         <files mask="bt_pal_rpa.h"/>
@@ -1153,6 +1231,8 @@
         <files mask="bt_pal_hci_ecc.h"/>
         <files mask="bt_pal_keys.h"/>
         <files mask="bt_pal_l2cap_internal.h"/>
+        <files mask="bt_pal_l2cap_br_internal.h"/>
+        <files mask="bt_pal_l2cap_br_interface.h"/>
         <files mask="bt_pal_monitor.h"/>
         <files mask="bt_pal_rpa.h"/>
         <files mask="bt_pal_settings.h"/>
@@ -1263,6 +1343,8 @@
         <files mask="bt_pal_hci_ecc.h"/>
         <files mask="bt_pal_keys.h"/>
         <files mask="bt_pal_l2cap_internal.h"/>
+        <files mask="bt_pal_l2cap_br_internal.h"/>
+        <files mask="bt_pal_l2cap_br_interface.h"/>
         <files mask="bt_pal_monitor.h"/>
         <files mask="bt_pal_rfcomm_internal.h"/>
         <files mask="bt_pal_rpa.h"/>
@@ -1418,6 +1500,9 @@
       </source>
       <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="src">
         <files mask="mcc.c"/>
+      </source>
+      <source relative_path="./source/impl/ethermind/audio" project_relative_path="source/audio" type="c_include">
+        <files mask="mcc_internal.h"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_le_audio_mcc.cmake" hidden="true"/>
@@ -1959,9 +2044,17 @@
     <component id="middleware.edgefast_bluetooth.template.MIMXRT685S" name="EdgeFast Bluetooth configuration template" brief="Template configuration file to be edited by user." version="1.0.0" full_name="EdgeFast Bluetooth configuration template" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path=".././" project_base_path="source">
       <dependencies>
         <all>
+          <any_of>
+            <all>
+              <component_dependency value="middleware.edgefast_bluetooth.mcux.linker.template.evkmimxrt685.MIMXRT685S"/>
+              <board_dependency value="evkmimxrt685"/>
+            </all>
+            <all>
+              <component_dependency value="middleware.edgefast_bluetooth.mcux.linker.template.mimxrt685audevk.MIMXRT685S"/>
+              <board_dependency value="mimxrt685audevk"/>
+            </all>
+          </any_of>
           <component_dependency value="middleware.edgefast_bluetooth.config.template.MIMXRT685S"/>
-          <component_dependency value="middleware.edgefast_bluetooth.mcux.linker.template.mimxrt685audevk.MIMXRT685S"/>
-          <board_dependency value="mimxrt685audevk"/>
           <device_dependency value="MIMXRT685S"/>
         </all>
       </dependencies>
@@ -1983,6 +2076,20 @@
       </defines>
       <dependencies>
         <all>
+          <any_of>
+            <all>
+              <not>
+                <component_dependency value="utility.debug_console_lite.MIMXRT685S"/>
+              </not>
+              <component_dependency value="utility.debug_console.MIMXRT685S"/>
+            </all>
+            <all>
+              <not>
+                <component_dependency value="utility.debug_console.MIMXRT685S"/>
+              </not>
+              <component_dependency value="utility.debug_console_lite.MIMXRT685S"/>
+            </all>
+          </any_of>
           <component_dependency value="middleware.edgefast_bluetooth.pal.MIMXRT685S"/>
           <component_dependency value="middleware.edgefast_bluetooth.porting.work_queue.MIMXRT685S"/>
           <component_dependency value="middleware.edgefast_bluetooth.porting.toolchain.MIMXRT685S"/>
@@ -1990,7 +2097,6 @@
           <component_dependency value="middleware.edgefast_bluetooth.porting.list.MIMXRT685S"/>
           <component_dependency value="middleware.edgefast_bluetooth.porting.atomic.MIMXRT685S"/>
           <component_dependency value="component.log.MIMXRT685S"/>
-          <component_dependency value="component.log.backend.debugconsole.MIMXRT685S"/>
           <device_dependency value="MIMXRT685S"/>
         </all>
       </dependencies>
@@ -2100,6 +2206,7 @@
         <files mask="bap_scan_delegator.c"/>
         <files mask="bap.c"/>
         <files mask="cap_acceptor.c"/>
+        <files mask="cap_commander.c"/>
         <files mask="cap_initiator.c"/>
         <files mask="csip_set_coordinator.c"/>
         <files mask="csip_set_member.c"/>
@@ -2113,6 +2220,8 @@
         <files mask="tbs_client.c"/>
         <files mask="tbs.c"/>
         <files mask="tmap.c"/>
+        <files mask="gmap.c"/>
+        <files mask="pbp.c"/>
         <files mask="vcp_vol_ctlr.c"/>
         <files mask="vcp_vol_rend.c"/>
       </source>
@@ -2581,6 +2690,44 @@
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_ble_ethermind_lib_lc3_cm33.cmake" hidden="true"/>
+      </source>
+    </component>
+    <component id="middleware.edgefast_bluetooth.sdio.template.mimxrt685audevk.MIMXRT685S" name="EdgeFast Bluetooth configuration template of SDIO" brief="Template configuration file to be edited by user." version="1.0.0" full_name="EdgeFast Bluetooth configuration template of SDIO" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path="../../../boards/mimxrt685audevk/edgefast_bluetooth_examples/template" project_base_path="source">
+      <dependencies>
+        <all>
+          <component_dependency value="middleware.sdmmc.host.usdhc.MIMXRT685S"/>
+          <component_dependency value="middleware.sdmmc.sdio.MIMXRT685S"/>
+          <component_dependency value="middleware.sdmmc.host.usdhc.freertos.MIMXRT685S"/>
+          <component_dependency value="component.rt_gpio_adapter.MIMXRT685S"/>
+          <board_dependency value="mimxrt685audevk"/>
+          <device_dependency value="MIMXRT685S"/>
+        </all>
+      </dependencies>
+      <source exclude="true" relative_path="./" project_relative_path="template" type="doc">
+        <files mask="dummy.txt" hidden="true"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_sdio_template_mimxrt685audevk.cmake" hidden="true"/>
+      </source>
+    </component>
+    <component id="middleware.edgefast_bluetooth.mcux.linker.template.mimxrt685audevk.MIMXRT685S" name="EdgeFast Bluetooth configuration template of MCUX Linker" brief="Template configuration file to be edited by user." version="1.0.0" full_name="EdgeFast Bluetooth configuration template of MCUX Linker" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="project_template" package_base_path="../../../boards/mimxrt685audevk/edgefast_bluetooth_examples/template" project_base_path="source">
+      <dependencies>
+        <all>
+          <board_dependency value="mimxrt685audevk"/>
+          <device_dependency value="MIMXRT685S"/>
+        </all>
+      </dependencies>
+      <source toolchain="mcuxpresso" relative_path="./" project_relative_path="linkscripts" config="true" type="src">
+        <files mask="end_text.ldt"/>
+        <files mask="main_data.ldt"/>
+        <files mask="main_text.ldt"/>
+        <files mask="symbols.ldt"/>
+      </source>
+      <source exclude="true" relative_path="./" project_relative_path="template" type="doc">
+        <files mask="dummy.txt" hidden="true"/>
+      </source>
+      <source toolchain="armgcc" relative_path="./" type="workspace">
+        <files mask="middleware_edgefast_bluetooth_mcux_linker_template_mimxrt685audevk.cmake" hidden="true"/>
       </source>
     </component>
   </components>
