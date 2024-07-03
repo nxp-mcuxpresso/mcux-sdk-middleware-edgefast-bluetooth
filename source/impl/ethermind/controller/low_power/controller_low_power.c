@@ -136,7 +136,6 @@ uint8_t controller_power_state(void)
 {
     uint8_t pinState;
     uint8_t ret = CONTROLLER_WAKE;
-    USART_Type *const s_HciUsartBase[] = USART_BASE_PTRS;
 
     if(s_LowPowerPinInitialized)
     {

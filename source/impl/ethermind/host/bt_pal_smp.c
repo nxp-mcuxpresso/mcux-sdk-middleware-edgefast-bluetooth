@@ -7087,6 +7087,7 @@ void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
 
 		bt_conn_unref(conn);
 
+#if (defined(CONFIG_BT_BREDR) && ((CONFIG_BT_BREDR) > 0U))
         smp = smp_br_chan_get(conn);
         if (smp == NULL)
         {
@@ -7114,6 +7115,7 @@ void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
 		k_work_cancel_delayable(&smp->auth_timeout);
 		k_work_cancel_delayable(&smp->auth_complete);
         k_work_submit(&smp->auth_complete.work);
+#endif
     }
 }
 void appl_smp_lesc_xtxp_lk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
