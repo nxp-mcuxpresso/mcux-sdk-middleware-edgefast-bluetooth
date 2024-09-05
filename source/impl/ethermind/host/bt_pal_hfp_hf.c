@@ -1,7 +1,7 @@
 /* hfp_hf.c - Hands free Profile - Handsfree side handling */
 
 /*
- * Copyright (C) 2021. NXP Ltd.
+ * Copyright (C) 2021, 2024 NXP Ltd.
  * Copyright (c) 2015-2016 Intel Corporation
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -21,6 +21,7 @@
 #include <bluetooth/conn.h>
 #include <bluetooth/hfp_hf.h>
 #include <bluetooth/rfcomm.h>
+#include <bluetooth/sdp.h>
 #include "bt_pal_conn_internal.h"
 #include "bt_pal_l2cap_internal.h"
 #include "bt_pal_rfcomm_internal.h"
@@ -50,6 +51,13 @@
 #include "fsl_component_log.h"
 
 LOG_MODULE_DEFINE(LOG_MODULE_NAME, kLOG_LevelTrace);
+typedef enum _hf_at_cmd_t
+{
+    HFP_HF_BCS_CMD                = 0x1,
+    HFP_HF_CCWA_CMD               = 0x2,
+    HFP_HF_CLIP_CMD               = 0x4,
+    HFP_HF_SET_VGS_CMD            = 0x8,
+} hf_at_cmd_t;
 
 struct bt_hfp_hf_em
 {
@@ -62,18 +70,35 @@ struct bt_hfp_hf_em
     uint16_t sco_connection_handle;
     struct bt_conn *bt_so_conn;
     struct bt_conn *bt_conn;
-    struct bt_hfp_hf_cb *bt_hf_cb;
     uint8_t bt_hfp_hp_speaker_volume[3];
     uint8_t bt_hfp_hp_microphone_gain[3];
     uint32_t hf_features;
     uint32_t ag_features;
     int8_t ind_table[HF_MAX_AG_INDICATORS];
+    hfp_hf_get_config *bt_hfp_hf_config;
+    uint32_t hfp_work_retry_at_cmds;
+    uint32_t running_at_cmds;
+    uint32_t hfp_work_retry_count;
+    struct bt_delayed_work hf_at_cmd_retry_delayed_work;
+    uint8_t esco_codec_id;
 };
 static OSA_MUTEX_HANDLE_DEFINE(s_HfpHfLockMutex);
 static osa_mutex_handle_t s_HfpHfLock;
 static struct bt_hfp_hf_em s_HfpHfInstances[HFP_UNIT_MAX_CONNECTIONS];
 #define EDGEFAST_HFP_HF_LOCK   OSA_MutexLock(s_HfpHfLock, osaWaitForever_c)
 #define EDGEFAST_HFP_HF_UNLOCK OSA_MutexUnlock(s_HfpHfLock)
+static struct bt_hfp_hf_cb *bt_hf_cb;
+#define SDP_CLIENT_USER_BUF_LEN 512U
+#define HF_CMD_RETRY_TIME          BT_SECONDS(2)
+#define HF_CMD_RETRY_COUNT         5
+NET_BUF_POOL_FIXED_DEFINE(sdp_client_pool, CONFIG_BT_MAX_CONN, SDP_CLIENT_USER_BUF_LEN, NULL);
+struct bt_hfp_sdp
+{
+    struct bt_conn *bt_conn;
+    bt_hfp_hf_discover_callback discoverCallback;
+    uint8_t allocated;
+};
+static struct bt_hfp_sdp s_hfp_hf_sdp[CONFIG_BT_MAX_CONN];
 
 /* ----------------------------------------- Structures/ Data Types */
 /* Data Structures to display received responses from AG */
@@ -266,6 +291,130 @@ static HCI_SCO_IN_PARAMS *bt_hfp_esco_params[2] = {
 
     /* Default Wideband (mSBC) parameter */
     &bt_hfp_esco_msbc_params[0]};
+
+static void hfp_hf_disconnected(struct bt_hfp_hf_em *hfp_hf);
+static struct bt_hfp_hf_em *hfp_hf_connected(struct bt_conn *conn);
+
+static int bt_hfp_hf_get_status(API_RESULT retval)
+{
+    int status = retval;
+    switch (retval)
+    {
+        case HFP_UNIT_ERR_UNIT_BUSY:
+            status = -EBUSY;
+            break;
+
+        default:
+            /*MISRA rule 16.4*/
+            break;
+    }
+    return status;
+}
+static int bt_hfp_hf_start_at_cmd(struct bt_hfp_hf_em *hf, hf_at_cmd_t cmd)
+{
+    EDGEFAST_HFP_HF_LOCK;
+    if ((hf->running_at_cmds & cmd) != 0)
+    {
+        LOG_ERR("Last CMD is not done happen %d ", hf->running_at_cmds);
+        EDGEFAST_HFP_HF_UNLOCK;
+        return -EIO;
+    }
+    hf->running_at_cmds |= cmd;
+    EDGEFAST_HFP_HF_UNLOCK;
+    return 0;
+}
+
+static int bt_hfp_hf_notify_at_cmd_finished(struct bt_hfp_hf_em *hf, uint16_t result)
+{
+    struct bt_hfp_hf_cmd_complete cb_cmd = { 0 };
+
+    cb_cmd.type  = result & 0xff;
+
+    LOG_DBG("bt_hfp_hf_notify_at_cmd_finished  type %d", cb_cmd.type); 
+    if (bt_hf_cb->cmd_complete_cb)
+    {
+        bt_hf_cb->cmd_complete_cb(hf->bt_conn, &cb_cmd);
+    }
+    EDGEFAST_HFP_HF_LOCK;
+    if (hf->hfp_work_retry_at_cmds != 0)
+    {
+        bt_delayed_work_cancel(&hf->hf_at_cmd_retry_delayed_work);
+        bt_delayed_work_submit(&hf->hf_at_cmd_retry_delayed_work, K_NO_WAIT);
+    }
+    EDGEFAST_HFP_HF_UNLOCK;
+    return 0;
+}
+static void bt_hfp_hf_clear_running_at_cmd_status(struct bt_hfp_hf_em *hf, hf_at_cmd_t cmd)
+{
+    EDGEFAST_HFP_HF_LOCK;
+    hf->running_at_cmds &= ~cmd;
+    EDGEFAST_HFP_HF_UNLOCK;
+    return;
+}
+static API_RESULT bt_hfp_hf_at_cmd_ret_handling(struct bt_hfp_hf_em *hf, API_RESULT retval, hf_at_cmd_t cmd)
+{
+    if (API_SUCCESS != retval)
+    {        
+        if (HFP_UNIT_ERR_UNIT_BUSY !=  retval)
+        {
+            LOG_ERR("Failed: cmd %d bt_hfp_hf_cmd 0x%04X\n", cmd, retval);
+            bt_hfp_hf_clear_running_at_cmd_status(hf, cmd);
+        }
+        else
+        {
+            EDGEFAST_HFP_HF_LOCK;
+            hf->hfp_work_retry_at_cmds |= cmd ;
+            EDGEFAST_HFP_HF_UNLOCK;
+            LOG_DBG("Have a AT command retry: cmd %d bt_hfp_hf_cmd 0x%04X\n", cmd, retval);
+            bt_delayed_work_submit(&hf->hf_at_cmd_retry_delayed_work, HF_CMD_RETRY_TIME);
+        }
+    }
+    return retval;
+}
+
+static API_RESULT bt_hfp_hf_cmd_retry_ret_handling (struct bt_hfp_hf_em *hf, API_RESULT retval, hf_at_cmd_t cmd)
+{
+    if (API_SUCCESS != retval)
+    {
+        if (HFP_UNIT_ERR_UNIT_BUSY !=  retval)
+        {
+            LOG_ERR("Failed: bt_hfp_hf_cmd 0x%04X\n", retval);
+            EDGEFAST_HFP_HF_LOCK;
+            hf->hfp_work_retry_at_cmds &= ~cmd;
+            EDGEFAST_HFP_HF_UNLOCK;
+            bt_hfp_hf_clear_running_at_cmd_status(hf, cmd);
+        }
+        else
+        {
+            hf->hfp_work_retry_count ++;
+            if (hf->hfp_work_retry_count > HF_CMD_RETRY_COUNT)
+            {
+                EDGEFAST_HFP_HF_LOCK;
+                hf->hfp_work_retry_at_cmds &= ~cmd;
+                EDGEFAST_HFP_HF_UNLOCK;
+                LOG_ERR("Failed: cmd have been retied many times still failure 0x%04X\n", cmd);
+            }
+        }
+    }
+    else
+    {
+        EDGEFAST_HFP_HF_LOCK;
+        hf->hfp_work_retry_at_cmds &= ~cmd;
+        EDGEFAST_HFP_HF_UNLOCK;
+    }
+    EDGEFAST_HFP_HF_LOCK;
+    if (hf->hfp_work_retry_at_cmds == 0)
+    {
+        hf->hfp_work_retry_count = 0;
+    }
+    else
+    {
+        bt_delayed_work_cancel(&hf->hf_at_cmd_retry_delayed_work);
+        bt_delayed_work_submit(&hf->hf_at_cmd_retry_delayed_work, K_NO_WAIT);
+    }
+    EDGEFAST_HFP_HF_UNLOCK;
+    return retval;
+}
 
 static struct bt_hfp_hf_em *hfp_hf_GetInstance(void)
 {
@@ -764,6 +913,47 @@ static API_RESULT bt_hfp_hp_extract_result(AT_PARSER_RESPONSE *parser_response,
 
     return retval;
 }
+
+static void bt_work_hf_retry_at_cmd_handling(struct bt_work *work)
+{
+    API_RESULT retval;
+    uint32_t pending_at_cmds;
+    struct bt_hfp_hf_em *hfp_hf = CONTAINER_OF(work, struct bt_hfp_hf_em, hf_at_cmd_retry_delayed_work);
+    EDGEFAST_HFP_HF_LOCK;
+    pending_at_cmds = hfp_hf->hfp_work_retry_at_cmds;
+    EDGEFAST_HFP_HF_UNLOCK;
+    
+    LOG_DBG("bt_work_hf_retry_at_cmd_handling: pending_at_cmds :%x \n" ,pending_at_cmds);
+    if (pending_at_cmds & HFP_HF_SET_VGS_CMD)
+    {
+        retval = BT_hfp_unit_set_gain(hfp_hf->handle, hf_volume_type_speaker, hfp_hf->bt_hfp_hp_speaker_volume,
+                                      (UCHAR)BT_str_len(hfp_hf->bt_hfp_hp_speaker_volume));
+        if (API_SUCCESS == retval)
+        {
+            sco_audio_set_speaker_volume_pl(atoi((char const *)(const char *)hfp_hf->bt_hfp_hp_speaker_volume));
+        }
+        bt_hfp_hf_cmd_retry_ret_handling (hfp_hf, retval, HFP_HF_SET_VGS_CMD); 
+
+    }
+    if (pending_at_cmds & HFP_HF_CLIP_CMD)
+    {
+        retval = BT_hfp_unit_feature_control(hfp_hf->handle, HFP_UNIT_FEATURE_CLIP, HFP_UNIT_ACTION_ENABLE);
+        bt_hfp_hf_cmd_retry_ret_handling (hfp_hf, retval, HFP_HF_CLIP_CMD);
+    }
+    if (pending_at_cmds & HFP_HF_CCWA_CMD)
+    {
+        /* Enable Call waiting */
+        retval = BT_hfp_unit_feature_control(hfp_hf->handle, HFP_UNIT_FEATURE_CCWA, HFP_UNIT_ACTION_ENABLE);
+        bt_hfp_hf_cmd_retry_ret_handling (hfp_hf, retval, HFP_HF_CCWA_CMD);
+
+    }
+    if (pending_at_cmds & HFP_HF_BCS_CMD)
+    {
+        /* Send codec confirmation */
+        retval = BT_hfp_unit_codec_confirmation_num(hfp_hf->handle, hfp_hf->esco_codec_id);
+        bt_hfp_hf_cmd_retry_ret_handling (hfp_hf, retval, HFP_HF_BCS_CMD);
+    }    
+}
 /* Callback registered with HFP - profile */
 static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle, /* Connection Instance */
                                                   HFP_UNIT_EVENTS event,  /* HFP Events          */
@@ -786,13 +976,7 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
     // struct bt_conn *hfp_hf_bt_conn = bt_conn_lookup_handle((uint16_t)handle);
     struct bt_hfp_hf_em *hfp_hf = bt_hfp_hf_lookup_bt_handle((uint16_t)handle);
 
-#ifdef HFP_UNIT_1_7
     API_RESULT retval;
-#endif /* HFP_UNIT_1_7 */
-
-#ifdef HFP_UNIT_1_6
-    uint8_t esco_codec_id;
-#endif /* HFP_UNIT_1_6 */
 
     data_to_app = data;
 
@@ -845,12 +1029,29 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             LOG_DBG("> Event result   : 0x%04X\n", result);
             if (API_SUCCESS == result)
             {
+                struct bt_conn *conn;
+
                 BT_mem_copy(bt_hfp_hp_peer_bd_addr, data, BT_BD_ADDR_SIZE);
                 LOG_DBG("> BD_ADDR of peer %02X:%02X:%02X:%02X:%02X:%02X\n", bt_hfp_hp_peer_bd_addr[0],
                        bt_hfp_hp_peer_bd_addr[1], bt_hfp_hp_peer_bd_addr[2], bt_hfp_hp_peer_bd_addr[3],
                        bt_hfp_hp_peer_bd_addr[4], bt_hfp_hp_peer_bd_addr[5]);
 
-                hfp_hf         = bt_hfp_hf_lookup_bt_addr(bt_hfp_hp_peer_bd_addr);
+                conn = bt_conn_lookup_addr_br((const bt_addr_t *)bt_hfp_hp_peer_bd_addr);
+                if (!conn)
+                {
+                    break;
+                }
+                else
+                {
+                    bt_conn_unref(conn);
+                }
+
+                hfp_hf = hfp_hf_connected(conn);
+                if (!hfp_hf)
+                {
+                    break;
+                }
+
                 hfp_hf->handle = handle;
                 /* Update the eSCO channel paramters for Default CVSD Codec */
                 bt_hfp_hf_set_esco_channel_parameters(BT_TRUE, bt_hfp_esco_params[0]);
@@ -859,8 +1060,27 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
                 BT_hfp_unit_get_peer_supported_features(handle, &bt_hfp_hf_peer_supported_features_ext);
 
                 hfp_hf->bt_hfp_hp_hfu_slc = 1;
+                hfp_hf->hfp_work_retry_at_cmds = 0x0;
+                hfp_hf->hfp_work_retry_count = 0x0;
+                hfp_hf->running_at_cmds= 0x0;
+                if (0 != bt_hfp_hf_start_at_cmd(hfp_hf, HFP_HF_SET_VGS_CMD)) 
+                {
+                    LOG_ERR("HFP_HF_SET_VGS_CMD bt_hfp_hf_start_at_cmd failure");
+                };
+                retval = BT_hfp_unit_set_gain(hfp_hf->handle, hf_volume_type_speaker, hfp_hf->bt_hfp_hp_speaker_volume,
+                                              (UCHAR)BT_str_len(hfp_hf->bt_hfp_hp_speaker_volume));
+                if (API_SUCCESS == retval)
+                {
+                    sco_audio_set_speaker_volume_pl(atoi((char const *)(const char *)hfp_hf->bt_hfp_hp_speaker_volume));
+                }
 
-                BT_hfp_unit_feature_control(handle, HFP_UNIT_FEATURE_CLIP, HFP_UNIT_ACTION_ENABLE);
+                bt_hfp_hf_at_cmd_ret_handling(hfp_hf, retval, HFP_HF_SET_VGS_CMD);
+                if (0 != bt_hfp_hf_start_at_cmd(hfp_hf, HFP_HF_CLIP_CMD)) 
+                {
+                    LOG_ERR("HFP_HF_CLIP_CMD bt_hfp_hf_start_at_cmd failure");
+                };
+                retval = BT_hfp_unit_feature_control(hfp_hf->handle, HFP_UNIT_FEATURE_CLIP, HFP_UNIT_ACTION_ENABLE);
+                bt_hfp_hf_at_cmd_ret_handling(hfp_hf, retval, HFP_HF_CLIP_CMD);
             }
             break;
 
@@ -870,12 +1090,29 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             LOG_DBG("> Event result   : 0x%04X\n", result);
             if (API_SUCCESS == result)
             {
+                struct bt_conn *conn;
+
                 BT_mem_copy(bt_hfp_hp_peer_bd_addr, data, BT_BD_ADDR_SIZE);
                 LOG_DBG("> BD_ADDR of peer %02X:%02X:%02X:%02X:%02X:%02X\n", bt_hfp_hp_peer_bd_addr[0],
                        bt_hfp_hp_peer_bd_addr[1], bt_hfp_hp_peer_bd_addr[2], bt_hfp_hp_peer_bd_addr[3],
                        bt_hfp_hp_peer_bd_addr[4], bt_hfp_hp_peer_bd_addr[5]);
 
-                hfp_hf         = bt_hfp_hf_lookup_bt_addr(bt_hfp_hp_peer_bd_addr);
+                conn = bt_conn_lookup_addr_br((const bt_addr_t *)bt_hfp_hp_peer_bd_addr);
+                if (!conn)
+                {
+                    break;
+                }
+                else
+                {
+                    bt_conn_unref(conn);
+                }
+
+                hfp_hf = hfp_hf_connected(conn);
+                if (!hfp_hf)
+                {
+                    break;
+                }
+
                 hfp_hf->handle = handle;
                 /* Update the eSCO channel paramters for Default CVSD Codec */
                 bt_hfp_hf_set_esco_channel_parameters(BT_TRUE, bt_hfp_esco_params[0]);
@@ -884,8 +1121,26 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
                 BT_hfp_unit_get_peer_supported_features(handle, &bt_hfp_hf_peer_supported_features_ext);
 
                 hfp_hf->bt_hfp_hp_hfu_slc = 1;
-
-                BT_hfp_unit_feature_control(handle, HFP_UNIT_FEATURE_CLIP, HFP_UNIT_ACTION_ENABLE);
+                hfp_hf->hfp_work_retry_at_cmds = 0x0;
+                hfp_hf->hfp_work_retry_count = 0x0;
+                hfp_hf->running_at_cmds= 0x0;
+                if (0 != bt_hfp_hf_start_at_cmd(hfp_hf, HFP_HF_SET_VGS_CMD)) 
+                {
+                    LOG_ERR("HFP_HF_SET_VGS_CMD bt_hfp_hf_start_at_cmd failure");
+                };
+                retval = BT_hfp_unit_set_gain(hfp_hf->handle, hf_volume_type_speaker, hfp_hf->bt_hfp_hp_speaker_volume,
+                                              (UCHAR)BT_str_len(hfp_hf->bt_hfp_hp_speaker_volume));
+                if (API_SUCCESS == retval)
+                {
+                    sco_audio_set_speaker_volume_pl(atoi((char const *)(const char *)hfp_hf->bt_hfp_hp_speaker_volume));
+                }
+                bt_hfp_hf_at_cmd_ret_handling(hfp_hf, retval, HFP_HF_SET_VGS_CMD);
+                if (0 != bt_hfp_hf_start_at_cmd(hfp_hf, HFP_HF_CLIP_CMD)) 
+                {
+                    LOG_ERR("HFP_HF_CLIP_CMD bt_hfp_hf_start_at_cmd failure");
+                };                
+                retval = BT_hfp_unit_feature_control(hfp_hf->handle, HFP_UNIT_FEATURE_CLIP, HFP_UNIT_ACTION_ENABLE);
+                bt_hfp_hf_at_cmd_ret_handling(hfp_hf, retval, HFP_HF_CLIP_CMD); 
             }
 
             break;
@@ -898,6 +1153,10 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             LOG_DBG("> BD_ADDR of peer %02X:%02X:%02X:%02X:%02X:%02X\n", bd_addr[0], bd_addr[1], bd_addr[2], bd_addr[3],
                    bd_addr[4], bd_addr[5]);
             (void)bd_addr;
+            if (hfp_hf)
+            {
+                hfp_hf_disconnected(hfp_hf);
+            }
             break;
 
         case HFP_UNIT_DISCONNECT_IND:
@@ -906,24 +1165,28 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             LOG_DBG("> Event result   : 0x%04X\n", result);
             bd_addr = (uint8_t *)data;
             LOG_DBG("> BD_ADDR of peer %02X:%02X:%02X:%02X:%02X:%02X\n", bd_addr[0], bd_addr[1], bd_addr[2], bd_addr[3],
-                   bd_addr[4], bd_addr[5]);          
+                   bd_addr[4], bd_addr[5]);
+            if (hfp_hf)
+            {
+                hfp_hf_disconnected(hfp_hf);
+            }
             break;
 
         case HFP_UNIT_CALL_ACTIVE:
             LOG_DBG("\n> Event    : HFP_UNIT_CALL_ACTIVE\n");
             LOG_DBG("> Instance : 0x%02X\n", (unsigned int)handle);
-            if (hfp_hf->bt_hf_cb->call)
+            if (bt_hf_cb->call)
             {
-                hfp_hf->bt_hf_cb->call(hfp_hf->bt_conn, 1U);
+                bt_hf_cb->call(hfp_hf->bt_conn, 1U);
             }
 
             break;
         case HFP_UNIT_NO_CALL:
             LOG_DBG("\n> Event    : HFP_UNIT_NO_CALL\n");
             LOG_DBG("> Instance : 0x%02X\n", (unsigned int)handle);
-            if (hfp_hf->bt_hf_cb->call)
+            if (bt_hf_cb->call)
             {
-                hfp_hf->bt_hf_cb->call(hfp_hf->bt_conn, 0U);
+                bt_hf_cb->call(hfp_hf->bt_conn, 0U);
             }
             break;
 
@@ -935,22 +1198,11 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
                 LOG_DBG("> Call Setup Value : %d\n", *(uint8_t *)data);
             }
 
-            if (hfp_hf->bt_hf_cb->call_setup)
+            if (bt_hf_cb->call_setup)
             {
-                hfp_hf->bt_hf_cb->call_setup(hfp_hf->bt_conn, *(uint8_t *)data);
+                bt_hf_cb->call_setup(hfp_hf->bt_conn, *(uint8_t *)data);
             }
             sco_audio_play_ringtone_exit_pl();
-#if 0
-            BT_hfp_unit_set_gain
-            (
-                hfp_hf->handle,
-                hf_volume_type_speaker,
-                hfp_hf->bt_hfp_hp_speaker_volume,
-                (UCHAR)BT_str_len(hfp_hf->bt_hfp_hp_speaker_volume)
-            );
-#endif
-            sco_audio_set_speaker_volume_pl(atoi((char const *)(const char *)hfp_hf->bt_hfp_hp_speaker_volume));
-
             break;
 
         case HFP_UNIT_AG_SERVICE_IND:
@@ -958,9 +1210,9 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             LOG_DBG("> Instance      : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Data Received : %d\n", *((uint8_t *)data));
 
-            if (hfp_hf->bt_hf_cb->service)
+            if (bt_hf_cb->service)
             {
-                hfp_hf->bt_hf_cb->service(hfp_hf->bt_conn, *((uint8_t *)data));
+                bt_hf_cb->service(hfp_hf->bt_conn, *((uint8_t *)data));
             }
             break;
 
@@ -969,9 +1221,9 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             LOG_DBG("> Instance : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Value    : %d\n", *((uint8_t *)data));
 
-            if (hfp_hf->bt_hf_cb->signal)
+            if (bt_hf_cb->signal)
             {
-                hfp_hf->bt_hf_cb->signal(hfp_hf->bt_conn, *((uint8_t *)data));
+                bt_hf_cb->signal(hfp_hf->bt_conn, *((uint8_t *)data));
             }
             break;
 
@@ -980,9 +1232,9 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             LOG_DBG("> Instance : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Value    : %d\n", *((uint8_t *)data));
 
-            if (hfp_hf->bt_hf_cb->roam)
+            if (bt_hf_cb->roam)
             {
-                hfp_hf->bt_hf_cb->roam(hfp_hf->bt_conn, *((uint8_t *)data));
+                bt_hf_cb->roam(hfp_hf->bt_conn, *((uint8_t *)data));
             }
             break;
 
@@ -990,9 +1242,9 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             LOG_DBG("\n> Event    : HFP_UNIT_CIEV_BATTCHG_IND.\n");
             LOG_DBG("> Instance : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Value    : %d\n", *((uint8_t *)data));
-            if (hfp_hf->bt_hf_cb->battery)
+            if (bt_hf_cb->battery)
             {
-                hfp_hf->bt_hf_cb->battery(hfp_hf->bt_conn, *((uint8_t *)data));
+                bt_hf_cb->battery(hfp_hf->bt_conn, *((uint8_t *)data));
             }
             break;
 
@@ -1001,9 +1253,9 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             LOG_DBG("> Instance      : 0x%02X\n", (unsigned int)handle);
             data_recvd = (uint8_t *)data;
             LOG_DBG("> Data Received : %d\n", (*data_recvd));
-            if (hfp_hf->bt_hf_cb->call)
+            if (bt_hf_cb->call)
             {
-                hfp_hf->bt_hf_cb->call(hfp_hf->bt_conn, (*data_recvd));
+                bt_hf_cb->call(hfp_hf->bt_conn, (*data_recvd));
             }
             break;
 
@@ -1011,13 +1263,12 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             LOG_DBG("\n> Event     : HFP_UNIT_INCALL_ALERT\n");
             LOG_DBG("> Instance  : 0x%02X\n", (unsigned int)handle);
 
-            if (hfp_hf->bt_hf_cb->ring_indication)
+            if (bt_hf_cb->ring_indication)
             {
-                hfp_hf->bt_hf_cb->ring_indication(hfp_hf->bt_conn);
+                bt_hf_cb->ring_indication(hfp_hf->bt_conn);
             }
             /* Indicate platform of ring */
-           sco_audio_play_ringtone_pl();
-
+            sco_audio_play_ringtone_pl();
             break;
 
         case HFP_UNIT_CLI_DIGITS:
@@ -1027,9 +1278,9 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             {
                 LOG_DBG("> Name : %s\n", app_parser_result.result_param.cli_info.name);
             }
-            if (hfp_hf->bt_hf_cb->call_phnum)
+            if (bt_hf_cb->call_phnum)
             {
-                hfp_hf->bt_hf_cb->call_phnum(hfp_hf->bt_conn, (char *)app_parser_result.result_param.cli_info.digits);
+                bt_hf_cb->call_phnum(hfp_hf->bt_conn, (char *)app_parser_result.result_param.cli_info.digits);
             }
             break;
 
@@ -1040,9 +1291,9 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             LOG_DBG("> Number Type     : %d\n", app_parser_result.result_param.ccwa_result.type);
             LOG_DBG("> Voice Class     : %d\n", app_parser_result.result_param.ccwa_result.voice_class);
             LOG_DBG("> Operator Name   : %s\n", app_parser_result.result_param.ccwa_result.alpha);
-            if (hfp_hf->bt_hf_cb->waiting_call)
+            if (bt_hf_cb->waiting_call)
             {
-                hfp_hf->bt_hf_cb->waiting_call(hfp_hf->bt_conn, (hf_waiting_call_state_t *)&app_parser_result.result_param.ccwa_result);
+                bt_hf_cb->waiting_call(hfp_hf->bt_conn, (hf_waiting_call_state_t *)&app_parser_result.result_param.ccwa_result);
             }
 
             break;
@@ -1096,7 +1347,10 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
                         data_to_app->parser_resp->param[0].value_length);
             /* NULL terminate the str */
             hfp_hf->bt_hfp_hp_microphone_gain[data_to_app->parser_resp->param[0].value_length] = '\0';
-
+            if (bt_hf_cb->volume_update)
+            {
+                bt_hf_cb->volume_update(hfp_hf->bt_conn, hf_volume_type_mic, atoi((char const *)(const char *)hfp_hf->bt_hfp_hp_microphone_gain));
+            }
             sco_audio_set_microphone_gain_pl(atoi((char const *)(const char *)hfp_hf->bt_hfp_hp_microphone_gain));
             LOG_DBG("> Data Received : %s\n", hfp_hf->bt_hfp_hp_microphone_gain);
             break;
@@ -1110,6 +1364,10 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
                         data_to_app->parser_resp->param[0].value_length);
             /* NULL terminate the str */
             hfp_hf->bt_hfp_hp_speaker_volume[data_to_app->parser_resp->param[0].value_length] = '\0';
+            if (bt_hf_cb->volume_update)
+            {
+                bt_hf_cb->volume_update(hfp_hf->bt_conn, hf_volume_type_speaker, atoi((char const *)(const char *)hfp_hf->bt_hfp_hp_speaker_volume));
+            }
             sco_audio_set_speaker_volume_pl(atoi((char const *)(const char *)hfp_hf->bt_hfp_hp_speaker_volume));
             LOG_DBG("> Data Received : %s\n", hfp_hf->bt_hfp_hp_speaker_volume);
             break;
@@ -1118,9 +1376,9 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             LOG_DBG("\n> Event           : HFP_UNIT_VOICETAG_PHNUM_IND\n");
             LOG_DBG("> Instance        : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Received Number : %s\n", app_parser_result.result_param.digits);
-            if (hfp_hf->bt_hf_cb->voicetag_phnum)
+            if (bt_hf_cb->voicetag_phnum)
             {
-                hfp_hf->bt_hf_cb->voicetag_phnum(hfp_hf->bt_conn, (char *)app_parser_result.result_param.digits);
+                bt_hf_cb->voicetag_phnum(hfp_hf->bt_conn, (char *)app_parser_result.result_param.digits);
             }            
             break;
 
@@ -1219,71 +1477,108 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             LOG_DBG("\n> Event        : HFP_UNIT_SEND_DATA_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
         case HFP_UNIT_PEER_IND_STATUS_CNF:
             LOG_DBG("\n> Event        : HFP_UNIT_PEER_INDICATOR_STATUS_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
         case HFP_UNIT_VOICETAG_PHNUM_CNF:
             LOG_DBG("\n> Event        : HFP_UNIT_VOICETAG_PHNUM_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
         case HFP_UNIT_INCALL_ACCEPT_CNF:
             LOG_DBG("\n> Event        : HFP_UNIT_INCALL_ACCEPT_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
         case HFP_UNIT_OUTCALL_CNF:
             LOG_DBG("\n> Event        : HFP_UNIT_OUTCALL_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
         case HFP_UNIT_CALLHANGUP_CNF:
             LOG_DBG("\n> Event        : HFP_UNIT_CALLHANGUP_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
         case HFP_UNIT_TWC_CALL_CTRL_CNF:
             LOG_DBG("\n> Event        : HFP_UNIT_TWC_CALL_CTRL_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
         case HFP_UNIT_SET_VGM_CNF:
             LOG_DBG("\n> Event        : HFP_UNIT_SET_VGM_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
         case HFP_UNIT_SET_VGS_CNF:
             LOG_DBG("\n> Event        : HFP_UNIT_SET_VGS_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            if ((hfp_hf->running_at_cmds & HFP_HF_SET_VGS_CMD) != 0)
+            {
+                bt_hfp_hf_clear_running_at_cmd_status(hfp_hf, HFP_HF_SET_VGS_CMD);
+            } 
+            else
+            {
+                bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
+            }
             break;
-
-        case HFP_UNIT_CCWA_CNF:
+            
+         case HFP_UNIT_CCWA_CNF:
             LOG_DBG("\n> Event        : HFP_UNIT_NOTIFICATION_CCWA_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            if ((hfp_hf->running_at_cmds & HFP_HF_CCWA_CMD) != 0)
+            {
+                bt_hfp_hf_clear_running_at_cmd_status(hfp_hf, HFP_HF_CCWA_CMD);
+            } 
+            else
+            {
+                bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
+            }
             break;
 
         case HFP_UNIT_CLIP_CNF:
             LOG_DBG("\n> Event        : HFP_UNIT_NOTIFICATION_CLIP_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            if ((hfp_hf->running_at_cmds & HFP_HF_CLIP_CMD) != 0)
+            {
+                bt_hfp_hf_clear_running_at_cmd_status(hfp_hf, HFP_HF_CLIP_CMD);
+            } 
+            else
+            {
+                bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
+            }
 
             if (hfp_hf->bt_hfp_hp_hfu_slc)
             {
+                if (0 != bt_hfp_hf_start_at_cmd(hfp_hf, HFP_HF_CCWA_CMD)) 
+                {
+                    LOG_ERR("HFP_HF_CCWA_CMD bt_hfp_hf_start_at_cmd failure");
+                }                
                 /* Enable Call waiting */
-                BT_hfp_unit_feature_control(handle, HFP_UNIT_FEATURE_CCWA, HFP_UNIT_ACTION_ENABLE);
+                retval = BT_hfp_unit_feature_control(hfp_hf->handle, HFP_UNIT_FEATURE_CCWA, HFP_UNIT_ACTION_ENABLE);
+                bt_hfp_hf_at_cmd_ret_handling(hfp_hf, retval, HFP_HF_CCWA_CMD);
             }
             break;
 
@@ -1291,12 +1586,14 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             LOG_DBG("\n> Event        : HFP_UNIT_ECNR_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
         case HFP_UNIT_VREC_ENABLE_CNF:
             LOG_DBG("\n> Event        : HFP_UNIT_VREC_ENABLE_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
 #ifdef HFP_UNIT_1_8
@@ -1304,6 +1601,7 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             LOG_DBG("\n> Event        : HFP_UNIT_ENH_VREC_ENABLE_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 #endif /* HFP_UNIT_1_8 */
 
@@ -1311,12 +1609,14 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             LOG_DBG("\n> Event        : HFP_UNIT_VREC_DISABLE_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
         case HFP_UNIT_SEND_DTMF_CNF:
             LOG_DBG("\n> Event        : HFP_UNIT_SEND_DTMF_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
         case HFP_UNIT_STOP_CNF:
@@ -1324,48 +1624,56 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
             BT_dbase_inactivate_record(hfp_hfu_record_handle);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
         case HFP_UNIT_CMEE_CNF:
             LOG_DBG("\n> Event        : HFP_UNIT_CMEE_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
         case HFP_UNIT_REQ_SUB_NUM_CNF:
             LOG_DBG("\n> Event        : HFP_UNIT_REQ_SUB_NUM_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
         case HFP_UNIT_SET_NW_NAME_FORMAT_CNF:
             LOG_DBG("\n> Event        : HFP_UNIT_SET_NW_NAME_FORMAT_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
         case HFP_UNIT_SEND_BTRH_CNF:
             LOG_DBG("\n> Event        : HFP_UNIT_SEND_BTRH_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
         case HFP_UNIT_ADV_CALL_HOLD_CNF:
             LOG_DBG("\n> Event        : HFP_UNIT_ADV_CALL_HOLD_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
         case HFP_UNIT_COPS_QUERY_CNF:
             LOG_DBG("\n> Event        : HFP_UNIT_COPS_QUERY_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
         case HFP_UNIT_CURRENT_CALL_LIST_CNF:
             LOG_DBG("\n> Event        : HFP_UNIT_CURRENT_CALL_LIST_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
 #ifdef HFP_UNIT_1_6
@@ -1373,24 +1681,35 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             LOG_DBG("\n> Event        : HFP_UNIT_BIA_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
         case HFP_UNIT_BAC_CNF:
             LOG_DBG("\n> Event        : HFP_UNIT_BAC_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
         case HFP_UNIT_BCC_CNF:
             LOG_DBG("\n> Event        : HFP_UNIT_BCC_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
             break;
 
         case HFP_UNIT_BCS_CNF:
             LOG_DBG("\n> Event        : HFP_UNIT_BCS_CNF\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
             LOG_DBG("> Event result : 0x%04X\n", result);
+            if ((hfp_hf->running_at_cmds & HFP_HF_BCS_CMD) != 0)
+            {
+                bt_hfp_hf_clear_running_at_cmd_status(hfp_hf, HFP_HF_BCS_CMD);
+            } 
+            else
+            {
+                bt_hfp_hf_notify_at_cmd_finished(hfp_hf, result);
+            }
             break;
 
         case HFP_UNIT_BCS_IND:
@@ -1399,21 +1718,25 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             LOG_DBG("> Event result : 0x%04X\n", result);
 
             /* Get Codec ID from event buffer */
-            esco_codec_id = data_to_app->buffer[data_to_app->parser_resp->param->start_of_value_index] - '0';
+            hfp_hf->esco_codec_id = data_to_app->buffer[data_to_app->parser_resp->param->start_of_value_index] - '0';
 
             /* Based on Codec ID, update eSCO parameters */
-            if ((HFP_UNIT_CODEC_ID_CVSD == esco_codec_id) || (HFP_UNIT_CODEC_ID_MSBC == esco_codec_id))
+            if ((HFP_UNIT_CODEC_ID_CVSD == hfp_hf->esco_codec_id) || (HFP_UNIT_CODEC_ID_MSBC == hfp_hf->esco_codec_id))
             {
                 /* Update the eSCO channel parameters for mSBC Codec */
-                bt_hfp_hf_set_esco_channel_parameters(BT_TRUE, bt_hfp_esco_params[esco_codec_id - 1]);
+                bt_hfp_hf_set_esco_channel_parameters(BT_TRUE, bt_hfp_esco_params[hfp_hf->esco_codec_id - 1]);
             }
             else
             {
                 LOG_ERR("Codec Selection: ???\n");
             }
-
-            /* Send codec confirmation */
-            BT_hfp_unit_codec_confirmation_num(handle, esco_codec_id);
+            
+            if (0 != bt_hfp_hf_start_at_cmd(hfp_hf, HFP_HF_BCS_CMD)) 
+            {
+                LOG_ERR("HFP_HF_BCS_CMD bt_hfp_hf_start_at_cmd failure");
+            }
+            retval = BT_hfp_unit_codec_confirmation_num(hfp_hf->handle, hfp_hf->esco_codec_id);
+            bt_hfp_hf_at_cmd_ret_handling(hfp_hf, retval, HFP_HF_BCS_CMD);
 
             break;
 
@@ -1522,7 +1845,9 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
 static API_RESULT bt_hfp_hf_start(HFP_UNIT_APPL_CONFIG_PARAMS *p_bt_hfp_hf_appl_conf_params)
 {
     API_RESULT api_retval;
-
+#ifdef SDP_DYNAMIC_DB
+    p_bt_hfp_hf_appl_conf_params->server_channel = BT_RFCOMM_CHAN_HFP_HF;
+#else
     /* local variable to extract the supported features */
     uint8_t attr_value[] = {0x09, 0x00, 0x00};
 
@@ -1544,16 +1869,19 @@ static API_RESULT bt_hfp_hf_start(HFP_UNIT_APPL_CONFIG_PARAMS *p_bt_hfp_hf_appl_
 
     api_retval = BT_dbase_update_attr_value(hfp_hfu_record_handle, 0x0311, attr_value, 0x03);
 
+
     BT_dbase_get_server_channel(hfp_hfu_record_handle, PROTOCOL_DESC_LIST,
                                 &p_bt_hfp_hf_appl_conf_params->server_channel);
-
+#endif
     api_retval = BT_hfp_unit_start(p_bt_hfp_hf_appl_conf_params);
     LOG_INF("> API RETVAL BT_hfp_unit_start : 0x%04X\n", api_retval);
 
     if (API_SUCCESS == api_retval)
     {
+#ifdef SDP_DYNAMIC_DB
+#else
         BT_dbase_activate_record(hfp_hfu_record_handle);
-
+#endif
         LOG_INF("> HF Profile Started Successfully\n");
     }
 
@@ -1606,82 +1934,49 @@ static void hfp_hf_init(void)
     /* Set the default */
     bt_hfp_hf_peer_hf_ind_count = 0;
 #endif /* HFP_UNIT_1_7 */
-
     bt_hfp_hf_start(&bt_hfp_hf_conf_params);
-#else  /* HFP_UNIT_1_6 */
-    bt_hfp_hf_start(bt_hfp_hf_local_supported_features,
-                    (uint8_t)strnlen(bt_hfp_hf_local_supported_features, HFP_UNIT_MAX_SUPP_FEATURE_LEN));
 #endif /* HFP_UNIT_1_6 */
 }
 
-static void bt_disconnected(struct bt_conn *conn, uint8_t reason)
+static void hfp_hf_disconnected(struct bt_hfp_hf_em *hfp_hf)
 {
-    struct bt_hfp_hf_em *hfp_hf;
-    LOG_INF("Dis Connection failed (reason 0x%02x)\n", reason);
-    hfp_hf = bt_hfp_hf_lookup_bt_conn(conn);
-       
-    if (hfp_hf->bt_hf_cb->disconnected)
+    LOG_INF("disconnected\n");
+
+    if (bt_hf_cb->disconnected)
     {
-        hfp_hf->bt_hf_cb->disconnected(conn);
+        bt_hf_cb->disconnected(hfp_hf->bt_conn);
     }
     BT_mem_set(hfp_hf->peerAddr, 0, BT_BD_ADDR_SIZE);
     hfp_hf_DeActiveInstance(hfp_hf);
 }
-static void bt_connected(struct bt_conn *conn, uint8_t err)
+
+static struct bt_hfp_hf_em* hfp_hf_connected(struct bt_conn *conn)
 {
     struct bt_hfp_hf_em *hfp_hf;
     struct bt_conn_info info;
-    if (err)
+
+    LOG_INF("connected\n");
+
+    hfp_hf = hfp_hf_GetNoneActiveInstance();
+    (void)memset(&info, 0, sizeof(info));
+    bt_conn_get_info(conn, &info);
+    if (info.type == BT_CONN_TYPE_LE)
     {
-        LOG_ERR("Connection failed (err 0x%02x)\n", err);
+        hfp_hf_FreeInstance(hfp_hf);
+        return NULL;
     }
-    else
+
+    memcpy(hfp_hf->peerAddr, info.br.dst, BT_BD_ADDR_SIZE);
+    if (bt_hf_cb->connected)
     {
-        bt_conn_ref(conn);
-        LOG_INF("bt_connected\n");
-
-        hfp_hf = hfp_hf_GetNoneActiveInstance();
-        (void)memset(&info, 0, sizeof(info));
-        bt_conn_get_info(conn, &info);
-        if (info.type == BT_CONN_TYPE_LE)
-        {
-            hfp_hf_FreeInstance(hfp_hf);
-            return;
-        }
-
-        memcpy(hfp_hf->peerAddr, info.br.dst, BT_BD_ADDR_SIZE);
-        if (hfp_hf->bt_hf_cb->connected)
-        {
-            hfp_hf->bt_hf_cb->connected(conn);
-        }
-        hfp_hf->actived     = 1U;
-        hfp_hf->bt_conn     = conn;
-        hfp_hf->hf_features = BT_HFP_HF_SUPPORTED_FEATURES;
-
+        bt_hf_cb->connected(conn);
     }
+    hfp_hf->actived     = 1U;
+    hfp_hf->bt_conn     = conn;
+    hfp_hf->hf_features = BT_HFP_HF_SUPPORTED_FEATURES;
+
+    return hfp_hf;
 }
-
-static void security_changed(struct bt_conn *conn, bt_security_t level, enum bt_security_err err)
-{
-    char addr[BT_ADDR_LE_STR_LEN];
-
-    bt_addr_to_str(bt_conn_get_dst_br(conn), addr, sizeof(addr));
-
-    if (!err)
-    {
-        LOG_INF("Security changed: %s level %u\n", addr, level);
-    }
-    else
-    {
-        LOG_ERR("Security failed: %s level %u err %d\n", addr, level, err);
-    }
-}
-
-static struct bt_conn_cb conn_callbacks = {
-    .connected        = bt_connected,
-    .disconnected     =  bt_disconnected,
-    .security_changed = security_changed,
-};
 
 /** @brief Register HFP HF profile
  *
@@ -1721,13 +2016,19 @@ int bt_hfp_hf_register(struct bt_hfp_hf_cb *cb)
         }
     }
 
-    hfp_hf->bt_hf_cb = cb;
-    bt_conn_cb_register(&conn_callbacks);
+    bt_hf_cb = cb;
+    if ((bt_hf_cb) && (bt_hf_cb->get_config))
+    {
+        bt_hf_cb->get_config(&hfp_hf->bt_hfp_hf_config);
+    }
     hfp_hf_init();
     hfp_hf->actived = 0;
-    BT_str_n_copy(&hfp_hf->bt_hfp_hp_speaker_volume[0], BT_HFP_HF_INITIAL_GAIN, 3);
-    BT_str_n_copy(&hfp_hf->bt_hfp_hp_microphone_gain[0], BT_HFP_HF_INITIAL_GAIN, 3);
-
+    memset((char *)&hfp_hf->bt_hfp_hp_speaker_volume[0], 0x0, 3);
+    memset((char *)&hfp_hf->bt_hfp_hp_microphone_gain[0], 0x0, 3);
+    sprintf((char *)&hfp_hf->bt_hfp_hp_speaker_volume[0], "%d", hfp_hf->bt_hfp_hf_config->bt_hfp_hf_vgs);
+    sprintf((char *)&hfp_hf->bt_hfp_hp_microphone_gain[0], "%d", hfp_hf->bt_hfp_hf_config->bt_hfp_hf_vgm);
+    bt_delayed_work_init(&hfp_hf->hf_at_cmd_retry_delayed_work, bt_work_hf_retry_at_cmd_handling);
+    
     return 0;
 }
 
@@ -1745,7 +2046,6 @@ int bt_hfp_hf_send_cmd(struct bt_conn *conn, enum bt_hfp_hf_at_cmd cmd)
     struct bt_hfp_hf_em *hf;
     int api_retval;
     int status                                 = 0;
-    struct bt_hfp_hf_cmd_complete cmd_complete = {0};
 
     if (!conn)
     {
@@ -1767,16 +2067,16 @@ int bt_hfp_hf_send_cmd(struct bt_conn *conn, enum bt_hfp_hf_at_cmd cmd)
 
             if (api_retval < 0)
             {
-                LOG_ERR("Failed ATA");
-                status = api_retval;
+                LOG_ERR("Failed ATA api_retval : %d", api_retval);
+                status = bt_hfp_hf_get_status(api_retval);
             }
             break;
         case BT_HFP_HF_AT_CHUP:
             api_retval = BT_hfp_unit_callhangup(hf->handle);
             if (api_retval < 0)
             {
-                LOG_ERR("Failed AT+CHUP");
-                status = api_retval;
+                LOG_ERR("Failed AT+CHUP api_retval : %d", api_retval);
+                status = bt_hfp_hf_get_status(api_retval);
             }
             break;
         default:
@@ -1784,19 +2084,7 @@ int bt_hfp_hf_send_cmd(struct bt_conn *conn, enum bt_hfp_hf_at_cmd cmd)
             status = -EINVAL;
             break;
     }
-    if (status < 0)
-    {
-        cmd_complete.type = HFP_HF_CMD_ERROR;
-    }
-    else
-    {
-        cmd_complete.type = HFP_HF_CMD_OK;
-    }
 
-    if (hf->bt_hf_cb->cmd_complete_cb)
-    {
-        hf->bt_hf_cb->cmd_complete_cb(conn, &cmd_complete);
-    }
     return status;
 }
 int bt_hfp_hf_start_voice_recognition(struct bt_conn *conn)
@@ -1814,10 +2102,10 @@ int bt_hfp_hf_start_voice_recognition(struct bt_conn *conn)
     hf = bt_hfp_hf_lookup_bt_conn(conn);
     if (!hf)
     {
-        LOG_ERR("No HF connection found");
-        
+        LOG_ERR("No HF connection found");      
         return -ENOTCONN;
     }
+
     api_retval = BT_hfp_unit_feature_control
                  (
                      hf->handle,
@@ -1827,8 +2115,8 @@ int bt_hfp_hf_start_voice_recognition(struct bt_conn *conn)
 
     if (api_retval < 0)
     {
-        LOG_ERR("Failed start voice recognition");
-        status = api_retval;
+        LOG_ERR("Failed start voice recognition api_retval : %d", api_retval);
+        status = bt_hfp_hf_get_status(api_retval);
     }
 
     return status;  
@@ -1852,6 +2140,7 @@ int bt_hfp_hf_stop_voice_recognition(struct bt_conn *conn)
         LOG_ERR("No HF connection found");
         return -ENOTCONN;
     }
+
     api_retval = BT_hfp_unit_feature_control
                  (
                      hf->handle,
@@ -1861,8 +2150,8 @@ int bt_hfp_hf_stop_voice_recognition(struct bt_conn *conn)
 
     if (api_retval < 0)
     {
-        LOG_ERR("Failed stop voice recognition");
-        status = api_retval;
+        LOG_ERR("Failed stop voice recognition api_retval : %d", api_retval);
+        status = bt_hfp_hf_get_status(api_retval);
     }
     return status;
 }
@@ -1894,8 +2183,8 @@ int bt_hfp_hf_dial(struct bt_conn *conn, const char *number)
 
     if (api_retval < 0)
     {
-        LOG_ERR("Failed to dial number");
-        status = api_retval;
+        LOG_ERR("Failed to dial number api_retval : %d", api_retval);
+        status = bt_hfp_hf_get_status(api_retval);
     }
     return status;  
   
@@ -1946,8 +2235,8 @@ int bt_hfp_hf_dial_memory(struct bt_conn *conn, int location)
 
     if (api_retval < 0)
     {
-        LOG_ERR("Failed to dial number");
-        status = api_retval;
+        LOG_ERR("Failed to BT_hfp_unit_memdial api_retval : %d", api_retval);
+        status = bt_hfp_hf_get_status(api_retval);
     }
     return status;  
     
@@ -1976,11 +2265,10 @@ int bt_hfp_hf_last_dial(struct bt_conn *conn)
                      hf->handle
                  );
 
-
     if (api_retval < 0)
     {
-        LOG_ERR("Failed to dial number");
-        status = api_retval;
+        LOG_ERR("Failed to last dial api_retval : %d", api_retval);
+        status = bt_hfp_hf_get_status(api_retval);
     }
     return status; 
 }
@@ -2010,8 +2298,8 @@ int bt_hfp_hf_multiparty_call_option(struct bt_conn *conn, hf_multiparty_call_op
                  );
     if (api_retval < 0)
     {
-        LOG_ERR("Failed to control multiparty call");
-        status = api_retval;
+        LOG_ERR("Failed to control multiparty call api_retval : %d", api_retval);
+        status = bt_hfp_hf_get_status(api_retval);
     }
     return status;   
 }
@@ -2042,8 +2330,8 @@ int bt_hfp_hf_enable_clip_notification(struct bt_conn *conn)
                  );
     if (api_retval < 0)
     {
-        LOG_ERR("Failed to control multiparty call");
-        status = api_retval;
+        LOG_ERR("Failed to control clip enable api_retval : %d", api_retval);
+        status = bt_hfp_hf_get_status(api_retval);
     }
     return status;    
 }
@@ -2075,8 +2363,9 @@ int bt_hfp_hf_disable_clip_notification(struct bt_conn *conn)
                  );
     if (api_retval < 0)
     {
-        LOG_ERR("Failed to control multiparty call");
-        status = api_retval;
+        LOG_ERR("Failed to control clip disable api_retval : %d", api_retval);
+        status = bt_hfp_hf_get_status(api_retval);
+
     }
     return status;    
 }
@@ -2107,8 +2396,8 @@ int bt_hfp_hf_enable_call_waiting_notification(struct bt_conn *conn)
                  );
     if (api_retval < 0)
     {
-        LOG_ERR("Failed to control multiparty call");
-        status = api_retval;
+        LOG_ERR("Failed to control ccwa enable api_retval : %d", api_retval);
+        status = bt_hfp_hf_get_status(api_retval);
     }
     return status;    
 }
@@ -2139,8 +2428,8 @@ int bt_hfp_hf_disable_call_waiting_notification(struct bt_conn *conn)
                  );
     if (api_retval < 0)
     {
-        LOG_ERR("Failed to control multiparty call");
-        status = api_retval;
+        LOG_ERR("Failed to control ccwa disable api_retval : %d", api_retval);
+        status = bt_hfp_hf_get_status(api_retval);
     }
     return status;    
 }
@@ -2149,14 +2438,19 @@ int bt_hfp_hf_volume_update(struct bt_conn *conn, hf_volume_type_t type, int vol
     struct bt_hfp_hf_em *hf;
     int api_retval;
     int status                                 = 0;
-    UCHAR volumeStr[3U];
+    UCHAR volumeStr[3U] = {0};
+
+    if ((volume > 15) || (volume < 0))  
+    {
+        LOG_ERR("Volume out of range");
+        return -EINVAL;
+    }
 
     if (!conn)
     {
         LOG_ERR("Invalid connection");
         return -ENOTCONN;
     }
-
     hf = bt_hfp_hf_lookup_bt_conn(conn);
     if (!hf)
     {
@@ -2165,25 +2459,46 @@ int bt_hfp_hf_volume_update(struct bt_conn *conn, hf_volume_type_t type, int vol
     }
 
     sprintf((char *)&volumeStr[0U],"%d", volume);
-    
-    api_retval = BT_hfp_unit_set_gain
+    if (type == hf_volume_type_speaker)
+    {
+        memset((char *)&hf->bt_hfp_hp_speaker_volume[0], 0x0, 3);
+        sprintf((char *)&hf->bt_hfp_hp_speaker_volume[0], "%d", volume);
+
+        api_retval = BT_hfp_unit_set_gain
                  (
                      hf->handle,
                      type,
-                     volumeStr,
-                     (UCHAR)BT_str_len(volumeStr)
+                     hf->bt_hfp_hp_speaker_volume,
+                     (UCHAR)BT_str_len(hf->bt_hfp_hp_speaker_volume)
                  );
-
-    printf("> API RETVAL Set Volume 0x%04X\n",api_retval);
-    if (type == hf_volume_type_speaker )
-    {
-        BT_str_n_copy(&hf->bt_hfp_hp_speaker_volume[0], volume, 3);
-        sco_audio_set_speaker_volume_pl(volume);
     }
     else
     {
-        BT_str_n_copy(&hf->bt_hfp_hp_microphone_gain[0], volume, 3);
+        memset((char *)&hf->bt_hfp_hp_microphone_gain[0], 0x0, 3);
+        sprintf((char *)&hf->bt_hfp_hp_microphone_gain[0], "%d", volume);
+
+        api_retval = BT_hfp_unit_set_gain
+                 (
+                     hf->handle,
+                     type,
+                     hf->bt_hfp_hp_microphone_gain,
+                     (UCHAR)BT_str_len(hf->bt_hfp_hp_microphone_gain)
+                 );     
     }
+
+    if (api_retval < 0)
+    {
+        LOG_ERR("Failed to control volume value api_retval : %d", api_retval);
+        status = bt_hfp_hf_get_status(api_retval);
+    }
+    else
+    {
+        if (type == hf_volume_type_speaker )
+        {
+            sco_audio_set_speaker_volume_pl(volume);
+        }
+    }
+
     return status;    
 }
 int bt_hfp_hf_get_last_voice_tag_number(struct bt_conn *conn)
@@ -2204,15 +2519,128 @@ int bt_hfp_hf_get_last_voice_tag_number(struct bt_conn *conn)
         LOG_ERR("No HF connection found");
         return -ENOTCONN;
     }
+
     api_retval = BT_hfp_unit_feature_control
              (
                  hf->handle,
                  HFP_UNIT_FEATURE_BINP,
                  HFP_UNIT_ACTION_ENABLE
              );
-    printf("> API RETVAL Set Volume 0x%04X\n",api_retval);
+    if (api_retval < 0)
+    {
+        LOG_ERR("Failed to get last voice tag number api_retval :%d ", api_retval);
+        status = bt_hfp_hf_get_status(api_retval);
+    }
 
     return status;    
+}
+
+int bt_hfp_hf_connect(struct bt_conn *conn, uint8_t channel)
+{
+    API_RESULT api_retval;
+    struct bt_conn_info info;
+    uint8_t peer_addr[BT_BD_ADDR_SIZE];
+    
+    (void)memset(&info, 0, sizeof(info));
+    bt_conn_get_info(conn, &info);
+    memcpy(peer_addr, info.br.dst, BT_BD_ADDR_SIZE);
+    api_retval = BT_hfp_unit_connect(peer_addr, channel);
+    if (api_retval)
+    {
+        return -EIO;
+    }
+
+    return 0;
+}
+
+int bt_hfp_hf_disconnect(struct bt_conn *conn)
+{
+    API_RESULT api_retval;
+    struct bt_hfp_hf_em *hf;
+
+    hf = bt_hfp_hf_lookup_bt_conn(conn);
+    if (!hf)
+    {
+        LOG_ERR("No HF connection found");
+        return -ENOTCONN;
+    }
+    api_retval = BT_hfp_unit_disconnect(hf->handle);
+    if (api_retval)
+    {
+        return -EIO;
+    }
+
+    return 0;
+}
+
+static uint8_t bt_hfp_ag_sdp_user(struct bt_conn *conn, struct bt_sdp_client_result *result)
+{
+    uint16_t param;
+    int res;
+
+    if ((result) && (result->resp_buf))
+    {
+        LOG_INF("sdp success callback\r\n");
+        res = bt_sdp_get_proto_param(result->resp_buf, BT_SDP_PROTO_RFCOMM, &param);
+        if (res < 0)
+        {
+            LOG_ERR("PSM is not found\r\n");
+            return BT_SDP_DISCOVER_UUID_CONTINUE;
+        }
+        LOG_INF("param %x\r\n", param);
+        if (param != 0)
+        {
+            LOG_INF("HFP  Service found. Connecting ...\n");
+            for (int i = 0; i < CONFIG_BT_MAX_CONN; i++)
+            {
+                if ((s_hfp_hf_sdp[i].allocated) && (s_hfp_hf_sdp[i].bt_conn == conn))
+                {
+                    s_hfp_hf_sdp[i].discoverCallback(conn, param);
+                    s_hfp_hf_sdp[i].allocated = 0U;
+                    s_hfp_hf_sdp[i].bt_conn   = NULL;
+                    break;
+                }
+            }
+
+            return BT_SDP_DISCOVER_UUID_STOP;
+        }
+        return BT_SDP_DISCOVER_UUID_CONTINUE;
+    }
+    else
+    {
+        LOG_ERR("sdp fail callback\r\n");
+        return BT_SDP_DISCOVER_UUID_CONTINUE;
+    }
+}
+static struct bt_sdp_discover_params discov_hfp_hf = {
+    .uuid = BT_UUID_DECLARE_16(BT_SDP_HANDSFREE_AGW_SVCLASS),
+    .func = bt_hfp_ag_sdp_user,
+    .pool = &sdp_client_pool,
+};
+
+int bt_hfp_hf_discover(struct bt_conn *conn, bt_hfp_hf_discover_callback discoverCallback)
+{
+    int res;
+    for (int i = 0; i < CONFIG_BT_MAX_CONN; i++)
+    {
+        if (s_hfp_hf_sdp[i].allocated == 0)
+        {
+            s_hfp_hf_sdp[i].allocated        = 1U;
+            s_hfp_hf_sdp[i].bt_conn          = conn;
+            s_hfp_hf_sdp[i].discoverCallback = discoverCallback;
+            res                           = bt_sdp_discover(conn, &discov_hfp_hf);
+            if (res)
+            {
+                LOG_ERR("SDP discovery failed: result\r\n");
+            }
+            else
+            {
+                LOG_INF("SDP discovery started\r\n");
+            }
+            return res;
+        }
+    }
+    return -ENOSPC;
 }
 
 /**

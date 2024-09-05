@@ -3,7 +3,7 @@
  */
 
 /*
- * Copyright (c) 2021 NXP Corporation
+ * Copyright (c) 2021, 2024 NXP Corporation
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -122,6 +122,16 @@ struct bt_hfp_ag_cb
      */
     void (*disconnected)(struct bt_hfp_ag *hfp_ag);
 
+    /** Get config after connection.
+     *
+     *  This callback is used to get config #hfp_ag_get_config
+     *  It is same as the second parameter of #bt_hfp_ag_connect.
+     *
+     *  @param hfp_ag  bt hfp ag Connection object.
+     *  @param config  get the config from upper layer.
+     */
+    void (*get_config)(struct bt_hfp_ag *hfp_ag, hfp_ag_get_config **config);
+
     /** AG volume_control Callback
      *
      *  This callback provides volume_control indicator value to the application
@@ -237,6 +247,17 @@ int bt_hfp_ag_init(void);
 
 int bt_hfp_ag_deinit(void);
 
+/** @brief hfp ag register callback
+ *
+ *  #bt_hfp_ag_connect can register callback too.
+ *
+ *  @param cb  bt hfp ag callback
+ *
+ *  @return 0 in case of success or otherwise in case
+ *  of error.
+ */
+int bt_hfp_ag_register_cb(struct bt_hfp_ag_cb *cb);
+
 /** @brief hfp ag Connect.
  *
  *  This function is to be called after the conn parameter is obtained by
@@ -248,7 +269,7 @@ int bt_hfp_ag_deinit(void);
  *
  *  @param conn Pointer to bt_conn structure.
  *  @param config  bt hfp ag congigure
- *  @param cb  bt hfp ag congigure
+ *  @param cb  bt hfp ag callback
  *  @param phfp_ag  Pointer to pointer of bt hfp ag Connection object
  *
  *  @return 0 in case of success or otherwise in case

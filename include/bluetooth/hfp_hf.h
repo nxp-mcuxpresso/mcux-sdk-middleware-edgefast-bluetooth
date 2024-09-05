@@ -3,6 +3,7 @@
  */
 
 /*
+ * Copyright 2024 NXP
  * Copyright (c) 2015-2016 Intel Corporation
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -32,7 +33,6 @@ enum bt_hfp_hf_at_cmd {
 #define HFP_HF_DIGIT_ARRAY_SIZE                       32
 #define HFP_HF_MAX_OPERATOR_NAME_LEN                  16
 
-
 /*
  * Command complete types for the application
  */
@@ -48,7 +48,7 @@ struct bt_hfp_hf_cmd_complete {
 	/* CME error number to be added */
 	uint8_t cme;
 };
-/** @brief bt hfp ag volume type */
+/** @brief bt hfp volume type */
 typedef enum _hf_volume_type_t
 {
     /*speaker */
@@ -72,6 +72,14 @@ typedef enum _hf_multiparty_call_option_t
     hf_multiparty_call_option_five, 
 } hf_multiparty_call_option_t;
 
+/** @brief bt hf configure setting */
+typedef struct _hfp_hf_get_config
+{
+    /*bt hfp hf volume of speaker setting */
+    uint8_t bt_hfp_hf_vgs;
+    /*bt hfp hf volume of mic setting*/
+    uint8_t bt_hfp_hf_vgm;
+} hfp_hf_get_config;
 
 typedef struct _hf_waiting_call_state_t
 {
@@ -81,7 +89,14 @@ typedef struct _hf_waiting_call_state_t
     uint8_t   alpha[HFP_HF_MAX_OPERATOR_NAME_LEN];
 } hf_waiting_call_state_t;
 
-/** @brief HFP profile application callback */
+/** @brief HFP profile application callback 
+  *
+  * @note Please note that blocking function calls should be not be called
+  *  the callback function, otherwise, tThese blocking callbacks can potentially 
+  *  cause issues with the entire HFP AT Command state machine, preventing it from 
+  *  continuing to process subsequent AT commands.
+  *
+  */
 struct bt_hfp_hf_cb {
 	/** HF connected callback to application
 	 *
@@ -194,6 +209,18 @@ struct bt_hfp_hf_cb {
        */
       
       void (*ring_indication)(struct bt_conn *conn);
+
+      /** HF volume update indication callback to application
+       *
+       *  If this callback is provided it will be called whenever there
+       *  is an volume update event.
+       *
+       * @param conn Connection object.
+       * @param type bt hfp volume type.
+       * @param volume bt hfp volume level value.
+       */
+
+      void (*volume_update)(struct bt_conn *conn,  hf_volume_type_t type, int volume);
   
       /** HF notify command completed callback to application
        *
@@ -204,6 +231,15 @@ struct bt_hfp_hf_cb {
        */
       void (*cmd_complete_cb)(struct bt_conn *conn,
                             struct bt_hfp_hf_cmd_complete *cmd);
+      
+      /** Get config before connection.
+       *
+       *  This callback is used to get config #hfp_hf_get_config
+       *
+       *  @param conn Connection object.
+       *  @param config get the config from upper layer.
+       */
+      void (*get_config)(hfp_hf_get_config **config); 
 };
 
 /** @brief Register HFP HF profile
@@ -217,6 +253,61 @@ struct bt_hfp_hf_cb {
  */
 int bt_hfp_hf_register(struct bt_hfp_hf_cb *cb);
 
+
+/** @brief hfp hf Connect.
+ *
+ *  This function is to be called after the conn parameter is obtained by
+ *  performing a GAP procedure. The API is to be used to establish hfp hf
+ *  connection between devices.
+ *  This function only establish RFCOM connection.
+ *  After connection success, the callback that is registered by
+ *  bt_hfp_hf_register is called.
+ *
+ *  @param conn Pointer to bt_conn structure.
+ *  @param channel The refcom service channel.
+ *
+ *  @return 0 in case of success or otherwise in case
+ *  of error.
+ */
+int bt_hfp_hf_connect(struct bt_conn *conn, uint8_t channel);
+/** @brief hfp hf DisConnect.
+ *
+ *  This function is to be called after the conn parameter is obtained by
+ *  performing a GAP procedure. The API is to be used to disconnect hfp ag
+ *  connection between devices.
+ *  This function only disconnect RFCOM connection.
+ *  After connection success, the callback that is registered by
+ *  bt_hfp_hf_register is called.
+ *
+ *  @param conn  pointer to connection object
+ *
+ *  @return 0 in case of success or otherwise in case
+ *  of error.
+ */
+int bt_hfp_hf_disconnect(struct bt_conn *conn);
+
+/** @brief hfp_hf discover callback function 
+ *
+ *  @param conn   Pointer to bt_conn structure.
+ *  @param channel the server channel of hfp ag
+ */
+
+typedef int (*bt_hfp_hf_discover_callback)(struct bt_conn *conn, uint8_t channel);
+
+/** @brief hfp hf discover 
+ *
+ *  This function is to be called after the conn parameter is obtained by
+ *  performing a GAP procedure. The API is to be used to find the ag's rfcomm
+ *  service channel.
+ *
+ *  @param conn  pointer to bt connection object
+ *  @param discoverCallback  pointer to discover callback function,defined in application
+ *
+ *  @return 0 in case of success or otherwise in case
+ *  of error.
+ */
+int bt_hfp_hf_discover(struct bt_conn *conn, bt_hfp_hf_discover_callback discoverCallback);
+
 /** @brief Handsfree client Send AT
  *
  *  Send specific AT commands to handsfree client profile.
@@ -225,7 +316,14 @@ int bt_hfp_hf_register(struct bt_hfp_hf_cb *cb);
  *  @param cmd AT command to be sent.
  *
  *  @return 0 in case of success or negative value in case of error.
- */
+ *
+ *  @note Please note that send_cmd function and the following HFP APIs may return -EBUSY indicating a 
+ *  failure in sending with busy, requiring the application to retry sending. The possible reasons for this 
+ *  failure could be that an AT command is currently being sent by the application, or it could be
+ *  caused by the HFP profile internally sending AT commands (such as AT+VGS, AT+BCS, AT+CLIP, AT+CCWA), 
+ *  resulting in the application's AT command being in a busy state.
+ *
+*/
 int bt_hfp_hf_send_cmd(struct bt_conn *conn, enum bt_hfp_hf_at_cmd cmd);
 
 /**

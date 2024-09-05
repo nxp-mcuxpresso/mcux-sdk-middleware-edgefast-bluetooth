@@ -541,6 +541,14 @@ struct bt_l2cap_chan_ops {
  */
 #define BT_L2CAP_SDU_CHAN_SEND_RESERVE (BT_L2CAP_SDU_BUF_SIZE(0))
 
+/* BR_L2CAP_PSM(0x1000 - 0xFFFF) : pre-allocated for profiles to avoid conflicts */
+enum bt_l2cap_br_psm{
+    BT_BR_PSM_PBAP_PSE  = 0x1001,
+	BT_BR_PSM_MAP_MSE_1 = 0x1003,
+	BT_BR_PSM_MAP_MSE_2 = 0x1005,
+	BT_BR_PSM_MAP_MCE   = 0x1007,
+};
+
 /** @brief L2CAP Server structure. */
 struct bt_l2cap_server {
 	/** @brief Server PSM.

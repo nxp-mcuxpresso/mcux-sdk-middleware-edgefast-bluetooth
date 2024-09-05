@@ -705,11 +705,13 @@ static int send_frag(struct bt_conn *conn,
 		     uint8_t flags)
 {
 
+#if 0 /* This code will cause hci_tx_thread blocking when not receive NOCP. */
 	/* Wait until the controller can accept ACL packets */
     if (KOSA_StatusSuccess != OSA_SemaphoreWait(bt_conn_get_pkts(conn), osaWaitForever_c)){
 		LOG_DBG("no controller bufs");
 		return -ENOBUFS;
 	}
+#endif
 
 	/* Check for disconnection. It can't be done higher up (ie `send_buf`)
 	 * as `create_frag` blocks with K_FOREVER and the connection could
@@ -732,7 +734,7 @@ static int send_frag(struct bt_conn *conn,
 		 * This buffer was fetched from the FIFO using a peek operation.
 		 */
 		#if 0 /* current buf already dequeue. */
-		buf = net_buf_get(&conn->tx_queue, osaWaitNone_c);
+		buf = net_buf_get(conn->tx_queue, osaWaitNone_c);
 		#endif
 		frag = buf;
 	}
@@ -840,10 +842,23 @@ static struct k_poll_signal conn_change =
 #endif
 static void conn_cleanup(struct bt_conn *conn)
 {
-    if (atomic_test_and_clear_bit(conn->flags, BT_CONN_UNPAIRING))
-    {
-        bt_conn_unpair(conn->id, &conn->le.dst);
-    }
+	if (atomic_test_and_clear_bit(conn->flags, BT_CONN_UNPAIRING))
+	{
+#if (defined(CONFIG_BT_BREDR) && ((CONFIG_BT_BREDR) > 0U))
+		if (conn->type == BT_CONN_TYPE_BR)
+		{
+			bt_addr_le_t addr;
+
+			addr.type = BT_ADDR_LE_PUBLIC;
+			addr.a = conn->br.dst;
+			bt_conn_unpair(conn->id, &addr);
+		}
+		else
+#endif /* (defined(CONFIG_BT_BREDR) && ((CONFIG_BT_BREDR) > 0U)) */
+		{
+			bt_conn_unpair(conn->id, &conn->le.dst);
+		}
+	}
 
 #if 1
 	struct net_buf *buf;
@@ -976,7 +991,7 @@ int bt_conn_prepare_events(struct k_poll_event events[])
 	return ev_count;
 }
 #endif
-void bt_conn_process_tx(struct bt_conn *conn)
+int bt_conn_process_tx(struct bt_conn *conn)
 {
 	struct net_buf *buf;
 	int err;
@@ -987,8 +1002,16 @@ void bt_conn_process_tx(struct bt_conn *conn)
 	    atomic_test_and_clear_bit(conn->flags, BT_CONN_CLEANUP)) {
 		LOG_DBG("handle %u disconnected - cleaning up", conn->handle);
 		conn_cleanup(conn);
-		return;
+		return -ENOTCONN;
 	}
+
+#if 1 /* Here we put this check early so that it won't block the cmd send. */
+	/* Wait until the controller can accept ACL packets */
+	if (KOSA_StatusSuccess != OSA_SemaphoreWait(bt_conn_get_pkts(conn), osaWaitNone_c)){
+		LOG_DBG("no controller bufs");
+		return -ENOMEM;
+	}
+#endif
 
 	/* Get next ACL packet for connection. The buffer will only get dequeued
 	 * if there is a free controller buffer to put it in.
@@ -999,7 +1022,9 @@ void bt_conn_process_tx(struct bt_conn *conn)
 	buf = net_buf_get(conn->tx_queue, osaWaitNone_c);
 	if(NULL == buf)
 	{
-		return;
+		/* Since dequeue fail, we need give back the packet for later send. */
+		OSA_SemaphorePost(bt_conn_get_pkts(conn));
+		return -ENOMSG;
 	}
 	/* Since we used `peek`, the queue still owns the reference to the
 	 * buffer, so we need to take an explicit additional reference here.
@@ -1027,6 +1052,8 @@ void bt_conn_process_tx(struct bt_conn *conn)
 		}
 	}
 	net_buf_unref(buf);
+
+	return err;
 }
 
 static void process_unack_tx(struct bt_conn *conn)

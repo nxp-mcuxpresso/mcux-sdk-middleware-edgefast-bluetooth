@@ -729,6 +729,47 @@ done:
 	return BT_SDP_DISCOVER_UUID_CONTINUE;
 }
 
+static uint8_t bt_pbap_pce_sdp_user(struct bt_conn *conn, struct bt_sdp_client_result *result)
+{
+    int res;
+	uint32_t peer_feature = 0;
+	uint16_t rfommchannel = 0;
+	uint16_t l2cappsm     = 0;
+    if ((result) && (result->resp_buf))
+    {
+        res = bt_sdp_get_pbap_map_ctn_features(result->resp_buf, &peer_feature);
+        if (res < 0)
+        {
+            shell_error(ctx_shell, "No peer_feature found\r\n");
+        }
+        else
+        {
+            shell_print(ctx_shell, "peer_feature : %x\r\n", peer_feature);
+        }
+        res = bt_sdp_get_goep_l2cap_psm(result->resp_buf, &l2cappsm);
+        if (res < 0)
+        {
+            shell_error(ctx_shell, "No GOEP_L2CAPPSM found\r\n");
+        }
+        else
+        {
+            shell_print(ctx_shell, "GOEP_L2CAPPSM : %d\r\n", l2cappsm);
+        }
+
+        res = bt_sdp_get_proto_param(result->resp_buf, BT_SDP_PROTO_RFCOMM, &rfommchannel);
+        if (res < 0)
+        {
+            shell_error(ctx_shell, "No rfcomm found\r\n");
+        }
+        else
+        {
+            shell_print(ctx_shell, "rfcomm channel : %d\r\n", rfommchannel);
+        }
+    }
+
+    return BT_SDP_DISCOVER_UUID_STOP;
+}
+
 static struct bt_sdp_discover_params discov_hfpag = {
 	.uuid = BT_UUID_DECLARE_16(BT_SDP_HANDSFREE_AGW_SVCLASS),
 	.func = sdp_hfp_ag_user,
@@ -739,6 +780,12 @@ static struct bt_sdp_discover_params discov_a2src = {
 	.uuid = BT_UUID_DECLARE_16(BT_SDP_AUDIO_SOURCE_SVCLASS),
 	.func = sdp_a2src_user,
 	.pool = &sdp_client_pool,
+};
+
+static struct bt_sdp_discover_params discov_pbap_pce = {
+    .uuid = BT_UUID_DECLARE_16(BT_SDP_PBAP_PSE_SVCLASS),
+    .func = bt_pbap_pce_sdp_user,
+    .pool = &sdp_client_pool,
 };
 
 static struct bt_sdp_discover_params discov;
@@ -760,7 +807,9 @@ static shell_status_t cmd_sdp_find_record(shell_handle_t shell,
 		discov = discov_hfpag;
 	} else if (!strcmp(action, "A2SRC")) {
 		discov = discov_a2src;
-	} else {
+	}else if (!strcmp(action, "PBAP_PCE")){
+        discov = discov_pbap_pce;
+    }else {
 		shell_help(shell);
 		return kStatus_SHELL_Success;
 	}
@@ -876,6 +925,90 @@ static shell_status_t cmd_l2cap_send(shell_handle_t shell, int32_t argc, char *a
 	return kStatus_SHELL_Success;
 }
 
+void discovery_recv_cb(const struct bt_br_discovery_result *result)
+{
+	char addr[BT_ADDR_LE_STR_LEN];
+	const uint8_t *eir;
+	size_t len = sizeof(result->eir);
+	static uint8_t temp[240];
+
+	bt_addr_to_str(&result->addr, addr, sizeof(addr));
+	PRINTF("Monitor: Device: %s, rssi %d, cod 0x%X%X%X", addr, result->rssi,
+		       result->cod[0], result->cod[1], result->cod[2]);
+
+	eir = result->eir;
+
+	while ((eir[0] > 2) && (len > eir[0])) {
+		switch (eir[1]) {
+		case BT_DATA_NAME_SHORTENED:
+		case BT_DATA_NAME_COMPLETE:
+			memcpy(temp, &eir[2], eir[0] - 1);
+			temp[eir[0] - 1] = '\0'; /* Set end flag */
+			PRINTF(", name %s", temp);
+			break;
+		}
+		len = len - eir[0] - 1;
+		eir = eir + eir[0] + 1;
+	}
+	PRINTF("\n");
+}
+
+void discovery_timeout_cb(const struct bt_br_discovery_result *results,
+		size_t count)
+{
+	char addr[BT_ADDR_LE_STR_LEN];
+	const uint8_t *eir;
+	size_t len = sizeof(results->eir);
+	static uint8_t temp[240];
+
+	for (size_t i = 0; i < count; i++) {
+		bt_addr_to_str(&results[i].addr, addr, sizeof(addr));
+		PRINTF("Monitor: Device[%d]: %s, rssi %d, cod 0x%X%X%X", i, addr, results[i].rssi,
+		       results[i].cod[0], results[i].cod[1], results[i].cod[2]);
+
+		eir = results[i].eir;
+
+		while ((eir[0] > 2) && (len > eir[0])) {
+			switch (eir[1]) {
+			case BT_DATA_NAME_SHORTENED:
+			case BT_DATA_NAME_COMPLETE:
+				memcpy(temp, &eir[2], eir[0] - 1);
+				temp[eir[0] - 1] = '\0'; /* Set end flag */
+				PRINTF(", name %s", temp);
+				break;
+			}
+			len = len - eir[0] - 1;
+			eir = eir + eir[0] + 1;
+		}
+		PRINTF("\n");
+	}
+}
+
+static struct bt_br_discovery_cb discovery_cb = {
+	.recv = discovery_recv_cb,
+	.timeout = discovery_timeout_cb,
+};
+
+static shell_status_t cmd_discovery_cb(shell_handle_t shell, int32_t argc, char *argv[])
+{
+	const char *action;
+
+	action = argv[1];
+	if (!strcmp(action, "on")) {
+		bt_br_discovery_cb_register(&discovery_cb);
+
+		shell_print(shell, "Discovery cb register");
+	} else if (!strcmp(action, "off")) {
+		bt_br_discovery_cb_unregister(&discovery_cb);
+
+		shell_print(shell, "Discovery cb unregister");
+	} else {
+		shell_help(shell);
+	}
+
+	return kStatus_SHELL_Success;
+}
+
 #define HELP_NONE "[none]"
 #define HELP_ADDR_LE "<address: XX:XX:XX:XX:XX:XX> <type: (public|random)>"
 
@@ -898,6 +1031,7 @@ SHELL_STATIC_SUBCMD_SET_CREATE(br_cmds,
 	SHELL_CMD_ARG(oob, NULL, HELP_NONE, cmd_oob, 1, 0),
 	SHELL_CMD_ARG(pscan, NULL, "<value: on, off>", cmd_connectable, 2, 0),
 	SHELL_CMD_ARG(sdp-find, NULL, "<HFPAG>", cmd_sdp_find_record, 2, 0),
+	SHELL_CMD_ARG(discovery-cb-register, NULL, "<value: on, off>", cmd_discovery_cb, 2, 0),
 	SHELL_SUBCMD_SET_END
 );
 

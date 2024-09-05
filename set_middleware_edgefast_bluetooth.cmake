@@ -331,39 +331,25 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PUBLIC
 endif()
 
 
-if (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkbmimxrt1170)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkbmimxrt1170 true) in config.cmake to use this component
+if (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_frdmrw612)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_frdmrw612 true) in config.cmake to use this component
 
-message("middleware_edgefast_bluetooth_sdio_template_evkbmimxrt1170 component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+message("middleware_edgefast_bluetooth_mcux_linker_template_frdmrw612 component is included from ${CMAKE_CURRENT_LIST_FILE}.")
 
-if(CONFIG_USE_middleware_sdmmc_host_usdhc AND CONFIG_USE_middleware_sdmmc_sdio AND CONFIG_USE_middleware_sdmmc_host_usdhc_freertos AND CONFIG_USE_component_igpio_adapter AND (CONFIG_DEVICE_ID STREQUAL MIMXRT1176xxxxx) AND (CONFIG_BOARD STREQUAL evkbmimxrt1170))
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_sdio_template_evkbmimxrt1170 dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkbmimxrt1170)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkbmimxrt1170 true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_mcux_linker_template_evkbmimxrt1170 component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if((CONFIG_DEVICE_ID STREQUAL MIMXRT1176xxxxx) AND (CONFIG_BOARD STREQUAL evkbmimxrt1170))
+if((CONFIG_DEVICE_ID STREQUAL RW612) AND (CONFIG_BOARD STREQUAL frdmrw612))
 
 if(CONFIG_TOOLCHAIN STREQUAL mcux)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkbmimxrt1170/edgefast_bluetooth_examples/template/end_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkbmimxrt1170)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkbmimxrt1170/edgefast_bluetooth_examples/template/main_data.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkbmimxrt1170)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkbmimxrt1170/edgefast_bluetooth_examples/template/main_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkbmimxrt1170)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkbmimxrt1170/edgefast_bluetooth_examples/template/symbols.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkbmimxrt1170)
+  target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
+      ${CMAKE_CURRENT_LIST_DIR}/../../boards/frdmrw612/edgefast_bluetooth_examples/template/end_text.ldt
+      ${CMAKE_CURRENT_LIST_DIR}/../../boards/frdmrw612/edgefast_bluetooth_examples/template/main_data.ldt
+      ${CMAKE_CURRENT_LIST_DIR}/../../boards/frdmrw612/edgefast_bluetooth_examples/template/main_text.ldt
+      ${CMAKE_CURRENT_LIST_DIR}/../../boards/frdmrw612/edgefast_bluetooth_examples/template/symbols.ldt
+  )
 endif()
 
 else()
 
-message(SEND_ERROR "middleware_edgefast_bluetooth_mcux_linker_template_evkbmimxrt1170 dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+message(SEND_ERROR "middleware_edgefast_bluetooth_mcux_linker_template_frdmrw612 dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
 
 endif()
 
@@ -407,7 +393,7 @@ if (CONFIG_USE_middleware_edgefast_bluetooth_common_ethermind_hci_uart)
 
 message("middleware_edgefast_bluetooth_common_ethermind_hci_uart component is included from ${CMAKE_CURRENT_LIST_FILE}.")
 
-if(CONFIG_USE_middleware_edgefast_bluetooth_common_ethermind AND (CONFIG_DEVICE_ID STREQUAL MIMXRT1042xxxxB OR CONFIG_DEVICE_ID STREQUAL MIMXRT1062xxxxA OR CONFIG_DEVICE_ID STREQUAL MIMXRT1062xxxxB OR CONFIG_DEVICE_ID STREQUAL MIMXRT685S OR CONFIG_DEVICE_ID STREQUAL MIMXRT1176xxxxx OR CONFIG_DEVICE_ID STREQUAL MIMXRT595S OR CONFIG_DEVICE_ID STREQUAL MIMXRT1052xxxxB OR CONFIG_DEVICE_ID STREQUAL MIMXRT1189xxxxx OR CONFIG_DEVICE_ID STREQUAL MIMXRT1187xxxxx OR CONFIG_DEVICE_ID STREQUAL MIMXRT1166xxxxx OR CONFIG_DEVICE_ID STREQUAL MCXN547 OR CONFIG_DEVICE_ID STREQUAL MCXN947) AND CONFIG_USE_component_serial_manager AND CONFIG_USE_component_serial_manager_uart AND (CONFIG_USE_middleware_edgefast_bluetooth_wifi_nxp_controller_base OR CONFIG_USE_middleware_edgefast_bluetooth_k32w061_controller))
+if(CONFIG_USE_middleware_edgefast_bluetooth_common_ethermind AND (CONFIG_DEVICE_ID STREQUAL MIMXRT1062xxxxA OR CONFIG_DEVICE_ID STREQUAL MIMXRT1062xxxxB OR CONFIG_DEVICE_ID STREQUAL MIMXRT1176xxxxx OR CONFIG_DEVICE_ID STREQUAL MIMXRT1189xxxxx OR CONFIG_DEVICE_ID STREQUAL MIMXRT1187xxxxx OR CONFIG_DEVICE_ID STREQUAL MCXN547 OR CONFIG_DEVICE_ID STREQUAL MCXN947) AND CONFIG_USE_component_serial_manager AND CONFIG_USE_component_serial_manager_uart AND (CONFIG_USE_middleware_edgefast_bluetooth_wifi_nxp_controller_base OR CONFIG_USE_middleware_edgefast_bluetooth_k32w061_controller))
 
 target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/port/pal/mcux/bluetooth/hci_uart.c
@@ -588,7 +574,7 @@ if (CONFIG_USE_middleware_edgefast_bluetooth_wifi_nxp_controller_base)
 
 message("middleware_edgefast_bluetooth_wifi_nxp_controller_base component is included from ${CMAKE_CURRENT_LIST_FILE}.")
 
-if(CONFIG_USE_middleware_edgefast_bluetooth_common_ethermind AND CONFIG_USE_middleware_wifi_fwdnld AND ((CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkmimxrt1040 AND (CONFIG_BOARD STREQUAL evkmimxrt1040)) OR (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkcmimxrt1060 AND (CONFIG_BOARD STREQUAL evkcmimxrt1060)) OR (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkmimxrt685 AND (CONFIG_BOARD STREQUAL evkmimxrt685)) OR (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_mimxrt685audevk AND (CONFIG_BOARD STREQUAL mimxrt685audevk)) OR (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkmimxrt595 AND (CONFIG_BOARD STREQUAL evkmimxrt595)) OR (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkbimxrt1050 AND (CONFIG_BOARD STREQUAL evkbimxrt1050)) OR (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkbmimxrt1170 AND (CONFIG_BOARD STREQUAL evkbmimxrt1170)) OR (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkmimxrt1180 AND (CONFIG_BOARD STREQUAL evkmimxrt1180)) OR (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_mcxn5xxevk AND (CONFIG_BOARD STREQUAL mcxn5xxevk)) OR (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_mcxn9xxevk AND (CONFIG_BOARD STREQUAL mcxn9xxevk))))
+if(CONFIG_USE_middleware_edgefast_bluetooth_common_ethermind AND CONFIG_USE_middleware_wifi_fwdnld AND ((CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkcmimxrt1060 AND (CONFIG_BOARD STREQUAL evkcmimxrt1060)) OR (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkbmimxrt1170 AND (CONFIG_BOARD STREQUAL evkbmimxrt1170)) OR (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkmimxrt1180 AND (CONFIG_BOARD STREQUAL evkmimxrt1180)) OR (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_mcxn5xxevk AND (CONFIG_BOARD STREQUAL mcxn5xxevk)) OR (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_mcxn9xxevk AND (CONFIG_BOARD STREQUAL mcxn9xxevk))))
 
 target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/port/pal/mcux/bluetooth/controller/controller_wifi_nxp.c
@@ -612,7 +598,7 @@ if (CONFIG_USE_middleware_edgefast_bluetooth_k32w061_controller)
 
 message("middleware_edgefast_bluetooth_k32w061_controller component is included from ${CMAKE_CURRENT_LIST_FILE}.")
 
-if(CONFIG_USE_middleware_edgefast_bluetooth_common_ethermind AND (CONFIG_DEVICE_ID STREQUAL MIMXRT1042xxxxB OR CONFIG_DEVICE_ID STREQUAL MIMXRT1062xxxxA OR CONFIG_DEVICE_ID STREQUAL MIMXRT1062xxxxB OR CONFIG_DEVICE_ID STREQUAL MIMXRT685S OR CONFIG_DEVICE_ID STREQUAL MIMXRT1176xxxxx OR CONFIG_DEVICE_ID STREQUAL MIMXRT595S OR CONFIG_DEVICE_ID STREQUAL MIMXRT1052xxxxB OR CONFIG_DEVICE_ID STREQUAL MIMXRT1189xxxxx OR CONFIG_DEVICE_ID STREQUAL MIMXRT1187xxxxx OR CONFIG_DEVICE_ID STREQUAL MIMXRT1166xxxxx))
+if(CONFIG_USE_middleware_edgefast_bluetooth_common_ethermind AND (CONFIG_DEVICE_ID STREQUAL MIMXRT1062xxxxA OR CONFIG_DEVICE_ID STREQUAL MIMXRT1062xxxxB OR CONFIG_DEVICE_ID STREQUAL MIMXRT1176xxxxx OR CONFIG_DEVICE_ID STREQUAL MIMXRT1189xxxxx OR CONFIG_DEVICE_ID STREQUAL MIMXRT1187xxxxx))
 
 target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/port/pal/mcux/bluetooth/controller/controller_k32w.c
@@ -705,12 +691,12 @@ endif()
 endif()
 
 
-if (CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_cm4f)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_cm4f true) in config.cmake to use this component
+if (CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_cm33nodsp)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_cm33nodsp true) in config.cmake to use this component
 
-message("middleware_edgefast_bluetooth_btble_ethermind_cm4f component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+message("middleware_edgefast_bluetooth_btble_ethermind_cm33nodsp component is included from ${CMAKE_CURRENT_LIST_FILE}.")
 
-if(CONFIG_USE_middleware_edgefast_bluetooth_pal AND CONFIG_USE_middleware_edgefast_bluetooth_template AND CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_cm4f AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_cm4f) AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_cm4f) AND (CONFIG_CORE STREQUAL cm4f))
+if(CONFIG_USE_middleware_edgefast_bluetooth_pal AND CONFIG_USE_middleware_edgefast_bluetooth_template AND CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_cm33nodsp AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_cm33nodsp) AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_cm33nodsp) AND (CONFIG_CORE STREQUAL cm33))
 
 target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_a2dp.c
@@ -738,6 +724,8 @@ target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_keys_br.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_l2cap.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_l2cap_br.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_map_mce.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_map_mse.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_monitor.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_rfcomm.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_spp.c
@@ -749,6 +737,8 @@ target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_uuid.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hfp_ag.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hfp_hf.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_pbap_pce.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_pbap_pse.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/common/addr.c
 )
 
@@ -759,19 +749,19 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PUBLIC
 
 else()
 
-message(SEND_ERROR "middleware_edgefast_bluetooth_btble_ethermind_cm4f dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+message(SEND_ERROR "middleware_edgefast_bluetooth_btble_ethermind_cm33nodsp dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
 
 endif()
 
 endif()
 
 
-if (CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_cm4f)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_cm4f true) in config.cmake to use this component
+if (CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_cm33nodsp)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_cm33nodsp true) in config.cmake to use this component
 
-message("middleware_edgefast_bluetooth_ble_ethermind_cm4f component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+message("middleware_edgefast_bluetooth_ble_ethermind_cm33nodsp component is included from ${CMAKE_CURRENT_LIST_FILE}.")
 
-if(CONFIG_USE_middleware_edgefast_bluetooth_pal AND CONFIG_USE_middleware_edgefast_bluetooth_template AND CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_cm4f AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_cm4f) AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_cm4f) AND (CONFIG_CORE STREQUAL cm4f))
+if(CONFIG_USE_middleware_edgefast_bluetooth_pal AND CONFIG_USE_middleware_edgefast_bluetooth_template AND CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_cm33nodsp AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_cm33nodsp) AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_cm33nodsp) AND (CONFIG_CORE STREQUAL cm33))
 
 target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_att.c
@@ -817,19 +807,19 @@ endif()
 
 else()
 
-message(SEND_ERROR "middleware_edgefast_bluetooth_ble_ethermind_cm4f dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+message(SEND_ERROR "middleware_edgefast_bluetooth_ble_ethermind_cm33nodsp dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
 
 endif()
 
 endif()
 
 
-if (CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_cm4f)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_cm4f true) in config.cmake to use this component
+if (CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_cm33nodsp)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_cm33nodsp true) in config.cmake to use this component
 
-message("middleware_edgefast_bluetooth_br_ethermind_cm4f component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+message("middleware_edgefast_bluetooth_br_ethermind_cm33nodsp component is included from ${CMAKE_CURRENT_LIST_FILE}.")
 
-if(CONFIG_USE_middleware_edgefast_bluetooth_pal AND CONFIG_USE_middleware_edgefast_bluetooth_template AND CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_cm4f AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_cm4f) AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_cm4f) AND (CONFIG_CORE STREQUAL cm4f))
+if(CONFIG_USE_middleware_edgefast_bluetooth_pal AND CONFIG_USE_middleware_edgefast_bluetooth_template AND CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_cm33nodsp AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_cm33nodsp) AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_cm33nodsp) AND (CONFIG_CORE STREQUAL cm33))
 
 target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_a2dp.c
@@ -854,6 +844,8 @@ target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_keys_br.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_l2cap.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_l2cap_br.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_map_mce.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_map_mse.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_monitor.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_rfcomm.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_spp.c
@@ -865,6 +857,8 @@ target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_uuid.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hfp_ag.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hfp_hf.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_pbap_pce.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_pbap_pse.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/common/addr.c
 )
 
@@ -875,7 +869,7 @@ target_include_directories(${MCUX_SDK_PROJECT_NAME} PUBLIC
 
 else()
 
-message(SEND_ERROR "middleware_edgefast_bluetooth_br_ethermind_cm4f dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+message(SEND_ERROR "middleware_edgefast_bluetooth_br_ethermind_cm33nodsp dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
 
 endif()
 
@@ -1578,12 +1572,28 @@ endif()
 endif()
 
 
+if (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_frdmrw612)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_frdmrw612 true) in config.cmake to use this component
+
+message("middleware_edgefast_bluetooth_sdio_template_frdmrw612 component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+
+if((CONFIG_DEVICE_ID STREQUAL RW612) AND (CONFIG_BOARD STREQUAL frdmrw612))
+
+else()
+
+message(SEND_ERROR "middleware_edgefast_bluetooth_sdio_template_frdmrw612 dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+
+endif()
+
+endif()
+
+
 if (CONFIG_USE_middleware_edgefast_bluetooth_template)
 # Add set(CONFIG_USE_middleware_edgefast_bluetooth_template true) in config.cmake to use this component
 
 message("middleware_edgefast_bluetooth_template component is included from ${CMAKE_CURRENT_LIST_FILE}.")
 
-if(CONFIG_USE_middleware_edgefast_bluetooth_config_template AND ((CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt1040 AND (CONFIG_BOARD STREQUAL evkmimxrt1040)) OR (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkcmimxrt1060 AND (CONFIG_BOARD STREQUAL evkcmimxrt1060)) OR (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt685 AND (CONFIG_BOARD STREQUAL evkmimxrt685)) OR (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_mimxrt685audevk AND (CONFIG_BOARD STREQUAL mimxrt685audevk)) OR (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt595 AND (CONFIG_BOARD STREQUAL evkmimxrt595)) OR (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkbimxrt1050 AND (CONFIG_BOARD STREQUAL evkbimxrt1050)) OR (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkbmimxrt1170 AND (CONFIG_BOARD STREQUAL evkbmimxrt1170)) OR (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt1180 AND (CONFIG_BOARD STREQUAL evkmimxrt1180)) OR (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_rdrw612bga AND (CONFIG_BOARD STREQUAL rdrw612bga)) OR (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_frdmrw612 AND (CONFIG_BOARD STREQUAL frdmrw612)) OR (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_mcxn5xxevk AND (CONFIG_BOARD STREQUAL mcxn5xxevk)) OR (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_mcxn9xxevk AND (CONFIG_BOARD STREQUAL mcxn9xxevk))))
+if(CONFIG_USE_middleware_edgefast_bluetooth_config_template AND ((CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkcmimxrt1060 AND (CONFIG_BOARD STREQUAL evkcmimxrt1060)) OR (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkbmimxrt1170 AND (CONFIG_BOARD STREQUAL evkbmimxrt1170)) OR (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt1180 AND (CONFIG_BOARD STREQUAL evkmimxrt1180)) OR (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_rdrw612bga AND (CONFIG_BOARD STREQUAL rdrw612bga)) OR (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_frdmrw612 AND (CONFIG_BOARD STREQUAL frdmrw612)) OR (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_mcxn5xxevk AND (CONFIG_BOARD STREQUAL mcxn5xxevk)) OR (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_mcxn9xxevk AND (CONFIG_BOARD STREQUAL mcxn9xxevk))))
 
 add_config_file(${CMAKE_CURRENT_LIST_DIR}/./output/templates/config/mbedtls/mbedtls_config_client.h ${CMAKE_CURRENT_LIST_DIR}/./output/templates/config/mbedtls middleware_edgefast_bluetooth_template)
 
@@ -1654,6 +1664,10 @@ target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/./source/shell/shell_avrcp.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/shell/shell_test_mode.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/shell/shell_iso.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/shell/shell_map.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/shell/shell_pbap.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/shell/shell_hfp.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/shell/shell_ble_scan_filter.c
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PUBLIC
@@ -1755,6 +1769,7 @@ target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/./source/shell/shell_l2cap.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/shell/fsl_shell.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/shell/shell_test_mode.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/shell/shell_ble_scan_filter.c
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PUBLIC
@@ -1783,296 +1798,317 @@ endif()
 endif()
 
 
-if (CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_cm4f)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_cm4f true) in config.cmake to use this component
+if (CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_cm33nodsp)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_cm33nodsp true) in config.cmake to use this component
 
-message("middleware_edgefast_bluetooth_btble_ethermind_lib_cm4f component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+message("middleware_edgefast_bluetooth_btble_ethermind_lib_cm33nodsp component is included from ${CMAKE_CURRENT_LIST_FILE}.")
 
-if((CONFIG_CORE STREQUAL cm4f) AND CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_cm4f)
+if((CONFIG_CORE STREQUAL cm33) AND CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_cm33nodsp)
 
-if(CONFIG_TOOLCHAIN STREQUAL armgcc AND CONFIG_CORE STREQUAL cm4f)
+if(CONFIG_TOOLCHAIN STREQUAL armgcc AND CONFIG_CORE STREQUAL cm33)
   target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
     -Wl,--start-group
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_a2dp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_avrcp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_bip.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_bpp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_core.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_ctn.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_ftp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_ga.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_gatt.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_hfp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_hid.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_map.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_opp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_pan.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_pbap.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_protocol.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_sap.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_spp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_util.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_sbc_common.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_sbc_decoder.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_sbc_encoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_a2dp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_avrcp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_bip.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_bpp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_core.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_ctn.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_ftp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/gcc/libethermind_bt_ga.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_gatt.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_ga.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_hfp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_hid.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_map.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_opp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_pan.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_pbap.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_protocol.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_sap.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_spp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_util.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_sbc_common.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_sbc_decoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_sbc_encoder.a
       -Wl,--end-group
   )
 endif()
 
-if(CONFIG_TOOLCHAIN STREQUAL mcux AND CONFIG_CORE STREQUAL cm4f)
+if(CONFIG_TOOLCHAIN STREQUAL mcux AND CONFIG_CORE STREQUAL cm33)
   target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
     -Wl,--start-group
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_a2dp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_avrcp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_bip.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_bpp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_core.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_ctn.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_ftp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_ga.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_gatt.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_hfp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_hid.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_map.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_opp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_pan.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_pbap.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_protocol.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_sap.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_spp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_util.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_sbc_common.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_sbc_decoder.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_sbc_encoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso/libethermind_bt_ga.a
       -Wl,--end-group
   )
 endif()
 
 else()
 
-message(SEND_ERROR "middleware_edgefast_bluetooth_btble_ethermind_lib_cm4f dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+message(SEND_ERROR "middleware_edgefast_bluetooth_btble_ethermind_lib_cm33nodsp dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
 
 endif()
 
 endif()
 
 
-if (CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_cm4f)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_cm4f true) in config.cmake to use this component
+if (CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_cm33nodsp)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_cm33nodsp true) in config.cmake to use this component
 
-message("middleware_edgefast_bluetooth_br_ethermind_lib_cm4f component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+message("middleware_edgefast_bluetooth_br_ethermind_lib_cm33nodsp component is included from ${CMAKE_CURRENT_LIST_FILE}.")
 
-if((CONFIG_CORE STREQUAL cm4f) AND CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_cm4f)
+if((CONFIG_CORE STREQUAL cm33) AND CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_cm33nodsp)
 
-if(CONFIG_TOOLCHAIN STREQUAL armgcc AND CONFIG_CORE STREQUAL cm4f)
+if(CONFIG_TOOLCHAIN STREQUAL armgcc AND CONFIG_CORE STREQUAL cm33)
   target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
     -Wl,--start-group
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_a2dp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_avrcp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_bip.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_bpp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_core.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_ctn.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_ftp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_ga.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_gatt.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_hfp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_hid.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_map.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_opp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_pan.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_pbap.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_protocol.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_sap.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_spp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_util.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_sbc_common.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_sbc_decoder.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_sbc_encoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_a2dp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_avrcp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_bip.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_bpp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_core.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_ctn.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_ftp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/gcc/libethermind_bt_ga.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_gatt.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_ga.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_hfp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_hid.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_map.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_opp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_pan.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_pbap.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_protocol.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_sap.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_spp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_util.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_sbc_common.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_sbc_decoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_sbc_encoder.a
       -Wl,--end-group
   )
 endif()
 
-if(CONFIG_TOOLCHAIN STREQUAL mcux AND CONFIG_CORE STREQUAL cm4f)
+if(CONFIG_TOOLCHAIN STREQUAL mcux AND CONFIG_CORE STREQUAL cm33)
   target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
     -Wl,--start-group
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_a2dp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_avrcp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_bip.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_bpp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_core.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_ctn.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_ftp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_ga.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_gatt.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_hfp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_hid.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_map.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_opp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_pan.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_pbap.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_protocol.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_sap.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_spp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_util.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_sbc_common.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_sbc_decoder.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_sbc_encoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso/libethermind_bt_ga.a
       -Wl,--end-group
   )
 endif()
 
 else()
 
-message(SEND_ERROR "middleware_edgefast_bluetooth_br_ethermind_lib_cm4f dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+message(SEND_ERROR "middleware_edgefast_bluetooth_br_ethermind_lib_cm33nodsp dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
 
 endif()
 
 endif()
 
 
-if (CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_cm4f)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_cm4f true) in config.cmake to use this component
+if (CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_cm33nodsp)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_cm33nodsp true) in config.cmake to use this component
 
-message("middleware_edgefast_bluetooth_ble_ethermind_lib_cm4f component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+message("middleware_edgefast_bluetooth_ble_ethermind_lib_cm33nodsp component is included from ${CMAKE_CURRENT_LIST_FILE}.")
 
-if((CONFIG_CORE STREQUAL cm4f) AND CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_cm4f)
+if((CONFIG_CORE STREQUAL cm33) AND CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_cm33nodsp)
 
-if(CONFIG_TOOLCHAIN STREQUAL armgcc AND CONFIG_CORE STREQUAL cm4f)
+if(CONFIG_TOOLCHAIN STREQUAL armgcc AND CONFIG_CORE STREQUAL cm33)
   target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
     -Wl,--start-group
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/gcc/libethermind_ble_core.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/gcc/libethermind_ble_gatt.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/gcc/libethermind_ble_protocol.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/gcc/libethermind_ble_util.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/gcc/libethermind_ble_ga.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm33nodsp/gcc/libethermind_ble_core.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm33nodsp/gcc/libethermind_ble_gatt.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm33nodsp/gcc/libethermind_ble_protocol.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm33nodsp/gcc/libethermind_ble_util.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm33nodsp/gcc/libethermind_ble_ga.a
       -Wl,--end-group
   )
 endif()
 
-if(CONFIG_TOOLCHAIN STREQUAL mcux AND CONFIG_CORE STREQUAL cm4f)
+if(CONFIG_TOOLCHAIN STREQUAL mcux AND CONFIG_CORE STREQUAL cm33)
   target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
     -Wl,--start-group
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/mcuxpresso/libethermind_ble_core.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/mcuxpresso/libethermind_ble_gatt.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/mcuxpresso/libethermind_ble_protocol.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/mcuxpresso/libethermind_ble_util.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/mcuxpresso/libethermind_ble_ga.a
-      -Wl,--end-group
-  )
-endif()
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_ble_ethermind_lib_cm4f dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_lc3_cm4f)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_lc3_cm4f true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_btble_ethermind_lib_lc3_cm4f component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if((CONFIG_CORE STREQUAL cm4f) AND CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_cm4f)
-
-if(CONFIG_TOOLCHAIN STREQUAL armgcc AND CONFIG_CORE STREQUAL cm4f)
-  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
-    -Wl,--start-group
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_lc3_common.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_lc3_decoder.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_lc3_encoder.a
-      -Wl,--end-group
-  )
-endif()
-
-if(CONFIG_TOOLCHAIN STREQUAL mcux AND CONFIG_CORE STREQUAL cm4f)
-  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
-    -Wl,--start-group
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_lc3_common.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_lc3_decoder.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_lc3_encoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm33nodsp/mcuxpresso/libethermind_ble_core.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm33nodsp/mcuxpresso/libethermind_ble_gatt.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm33nodsp/mcuxpresso/libethermind_ble_protocol.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm33nodsp/mcuxpresso/libethermind_ble_util.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm33nodsp/mcuxpresso/libethermind_ble_ga.a
       -Wl,--end-group
   )
 endif()
 
 else()
 
-message(SEND_ERROR "middleware_edgefast_bluetooth_btble_ethermind_lib_lc3_cm4f dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+message(SEND_ERROR "middleware_edgefast_bluetooth_ble_ethermind_lib_cm33nodsp dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
 
 endif()
 
 endif()
 
 
-if (CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_lc3_cm4f)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_lc3_cm4f true) in config.cmake to use this component
+if (CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_lc3_cm33nodsp)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_lc3_cm33nodsp true) in config.cmake to use this component
 
-message("middleware_edgefast_bluetooth_br_ethermind_lib_lc3_cm4f component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+message("middleware_edgefast_bluetooth_btble_ethermind_lib_lc3_cm33nodsp component is included from ${CMAKE_CURRENT_LIST_FILE}.")
 
-if((CONFIG_CORE STREQUAL cm4f) AND CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_cm4f)
+if((CONFIG_CORE STREQUAL cm33) AND CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_cm33nodsp)
 
-if(CONFIG_TOOLCHAIN STREQUAL armgcc AND CONFIG_CORE STREQUAL cm4f)
+if(CONFIG_TOOLCHAIN STREQUAL armgcc AND CONFIG_CORE STREQUAL cm33)
   target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
     -Wl,--start-group
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_lc3_common.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_lc3_decoder.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_lc3_encoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/gcc/libethermind_lc3_common.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/gcc/libethermind_lc3_decoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/gcc/libethermind_lc3_encoder.a
       -Wl,--end-group
   )
 endif()
 
-if(CONFIG_TOOLCHAIN STREQUAL mcux AND CONFIG_CORE STREQUAL cm4f)
+if(CONFIG_TOOLCHAIN STREQUAL mcux AND CONFIG_CORE STREQUAL cm33)
   target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
     -Wl,--start-group
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_lc3_common.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_lc3_decoder.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_lc3_encoder.a
-      -Wl,--end-group
-  )
-endif()
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_br_ethermind_lib_lc3_cm4f dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_lc3_cm4f)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_lc3_cm4f true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_ble_ethermind_lib_lc3_cm4f component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if((CONFIG_CORE STREQUAL cm4f) AND CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_cm4f)
-
-if(CONFIG_TOOLCHAIN STREQUAL armgcc AND CONFIG_CORE STREQUAL cm4f)
-  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
-    -Wl,--start-group
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/gcc/libethermind_lc3_common.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/gcc/libethermind_lc3_decoder.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/gcc/libethermind_lc3_encoder.a
-      -Wl,--end-group
-  )
-endif()
-
-if(CONFIG_TOOLCHAIN STREQUAL mcux AND CONFIG_CORE STREQUAL cm4f)
-  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
-    -Wl,--start-group
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/mcuxpresso/libethermind_lc3_decoder.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/mcuxpresso/libethermind_lc3_encoder.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/mcuxpresso/libethermind_lc3_common.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso/libethermind_lc3_common.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso/libethermind_lc3_decoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso/libethermind_lc3_encoder.a
       -Wl,--end-group
   )
 endif()
 
 else()
 
-message(SEND_ERROR "middleware_edgefast_bluetooth_ble_ethermind_lib_lc3_cm4f dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+message(SEND_ERROR "middleware_edgefast_bluetooth_btble_ethermind_lib_lc3_cm33nodsp dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+
+endif()
+
+endif()
+
+
+if (CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_lc3_cm33nodsp)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_lc3_cm33nodsp true) in config.cmake to use this component
+
+message("middleware_edgefast_bluetooth_br_ethermind_lib_lc3_cm33nodsp component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+
+if((CONFIG_CORE STREQUAL cm33) AND CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_cm33nodsp)
+
+if(CONFIG_TOOLCHAIN STREQUAL armgcc AND CONFIG_CORE STREQUAL cm33)
+  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
+    -Wl,--start-group
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/gcc/libethermind_lc3_common.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/gcc/libethermind_lc3_decoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/gcc/libethermind_lc3_encoder.a
+      -Wl,--end-group
+  )
+endif()
+
+if(CONFIG_TOOLCHAIN STREQUAL mcux AND CONFIG_CORE STREQUAL cm33)
+  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
+    -Wl,--start-group
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso/libethermind_lc3_common.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso/libethermind_lc3_decoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso/libethermind_lc3_encoder.a
+      -Wl,--end-group
+  )
+endif()
+
+else()
+
+message(SEND_ERROR "middleware_edgefast_bluetooth_br_ethermind_lib_lc3_cm33nodsp dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+
+endif()
+
+endif()
+
+
+if (CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_lc3_cm33nodsp)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_lc3_cm33nodsp true) in config.cmake to use this component
+
+message("middleware_edgefast_bluetooth_ble_ethermind_lib_lc3_cm33nodsp component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+
+if((CONFIG_CORE STREQUAL cm33) AND CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_cm33nodsp)
+
+else()
+
+message(SEND_ERROR "middleware_edgefast_bluetooth_ble_ethermind_lib_lc3_cm33nodsp dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+
+endif()
+
+endif()
+
+
+if (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_rdrw612bga)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_rdrw612bga true) in config.cmake to use this component
+
+message("middleware_edgefast_bluetooth_mcux_linker_template_rdrw612bga component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+
+if((CONFIG_DEVICE_ID STREQUAL RW612) AND (CONFIG_BOARD STREQUAL rdrw612bga))
+
+if(CONFIG_TOOLCHAIN STREQUAL mcux)
+  target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
+      ${CMAKE_CURRENT_LIST_DIR}/../../boards/rdrw612bga/edgefast_bluetooth_examples/template/end_text.ldt
+      ${CMAKE_CURRENT_LIST_DIR}/../../boards/rdrw612bga/edgefast_bluetooth_examples/template/main_data.ldt
+      ${CMAKE_CURRENT_LIST_DIR}/../../boards/rdrw612bga/edgefast_bluetooth_examples/template/main_text.ldt
+      ${CMAKE_CURRENT_LIST_DIR}/../../boards/rdrw612bga/edgefast_bluetooth_examples/template/symbols.ldt
+  )
+endif()
+
+else()
+
+message(SEND_ERROR "middleware_edgefast_bluetooth_mcux_linker_template_rdrw612bga dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+
+endif()
+
+endif()
+
+
+if (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_rdrw612bga)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_rdrw612bga true) in config.cmake to use this component
+
+message("middleware_edgefast_bluetooth_sdio_template_rdrw612bga component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+
+if((CONFIG_DEVICE_ID STREQUAL RW612) AND (CONFIG_BOARD STREQUAL rdrw612bga))
+
+else()
+
+message(SEND_ERROR "middleware_edgefast_bluetooth_sdio_template_rdrw612bga dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+
+endif()
+
+endif()
+
+
+if (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkcmimxrt1060)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkcmimxrt1060 true) in config.cmake to use this component
+
+message("middleware_edgefast_bluetooth_sdio_template_evkcmimxrt1060 component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+
+if(CONFIG_USE_middleware_sdmmc_host_usdhc AND CONFIG_USE_middleware_sdmmc_sdio AND CONFIG_USE_middleware_sdmmc_host_usdhc_freertos AND CONFIG_USE_component_igpio_adapter AND (CONFIG_DEVICE_ID STREQUAL MIMXRT1062xxxxA OR CONFIG_DEVICE_ID STREQUAL MIMXRT1062xxxxB) AND (CONFIG_BOARD STREQUAL evkcmimxrt1060))
+
+else()
+
+message(SEND_ERROR "middleware_edgefast_bluetooth_sdio_template_evkcmimxrt1060 dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+
+endif()
+
+endif()
+
+
+if (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkcmimxrt1060)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkcmimxrt1060 true) in config.cmake to use this component
+
+message("middleware_edgefast_bluetooth_mcux_linker_template_evkcmimxrt1060 component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+
+if((CONFIG_DEVICE_ID STREQUAL MIMXRT1062xxxxA OR CONFIG_DEVICE_ID STREQUAL MIMXRT1062xxxxB) AND (CONFIG_BOARD STREQUAL evkcmimxrt1060))
+
+if(CONFIG_TOOLCHAIN STREQUAL mcux)
+  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkcmimxrt1060/edgefast_bluetooth_examples/template/data.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkcmimxrt1060)
+  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkcmimxrt1060/edgefast_bluetooth_examples/template/end_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkcmimxrt1060)
+  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkcmimxrt1060/edgefast_bluetooth_examples/template/main_data.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkcmimxrt1060)
+  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkcmimxrt1060/edgefast_bluetooth_examples/template/main_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkcmimxrt1060)
+  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkcmimxrt1060/edgefast_bluetooth_examples/template/symbols.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkcmimxrt1060)
+endif()
+
+else()
+
+message(SEND_ERROR "middleware_edgefast_bluetooth_mcux_linker_template_evkcmimxrt1060 dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
 
 endif()
 
@@ -2112,6 +2148,8 @@ target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_keys_br.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_l2cap.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_l2cap_br.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_map_mce.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_map_mse.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_monitor.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_rfcomm.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_spp.c
@@ -2123,6 +2161,8 @@ target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_uuid.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hfp_ag.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hfp_hf.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_pbap_pce.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_pbap_pse.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/common/addr.c
 )
 
@@ -2228,6 +2268,8 @@ target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_keys_br.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_l2cap.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_l2cap_br.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_map_mce.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_map_mse.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_monitor.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_rfcomm.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_spp.c
@@ -2239,6 +2281,8 @@ target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_uuid.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hfp_ag.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hfp_hf.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_pbap_pce.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_pbap_pse.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/common/addr.c
 )
 
@@ -2552,79 +2596,560 @@ endif()
 endif()
 
 
-if (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkmimxrt1040)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkmimxrt1040 true) in config.cmake to use this component
+if (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkbmimxrt1170)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkbmimxrt1170 true) in config.cmake to use this component
 
-message("middleware_edgefast_bluetooth_sdio_template_evkmimxrt1040 component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+message("middleware_edgefast_bluetooth_sdio_template_evkbmimxrt1170 component is included from ${CMAKE_CURRENT_LIST_FILE}.")
 
-if(CONFIG_USE_middleware_sdmmc_host_usdhc AND CONFIG_USE_middleware_sdmmc_sdio AND CONFIG_USE_middleware_sdmmc_host_usdhc_freertos AND CONFIG_USE_component_igpio_adapter AND (CONFIG_DEVICE_ID STREQUAL MIMXRT1042xxxxB) AND (CONFIG_BOARD STREQUAL evkmimxrt1040))
+if(CONFIG_USE_middleware_sdmmc_host_usdhc AND CONFIG_USE_middleware_sdmmc_sdio AND CONFIG_USE_middleware_sdmmc_host_usdhc_freertos AND CONFIG_USE_component_igpio_adapter AND (CONFIG_DEVICE_ID STREQUAL MIMXRT1176xxxxx) AND (CONFIG_BOARD STREQUAL evkbmimxrt1170))
 
 else()
 
-message(SEND_ERROR "middleware_edgefast_bluetooth_sdio_template_evkmimxrt1040 dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+message(SEND_ERROR "middleware_edgefast_bluetooth_sdio_template_evkbmimxrt1170 dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
 
 endif()
 
 endif()
 
 
-if (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt1040)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt1040 true) in config.cmake to use this component
+if (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkbmimxrt1170)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkbmimxrt1170 true) in config.cmake to use this component
 
-message("middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt1040 component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+message("middleware_edgefast_bluetooth_mcux_linker_template_evkbmimxrt1170 component is included from ${CMAKE_CURRENT_LIST_FILE}.")
 
-if((CONFIG_DEVICE_ID STREQUAL MIMXRT1042xxxxB) AND (CONFIG_BOARD STREQUAL evkmimxrt1040))
+if((CONFIG_DEVICE_ID STREQUAL MIMXRT1176xxxxx) AND (CONFIG_BOARD STREQUAL evkbmimxrt1170))
 
 if(CONFIG_TOOLCHAIN STREQUAL mcux)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkmimxrt1040/edgefast_bluetooth_examples/template/data.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt1040)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkmimxrt1040/edgefast_bluetooth_examples/template/end_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt1040)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkmimxrt1040/edgefast_bluetooth_examples/template/main_data.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt1040)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkmimxrt1040/edgefast_bluetooth_examples/template/main_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt1040)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkmimxrt1040/edgefast_bluetooth_examples/template/symbols.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt1040)
+  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkbmimxrt1170/edgefast_bluetooth_examples/template/end_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkbmimxrt1170)
+  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkbmimxrt1170/edgefast_bluetooth_examples/template/main_data.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkbmimxrt1170)
+  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkbmimxrt1170/edgefast_bluetooth_examples/template/main_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkbmimxrt1170)
+  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkbmimxrt1170/edgefast_bluetooth_examples/template/symbols.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkbmimxrt1170)
 endif()
 
 else()
 
-message(SEND_ERROR "middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt1040 dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+message(SEND_ERROR "middleware_edgefast_bluetooth_mcux_linker_template_evkbmimxrt1170 dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
 
 endif()
 
 endif()
 
 
-if (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_mcxn9xxevk)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_mcxn9xxevk true) in config.cmake to use this component
+if (CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_cm4f)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_cm4f true) in config.cmake to use this component
 
-message("middleware_edgefast_bluetooth_sdio_template_mcxn9xxevk component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+message("middleware_edgefast_bluetooth_btble_ethermind_cm4f component is included from ${CMAKE_CURRENT_LIST_FILE}.")
 
-if(CONFIG_USE_middleware_sdmmc_host_usdhc AND CONFIG_USE_middleware_sdmmc_sdio AND CONFIG_USE_middleware_sdmmc_host_usdhc_freertos AND CONFIG_USE_component_gpio_adapter AND (CONFIG_DEVICE_ID STREQUAL MCXN947) AND (CONFIG_BOARD STREQUAL mcxn9xxevk))
+if(CONFIG_USE_middleware_edgefast_bluetooth_pal AND CONFIG_USE_middleware_edgefast_bluetooth_template AND CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_cm4f AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_cm4f) AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_cm4f) AND (CONFIG_CORE STREQUAL cm4f))
+
+target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_a2dp.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/a2dp_codec/sbc/a2dp_codec_sbc.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_avrcp.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_avrcp_al_internal.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_avrcp_al_api.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_att.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_conn.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_ead.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_crypto.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_gatt.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hci_core.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_adv.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_br.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_id.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_iso.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_scan.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_ecc.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_addr.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_buf.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_direction.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_keys.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_keys_br.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_l2cap.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_l2cap_br.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_map_mce.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_map_mse.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_monitor.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_rfcomm.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_spp.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_rpa.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_settings.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_sdp.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_smp.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_ssp.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_uuid.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hfp_ag.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hfp_hf.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_pbap_pce.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_pbap_pse.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/common/addr.c
+)
+
+target_include_directories(${MCUX_SDK_PROJECT_NAME} PUBLIC
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host
+  ${CMAKE_CURRENT_LIST_DIR}/./include
+)
 
 else()
 
-message(SEND_ERROR "middleware_edgefast_bluetooth_sdio_template_mcxn9xxevk dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+message(SEND_ERROR "middleware_edgefast_bluetooth_btble_ethermind_cm4f dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
 
 endif()
 
 endif()
 
 
-if (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_mcxn9xxevk)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_mcxn9xxevk true) in config.cmake to use this component
+if (CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_cm4f)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_cm4f true) in config.cmake to use this component
 
-message("middleware_edgefast_bluetooth_mcux_linker_template_mcxn9xxevk component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+message("middleware_edgefast_bluetooth_ble_ethermind_cm4f component is included from ${CMAKE_CURRENT_LIST_FILE}.")
 
-if((CONFIG_DEVICE_ID STREQUAL MCXN947) AND (CONFIG_BOARD STREQUAL mcxn9xxevk))
+if(CONFIG_USE_middleware_edgefast_bluetooth_pal AND CONFIG_USE_middleware_edgefast_bluetooth_template AND CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_cm4f AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_cm4f) AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_cm4f) AND (CONFIG_CORE STREQUAL cm4f))
+
+target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_att.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_conn.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_ead.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_crypto.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_gatt.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hci_core.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_adv.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_br.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_id.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_iso.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_scan.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_ecc.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_addr.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_buf.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_direction.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_keys.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_l2cap.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_monitor.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_rpa.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_settings.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_smp.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_smp_null.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_uuid.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/common/addr.c
+)
+
+target_include_directories(${MCUX_SDK_PROJECT_NAME} PUBLIC
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host
+  ${CMAKE_CURRENT_LIST_DIR}/./include
+)
+
+if(CONFIG_USE_COMPONENT_CONFIGURATION)
+  message("===>Import configuration from ${CMAKE_CURRENT_LIST_FILE}")
+
+  target_compile_definitions(${MCUX_SDK_PROJECT_NAME} PUBLIC
+    -DCFG_BLE
+  )
+
+endif()
+
+else()
+
+message(SEND_ERROR "middleware_edgefast_bluetooth_ble_ethermind_cm4f dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+
+endif()
+
+endif()
+
+
+if (CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_cm4f)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_cm4f true) in config.cmake to use this component
+
+message("middleware_edgefast_bluetooth_br_ethermind_cm4f component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+
+if(CONFIG_USE_middleware_edgefast_bluetooth_pal AND CONFIG_USE_middleware_edgefast_bluetooth_template AND CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_cm4f AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_cm4f) AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_cm4f) AND (CONFIG_CORE STREQUAL cm4f))
+
+target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_a2dp.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/a2dp_codec/sbc/a2dp_codec_sbc.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_avrcp.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_avrcp_al_internal.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_avrcp_al_api.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_conn.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_data.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_ead.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_crypto.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hci_core.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_adv.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_br.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_id.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_scan.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_ecc.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_addr.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_buf.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_direction.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_keys.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_keys_br.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_l2cap.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_l2cap_br.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_map_mce.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_map_mse.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_monitor.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_rfcomm.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_spp.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_rpa.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_settings.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_sdp.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_smp.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_ssp.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_uuid.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hfp_ag.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hfp_hf.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_pbap_pce.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_pbap_pse.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/common/addr.c
+)
+
+target_include_directories(${MCUX_SDK_PROJECT_NAME} PUBLIC
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host
+  ${CMAKE_CURRENT_LIST_DIR}/./include
+)
+
+else()
+
+message(SEND_ERROR "middleware_edgefast_bluetooth_br_ethermind_cm4f dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+
+endif()
+
+endif()
+
+
+if (CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_cm4f)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_cm4f true) in config.cmake to use this component
+
+message("middleware_edgefast_bluetooth_btble_ethermind_lib_cm4f component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+
+if((CONFIG_CORE STREQUAL cm4f) AND CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_cm4f)
+
+if(CONFIG_TOOLCHAIN STREQUAL armgcc AND CONFIG_CORE STREQUAL cm4f)
+  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
+    -Wl,--start-group
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_a2dp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_avrcp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_bip.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_bpp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_core.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_ctn.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_ftp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_ga.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_gatt.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_hfp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_hid.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_map.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_opp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_pan.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_pbap.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_protocol.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_sap.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_spp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_util.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_sbc_common.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_sbc_decoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_sbc_encoder.a
+      -Wl,--end-group
+  )
+endif()
+
+if(CONFIG_TOOLCHAIN STREQUAL mcux AND CONFIG_CORE STREQUAL cm4f)
+  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
+    -Wl,--start-group
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_a2dp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_avrcp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_bip.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_bpp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_core.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_ctn.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_ftp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_ga.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_gatt.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_hfp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_hid.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_map.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_opp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_pan.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_pbap.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_protocol.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_sap.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_spp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_util.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_sbc_common.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_sbc_decoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_sbc_encoder.a
+      -Wl,--end-group
+  )
+endif()
+
+else()
+
+message(SEND_ERROR "middleware_edgefast_bluetooth_btble_ethermind_lib_cm4f dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+
+endif()
+
+endif()
+
+
+if (CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_cm4f)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_cm4f true) in config.cmake to use this component
+
+message("middleware_edgefast_bluetooth_br_ethermind_lib_cm4f component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+
+if((CONFIG_CORE STREQUAL cm4f) AND CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_cm4f)
+
+if(CONFIG_TOOLCHAIN STREQUAL armgcc AND CONFIG_CORE STREQUAL cm4f)
+  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
+    -Wl,--start-group
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_a2dp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_avrcp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_bip.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_bpp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_core.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_ctn.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_ftp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_ga.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_gatt.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_hfp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_hid.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_map.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_opp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_pan.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_pbap.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_protocol.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_sap.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_spp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_bt_util.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_sbc_common.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_sbc_decoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_sbc_encoder.a
+      -Wl,--end-group
+  )
+endif()
+
+if(CONFIG_TOOLCHAIN STREQUAL mcux AND CONFIG_CORE STREQUAL cm4f)
+  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
+    -Wl,--start-group
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_a2dp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_avrcp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_bip.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_bpp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_core.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_ctn.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_ftp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_ga.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_gatt.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_hfp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_hid.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_map.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_opp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_pan.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_pbap.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_protocol.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_sap.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_spp.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_bt_util.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_sbc_common.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_sbc_decoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_sbc_encoder.a
+      -Wl,--end-group
+  )
+endif()
+
+else()
+
+message(SEND_ERROR "middleware_edgefast_bluetooth_br_ethermind_lib_cm4f dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+
+endif()
+
+endif()
+
+
+if (CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_cm4f)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_cm4f true) in config.cmake to use this component
+
+message("middleware_edgefast_bluetooth_ble_ethermind_lib_cm4f component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+
+if((CONFIG_CORE STREQUAL cm4f) AND CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_cm4f)
+
+if(CONFIG_TOOLCHAIN STREQUAL armgcc AND CONFIG_CORE STREQUAL cm4f)
+  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
+    -Wl,--start-group
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/gcc/libethermind_ble_core.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/gcc/libethermind_ble_gatt.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/gcc/libethermind_ble_protocol.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/gcc/libethermind_ble_util.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/gcc/libethermind_ble_ga.a
+      -Wl,--end-group
+  )
+endif()
+
+if(CONFIG_TOOLCHAIN STREQUAL mcux AND CONFIG_CORE STREQUAL cm4f)
+  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
+    -Wl,--start-group
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/mcuxpresso/libethermind_ble_core.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/mcuxpresso/libethermind_ble_gatt.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/mcuxpresso/libethermind_ble_protocol.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/mcuxpresso/libethermind_ble_util.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/mcuxpresso/libethermind_ble_ga.a
+      -Wl,--end-group
+  )
+endif()
+
+else()
+
+message(SEND_ERROR "middleware_edgefast_bluetooth_ble_ethermind_lib_cm4f dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+
+endif()
+
+endif()
+
+
+if (CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_lc3_cm4f)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_lc3_cm4f true) in config.cmake to use this component
+
+message("middleware_edgefast_bluetooth_btble_ethermind_lib_lc3_cm4f component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+
+if((CONFIG_CORE STREQUAL cm4f) AND CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_cm4f)
+
+if(CONFIG_TOOLCHAIN STREQUAL armgcc AND CONFIG_CORE STREQUAL cm4f)
+  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
+    -Wl,--start-group
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_lc3_common.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_lc3_decoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_lc3_encoder.a
+      -Wl,--end-group
+  )
+endif()
+
+if(CONFIG_TOOLCHAIN STREQUAL mcux AND CONFIG_CORE STREQUAL cm4f)
+  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
+    -Wl,--start-group
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_lc3_common.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_lc3_decoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_lc3_encoder.a
+      -Wl,--end-group
+  )
+endif()
+
+else()
+
+message(SEND_ERROR "middleware_edgefast_bluetooth_btble_ethermind_lib_lc3_cm4f dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+
+endif()
+
+endif()
+
+
+if (CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_lc3_cm4f)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_lc3_cm4f true) in config.cmake to use this component
+
+message("middleware_edgefast_bluetooth_br_ethermind_lib_lc3_cm4f component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+
+if((CONFIG_CORE STREQUAL cm4f) AND CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_cm4f)
+
+if(CONFIG_TOOLCHAIN STREQUAL armgcc AND CONFIG_CORE STREQUAL cm4f)
+  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
+    -Wl,--start-group
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_lc3_common.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_lc3_decoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/gcc/libethermind_lc3_encoder.a
+      -Wl,--end-group
+  )
+endif()
+
+if(CONFIG_TOOLCHAIN STREQUAL mcux AND CONFIG_CORE STREQUAL cm4f)
+  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
+    -Wl,--start-group
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_lc3_common.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_lc3_decoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm4f/mcuxpresso/libethermind_lc3_encoder.a
+      -Wl,--end-group
+  )
+endif()
+
+else()
+
+message(SEND_ERROR "middleware_edgefast_bluetooth_br_ethermind_lib_lc3_cm4f dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+
+endif()
+
+endif()
+
+
+if (CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_lc3_cm4f)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_lc3_cm4f true) in config.cmake to use this component
+
+message("middleware_edgefast_bluetooth_ble_ethermind_lib_lc3_cm4f component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+
+if((CONFIG_CORE STREQUAL cm4f) AND CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_cm4f)
+
+if(CONFIG_TOOLCHAIN STREQUAL armgcc AND CONFIG_CORE STREQUAL cm4f)
+  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
+    -Wl,--start-group
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/gcc/libethermind_lc3_common.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/gcc/libethermind_lc3_decoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/gcc/libethermind_lc3_encoder.a
+      -Wl,--end-group
+  )
+endif()
+
+if(CONFIG_TOOLCHAIN STREQUAL mcux AND CONFIG_CORE STREQUAL cm4f)
+  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
+    -Wl,--start-group
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/mcuxpresso/libethermind_lc3_decoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/mcuxpresso/libethermind_lc3_encoder.a
+      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm4f/mcuxpresso/libethermind_lc3_common.a
+      -Wl,--end-group
+  )
+endif()
+
+else()
+
+message(SEND_ERROR "middleware_edgefast_bluetooth_ble_ethermind_lib_lc3_cm4f dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+
+endif()
+
+endif()
+
+
+if (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_mcxn5xxevk)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_mcxn5xxevk true) in config.cmake to use this component
+
+message("middleware_edgefast_bluetooth_sdio_template_mcxn5xxevk component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+
+if(CONFIG_USE_middleware_sdmmc_host_usdhc AND CONFIG_USE_middleware_sdmmc_sdio AND CONFIG_USE_middleware_sdmmc_host_usdhc_freertos AND CONFIG_USE_component_gpio_adapter AND (CONFIG_DEVICE_ID STREQUAL MCXN547) AND (CONFIG_BOARD STREQUAL mcxn5xxevk))
+
+else()
+
+message(SEND_ERROR "middleware_edgefast_bluetooth_sdio_template_mcxn5xxevk dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+
+endif()
+
+endif()
+
+
+if (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_mcxn5xxevk)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_mcxn5xxevk true) in config.cmake to use this component
+
+message("middleware_edgefast_bluetooth_mcux_linker_template_mcxn5xxevk component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+
+if((CONFIG_DEVICE_ID STREQUAL MCXN547) AND (CONFIG_BOARD STREQUAL mcxn5xxevk))
 
 if(CONFIG_TOOLCHAIN STREQUAL mcux)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/mcxn9xxevk/edgefast_bluetooth_examples/template/end_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_mcxn9xxevk)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/mcxn9xxevk/edgefast_bluetooth_examples/template/main_data.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_mcxn9xxevk)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/mcxn9xxevk/edgefast_bluetooth_examples/template/main_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_mcxn9xxevk)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/mcxn9xxevk/edgefast_bluetooth_examples/template/symbols.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_mcxn9xxevk)
+  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/mcxn5xxevk/edgefast_bluetooth_examples/template/data.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_mcxn5xxevk)
+  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/mcxn5xxevk/edgefast_bluetooth_examples/template/end_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_mcxn5xxevk)
+  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/mcxn5xxevk/edgefast_bluetooth_examples/template/main_data.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_mcxn5xxevk)
+  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/mcxn5xxevk/edgefast_bluetooth_examples/template/main_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_mcxn5xxevk)
+  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/mcxn5xxevk/edgefast_bluetooth_examples/template/symbols.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_mcxn5xxevk)
 endif()
 
 else()
 
-message(SEND_ERROR "middleware_edgefast_bluetooth_mcux_linker_template_mcxn9xxevk dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+message(SEND_ERROR "middleware_edgefast_bluetooth_mcux_linker_template_mcxn5xxevk dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
 
 endif()
 
@@ -2664,6 +3189,8 @@ target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_keys_br.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_l2cap.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_l2cap_br.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_map_mce.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_map_mse.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_monitor.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_rfcomm.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_spp.c
@@ -2675,6 +3202,8 @@ target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_uuid.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hfp_ag.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hfp_hf.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_pbap_pce.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_pbap_pse.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/common/addr.c
 )
 
@@ -2780,6 +3309,8 @@ target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_keys_br.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_l2cap.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_l2cap_br.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_map_mce.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_map_mse.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_monitor.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_rfcomm.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_spp.c
@@ -2791,6 +3322,8 @@ target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_uuid.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hfp_ag.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hfp_hf.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_pbap_pce.c
+  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_pbap_pse.c
   ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/common/addr.c
 )
 
@@ -3104,581 +3637,6 @@ endif()
 endif()
 
 
-if (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_rdrw612bga)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_rdrw612bga true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_mcux_linker_template_rdrw612bga component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if((CONFIG_DEVICE_ID STREQUAL RW612) AND (CONFIG_BOARD STREQUAL rdrw612bga))
-
-if(CONFIG_TOOLCHAIN STREQUAL mcux)
-  target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
-      ${CMAKE_CURRENT_LIST_DIR}/../../boards/rdrw612bga/edgefast_bluetooth_examples/template/end_text.ldt
-      ${CMAKE_CURRENT_LIST_DIR}/../../boards/rdrw612bga/edgefast_bluetooth_examples/template/main_data.ldt
-      ${CMAKE_CURRENT_LIST_DIR}/../../boards/rdrw612bga/edgefast_bluetooth_examples/template/main_text.ldt
-      ${CMAKE_CURRENT_LIST_DIR}/../../boards/rdrw612bga/edgefast_bluetooth_examples/template/symbols.ldt
-  )
-endif()
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_mcux_linker_template_rdrw612bga dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_cm33nodsp)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_cm33nodsp true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_btble_ethermind_cm33nodsp component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if(CONFIG_USE_middleware_edgefast_bluetooth_pal AND CONFIG_USE_middleware_edgefast_bluetooth_template AND CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_cm33nodsp AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_cm33nodsp) AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_cm33nodsp) AND (CONFIG_CORE STREQUAL cm33))
-
-target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_a2dp.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/a2dp_codec/sbc/a2dp_codec_sbc.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_avrcp.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_avrcp_al_internal.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_avrcp_al_api.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_att.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_conn.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_data.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_ead.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_crypto.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_gatt.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hci_core.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_adv.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_br.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_id.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_iso.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_scan.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_ecc.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_addr.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_buf.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_direction.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_keys.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_keys_br.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_l2cap.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_l2cap_br.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_monitor.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_rfcomm.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_spp.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_rpa.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_settings.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_sdp.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_smp.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_ssp.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_uuid.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hfp_ag.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hfp_hf.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/common/addr.c
-)
-
-target_include_directories(${MCUX_SDK_PROJECT_NAME} PUBLIC
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host
-  ${CMAKE_CURRENT_LIST_DIR}/./include
-)
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_btble_ethermind_cm33nodsp dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_cm33nodsp)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_cm33nodsp true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_ble_ethermind_cm33nodsp component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if(CONFIG_USE_middleware_edgefast_bluetooth_pal AND CONFIG_USE_middleware_edgefast_bluetooth_template AND CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_cm33nodsp AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_cm33nodsp) AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_cm33nodsp) AND (CONFIG_CORE STREQUAL cm33))
-
-target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_att.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_conn.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_data.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_ead.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_crypto.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_gatt.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hci_core.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_adv.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_br.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_id.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_iso.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_scan.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_ecc.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_addr.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_buf.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_direction.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_keys.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_l2cap.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_monitor.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_rpa.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_settings.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_smp.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_smp_null.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_uuid.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/common/addr.c
-)
-
-target_include_directories(${MCUX_SDK_PROJECT_NAME} PUBLIC
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host
-  ${CMAKE_CURRENT_LIST_DIR}/./include
-)
-
-if(CONFIG_USE_COMPONENT_CONFIGURATION)
-  message("===>Import configuration from ${CMAKE_CURRENT_LIST_FILE}")
-
-  target_compile_definitions(${MCUX_SDK_PROJECT_NAME} PUBLIC
-    -DCFG_BLE
-  )
-
-endif()
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_ble_ethermind_cm33nodsp dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_cm33nodsp)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_cm33nodsp true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_br_ethermind_cm33nodsp component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if(CONFIG_USE_middleware_edgefast_bluetooth_pal AND CONFIG_USE_middleware_edgefast_bluetooth_template AND CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_cm33nodsp AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_cm33nodsp) AND (NOT CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_cm33nodsp) AND (CONFIG_CORE STREQUAL cm33))
-
-target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_a2dp.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/a2dp_codec/sbc/a2dp_codec_sbc.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_avrcp.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_avrcp_al_internal.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_avrcp_al_api.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_conn.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_data.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_ead.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_crypto.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hci_core.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_adv.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_br.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_id.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_scan.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_ecc.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_addr.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_buf.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_direction.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_keys.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_keys_br.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_l2cap.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_l2cap_br.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_monitor.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_rfcomm.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_spp.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_rpa.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_settings.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_sdp.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_smp.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_ssp.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_uuid.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hfp_ag.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host/bt_pal_hfp_hf.c
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/common/addr.c
-)
-
-target_include_directories(${MCUX_SDK_PROJECT_NAME} PUBLIC
-  ${CMAKE_CURRENT_LIST_DIR}/./source/impl/ethermind/host
-  ${CMAKE_CURRENT_LIST_DIR}/./include
-)
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_br_ethermind_cm33nodsp dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_rdrw612bga)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_rdrw612bga true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_sdio_template_rdrw612bga component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if((CONFIG_DEVICE_ID STREQUAL RW612) AND (CONFIG_BOARD STREQUAL rdrw612bga))
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_sdio_template_rdrw612bga dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_cm33nodsp)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_cm33nodsp true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_btble_ethermind_lib_cm33nodsp component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if((CONFIG_CORE STREQUAL cm33) AND CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_cm33nodsp)
-
-if(CONFIG_TOOLCHAIN STREQUAL armgcc AND CONFIG_CORE STREQUAL cm33)
-  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
-    -Wl,--start-group
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_a2dp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_avrcp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_bip.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_bpp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_core.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_ctn.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_ftp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/gcc/libethermind_bt_ga.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_gatt.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_ga.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_hfp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_hid.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_map.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_opp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_pan.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_pbap.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_protocol.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_sap.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_spp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_util.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_sbc_common.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_sbc_decoder.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_sbc_encoder.a
-      -Wl,--end-group
-  )
-endif()
-
-if(CONFIG_TOOLCHAIN STREQUAL mcux AND CONFIG_CORE STREQUAL cm33)
-  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
-    -Wl,--start-group
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso/libethermind_bt_ga.a
-      -Wl,--end-group
-  )
-endif()
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_btble_ethermind_lib_cm33nodsp dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_cm33nodsp)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_cm33nodsp true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_br_ethermind_lib_cm33nodsp component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if((CONFIG_CORE STREQUAL cm33) AND CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_cm33nodsp)
-
-if(CONFIG_TOOLCHAIN STREQUAL armgcc AND CONFIG_CORE STREQUAL cm33)
-  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
-    -Wl,--start-group
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_a2dp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_avrcp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_bip.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_bpp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_core.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_ctn.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_ftp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/gcc/libethermind_bt_ga.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_gatt.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_ga.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_hfp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_hid.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_map.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_opp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_pan.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_pbap.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_protocol.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_sap.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_spp.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_bt_util.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_sbc_common.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_sbc_decoder.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33nodsp/gcc/libethermind_sbc_encoder.a
-      -Wl,--end-group
-  )
-endif()
-
-if(CONFIG_TOOLCHAIN STREQUAL mcux AND CONFIG_CORE STREQUAL cm33)
-  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
-    -Wl,--start-group
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso/libethermind_bt_ga.a
-      -Wl,--end-group
-  )
-endif()
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_br_ethermind_lib_cm33nodsp dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_cm33nodsp)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_cm33nodsp true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_ble_ethermind_lib_cm33nodsp component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if((CONFIG_CORE STREQUAL cm33) AND CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_cm33nodsp)
-
-if(CONFIG_TOOLCHAIN STREQUAL armgcc AND CONFIG_CORE STREQUAL cm33)
-  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
-    -Wl,--start-group
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm33nodsp/gcc/libethermind_ble_core.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm33nodsp/gcc/libethermind_ble_gatt.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm33nodsp/gcc/libethermind_ble_protocol.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm33nodsp/gcc/libethermind_ble_util.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm33nodsp/gcc/libethermind_ble_ga.a
-      -Wl,--end-group
-  )
-endif()
-
-if(CONFIG_TOOLCHAIN STREQUAL mcux AND CONFIG_CORE STREQUAL cm33)
-  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
-    -Wl,--start-group
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm33nodsp/mcuxpresso/libethermind_ble_core.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm33nodsp/mcuxpresso/libethermind_ble_gatt.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm33nodsp/mcuxpresso/libethermind_ble_protocol.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm33nodsp/mcuxpresso/libethermind_ble_util.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/ble/cm33nodsp/mcuxpresso/libethermind_ble_ga.a
-      -Wl,--end-group
-  )
-endif()
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_ble_ethermind_lib_cm33nodsp dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_lc3_cm33nodsp)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_lib_lc3_cm33nodsp true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_btble_ethermind_lib_lc3_cm33nodsp component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if((CONFIG_CORE STREQUAL cm33) AND CONFIG_USE_middleware_edgefast_bluetooth_btble_ethermind_cm33nodsp)
-
-if(CONFIG_TOOLCHAIN STREQUAL armgcc AND CONFIG_CORE STREQUAL cm33)
-  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
-    -Wl,--start-group
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/gcc/libethermind_lc3_common.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/gcc/libethermind_lc3_decoder.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/gcc/libethermind_lc3_encoder.a
-      -Wl,--end-group
-  )
-endif()
-
-if(CONFIG_TOOLCHAIN STREQUAL mcux AND CONFIG_CORE STREQUAL cm33)
-  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
-    -Wl,--start-group
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso/libethermind_lc3_common.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso/libethermind_lc3_decoder.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso/libethermind_lc3_encoder.a
-      -Wl,--end-group
-  )
-endif()
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_btble_ethermind_lib_lc3_cm33nodsp dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_lc3_cm33nodsp)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_lib_lc3_cm33nodsp true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_br_ethermind_lib_lc3_cm33nodsp component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if((CONFIG_CORE STREQUAL cm33) AND CONFIG_USE_middleware_edgefast_bluetooth_br_ethermind_cm33nodsp)
-
-if(CONFIG_TOOLCHAIN STREQUAL armgcc AND CONFIG_CORE STREQUAL cm33)
-  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
-    -Wl,--start-group
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/gcc/libethermind_lc3_common.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/gcc/libethermind_lc3_decoder.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/gcc/libethermind_lc3_encoder.a
-      -Wl,--end-group
-  )
-endif()
-
-if(CONFIG_TOOLCHAIN STREQUAL mcux AND CONFIG_CORE STREQUAL cm33)
-  target_link_libraries(${MCUX_SDK_PROJECT_NAME} PRIVATE
-    -Wl,--start-group
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso/libethermind_lc3_common.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso/libethermind_lc3_decoder.a
-      ${CMAKE_CURRENT_LIST_DIR}/../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/cm33/mcuxpresso/libethermind_lc3_encoder.a
-      -Wl,--end-group
-  )
-endif()
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_br_ethermind_lib_lc3_cm33nodsp dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_lc3_cm33nodsp)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_lib_lc3_cm33nodsp true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_ble_ethermind_lib_lc3_cm33nodsp component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if((CONFIG_CORE STREQUAL cm33) AND CONFIG_USE_middleware_edgefast_bluetooth_ble_ethermind_cm33nodsp)
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_ble_ethermind_lib_lc3_cm33nodsp dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_frdmrw612)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_frdmrw612 true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_mcux_linker_template_frdmrw612 component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if((CONFIG_DEVICE_ID STREQUAL RW612) AND (CONFIG_BOARD STREQUAL frdmrw612))
-
-if(CONFIG_TOOLCHAIN STREQUAL mcux)
-  target_sources(${MCUX_SDK_PROJECT_NAME} PRIVATE
-      ${CMAKE_CURRENT_LIST_DIR}/../../boards/frdmrw612/edgefast_bluetooth_examples/template/end_text.ldt
-      ${CMAKE_CURRENT_LIST_DIR}/../../boards/frdmrw612/edgefast_bluetooth_examples/template/main_data.ldt
-      ${CMAKE_CURRENT_LIST_DIR}/../../boards/frdmrw612/edgefast_bluetooth_examples/template/main_text.ldt
-      ${CMAKE_CURRENT_LIST_DIR}/../../boards/frdmrw612/edgefast_bluetooth_examples/template/symbols.ldt
-  )
-endif()
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_mcux_linker_template_frdmrw612 dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_frdmrw612)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_frdmrw612 true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_sdio_template_frdmrw612 component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if((CONFIG_DEVICE_ID STREQUAL RW612) AND (CONFIG_BOARD STREQUAL frdmrw612))
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_sdio_template_frdmrw612 dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkbimxrt1050)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkbimxrt1050 true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_sdio_template_evkbimxrt1050 component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if(CONFIG_USE_middleware_sdmmc_host_usdhc AND CONFIG_USE_middleware_sdmmc_sdio AND CONFIG_USE_middleware_sdmmc_host_usdhc_freertos AND CONFIG_USE_component_igpio_adapter AND (CONFIG_DEVICE_ID STREQUAL MIMXRT1052xxxxB) AND (CONFIG_BOARD STREQUAL evkbimxrt1050))
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_sdio_template_evkbimxrt1050 dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkbimxrt1050)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkbimxrt1050 true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_mcux_linker_template_evkbimxrt1050 component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if((CONFIG_DEVICE_ID STREQUAL MIMXRT1052xxxxB) AND (CONFIG_BOARD STREQUAL evkbimxrt1050))
-
-if(CONFIG_TOOLCHAIN STREQUAL mcux)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkbimxrt1050/edgefast_bluetooth_examples/template/data.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkbimxrt1050)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkbimxrt1050/edgefast_bluetooth_examples/template/end_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkbimxrt1050)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkbimxrt1050/edgefast_bluetooth_examples/template/main_data.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkbimxrt1050)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkbimxrt1050/edgefast_bluetooth_examples/template/main_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkbimxrt1050)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkbimxrt1050/edgefast_bluetooth_examples/template/symbols.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkbimxrt1050)
-endif()
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_mcux_linker_template_evkbimxrt1050 dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_mcxn5xxevk)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_mcxn5xxevk true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_sdio_template_mcxn5xxevk component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if(CONFIG_USE_middleware_sdmmc_host_usdhc AND CONFIG_USE_middleware_sdmmc_sdio AND CONFIG_USE_middleware_sdmmc_host_usdhc_freertos AND CONFIG_USE_component_gpio_adapter AND (CONFIG_DEVICE_ID STREQUAL MCXN547) AND (CONFIG_BOARD STREQUAL mcxn5xxevk))
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_sdio_template_mcxn5xxevk dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_mcxn5xxevk)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_mcxn5xxevk true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_mcux_linker_template_mcxn5xxevk component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if((CONFIG_DEVICE_ID STREQUAL MCXN547) AND (CONFIG_BOARD STREQUAL mcxn5xxevk))
-
-if(CONFIG_TOOLCHAIN STREQUAL mcux)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/mcxn5xxevk/edgefast_bluetooth_examples/template/data.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_mcxn5xxevk)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/mcxn5xxevk/edgefast_bluetooth_examples/template/end_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_mcxn5xxevk)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/mcxn5xxevk/edgefast_bluetooth_examples/template/main_data.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_mcxn5xxevk)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/mcxn5xxevk/edgefast_bluetooth_examples/template/main_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_mcxn5xxevk)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/mcxn5xxevk/edgefast_bluetooth_examples/template/symbols.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_mcxn5xxevk)
-endif()
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_mcux_linker_template_mcxn5xxevk dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
 if (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkmimxrt1180)
 # Add set(CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkmimxrt1180 true) in config.cmake to use this component
 
@@ -3721,157 +3679,39 @@ endif()
 endif()
 
 
-if (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkmimxrt685)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkmimxrt685 true) in config.cmake to use this component
+if (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_mcxn9xxevk)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_mcxn9xxevk true) in config.cmake to use this component
 
-message("middleware_edgefast_bluetooth_sdio_template_evkmimxrt685 component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+message("middleware_edgefast_bluetooth_sdio_template_mcxn9xxevk component is included from ${CMAKE_CURRENT_LIST_FILE}.")
 
-if(CONFIG_USE_middleware_sdmmc_host_usdhc AND CONFIG_USE_middleware_sdmmc_sdio AND CONFIG_USE_middleware_sdmmc_host_usdhc_freertos AND CONFIG_USE_component_rt_gpio_adapter AND (CONFIG_DEVICE_ID STREQUAL MIMXRT685S) AND (CONFIG_BOARD STREQUAL evkmimxrt685))
+if(CONFIG_USE_middleware_sdmmc_host_usdhc AND CONFIG_USE_middleware_sdmmc_sdio AND CONFIG_USE_middleware_sdmmc_host_usdhc_freertos AND CONFIG_USE_component_gpio_adapter AND (CONFIG_DEVICE_ID STREQUAL MCXN947) AND (CONFIG_BOARD STREQUAL mcxn9xxevk))
 
 else()
 
-message(SEND_ERROR "middleware_edgefast_bluetooth_sdio_template_evkmimxrt685 dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+message(SEND_ERROR "middleware_edgefast_bluetooth_sdio_template_mcxn9xxevk dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
 
 endif()
 
 endif()
 
 
-if (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt685)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt685 true) in config.cmake to use this component
+if (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_mcxn9xxevk)
+# Add set(CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_mcxn9xxevk true) in config.cmake to use this component
 
-message("middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt685 component is included from ${CMAKE_CURRENT_LIST_FILE}.")
+message("middleware_edgefast_bluetooth_mcux_linker_template_mcxn9xxevk component is included from ${CMAKE_CURRENT_LIST_FILE}.")
 
-if((CONFIG_DEVICE_ID STREQUAL MIMXRT685S) AND (CONFIG_BOARD STREQUAL evkmimxrt685))
+if((CONFIG_DEVICE_ID STREQUAL MCXN947) AND (CONFIG_BOARD STREQUAL mcxn9xxevk))
 
 if(CONFIG_TOOLCHAIN STREQUAL mcux)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkmimxrt685/edgefast_bluetooth_examples/template/end_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt685)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkmimxrt685/edgefast_bluetooth_examples/template/main_data.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt685)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkmimxrt685/edgefast_bluetooth_examples/template/main_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt685)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkmimxrt685/edgefast_bluetooth_examples/template/symbols.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt685)
+  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/mcxn9xxevk/edgefast_bluetooth_examples/template/end_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_mcxn9xxevk)
+  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/mcxn9xxevk/edgefast_bluetooth_examples/template/main_data.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_mcxn9xxevk)
+  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/mcxn9xxevk/edgefast_bluetooth_examples/template/main_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_mcxn9xxevk)
+  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/mcxn9xxevk/edgefast_bluetooth_examples/template/symbols.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_mcxn9xxevk)
 endif()
 
 else()
 
-message(SEND_ERROR "middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt685 dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_mimxrt685audevk)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_mimxrt685audevk true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_sdio_template_mimxrt685audevk component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if(CONFIG_USE_middleware_sdmmc_host_usdhc AND CONFIG_USE_middleware_sdmmc_sdio AND CONFIG_USE_middleware_sdmmc_host_usdhc_freertos AND CONFIG_USE_component_rt_gpio_adapter AND (CONFIG_DEVICE_ID STREQUAL MIMXRT685S) AND (CONFIG_BOARD STREQUAL mimxrt685audevk))
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_sdio_template_mimxrt685audevk dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_mimxrt685audevk)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_mimxrt685audevk true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_mcux_linker_template_mimxrt685audevk component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if((CONFIG_DEVICE_ID STREQUAL MIMXRT685S) AND (CONFIG_BOARD STREQUAL mimxrt685audevk))
-
-if(CONFIG_TOOLCHAIN STREQUAL mcux)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/mimxrt685audevk/edgefast_bluetooth_examples/template/end_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_mimxrt685audevk)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/mimxrt685audevk/edgefast_bluetooth_examples/template/main_data.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_mimxrt685audevk)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/mimxrt685audevk/edgefast_bluetooth_examples/template/main_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_mimxrt685audevk)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/mimxrt685audevk/edgefast_bluetooth_examples/template/symbols.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_mimxrt685audevk)
-endif()
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_mcux_linker_template_mimxrt685audevk dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkmimxrt595)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkmimxrt595 true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_sdio_template_evkmimxrt595 component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if(CONFIG_USE_middleware_sdmmc_host_usdhc AND CONFIG_USE_middleware_sdmmc_sdio AND CONFIG_USE_middleware_sdmmc_host_usdhc_freertos AND CONFIG_USE_component_rt_gpio_adapter AND (CONFIG_DEVICE_ID STREQUAL MIMXRT595S) AND (CONFIG_BOARD STREQUAL evkmimxrt595))
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_sdio_template_evkmimxrt595 dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt595)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt595 true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt595 component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if((CONFIG_DEVICE_ID STREQUAL MIMXRT595S) AND (CONFIG_BOARD STREQUAL evkmimxrt595))
-
-if(CONFIG_TOOLCHAIN STREQUAL mcux)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkmimxrt595/edgefast_bluetooth_examples/template/end_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt595)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkmimxrt595/edgefast_bluetooth_examples/template/main_data.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt595)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkmimxrt595/edgefast_bluetooth_examples/template/main_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt595)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkmimxrt595/edgefast_bluetooth_examples/template/symbols.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt595)
-endif()
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_mcux_linker_template_evkmimxrt595 dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkcmimxrt1060)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_sdio_template_evkcmimxrt1060 true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_sdio_template_evkcmimxrt1060 component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if(CONFIG_USE_middleware_sdmmc_host_usdhc AND CONFIG_USE_middleware_sdmmc_sdio AND CONFIG_USE_middleware_sdmmc_host_usdhc_freertos AND CONFIG_USE_component_igpio_adapter AND (CONFIG_DEVICE_ID STREQUAL MIMXRT1062xxxxA OR CONFIG_DEVICE_ID STREQUAL MIMXRT1062xxxxB) AND (CONFIG_BOARD STREQUAL evkcmimxrt1060))
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_sdio_template_evkcmimxrt1060 dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
-
-endif()
-
-endif()
-
-
-if (CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkcmimxrt1060)
-# Add set(CONFIG_USE_middleware_edgefast_bluetooth_mcux_linker_template_evkcmimxrt1060 true) in config.cmake to use this component
-
-message("middleware_edgefast_bluetooth_mcux_linker_template_evkcmimxrt1060 component is included from ${CMAKE_CURRENT_LIST_FILE}.")
-
-if((CONFIG_DEVICE_ID STREQUAL MIMXRT1062xxxxA OR CONFIG_DEVICE_ID STREQUAL MIMXRT1062xxxxB) AND (CONFIG_BOARD STREQUAL evkcmimxrt1060))
-
-if(CONFIG_TOOLCHAIN STREQUAL mcux)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkcmimxrt1060/edgefast_bluetooth_examples/template/data.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkcmimxrt1060)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkcmimxrt1060/edgefast_bluetooth_examples/template/end_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkcmimxrt1060)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkcmimxrt1060/edgefast_bluetooth_examples/template/main_data.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkcmimxrt1060)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkcmimxrt1060/edgefast_bluetooth_examples/template/main_text.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkcmimxrt1060)
-  add_config_file(${CMAKE_CURRENT_LIST_DIR}/../../boards/evkcmimxrt1060/edgefast_bluetooth_examples/template/symbols.ldt "" middleware_edgefast_bluetooth_mcux_linker_template_evkcmimxrt1060)
-endif()
-
-else()
-
-message(SEND_ERROR "middleware_edgefast_bluetooth_mcux_linker_template_evkcmimxrt1060 dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
+message(SEND_ERROR "middleware_edgefast_bluetooth_mcux_linker_template_mcxn9xxevk dependency does not meet, please check ${CMAKE_CURRENT_LIST_FILE}.")
 
 endif()
 

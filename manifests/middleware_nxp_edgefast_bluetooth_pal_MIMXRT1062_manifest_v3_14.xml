@@ -29,7 +29,7 @@
     <definition extID="utility.debug_console_lite.MIMXRT1062"/>
     <definition extID="component.common_task.MIMXRT1062"/>
   </externalDefinitions>
-  <ksdk id="MCUXpressoSDK216000_middleware_nxp_edgefast_bluetooth_pal_MIMXRT1062_manifest_v3_14" name="MCUXpressoSDK216000_middleware_nxp_edgefast_bluetooth_pal_MIMXRT1062_manifest_v3_14" version="2.16.000" revision="2.16.000"/>
+  <ksdk id="MCUXpressoSDK216100_middleware_nxp_edgefast_bluetooth_pal_MIMXRT1062_manifest_v3_14" name="MCUXpressoSDK216100_middleware_nxp_edgefast_bluetooth_pal_MIMXRT1062_manifest_v3_14" version="2.16.100" revision="2.16.100"/>
   <components>
     <component id="middleware.edgefast_bluetooth.le_audio.config.template.MIMXRT1062" name="middleware.edgefast_bluetooth.le_audio.config.template" brief="edgefast_bluetooth configuration template for LE audio" version="1.0.0" full_name="middleware.edgefast_bluetooth.le_audio.config.template" category="Wireless/Middleware Edgefast Bluetooth" user_visible="false" type="middleware" package_base_path=".././" project_base_path="edgefast/bluetooth">
       <dependencies>
@@ -1178,6 +1178,8 @@
         <files mask="bt_pal_keys_br.c"/>
         <files mask="bt_pal_l2cap.c"/>
         <files mask="bt_pal_l2cap_br.c"/>
+        <files mask="bt_pal_map_mce.c"/>
+        <files mask="bt_pal_map_mse.c"/>
         <files mask="bt_pal_monitor.c"/>
         <files mask="bt_pal_rfcomm.c"/>
         <files mask="bt_pal_spp.c"/>
@@ -1189,6 +1191,8 @@
         <files mask="bt_pal_uuid.c"/>
         <files mask="bt_pal_hfp_ag.c"/>
         <files mask="bt_pal_hfp_hf.c"/>
+        <files mask="bt_pal_pbap_pce.c"/>
+        <files mask="bt_pal_pbap_pse.c"/>
       </source>
       <source relative_path="./source/impl/ethermind/host" project_relative_path="source/host" type="c_include">
         <files mask="bt_pal_a2dp_internal.h"/>
@@ -1215,6 +1219,7 @@
         <files mask="bt_pal_l2cap_internal.h"/>
         <files mask="bt_pal_l2cap_br_internal.h"/>
         <files mask="bt_pal_l2cap_br_interface.h"/>
+        <files mask="bt_pal_map_internal.h"/>
         <files mask="bt_pal_monitor.h"/>
         <files mask="bt_pal_rfcomm_internal.h"/>
         <files mask="bt_pal_rpa.h"/>
@@ -1223,11 +1228,15 @@
         <files mask="bt_pal_smp.h"/>
         <files mask="bt_pal_ssp.h"/>
         <files mask="bt_pal_hfp_internal.h"/>
+        <files mask="bt_pal_pbap_internal.h"/>
       </source>
       <source relative_path="./source/impl/ethermind/host/a2dp_codec/sbc" project_relative_path="source/host/a2dp_codec/sbc" type="src">
         <files mask="a2dp_codec_sbc.c"/>
       </source>
       <source relative_path="./include/bluetooth" project_relative_path="include/bluetooth" type="c_include">
+        <files mask="pbap_pce.h"/>
+        <files mask="pbap_pse.h"/>
+        <files mask="pbap_types.h"/>
         <files mask="a2dp.h"/>
         <files mask="avrcp.h"/>
         <files mask="a2dp_codec_sbc.h"/>
@@ -1238,6 +1247,10 @@
         <files mask="direction.h"/>
         <files mask="buf.h"/>
         <files mask="l2cap.h"/>
+        <files mask="map_mce.h"/>
+        <files mask="map_mse.h"/>
+        <files mask="map_types.h"/>
+        <files mask="obex.h"/>
         <files mask="rfcomm.h"/>
         <files mask="spp.h"/>
         <files mask="sdp.h"/>
@@ -1420,6 +1433,8 @@
         <files mask="bt_pal_keys_br.c"/>
         <files mask="bt_pal_l2cap.c"/>
         <files mask="bt_pal_l2cap_br.c"/>
+        <files mask="bt_pal_map_mce.c"/>
+        <files mask="bt_pal_map_mse.c"/>
         <files mask="bt_pal_monitor.c"/>
         <files mask="bt_pal_rfcomm.c"/>
         <files mask="bt_pal_spp.c"/>
@@ -1431,6 +1446,8 @@
         <files mask="bt_pal_uuid.c"/>
         <files mask="bt_pal_hfp_ag.c"/>
         <files mask="bt_pal_hfp_hf.c"/>
+        <files mask="bt_pal_pbap_pce.c"/>
+        <files mask="bt_pal_pbap_pse.c"/>
       </source>
       <source relative_path="./source/impl/ethermind/host" project_relative_path="source/host" type="c_include">
         <files mask="bt_pal_a2dp_internal.h"/>
@@ -1456,6 +1473,7 @@
         <files mask="bt_pal_l2cap_internal.h"/>
         <files mask="bt_pal_l2cap_br_internal.h"/>
         <files mask="bt_pal_l2cap_br_interface.h"/>
+        <files mask="bt_pal_map_internal.h"/>
         <files mask="bt_pal_monitor.h"/>
         <files mask="bt_pal_rfcomm_internal.h"/>
         <files mask="bt_pal_rpa.h"/>
@@ -1464,11 +1482,15 @@
         <files mask="bt_pal_smp.h"/>
         <files mask="bt_pal_ssp.h"/>
         <files mask="bt_pal_hfp_internal.h"/>
+        <files mask="bt_pal_pbap_internal.h"/>
       </source>
       <source relative_path="./source/impl/ethermind/host/a2dp_codec/sbc" project_relative_path="source/host/a2dp_codec/sbc" type="src">
         <files mask="a2dp_codec_sbc.c"/>
       </source>
       <source relative_path="./include/bluetooth" project_relative_path="include/bluetooth" type="c_include">
+        <files mask="pbap_pce.h"/>
+        <files mask="pbap_pse.h"/>
+        <files mask="pbap_types.h"/>
         <files mask="a2dp.h"/>
         <files mask="avrcp.h"/>
         <files mask="a2dp_codec_sbc.h"/>
@@ -1479,6 +1501,10 @@
         <files mask="direction.h"/>
         <files mask="buf.h"/>
         <files mask="l2cap.h"/>
+        <files mask="map_mce.h"/>
+        <files mask="map_mse.h"/>
+        <files mask="map_types.h"/>
+        <files mask="obex.h"/>
         <files mask="rfcomm.h"/>
         <files mask="spp.h"/>
         <files mask="sdp.h"/>
@@ -2363,12 +2389,17 @@
         <files mask="shell_avrcp.c"/>
         <files mask="shell_test_mode.c"/>
         <files mask="shell_iso.c"/>
+        <files mask="shell_map.c"/>
+        <files mask="shell_pbap.c"/>
+        <files mask="shell_hfp.c"/>
+        <files mask="shell_ble_scan_filter.c"/>
       </source>
       <source relative_path="./source/shell" project_relative_path="shell" type="c_include">
         <files mask="shell_bt.h"/>
         <files mask="shell_hci.h"/>
         <files mask="fsl_shell.h"/>
         <files mask="shell_test_mode.h"/>
+        <files mask="shell_ble_scan_filter.h"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_shell.cmake" hidden="true"/>
@@ -2465,12 +2496,14 @@
         <files mask="shell_l2cap.c"/>
         <files mask="fsl_shell.c"/>
         <files mask="shell_test_mode.c"/>
+        <files mask="shell_ble_scan_filter.c"/>
       </source>
       <source relative_path="./source/shell" project_relative_path="shell" type="c_include">
         <files mask="shell_bt.h"/>
         <files mask="shell_hci.h"/>
         <files mask="fsl_shell.h"/>
         <files mask="shell_test_mode.h"/>
+        <files mask="shell_ble_scan_filter.h"/>
       </source>
       <source toolchain="armgcc" relative_path="./" type="workspace">
         <files mask="middleware_edgefast_bluetooth_shell_ble.cmake" hidden="true"/>

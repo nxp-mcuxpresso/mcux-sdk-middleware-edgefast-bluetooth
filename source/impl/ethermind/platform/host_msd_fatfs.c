@@ -232,9 +232,11 @@ static uint32_t testThroughputBuffer[THROUGHPUT_BUFFER_SIZE / 4]; /* the buffer 
 uint32_t testSizeArray[] = {20 * 1024, 20 * 1024};                /* test time and test size (uint: K)*/
 #else
 #if FF_USE_MKFS
+#if 0
 /*fix build warning: declared but never used.*/
 USB_DMA_NONINIT_DATA_ALIGN(USB_DATA_ALIGN_SIZE)
 static uint8_t testBuffer[(FF_MAX_SS > 256) ? FF_MAX_SS : 256]; /* normal test buffer */
+#endif
 #endif
 #endif /* MSD_FATFS_THROUGHPUT_TEST_ENABLE */
 

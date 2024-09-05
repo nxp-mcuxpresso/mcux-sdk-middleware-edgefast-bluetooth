@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright 2021 NXP
+ * Copyright 2021, 2024 NXP
  * Copyright (c) 2017 Nordic Semiconductor ASA
  * Copyright (c) 2015-2016 Intel Corporation
  *
@@ -247,6 +247,8 @@ struct bt_smp {
 /* Global BD Address of the SMP procedure */
 #ifdef SMP_LESC_CROSS_TXP_KEY_GEN
 DECL_STATIC BT_DEVICE_ADDR bt_smp_bd_addr;
+DECL_STATIC UCHAR local_keys;
+DECL_STATIC SMP_KEY_DIST peer_key_info; /* static to reduce stack usage */
 #endif
 static unsigned int fixed_passkey = BT_PASSKEY_INVALID;
 
@@ -880,6 +882,9 @@ static void sc_derive_link_key(struct bt_smp *smp)
 	} else {
 		link_key->flags &= ~BT_LINK_KEY_AUTHENTICATED;
 	}
+	if (IS_ENABLED(CONFIG_BT_SETTINGS)) {
+		bt_keys_link_key_store(link_key);
+	}
 }
 
 static void smp_br_reset(struct bt_smp_br *smp)
@@ -1090,12 +1095,8 @@ static void bt_smp_br_disconnected(struct bt_l2cap_chan *chan)
 static void smp_br_init(struct bt_smp_br *smp)
 {
 	/* Initialize SMP context without clearing L2CAP channel context */
-	(void)memset((uint8_t *)smp + offsetof(struct bt_smp_br, allowed_cmds), 0,
-		     sizeof(*smp) - (offsetof(struct bt_smp, allowed_cmds)
-#if 0
-                             + sizeof(smp->work)
-#endif
-                               ));
+	(void)memset(((uint8_t *)(void *)smp) + offsetof(struct bt_smp_br, allowed_cmds), 0,
+		     sizeof(*smp) - offsetof(struct bt_smp, allowed_cmds));
 
 	atomic_set_bit(smp->allowed_cmds, BT_SMP_CMD_PAIRING_FAIL);
 }
@@ -7017,15 +7018,7 @@ static void smp_auth_starting(struct k_work *work)
 					);
 	}
 }
-#ifdef SMP_LESC
-#ifdef SMP_LESC_CROSS_TXP_KEY_GEN
-DECL_STATIC SMP_KEY_DIST peer_key_info;
-DECL_STATIC UCHAR peer_keys;
-DECL_STATIC UCHAR local_keys;
-#endif
-#endif
-DECL_STATIC SMP_KEY_DIST local_key_info;
-BT_DEVICE_ADDR g_bd_addr;
+
 #ifdef SMP_LESC
 #ifdef SMP_LESC_CROSS_TXP_KEY_GEN
 void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
@@ -7036,17 +7029,16 @@ void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
     UCHAR lkey[BT_LINK_KEY_SIZE];
     UCHAR lkey_type;
     struct bt_conn *conn;
-	bt_addr_le_t peer_addr;
+    bt_addr_le_t peer_addr;
     struct bt_keys *keys;
     struct bt_smp_br *smp;
-	DEVICE_HANDLE deviceHandle;
-
-
+    DEVICE_HANDLE deviceHandle;
+    UCHAR peer_keys;
 
     LOG_DBG("\n LTK of the device is ...\n");
     LOG_DBG("\n LK of the device is ...\n");
 
-	retval = device_queue_search_br_edr_remote_addr(&deviceHandle, &bt_smp_bd_addr);
+    retval = device_queue_search_br_edr_remote_addr(&deviceHandle, &bt_smp_bd_addr);
     if (API_SUCCESS != retval)
     {
         LOG_ERR("The address cannot be found");
@@ -7067,6 +7059,7 @@ void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
             SMP_SEC_LEVEL_2: SMP_SEC_LEVEL_1;
 
         /* Update the keys */
+        BT_smp_get_device_keys(&deviceHandle, &peer_keys, &peer_key_info);
         BT_mem_copy(peer_key_info.enc_info, xtxp->ltk, 16U);
         (BT_IGNORE_RETURN_VALUE)BT_smp_update_security_info
         (
@@ -7157,6 +7150,7 @@ void appl_smp_lesc_xtxp_lk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
 #endif
 #endif
 
+DECL_STATIC SMP_KEY_DIST local_key_info; /* static to reduce stack usage */
 #if (defined(CONFIG_BT_BREDR) && ((CONFIG_BT_BREDR) > 0U))
 static void hci_acl_smp_br_handler(struct net_buf *buf)
 {
@@ -7175,7 +7169,6 @@ static void hci_acl_smp_br_handler(struct net_buf *buf)
 
     struct bt_conn *conn;
 	struct bt_smp_br *smp;
-    DECL_STATIC SMP_KEY_DIST peer_key_info;
 
     UCHAR * bd_addr;
     UCHAR   bd_addr_type;
@@ -7284,7 +7277,6 @@ static void hci_acl_smp_br_handler(struct net_buf *buf)
                 {
                     /* Save the BD Address */
                     BT_COPY_BD_ADDR_AND_TYPE(&bt_smp_bd_addr, &bdaddr);
-                    BT_COPY_BD_ADDR_AND_TYPE(&g_bd_addr, &bdaddr);
 
 #ifdef CLASSIC_SEC_MANAGER
                     /* Compare key strengths before generating */
@@ -7580,6 +7572,11 @@ static void hci_acl_smp_br_handler(struct net_buf *buf)
         LOG_DBG("Encryption Key Size negotiated - 0x%02X",
                 kx_param->ekey_size);
 
+#ifdef SMP_LESC_CROSS_TXP_KEY_GEN
+        /* Save the local key distribution information */
+        local_keys = kx_param->keys;
+#endif
+
         /* Get platform data of key informations */
         BT_smp_get_key_exchange_info_pl (&key_info);
 
@@ -7739,7 +7736,6 @@ static void hci_acl_smp_br_handler(struct net_buf *buf)
         key_info = kx_param->keys_info;
 
         /* Store the peer keys */
-        BT_mem_copy (&peer_key_info, key_info, sizeof (SMP_KEY_DIST));
         BT_HEXDUMP_DBG(key_info->enc_info, sizeof (key_info->enc_info), "Encryption Info:");
         BT_HEXDUMP_DBG(key_info->mid_info, sizeof (key_info->mid_info), "Master Identification Info:");
         BT_HEXDUMP_DBG(key_info->id_info, sizeof (key_info->id_info), "Identity Info:");
@@ -7757,6 +7753,7 @@ static void hci_acl_smp_br_handler(struct net_buf *buf)
 			keys->enc_size = kx_param->ekey_size;
 			memcpy(keys->irk.val, key_info->id_info, sizeof(keys->irk.val));
 			bt_keys_add_type(keys, BT_KEYS_IRK);
+			bt_id_add(keys);
 #if (defined(CONFIG_BT_SIGNING) && (CONFIG_BT_SIGNING > 0U))
 			memcpy(keys->remote_csrk.val, key_info->sign_info, sizeof(keys->remote_csrk.val));
 			bt_keys_add_type(keys, BT_KEYS_REMOTE_CSRK);
@@ -7842,7 +7839,6 @@ static void hci_acl_smp_handler(struct net_buf *buf)
 
     struct bt_conn *conn;
 	struct bt_smp *smp;
-    DECL_STATIC SMP_KEY_DIST peer_key_info;
 
     UCHAR * bd_addr;
     UCHAR   bd_addr_type;
@@ -7891,6 +7887,7 @@ static void hci_acl_smp_handler(struct net_buf *buf)
 
 	if (BT_CONN_TYPE_BR == conn->type)
 	{
+		bt_conn_unref(conn);
 #if (defined(CONFIG_BT_BREDR) && ((CONFIG_BT_BREDR) > 0U))
 		hci_acl_smp_br_handler(buf);
 #endif /* CONFIG_BT_BREDR */
@@ -7973,7 +7970,6 @@ static void hci_acl_smp_handler(struct net_buf *buf)
                 {
                     /* Save the BD Address */
                     BT_COPY_BD_ADDR_AND_TYPE(&bt_smp_bd_addr, &bdaddr);
-                    BT_COPY_BD_ADDR_AND_TYPE(&g_bd_addr, &bdaddr);
 
 #ifdef CLASSIC_SEC_MANAGER
                     /* Compare key strengths before generating */
@@ -8646,7 +8642,6 @@ static void hci_acl_smp_handler(struct net_buf *buf)
         key_info = kx_param->keys_info;
 
         /* Store the peer keys */
-        BT_mem_copy (&peer_key_info, key_info, sizeof (SMP_KEY_DIST));
         BT_HEXDUMP_DBG(key_info->enc_info, sizeof (key_info->enc_info), "Encryption Info:");
         BT_HEXDUMP_DBG(key_info->mid_info, sizeof (key_info->mid_info), "Master Identification Info:");
         BT_HEXDUMP_DBG(key_info->id_info, sizeof (key_info->id_info), "Identity Info:");
@@ -8825,11 +8820,7 @@ static API_RESULT ethermind_br_sm_ui_notify_cb
         LOG_DBG( BT_DEVICE_ADDR_ONLY_FRMT_SPECIFIER, BT_DEVICE_ADDR_ONLY_PRINT_STR (bd_addr));
 
 		memcpy(link_key.bdaddr.val, bd_addr, sizeof(link_key.bdaddr));
-		retval = BT_sm_get_device_link_key_and_type(bd_addr, link_key.link_key, &link_key.key_type);
-		if (API_SUCCESS == retval)
-		{
-			(void)ethermind_hci_event_callback(BT_HCI_EVT_LINK_KEY_NOTIFY, (uint8_t *)&link_key, sizeof(link_key));
-		}
+		(void)BT_sm_get_device_link_key_and_type(bd_addr, link_key.link_key, &link_key.key_type);
 		(void)ethermind_hci_event_callback(BT_HCI_EVT_LINK_KEY_REQ, (uint8_t *)&link_key, sizeof(link_key.bdaddr.val));
         break;
 

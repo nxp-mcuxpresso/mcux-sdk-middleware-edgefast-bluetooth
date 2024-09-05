@@ -1,7 +1,7 @@
 /* hci_core.c - HCI core Bluetooth handling */
 
 /*
- * Copyright 2021 NXP
+ * Copyright 2021, 2024 NXP
  * Copyright (c) 2017-2021 Nordic Semiconductor ASA
  * Copyright (c) 2015-2016 Intel Corporation
  *
@@ -2092,8 +2092,8 @@ static void unpair(uint8_t id, const bt_addr_le_t *addr)
 #if (defined(CONFIG_BT_BREDR) && ((CONFIG_BT_BREDR) > 0U))
     conn = bt_conn_lookup_addr_br(&id_addr.a);
     if (NULL != conn) {
-        bt_conn_disconnect(conn, BT_HCI_ERR_REMOTE_USER_TERM_CONN);
         atomic_set_bit(conn->flags, BT_CONN_UNPAIRING);
+        bt_conn_disconnect(conn, BT_HCI_ERR_REMOTE_USER_TERM_CONN);
         bt_conn_unref(conn);
         return;
     }
@@ -3187,7 +3187,12 @@ static void hci_tx_thread(void *param)
 			ret = OSA_MsgQGet(bt_dev.iso_conn, &conn, osaWaitNone_c);
 			if (KOSA_StatusSuccess == ret)
 			{
-				bt_conn_process_tx(conn);
+				int err = bt_conn_process_tx(conn);
+				if(err == -ENOMEM)
+				{
+						ret = OSA_MsgQPut(bt_dev.iso_conn, &conn);
+						assert(KOSA_StatusSuccess == ret);
+				}
 				bt_set_send_iso_new();
 			}
         }
@@ -4502,8 +4507,16 @@ uint16_t ethermind_hci_event_callback
     hdr.len = event_datalen;
     (void)net_buf_add_mem(buf, &hdr, sizeof(hdr));
     (void)net_buf_add_mem(buf, event_data, event_datalen);
-	bt_recv(buf);
+    bt_recv(buf);
 
+    if (event_type == BT_HCI_EVT_CONN_REQUEST)
+    {
+        struct bt_hci_evt_conn_request *evt = (void *)buf->data;
+
+        if (evt->link_type != BT_HCI_ACL) {
+            return HCI_ESCO_REQ_RETURN_NO_AUTO_RESPONSE;
+        }
+    }
     return API_SUCCESS;
 }
 

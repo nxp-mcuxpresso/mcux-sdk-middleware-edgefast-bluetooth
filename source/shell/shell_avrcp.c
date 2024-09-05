@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2021 NXP
+ * Copyright (c) 2021, 2024 NXP
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -43,6 +43,8 @@ static void avrcp_auto_test(uint8_t print);
 
 #define AVRCP_TG_SUPPORTED_FEATURES (0x01ffu)
 #define AVRCP_CT_SUPPORTED_FEATURES (0x03Cfu)
+static uint8_t cover_art_handle[32u];
+static uint16_t cover_art_handle_len;
 
 static struct bt_sdp_attribute avrcp_tg_attrs[] = {
     BT_SDP_NEW_SERVICE,
@@ -634,7 +636,6 @@ void avrcp_target_rsp_notify_cmd_interim(
             break;
         }
 
-#ifdef AVRCP_1_4
         case BT_AVRCP_EVENT_NOW_PLAYING_CONTENT_CHANGED:
             shell_print(ctx_shell, "    Event-ID ->BT_AVRCP_EVENT_PLAYER_APP_SETTING_CHANGED<0x%x>.", event_id);
             register_player_event(event_id, msg->header.tl);
@@ -664,7 +665,6 @@ void avrcp_target_rsp_notify_cmd_interim(
             register_player_event(event_id, msg->header.tl);
             break;
 
-#endif /* AVRCP_1_4 */
         default:
             shell_print(ctx_shell, "    Event-ID -> ??? ");
             break;
@@ -1145,7 +1145,7 @@ void avrcp_target_handle_get_folder_items_req(struct bt_conn *conn, struct bt_av
     struct bt_avrcp_item *item;
     struct bt_avrcp_get_folder_items_rsp *response;
 
-    rsp_status = 0u;
+    rsp_status = BT_AVRCP_METADATA_ERROR_OPERATION_SUCCESSFUL;
 
     shell_print(ctx_shell, "    PDU ID - Get Folder Items(0x%x).", cmd->header.pdu_id);
 
@@ -1162,7 +1162,7 @@ void avrcp_target_handle_get_folder_items_req(struct bt_conn *conn, struct bt_av
         rsp_status = BT_AVRCP_BOW_ERROR_RANGE_OUT_OF_BOUNDS;
     }
 
-    if (rsp_status != 0u)
+    if (rsp_status != BT_AVRCP_METADATA_ERROR_OPERATION_SUCCESSFUL)
     {
         avrcp_target_get_folder_items_send_reject(conn, cmd, rsp_status);
         return;
@@ -1476,7 +1476,6 @@ void avrcp_print_event_nofity_rsp(uint8_t event_id, struct bt_avrcp_event_rsp *e
             shell_print(ctx_shell, "    Event-ID ->BT_AVRCP_EVENT_PLAYER_APP_SETTING_CHANGED<0x%x>.", event_id);
             break;
 
-#ifdef AVRCP_1_4
         case BT_AVRCP_EVENT_NOW_PLAYING_CONTENT_CHANGED:
             shell_print(ctx_shell, "    Event-ID ->BT_AVRCP_EVENT_NOW_PLAYING_CONTENT_CHANGED<0x%x>.", event_id);
             break;
@@ -1497,7 +1496,6 @@ void avrcp_print_event_nofity_rsp(uint8_t event_id, struct bt_avrcp_event_rsp *e
             shell_print(ctx_shell, "    Event-ID ->BT_AVRCP_EVENT_VOLUME_CHANGED<0x%x>.", event_id);
             break;
 
-#endif /* AVRCP_1_4 */
         default:
             shell_print(ctx_shell, "    Event-ID -> ??? ");
             break;
@@ -1505,9 +1503,8 @@ void avrcp_print_event_nofity_rsp(uint8_t event_id, struct bt_avrcp_event_rsp *e
     return;
 }
 
-void avrcp_print_vendor_cmd_rsp_content(struct bt_avrcp_control_msg *msg)
+void avrcp_print_vendor_cmd_rsp_content(struct bt_avrcp_vendor *vendor_rsp)
 {
-    struct bt_avrcp_vendor *vendor_rsp = &msg->vendor;
     switch (vendor_rsp->pdu_id)
     {
         case BT_AVRCP_PDU_ID_GET_CAPABILITY:
@@ -1636,12 +1633,6 @@ void avrcp_print_vendor_cmd_rsp_content(struct bt_avrcp_control_msg *msg)
             struct bt_avrcp_player_get_element_attr_rsp *rsp =
                 &vendor_rsp->element_attr_rsp;
 
-            if (BT_AVRCP_RESPONSE_TYPE_REJECTED == msg->header.ctype_response)
-            {
-                shell_print(ctx_shell, "    Reason: 0x%02x", vendor_rsp->parameter);
-                break;
-            }
-
             shell_print(ctx_shell, "    No. of Attributes: %d", rsp->num_of_attr);
             for (uint8_t i = 0; i < rsp->num_of_attr; i++)
             {
@@ -1650,7 +1641,16 @@ void avrcp_print_vendor_cmd_rsp_content(struct bt_avrcp_control_msg *msg)
 
                 attr_val[rsp->attrs[i].string_len] = '\0';
                 shell_print(ctx_shell, "       - ID: 0x%04x", rsp->attrs[i].attr_id);
-                shell_print(ctx_shell, "       - Value: %s", attr_val);
+                shell_print(ctx_shell, "       - Len:%d, Value: %s", rsp->attrs[i].string_len, attr_val);
+                if ((rsp->attrs[i].attr_id == 0x08u) && (rsp->attrs[i].string_len != 0u))
+                {
+                    shell_print(ctx_shell, "save the cover art handle");
+                    memset(cover_art_handle, 0, sizeof(cover_art_handle));
+                    cover_art_handle_len = rsp->attrs[i].string_len + 1;
+                    memcpy(cover_art_handle, attr_val,
+                           rsp->attrs[i].string_len > sizeof(cover_art_handle) - 1 ?
+                           sizeof(cover_art_handle) - 1 : rsp->attrs[i].string_len);
+                }
             }
         }
         break;
@@ -1738,9 +1738,8 @@ void avrcp_print_vendor_cmd_rsp_content(struct bt_avrcp_control_msg *msg)
     return;
 }
 
-void avrcp_print_vendor_cmd_rsp(struct bt_avrcp_control_msg *msg)
+void avrcp_print_vendor_cmd_rsp(struct bt_avrcp_vendor *vendor_rsp)
 {
-    struct bt_avrcp_vendor *vendor_rsp = &msg->vendor;
     shell_print(ctx_shell, "    PDU-ID -> ");
 
     switch (vendor_rsp->pdu_id)
@@ -1857,7 +1856,7 @@ void avrcp_print_vendor_cmd_rsp(struct bt_avrcp_control_msg *msg)
 
     shell_print(ctx_shell, "    Param Length: 0x%04x", vendor_rsp->parameter_len);
 
-    avrcp_print_vendor_cmd_rsp_content(msg);
+    avrcp_print_vendor_cmd_rsp_content(vendor_rsp);
 
     return;
 }
@@ -1869,6 +1868,16 @@ void avrcp_control_rsp_received(struct bt_conn *conn, struct bt_avrcp_control_ms
     if ((err) || (msg == NULL))
     {
         shell_error(ctx_shell, "    respone fail");
+        return;
+    }
+
+    if ((msg->header.ctype_response == BT_AVRCP_RESPONSE_TYPE_REJECTED) ||
+        (msg->header.ctype_response == BT_AVRCP_RESPONSE_TYPE_NOT_IMPLEMENTED))
+    {
+        shell_error(ctx_shell, "    avrcp error response");
+        avrcp_response_type_print(msg->header.ctype_response);
+
+        avrcp_auto_test(0);
         return;
     }
 
@@ -1898,13 +1907,84 @@ void avrcp_control_rsp_received(struct bt_conn *conn, struct bt_avrcp_control_ms
     }
     else if (msg->header.op_code == BT_AVRCP_OPCODE_VENDOR_DEPENDENT)
     {
-        avrcp_print_vendor_cmd_rsp(msg);
+        avrcp_print_vendor_cmd_rsp(&msg->vendor);
     }
     else
     {
     }
 
     avrcp_auto_test(0);
+}
+
+NET_BUF_POOL_FIXED_DEFINE(app_avrcp_continue_pool, 1u, 1024u, NULL);
+static struct net_buf *continue_rsp_buf;
+static struct bt_avrcp_vendor_header continue_rsp_header;
+#define PARSE_BUF_SIZE (1024u)
+static uint8_t parse_buf[PARSE_BUF_SIZE];
+
+static void app_avrcp_process_continue_packet(struct bt_avrcp_vendor_header *header, struct net_buf *buf)
+{
+    bool continue_packet_finish = false;
+
+    if (header->packet_type != BT_AVRCP_PACKET_TYPE_SINGLE) {
+        if (header->packet_type == BT_AVRCP_PACKET_TYPE_START) {
+
+            if (continue_rsp_buf != NULL) {
+                net_buf_unref(continue_rsp_buf);
+                continue_rsp_buf = NULL;
+            }
+
+            continue_rsp_buf = net_buf_alloc(&app_avrcp_continue_pool, osaWaitForever_c);
+            if (continue_rsp_buf == NULL) {
+                shell_print(ctx_shell, "fail to alloc response buf");
+                return;
+            }
+            continue_rsp_header.packet_type = BT_AVRCP_PACKET_TYPE_SINGLE; /* change the packet type as signal */
+            continue_rsp_header.parameter_len = 0u;
+            continue_rsp_header.pdu_id = header->pdu_id;
+        }
+
+        if (!continue_rsp_buf) {
+            return;
+        }
+
+        if (net_buf_tailroom(continue_rsp_buf) >= buf->len) {
+            net_buf_add_mem(continue_rsp_buf, buf->data, buf->len);
+            continue_rsp_header.parameter_len += header->parameter_len;
+
+            if (header->packet_type != BT_AVRCP_PACKET_TYPE_END) {
+                if (bt_avrcp_send_vendor_dependent(default_conn, BT_AVRCP_PDU_ID_REQUEST_CONTINUING_RESPONSE, &header->pdu_id)) {
+                    continue_packet_finish = true;
+                }
+            } else {
+                continue_packet_finish = true;
+            }
+        } else {
+            if (header->packet_type != BT_AVRCP_PACKET_TYPE_END) {
+                (void)bt_avrcp_send_vendor_dependent(default_conn, BT_AVRCP_PDU_ID_ABORT_CONTINUING_RESPONSE, &header->pdu_id);
+            }
+            continue_packet_finish = true;
+        }
+
+        if (continue_packet_finish) {
+            struct bt_avrcp_vendor* vendor = bt_avrcp_vendor_rsp_parse(&continue_rsp_header, continue_rsp_buf, parse_buf, PARSE_BUF_SIZE);
+            if (vendor == NULL) {
+                /* the parse_buf size may need to increase, or the continue_rsp_buf's data is wrong */
+                shell_print(ctx_shell, "parse fail");
+            } else {
+                avrcp_print_vendor_cmd_rsp(vendor);
+            }
+            avrcp_auto_test(0); /* test next case */
+        }
+
+        return;
+    }
+}
+
+static void avrcp_vendor_dependent_continue_rsp(struct bt_conn *conn, struct bt_avrcp_vendor_header *header, struct net_buf *buf)
+{
+    app_avrcp_process_continue_packet(header, buf);
+    net_buf_unref(buf);
 }
 
 void avrcp_browsing_rsp_received(struct bt_conn *conn, struct bt_avrcp_browsing_rsp *rsp, int err)
@@ -2684,36 +2764,41 @@ static void avrcp_auto_test(uint8_t print)
     }
 }
 
-static shell_status_t cmd_init_ct(shell_handle_t shell, int32_t argc, char *argv[])
+static void register_cb(void)
 {
-    struct bt_avrcp_cb cbs = {avrcp_control_connected,    avrcp_control_disconnected,
-                              avrcp_browsing_connected,   avrcp_browsing_disconnected,
-                              avrcp_send_result,          NULL,
-                              avrcp_control_rsp_received, NULL,
-                              avrcp_browsing_rsp_received};
-
-    bt_sdp_register_service(&avrcp_ct_rec);
-
-    bt_avrcp_register_callback(&cbs);
-    shell_print(shell, "init success");
-    return kStatus_SHELL_Success;
-}
-
-static shell_status_t cmd_init_tg(shell_handle_t shell, int32_t argc, char *argv[])
-{
+    static uint8_t cb_registered;
     struct bt_avrcp_cb cbs = {avrcp_control_connected,
                               avrcp_control_disconnected,
                               avrcp_browsing_connected,
                               avrcp_browsing_disconnected,
                               avrcp_send_result,
                               avrcp_control_received,
-                              NULL,
+                              avrcp_control_rsp_received,
+                              avrcp_vendor_dependent_continue_rsp,
                               avrcp_browsing_received,
-                              NULL};
+                              avrcp_browsing_rsp_received};
 
+    if (!cb_registered)
+    {
+        cb_registered = 1u;
+        bt_avrcp_register_callback(&cbs);
+    }
+}
+
+static shell_status_t cmd_init_ct(shell_handle_t shell, int32_t argc, char *argv[])
+{
+    bt_sdp_register_service(&avrcp_ct_rec);
+
+    register_cb();
+    shell_print(shell, "init success");
+    return kStatus_SHELL_Success;
+}
+
+static shell_status_t cmd_init_tg(shell_handle_t shell, int32_t argc, char *argv[])
+{
     bt_sdp_register_service(&avrcp_tg_rec);
 
-    bt_avrcp_register_callback(&cbs);
+    register_cb();
     shell_print(shell, "init success");
     return kStatus_SHELL_Success;
 }
@@ -2794,6 +2879,23 @@ void avrcp_cover_art_disconnected(uint8_t handle, int err)
 
 static uint8_t cover_test_step;
 static uint8_t wait_count;
+
+static void cover_art_set_handle(uint8_t **image_handle, uint16_t *image_handle_len)
+{
+    if (cover_art_handle_len > 0)
+    {
+        shell_print(ctx_shell, "use cover art handle from test case 18");
+        *image_handle     = cover_art_handle;
+        *image_handle_len = cover_art_handle_len;
+    }
+    else
+    {
+        shell_print(ctx_shell, "use cover art handle 1000004");
+        *image_handle     = (uint8_t *)"1000004";
+        *image_handle_len = 8u;
+    }
+}
+
 static void cover_art_auto_test(uint8_t print)
 {
     switch (cover_test_step)
@@ -2808,8 +2910,7 @@ static void cover_art_auto_test(uint8_t print)
                 break;
             }
 
-            param.image_handle     = (uint8_t *)"1000004";
-            param.image_handle_len = 7u;
+            cover_art_set_handle(&param.image_handle, &param.image_handle_len);
             param.wait             = 0;
             if (bt_avrcp_get_image_property(default_cover_handle, &param))
             {
@@ -2829,8 +2930,7 @@ static void cover_art_auto_test(uint8_t print)
 
             param.image_descriptor_data     = NULL;
             param.image_descriptor_data_len = 0u;
-            param.image_handle              = (uint8_t *)"1000004";
-            param.image_handle_len          = 7u;
+            cover_art_set_handle(&param.image_handle, &param.image_handle_len);
             param.wait                      = 0;
             if (bt_avrcp_get_image(default_cover_handle, &param))
             {
@@ -2851,8 +2951,7 @@ static void cover_art_auto_test(uint8_t print)
             wait_count                      = 2;
             param.image_descriptor_data     = NULL;
             param.image_descriptor_data_len = 0u;
-            param.image_handle              = (uint8_t *)"1000004";
-            param.image_handle_len          = 7u;
+            cover_art_set_handle(&param.image_handle, &param.image_handle_len);
             param.wait                      = wait_count;
             if (bt_avrcp_get_image(default_cover_handle, &param))
             {
@@ -2870,8 +2969,7 @@ static void cover_art_auto_test(uint8_t print)
                 break;
             }
 
-            param.image_handle     = (uint8_t *)"1000004";
-            param.image_handle_len = 7u;
+            cover_art_set_handle(&param.image_handle, &param.image_handle_len);
             param.wait             = 0;
             if (bt_avrcp_get_linked_thumbnail(default_cover_handle, &param))
             {

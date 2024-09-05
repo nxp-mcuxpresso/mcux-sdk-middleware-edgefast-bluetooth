@@ -67,9 +67,148 @@ static bool metrics;
 
 #if (defined(CONFIG_BT_L2CAP_UNBLOCK_SEND) && (CONFIG_BT_L2CAP_UNBLOCK_SEND > 0))
 static bool unblock_send_timer_initialized = false;
+static bool unblock_send_start_flag = false;
+static bool tx_throughput_print_flag = false;
+static bool rx_throughput_print_flag = false;
 static uint32_t unblock_send_count;
 static uint8_t unblock_send_length;
 static struct k_work_delayable unblock_send_timer;
+
+static uint16_t req_data_tx_chunk_len = 0x0000;
+static uint16_t req_data_tx_count     = 0x0000;
+static uint16_t exp_data_rx_chunk_len = 0x0000;
+static uint16_t exp_data_rx_count     = 0x0000;
+static uint16_t curr_data_rx_count    = 0x0000;
+
+#define L2CAP_RELATIVE_TIME_INIT_VALUE 0xFFFFFFFF
+extern uint64_t SHELL_get_us_timestamp(void);
+static uint64_t first_tx_inst = L2CAP_RELATIVE_TIME_INIT_VALUE;
+static uint64_t last_tx_inst  = L2CAP_RELATIVE_TIME_INIT_VALUE;
+static uint64_t first_rx_inst = L2CAP_RELATIVE_TIME_INIT_VALUE;
+static uint64_t last_rx_inst  = L2CAP_RELATIVE_TIME_INIT_VALUE;
+#endif
+
+#if (defined(CONFIG_BT_L2CAP_UNBLOCK_SEND) && (CONFIG_BT_L2CAP_UNBLOCK_SEND > 0))
+static uint64_t l2cap_get_current_relative_time (void)
+{
+    return (uint64_t)SHELL_get_us_timestamp();
+}
+
+static uint32_t l2cap_calculate_data_rate
+       (
+            uint32_t              data_count,
+            uint64_t             time_elapsed
+       )
+{
+    uint64_t tmp_data_count;
+
+    /* Converting the Data Count to Larger Data Type */
+    tmp_data_count = data_count;
+    tmp_data_count *= (1000000);
+
+    /**
+     * TODO: Check if this below code is needed.
+     * Defaults to 1 microsecond.
+     */
+    time_elapsed = (0 == time_elapsed) ? 1 : time_elapsed;
+
+    return (uint32_t)((tmp_data_count)/(time_elapsed));
+}
+
+static uint32_t l2cap_calculate_data_rate_in_kbps
+       (
+            uint32_t              data_count,
+            uint64_t             time_elapsed
+       )
+{
+    uint64_t tmp_data_count;
+
+    /* Converting the Data Count to Larger Data Type */
+    tmp_data_count = data_count;
+    tmp_data_count *= (1000000);
+
+    /**
+     * TODO: Check if this below code is needed.
+     * Defaults to 1 microsecond.
+     */
+    time_elapsed = (0 == time_elapsed) ? 1 : time_elapsed;
+
+    return (uint32_t)(((((tmp_data_count)/(time_elapsed)) * 8) /1024));
+}
+
+static uint16_t l2cap_display_tx_stat (void)
+{
+    uint64_t           duration;
+    uint32_t           total_byte_count;
+
+    if ((L2CAP_RELATIVE_TIME_INIT_VALUE == first_tx_inst) &&
+        (L2CAP_RELATIVE_TIME_INIT_VALUE == last_tx_inst))
+    {
+        /* Do Nothing */
+    }
+    else
+    {
+        duration = (last_tx_inst - first_tx_inst);
+        total_byte_count = (req_data_tx_chunk_len * req_data_tx_count);
+        shell_print (ctx_shell,
+        "\n---------------------------- TX Session ----------------------------\n");
+        shell_print (ctx_shell,
+        "  First Packet Transmit at: %lld microseconds\n", first_tx_inst);
+        shell_print (ctx_shell,
+        "  Last Packet Transmit at : %lld microseconds\n", last_tx_inst);
+        shell_print (ctx_shell,
+        "  Session Duration        : %lld microseconds\n", duration);
+        shell_print (ctx_shell,
+        "  Total Bytes Transmitted : %d bytes (%d * %d)\n", total_byte_count,
+        req_data_tx_chunk_len, req_data_tx_count);
+        shell_print (ctx_shell,
+        "  Data Rate               : %d bytes per second (%d kbps)\n",
+        l2cap_calculate_data_rate (total_byte_count, duration),
+        l2cap_calculate_data_rate_in_kbps (total_byte_count, duration));
+
+        shell_print (ctx_shell,
+        "\n---------------------------------------------------------------------\n");
+    }
+
+    return 0;
+}
+
+static uint16_t l2cap_display_rx_stat (void)
+{
+    uint64_t 			 duration;
+    uint32_t             total_byte_count;
+
+    if ((L2CAP_RELATIVE_TIME_INIT_VALUE == first_rx_inst) &&
+        (L2CAP_RELATIVE_TIME_INIT_VALUE == last_rx_inst))
+    {
+        /* Do Nothing */
+    }
+    else
+    {
+        duration = (last_rx_inst - first_rx_inst);
+        total_byte_count = (exp_data_rx_chunk_len * exp_data_rx_count);
+        shell_print (ctx_shell,
+        "\n---------------------------- RX Session ----------------------------\n");
+        shell_print (ctx_shell,
+        "  First Packet Received at: %lld microseconds\n", first_rx_inst);
+        shell_print (ctx_shell,
+        "  Last Packet Received at : %lld microseconds\n", last_rx_inst);
+        shell_print (ctx_shell,
+        "  Session Duration        : %lld microseconds\n", duration);
+        shell_print (ctx_shell,
+        "  Total Bytes Received    : %d bytes (%d * %d)\n", total_byte_count,
+        exp_data_rx_chunk_len, exp_data_rx_count);
+        shell_print (ctx_shell,
+        "  Data Rate               : %d bytes per second (%d kbps)\n",
+        l2cap_calculate_data_rate (total_byte_count, duration),
+        l2cap_calculate_data_rate_in_kbps (total_byte_count, duration));
+
+        shell_print (ctx_shell,
+        "\n---------------------------------------------------------------------\n");
+    }
+
+    return 0;
+}
 #endif
 
 static void l2cap_channel_free(struct l2ch *chan);
@@ -119,6 +258,40 @@ static int l2cap_recv(struct bt_l2cap_chan *chan, struct net_buf *buf)
 
 	shell_print(ctx_shell, "Incoming data channel %p len %u", chan,
 		    buf->len);
+
+#if (defined(CONFIG_BT_L2CAP_UNBLOCK_SEND) && (CONFIG_BT_L2CAP_UNBLOCK_SEND > 0))
+	if (rx_throughput_print_flag)
+	{
+		if (0x0000 == curr_data_rx_count)
+		{
+			/* Get first instance of Reception */
+			first_rx_inst = l2cap_get_current_relative_time();
+		}
+
+		/* Increment the count */
+		curr_data_rx_count++;
+
+		if (exp_data_rx_count == curr_data_rx_count)
+		{
+			shell_print(ctx_shell,
+			"\n%d Bytes of Data, received for %d times Successfully!\n",
+			exp_data_rx_chunk_len, exp_data_rx_count);
+
+			/* Get last instance of Reception */
+			last_rx_inst = l2cap_get_current_relative_time();
+
+			/* Print Statistics here */
+			l2cap_display_rx_stat();
+
+			/* Reset Transient Variables here */
+			curr_data_rx_count = 0;
+			first_rx_inst = L2CAP_RELATIVE_TIME_INIT_VALUE;
+			last_rx_inst  = L2CAP_RELATIVE_TIME_INIT_VALUE;
+
+			rx_throughput_print_flag = false;
+		}
+	}
+#endif
 
 	if (buf->len) {
 		shell_hexdump(ctx_shell, buf->data, buf->len);
@@ -489,6 +662,11 @@ static void unblock_send_timer_cb(struct k_work *work)
 		net_buf_add_mem(buf, buf_data, len);
 
 		ret = bt_l2cap_chan_send(&l2cap_channel->ch.chan, buf);
+        if((!unblock_send_start_flag) && (tx_throughput_print_flag))
+        {
+        	first_tx_inst = l2cap_get_current_relative_time();
+            unblock_send_start_flag = true;
+        } 
 		if (ret >= 0) {
 			unblock_send_count--;
 		}
@@ -496,10 +674,21 @@ static void unblock_send_timer_cb(struct k_work *work)
 			net_buf_unref(buf);     
 		}
 	}
-
     k_work_reschedule(&unblock_send_timer,30);
     if (unblock_send_count == 0) {
 		k_work_cancel_delayable(&unblock_send_timer);
+		if(tx_throughput_print_flag)
+		{
+			/* Get last instance of Transmission */
+      		last_tx_inst = l2cap_get_current_relative_time();
+      		unblock_send_start_flag = false;
+      		/* Print Statistics here */
+      		l2cap_display_tx_stat();
+
+      		/* Reset Transient Variables here */
+      		first_tx_inst = L2CAP_RELATIVE_TIME_INIT_VALUE;
+		}
+		tx_throughput_print_flag = false;
 	}
 }
 
@@ -507,14 +696,24 @@ static shell_status_t cmd_unblock_send(shell_handle_t shell, int32_t argc, char 
 {
 	if (argc > 1) {
 		unblock_send_count = strtoul(argv[1], NULL, 10);
+		if (unblock_send_count <= 0) {
+			shell_print(shell,
+			"Number should be greater than 0");
+			return kStatus_SHELL_Error;
+		}
+        req_data_tx_count = unblock_send_count;
 	}
 	if (argc > 2) {
 		unblock_send_length = strtoul(argv[2], NULL, 10);
+        req_data_tx_chunk_len = unblock_send_length;
 		if (unblock_send_length > DATA_MTU) {
 			shell_print(shell,
 			"Length exceeds TX MTU for the channel");
 			return kStatus_SHELL_Error;
 		}
+	}
+	if (argc > 3) {
+		tx_throughput_print_flag = strtoul(argv[3], NULL, 10);
 	}
     if(!unblock_send_timer_initialized)
     {
@@ -523,6 +722,31 @@ static shell_status_t cmd_unblock_send(shell_handle_t shell, int32_t argc, char 
     }
 
     k_work_schedule(&unblock_send_timer, 30);
+	return kStatus_SHELL_Success;
+}
+
+static shell_status_t cmd_rx_calculate_tput(shell_handle_t shell, int32_t argc, char *argv[])
+{
+	if (argc > 1) {
+		exp_data_rx_count = strtoul(argv[1], NULL, 10);
+		if (exp_data_rx_count <= 0) {
+			shell_print(shell,
+			"Number should be greater than 0");
+			return kStatus_SHELL_Error;
+		}
+	}
+	if (argc > 2) {
+		exp_data_rx_chunk_len = strtoul(argv[2], NULL, 10);
+		if (exp_data_rx_chunk_len > DATA_MTU) {
+			shell_print(shell,
+			"Length exceeds TX MTU for the channel");
+			return kStatus_SHELL_Error;
+		}
+	}
+	if (argc > 3) {
+		rx_throughput_print_flag = strtoul(argv[3], NULL, 10);
+	}
+
 	return kStatus_SHELL_Success;
 }
 #endif
@@ -665,8 +889,10 @@ SHELL_STATIC_SUBCMD_SET_CREATE(l2cap_cmds,
 		cmd_ecred_reconfigure, 1, 1),
 #endif /* CONFIG_BT_L2CAP_ECRED */
 #if (defined(CONFIG_BT_L2CAP_UNBLOCK_SEND) && (CONFIG_BT_L2CAP_UNBLOCK_SEND > 0))
-    SHELL_CMD_ARG(unblock_send, NULL, "<number of packets> <length of packet(s)>",
-		cmd_unblock_send, 3, 0),
+    SHELL_CMD_ARG(unblock_send, NULL, "<number of packets> <length of packet(s)> [enable/disable the throughput printing 1, 0]",
+		cmd_unblock_send, 3, 1),
+	SHELL_CMD_ARG(rx_calculate_tput, NULL, "<number of packets> <length of packet(s)> [enable/disable the throughput printing 1, 0]",
+		cmd_rx_calculate_tput, 3, 1),
 #endif /* CONFIG_BT_L2CAP_UNBLOCK_SEND */
 	SHELL_SUBCMD_SET_END
 );

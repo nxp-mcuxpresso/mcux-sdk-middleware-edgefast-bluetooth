@@ -50,6 +50,9 @@
 #if (defined(CONFIG_BT_IND_RESET) && (CONFIG_BT_IND_RESET > 0U))  
 #include "controller_ind_reset.h"
 #endif /*#define CONFIG_BT_IND_RESET*/
+#if (defined(CONFIG_BLE_ADV_REPORT_BUFFER_FILTER) && (CONFIG_BLE_ADV_REPORT_BUFFER_FILTER > 0U))
+#include "shell_ble_scan_filter.h"
+#endif /* CONFIG_BLE_ADV_REPORT_BUFFER_FILTER */
 static bool no_settings_load;
 
 uint8_t selected_id = BT_ID_DEFAULT;
@@ -528,6 +531,13 @@ static void scan_recv(const struct bt_le_scan_recv_info *info,
 
 	bt_data_parse(buf, data_cb, name);
 	bt_addr_le_to_str(info->addr, le_addr, sizeof(le_addr));
+
+#if (defined(CONFIG_BLE_ADV_REPORT_BUFFER_FILTER) && (CONFIG_BLE_ADV_REPORT_BUFFER_FILTER > 0U))
+    if (kStatus_SHELL_Success != shell_le_scan_filter_handler(info))
+    {
+        return;
+    }
+#endif /* CONFIG_BLE_ADV_REPORT_BUFFER_FILTER */
 
 	PRINTF("[DEVICE]: %s, AD evt type %u, RSSI %i %s "
 		    "C:%u S:%u D:%d SR:%u E:%u Prim: %s, Secn: %s, "
@@ -1421,6 +1431,10 @@ static shell_status_t cmd_active_scan_on(shell_handle_t shell, uint32_t options,
 
 	param.options |= options;
 
+#if (defined(CONFIG_BLE_ADV_REPORT_BUFFER_FILTER) && (CONFIG_BLE_ADV_REPORT_BUFFER_FILTER > 0U))
+    shell_le_init_adv_list();
+#endif /* CONFIG_BLE_ADV_REPORT_BUFFER_FILTER */
+
 	err = bt_le_scan_start(&param, NULL);
 	if (err) {
 		shell_error(shell, "Bluetooth set active scan failed "
@@ -1445,6 +1459,10 @@ static shell_status_t cmd_passive_scan_on(shell_handle_t shell, uint32_t options
 	int err;
 
 	param.options |= options;
+
+#if (defined(CONFIG_BLE_ADV_REPORT_BUFFER_FILTER) && (CONFIG_BLE_ADV_REPORT_BUFFER_FILTER > 0U))
+    shell_le_init_adv_list();
+#endif /* CONFIG_BLE_ADV_REPORT_BUFFER_FILTER */
 
 	err = bt_le_scan_start(&param, NULL);
 	if (err) {
@@ -4554,7 +4572,15 @@ void bt_CommandInit(shell_handle_t shell)
 #if (defined(CONFIG_BT_AVRCP) && (CONFIG_BT_AVRCP > 0))
     bt_ShellAvrcpInit(shell);
 #endif /* CONFIG_BT_AVRCP */
-
+#if (defined(CONFIG_BT_HFP_HF) && (CONFIG_BT_HFP_HF > 0))
+    bt_ShellHfpInit(shell);
+#endif /* CONFIG_BT_HFP */
+#if (defined(CONFIG_BT_PBAP_PCE) && (CONFIG_BT_PBAP_PCE > 0))
+    bt_ShellPbapInit(shell);
+#endif /* CONGIF_BT_PBAP */
+#if (defined(CONFIG_BT_MAP_MCE) && (CONFIG_BT_MAP_MCE > 0))
+    bt_ShellMapInit(shell);
+#endif /* CONFIG_BT_MAP_MCE */
 #endif /* CONFIG_BT_BREDR */
 #if (defined(CONFIG_BT_RF_TEST_MODE) && (CONFIG_BT_RF_TEST_MODE > 0))
     bt_ShellTestModeInit(shell);

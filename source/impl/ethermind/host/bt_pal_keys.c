@@ -55,6 +55,11 @@ static void find_key_in_use(struct bt_conn *conn, void *data)
 	__ASSERT_NO_MSG(data != NULL);
 
 	if (conn->state == BT_CONN_CONNECTED) {
+		const bt_addr_le_t *dst = bt_conn_get_dst(conn);
+
+		if (dst == NULL) {
+			return;
+		}
 		key = bt_keys_find_addr(conn->id, bt_conn_get_dst(conn));
 		if (key == NULL) {
 			return;
@@ -167,6 +172,10 @@ void bt_foreach_bond(uint8_t id, void (*func)(const struct bt_bond_info *info,
 			bt_addr_le_copy(&info.addr, &keys->addr);
 			func(&info, user_data);
 		}
+	}
+
+	if (IS_ENABLED(CONFIG_BT_BREDR)) {
+		bt_foreach_bond_br(func, user_data);
 	}
 }
 

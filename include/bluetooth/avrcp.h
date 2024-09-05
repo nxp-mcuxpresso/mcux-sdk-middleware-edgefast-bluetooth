@@ -510,6 +510,24 @@ struct bt_avrcp_event_rsp
     };
 } STRUCT_PACKED_POST;
 
+/** @brief vendor dependent message header */
+struct bt_avrcp_vendor_header
+{
+    /** company id */
+    uint32_t company_id;
+    /** pdu id */
+    uint8_t pdu_id;
+    /** packet type. It's value can be
+     *   BT_AVRCP_PACKET_TYPE_SINGLE
+     *   BT_AVRCP_PACKET_TYPE_START
+     *   BT_AVRCP_PACKET_TYPE_CONTINUE
+     *   BT_AVRCP_PACKET_TYPE_END
+     */
+    uint8_t packet_type;
+    /** parameter length */
+    uint16_t parameter_len;
+};
+
 /** @brief vendor dependent message */
 STRUCT_PACKED_PRE
 struct bt_avrcp_vendor
@@ -881,6 +899,16 @@ struct bt_avrcp_cb
      *  @param err error code.
      */
     void (*control_rsp_received)(struct bt_conn *conn, struct bt_avrcp_control_msg *msg, int err);
+    /** @brief received the vendor dependent continuing response.
+     *
+     *  @param conn connection object.
+     *  @param header vendor dependent response header information.
+     *         In this callback, header->packet_type never be BT_AVRCP_PACKET_TYPE_SINGLE.
+     *  @param buf it is the received continuing packet.
+     *
+     *  @param buf The data for the different vendor dependent commands. reference to #bt_avrcp_vendor_rsp_parse.
+     */
+    void (*vendor_dependent_continue_rsp)(struct bt_conn *conn, struct bt_avrcp_vendor_header *header, struct net_buf *buf);
 #endif
 #if (defined(CONFIG_BT_AVRCP_TG) && ((CONFIG_BT_AVRCP_TG) > 0U))
     /** @brief received the browsing command.
@@ -1050,6 +1078,38 @@ int bt_avrcp_set_addressed_player(struct bt_conn *conn, uint16_t player_id);
  *  @return 0 in case of success and error code in case of error.
  */
 int bt_avrcp_send_vendor_dependent(struct bt_conn *conn, uint8_t pdu_id, void *parameter);
+
+/** @brief parse the response buf.
+ *
+ *  @param header the vendor dependent msg header.
+ *  @param buf the received response data. that is formated as follow table.
+ *  @param parse_buf the parsing buffer.
+ *  @param parse_buf_size the parsing buffer size.
+ *  It parse the data of buf to parse_buf, and return the follow parsed structure.
+ *            pdu_id                                    returned structure
+ *  BT_AVRCP_PDU_ID_GET_CAPABILITY                   bt_avrcp_capability_company_id or bt_avrcp_capability_events_supported
+ *  BT_AVRCP_PDU_ID_LIST_PLAYER_APP_SETTING_ATTR     bt_avrcp_player_app_setting_attr_ids
+ *  BT_AVRCP_PDU_ID_LIST_PLAYER_APP_SETTING_VAL      bt_avrcp_player_app_setting_values
+ *  BT_AVRCP_PDU_ID_GET_CUR_PLAYER_APP_SETTING_VAL   bt_avrcp_player_app_attr_values
+ *  BT_AVRCP_PDU_ID_GET_PLAYER_APP_SETTING_ATTR_TXT  bt_avrcp_player_get_txt_rsp
+ *  BT_AVRCP_PDU_ID_GET_PLAYER_APP_SETTING_VAL_TXT   bt_avrcp_player_get_txt_rsp
+ *  BT_AVRCP_PDU_ID_SET_PLAYER_APP_SETTING_VAL       NULL
+ *  BT_AVRCP_PDU_ID_INFORM_DISPLAYABLE_CHAR_SET      NULL
+ *  BT_AVRCP_PDU_ID_INFORM_BATTERY_STATUS            NULL
+ *  BT_AVRCP_PDU_ID_GET_ELEMENT_ATTRIBUTE            bt_avrcp_player_get_element_attr_rsp
+ *  BT_AVRCP_PDU_ID_GET_PLAY_STATUS                  bt_avrcp_play_status_rsp
+ *  BT_AVRCP_PDU_ID_REGISTER_NOTIFICATION            bt_avrcp_event_rsp
+ *  BT_AVRCP_PDU_ID_REQUEST_CONTINUING_RESPONSE      requested messgae response
+ *  BT_AVRCP_PDU_ID_ABORT_CONTINUING_RESPONSE        NULL
+ *  BT_AVRCP_PDU_ID_SET_ABSOLUTE_VOLUME              volume(uint8_t)
+ *  BT_AVRCP_PDU_ID_SET_ADDRESSED_PLAYER             status(uint8_t)
+ *  BT_AVRCP_PDU_ID_PLAY_ITEMS                       status(uint8_t)
+ *  BT_AVRCP_PDU_ID_ADD_TO_NOW_PLAYING               status(uint8_t)
+ *
+ *  @return 0 in case of success and error code in case of error.
+ */
+struct bt_avrcp_vendor* bt_avrcp_vendor_rsp_parse(struct bt_avrcp_vendor_header *header, struct net_buf *buf,
+        uint8_t *parse_buf, uint32_t parse_buf_size);
 #endif
 
 #if (defined(CONFIG_BT_AVRCP_TG) && ((CONFIG_BT_AVRCP_TG) > 0U))

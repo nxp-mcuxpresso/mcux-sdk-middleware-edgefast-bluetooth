@@ -516,7 +516,7 @@ int bt_a2dp_configure_endpoint(struct bt_a2dp *a2dp, struct bt_a2dp_endpoint *en
  */
 int bt_a2dp_deconfigure(struct bt_a2dp_endpoint *endpoint);
 
-/** @brief start a2dp streamer, it is source only.
+/** @brief start a2dp streamer.
  *
  *  @param endpoint The endpoint.
  *
@@ -524,7 +524,7 @@ int bt_a2dp_deconfigure(struct bt_a2dp_endpoint *endpoint);
  */
 int bt_a2dp_start(struct bt_a2dp_endpoint *endpoint);
 
-/** @brief stop a2dp streamer, it is source only.
+/** @brief stop a2dp streamer.
  *
  *  @param endpoint The registered endpoint.
  *

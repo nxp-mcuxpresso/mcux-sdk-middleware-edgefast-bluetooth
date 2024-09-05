@@ -3,7 +3,7 @@
  */
 
 /*
- * Copyright 2021 NXP
+ * Copyright 2021, 2024 NXP
  * Copyright (c) 2016 Intel Corporation
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -164,6 +164,350 @@ enum uuid_state {
 };
 
 static void sdp_client_notify_result(struct bt_sdp_client *session, enum uuid_state state);
+#ifdef SDP_DYNAMIC_DB
+static uint32_t lookfor_uuid_16(struct bt_sdp_data_elem *elem, uint16_t *uuid_16,
+             uint8_t *count, uint8_t nest_level)
+{
+    const uint8_t *cur_elem;
+    uint32_t seq_size, size;
+
+    /* Limit recursion depth to avoid stack overflows */
+    if (nest_level == SDP_DATA_ELEM_NEST_LEVEL_MAX) {
+        return 0;
+    }
+
+    seq_size = elem->data_size;
+    cur_elem = elem->data;
+
+    if ((elem->type & BT_SDP_TYPE_DESC_MASK) == BT_SDP_UUID_UNSPEC) {
+        if (seq_size == 2U) {
+            *uuid_16 = *((uint16_t *)cur_elem);         
+            *count = *count + 1;
+            uuid_16++;
+        } else {
+            LOG_WRN("Invalid UUID size in local database");
+            assert(0);
+        }
+    }
+
+    if ((elem->type & BT_SDP_TYPE_DESC_MASK) == BT_SDP_SEQ_UNSPEC ||
+        (elem->type & BT_SDP_TYPE_DESC_MASK) == BT_SDP_ALT_UNSPEC) {
+        do {
+                      
+            /* Recursively parse data elements */
+            size = lookfor_uuid_16((struct bt_sdp_data_elem *)cur_elem,
+                       uuid_16 + *count, count, nest_level + 1);
+            cur_elem += sizeof(struct bt_sdp_data_elem);
+            seq_size -= size;
+        } while (seq_size);
+    }
+
+    return elem->total_size;
+}
+
+static uint32_t lookfor_languagebase_attr_id(struct bt_sdp_data_elem *elem, uint16_t *language,
+               uint16_t *char_enc,
+               uint16_t *base_id, uint8_t *count, uint8_t nest_level)
+{
+    const uint8_t *cur_elem;
+    uint32_t seq_size, size;
+
+    /* Limit recursion depth to avoid stack overflows */
+    if (nest_level == SDP_DATA_ELEM_NEST_LEVEL_MAX) {
+        return 0;
+    }
+
+    seq_size = elem->data_size;
+    cur_elem = elem->data;
+
+    if ((elem->type ) == BT_SDP_UINT16) {
+        if (seq_size == 2U) {
+            if (*count == 0) {
+                *language = *((uint16_t *)cur_elem);
+            }else if (*count == 1) {  
+                *char_enc = *((uint16_t *)cur_elem); 
+            }else if (*count == 2) {
+                *base_id = *((uint16_t *)cur_elem); 
+            }
+            *count = *count +1;
+        } else { 
+            LOG_WRN("Invalid UUID size in local database");
+            assert(0);
+        }
+    }
+
+    if ((elem->type & BT_SDP_TYPE_DESC_MASK) == BT_SDP_SEQ_UNSPEC ||
+        (elem->type & BT_SDP_TYPE_DESC_MASK) == BT_SDP_ALT_UNSPEC) {
+        do {
+            /* Recursively parse data elements */
+            size = lookfor_languagebase_attr_id((struct bt_sdp_data_elem *)cur_elem,
+                       language, char_enc, base_id, count, nest_level + 1);
+            cur_elem += sizeof(struct bt_sdp_data_elem);
+            seq_size -= size;
+        } while (seq_size);
+    }
+
+    return elem->total_size;
+}
+
+static uint32_t lookfor_profile_descriptor_list(struct bt_sdp_data_elem *elem, uint16_t *profile_uuid,
+               uint16_t *version, uint8_t *count, uint8_t nest_level)
+{
+    const uint8_t *cur_elem;
+    uint32_t seq_size, size;
+
+    /* Limit recursion depth to avoid stack overflows */
+    if (nest_level == SDP_DATA_ELEM_NEST_LEVEL_MAX) {
+        return 0;
+    }
+
+    seq_size = elem->data_size;
+    cur_elem = elem->data;
+
+    if (((elem->type & BT_SDP_TYPE_DESC_MASK) == BT_SDP_UUID_UNSPEC) || (elem->type == BT_SDP_UINT16)) {
+        if (seq_size == 2U) {
+            if (*count == 0) {
+                *profile_uuid = *((uint16_t *)cur_elem);
+            }else if (*count == 1){  
+                *version = *((uint16_t *)cur_elem); 
+            }
+            *count = *count +1;
+        } else { 
+            LOG_WRN("Invalid UUID size in local database");
+            assert(0);
+        }
+    }
+
+    if ((elem->type & BT_SDP_TYPE_DESC_MASK) == BT_SDP_SEQ_UNSPEC ||
+        (elem->type & BT_SDP_TYPE_DESC_MASK) == BT_SDP_ALT_UNSPEC) {
+        do {
+            /* Recursively parse data elements */
+            size = lookfor_profile_descriptor_list((struct bt_sdp_data_elem *)cur_elem,
+                       profile_uuid, version, count, nest_level + 1);
+            cur_elem += sizeof(struct bt_sdp_data_elem);
+            seq_size -= size;
+        } while (seq_size);
+    }
+
+    return elem->total_size;
+}
+static uint32_t lookfor_service_name(struct bt_sdp_data_elem *elem,
+               uint8_t *name, uint8_t *count)
+{
+    const uint8_t *cur_elem;
+    uint32_t seq_size;
+
+    seq_size = elem->data_size;
+    cur_elem = elem->data;
+
+    if (elem->type == BT_SDP_TEXT_STR8) {
+        if (seq_size > 0U) {
+           memcpy(name, cur_elem, seq_size + 1);
+           *count = seq_size + 1;
+        } else { 
+            LOG_WRN("Invalid UUID size in local database");
+            assert(0);
+        }
+    }
+
+    return elem->total_size;
+}
+
+static uint32_t lookfor_uint8_data(struct bt_sdp_data_elem *elem,
+               uint8_t *uint8_data, uint8_t *count)
+{
+    const uint8_t *cur_elem;
+    uint32_t seq_size;
+
+    seq_size = elem->data_size;
+    cur_elem = elem->data;
+
+    if (elem->type == BT_SDP_UINT8) {
+        if (seq_size > 0U) {
+           memcpy(uint8_data, cur_elem, seq_size);
+           *count = seq_size;
+        } else { 
+            LOG_WRN("Invalid UUID size in local database");
+            assert(0);
+        }
+    }
+
+    return elem->total_size;
+}
+
+static uint32_t lookfor_uint16_data(struct bt_sdp_data_elem *elem,
+               uint8_t *uint16_data, uint8_t *count)
+{
+    const uint8_t *cur_elem;
+    uint32_t seq_size;
+
+    seq_size = elem->data_size;
+    cur_elem = elem->data;
+
+    if (elem->type == BT_SDP_UINT16) {
+        if (seq_size > 0U) {
+           memcpy(uint16_data, cur_elem, seq_size);
+           sys_mem_swap(uint16_data, seq_size);
+           *count = seq_size;
+        } else { 
+            LOG_WRN("Invalid UUID size in local database");
+            assert(0);
+        }
+    }
+
+    return elem->total_size;
+}
+
+static uint32_t lookfor_uint32_data(struct bt_sdp_data_elem *elem,
+               uint8_t *uint32_data, uint8_t *count)
+{
+    const uint8_t *cur_elem;
+    uint32_t seq_size;
+
+    seq_size = elem->data_size;
+    cur_elem = elem->data;
+
+    if (elem->type == BT_SDP_UINT32) {
+        if (seq_size > 0U) {
+           memcpy(uint32_data, cur_elem, seq_size);
+           sys_mem_swap(uint32_data, seq_size);
+           *count = seq_size;
+        } else { 
+            LOG_WRN("Invalid UUID size in local database");
+            assert(0);
+        }
+    }
+
+    return elem->total_size;
+}
+
+static uint32_t lookfor_supp_features(struct bt_sdp_data_elem *elem,
+               uint8_t *supp_features, uint8_t *count)
+{
+    const uint8_t *cur_elem;
+    uint32_t seq_size;
+
+    seq_size = elem->data_size;
+    cur_elem = elem->data;
+
+    if (elem->type == BT_SDP_UINT16) {
+        if (seq_size > 0U) {
+           memcpy(supp_features, cur_elem, seq_size);
+           *count = seq_size;
+        } else { 
+            LOG_WRN("Invalid UUID size in local database");
+            assert(0);
+        }
+    }
+
+    return elem->total_size;
+}
+static uint32_t lookfor_add_proto_desc_list(struct bt_sdp_data_elem *elem,
+               DB_PROTOCOL_ELEM *db_pro_elem, uint8_t *count, uint8_t nest_level)
+{
+    const uint8_t *cur_elem;
+    uint32_t seq_size, size;
+    
+
+    /* Limit recursion depth to avoid stack overflows */
+    if (nest_level == SDP_DATA_ELEM_NEST_LEVEL_MAX) {
+        return 0;
+    }
+
+    seq_size = elem->data_size;
+    cur_elem = elem->data;
+    
+    if ((elem->type & BT_SDP_TYPE_DESC_MASK) == BT_SDP_UUID_UNSPEC) { 
+        db_pro_elem = db_pro_elem + *count;
+        if (seq_size == 2U) {
+            db_pro_elem->protocol_uuid = *((uint16_t *)cur_elem);
+            *count = *count + 1;
+         } else { 
+            LOG_WRN("Invalid UUID size in local database");
+            assert(0);
+        }
+    }
+    if (elem->type == BT_SDP_UINT16) {
+        db_pro_elem = db_pro_elem + (*count -1);
+        if (seq_size == 2U) {
+            db_pro_elem->params[db_pro_elem->num_params] = *((uint16_t *)cur_elem);
+            db_pro_elem->num_params += 1;         
+        } else { 
+            LOG_WRN("Invalid UUID size in local database");
+            assert(0);
+        }
+    }
+    if (elem->type == BT_SDP_UINT8) {
+        db_pro_elem = db_pro_elem + (*count -1);
+        if (seq_size == 1U) {
+            db_pro_elem->params[db_pro_elem->num_params] = *((uint8_t *)cur_elem);
+            db_pro_elem->num_params += 1;         
+        } else { 
+            LOG_WRN("Invalid UUID size in local database");
+            assert(0);
+        }
+    }
+    if ((elem->type & BT_SDP_TYPE_DESC_MASK) == BT_SDP_SEQ_UNSPEC ||
+        (elem->type & BT_SDP_TYPE_DESC_MASK) == BT_SDP_ALT_UNSPEC) {
+        do {
+            /* Recursively parse data elements */
+            size = lookfor_add_proto_desc_list((struct bt_sdp_data_elem *)cur_elem,
+                                               db_pro_elem, count, nest_level + 1);
+            cur_elem += sizeof(struct bt_sdp_data_elem);
+            seq_size -= size;
+        } while (seq_size);
+    }
+
+    return elem->total_size;
+}
+
+static uint32_t lookfor_url_buf(struct bt_sdp_data_elem *elem,
+               uint8_t *url_buf, uint8_t *count, uint8_t nest_level)
+{
+    const uint8_t *cur_elem;
+    uint32_t seq_size;
+
+    /* Limit recursion depth to avoid stack overflows */
+    if (nest_level == SDP_DATA_ELEM_NEST_LEVEL_MAX) {
+        return 0;
+    }
+
+    seq_size = elem->data_size;
+    cur_elem = elem->data;
+
+    if (elem->type == BT_SDP_TEXT_STR8) {
+        if (seq_size > 0U) {
+           memcpy(url_buf, cur_elem, seq_size);
+           *count = seq_size;
+        } else { 
+            LOG_WRN("Invalid UUID size in local database");
+            assert(0);
+        }
+    }
+
+    return elem->total_size;
+}
+#else
+#if (defined(CONFIG_BT_AVRCP) && ((CONFIG_BT_AVRCP) > 0U))
+static uint8_t ct_additional_protocol_descriptor_list[] =
+{0x35, 0x12, 0x35, 0x10, 0x35, 0x06, 0x19, 0x01, 0x00, 0x09,
+ 0x00, 0x1B, 0x35, 0x06, 0x19, 0x00, 0x17, 0x09, 0x01, 0x03};
+
+static uint8_t tg_additional_protocol_descriptor_list[] =
+{0x35, 0x12, 0x35, 0x10, 0x35, 0x06, 0x19, 0x01, 0x00, 0x09,
+ 0x00, 0x1B, 0x35, 0x06, 0x19, 0x00, 0x17, 0x09, 0x01, 0x03};
+
+static uint8_t tg_cover_art_additional_protocol_desc_list[] =
+{0x35, 0x21, 0x35, 0x10, 0x35, 0x06, 0x19, 0x01, 0x00, 0x09, 0x00, 0x1B,
+ 0x35, 0x06, 0x19, 0x00, 0x17, 0x09, 0x01, 0x04, 0x35, 0x0D, 0x35, 0x06,
+ 0x19, 0x01, 0x00, 0x09, (uint8_t)(0x1005u >> 8),
+ (uint8_t)0x1005u, 0x35, 0x03, 0x19, 0x00, 0x08};
+#endif
+
+extern const uint8_t uuid_indices_arr[];
+extern SDP_RECORD dbase[DB_MAX_RECORDS];
+extern struct SDP_ATTR attr_arr[];
+#endif /* SDP_DYNAMIC_DB */
 
 void bt_sdp_init(void)
 {
@@ -191,33 +535,316 @@ void bt_sdp_init(void)
 #if (CONFIG_BT_MAX_CONN > 7U)
 #error "please add the callback instances"
 #endif
+
 }
 
-#if (defined(CONFIG_BT_AVRCP) && ((CONFIG_BT_AVRCP) > 0U))
-static uint8_t ct_additional_protocol_descriptor_list[] =
-{0x35, 0x12, 0x35, 0x10, 0x35, 0x06, 0x19, 0x01, 0x00, 0x09,
- 0x00, 0x1B, 0x35, 0x06, 0x19, 0x00, 0x17, 0x09, 0x01, 0x03};
-
-static uint8_t tg_additional_protocol_descriptor_list[] =
-{0x35, 0x12, 0x35, 0x10, 0x35, 0x06, 0x19, 0x01, 0x00, 0x09,
- 0x00, 0x1B, 0x35, 0x06, 0x19, 0x00, 0x17, 0x09, 0x01, 0x03};
-
-static uint8_t tg_cover_art_additional_protocol_desc_list[] =
-{0x35, 0x21, 0x35, 0x10, 0x35, 0x06, 0x19, 0x01, 0x00, 0x09, 0x00, 0x1B,
- 0x35, 0x06, 0x19, 0x00, 0x17, 0x09, 0x01, 0x04, 0x35, 0x0D, 0x35, 0x06,
- 0x19, 0x01, 0x00, 0x09, (uint8_t)(0x1005u >> 8),
- (uint8_t)0x1005u, 0x35, 0x03, 0x19, 0x00, 0x08};
-#endif
-
-extern const uint8_t uuid_indices_arr[];
-extern SDP_RECORD dbase[DB_MAX_RECORDS];
-extern struct SDP_ATTR attr_arr[];
 int bt_sdp_register_service(struct bt_sdp_record *service)
 {
+#ifdef SDP_DYNAMIC_DB
+    UINT32 record_handle;
+    API_RESULT retval;
+    uint32_t index = 0;
+    uint16_t serviceID;
+    uint16_t service_uuids[5] = {0};
+    uint16_t browse_group_uuids[5] = {0};
+    uint8_t count;
+    uint16_t language;
+    uint16_t char_enc;
+    uint16_t base_id;
+    uint16_t profile_uuid;
+    uint16_t version;
+    uint8_t service_name[20] = {0};
+    uint8_t url_buf[50] = {0};
+    DB_PROTOCOL_ELEM elems[10U] = {0};
+    uint8_t supp_features_buf[4] = {0};
+    uint8_t uint8_data = 0;
+    uint8_t l2cap_psm[2] = {0};
+    /* Create Record */
+    for (index = 0; index < service->attr_count; index++)
+    {
+        if (service->attrs[index].id == BT_SDP_ATTR_SVCLASS_ID_LIST)
+        {
+            count = 0;
+            lookfor_uuid_16(&service->attrs[index].val, &service_uuids[0], &count, 1);
+            switch(service_uuids[0])
+            {
+                case BT_SDP_PBAP_PSE_SVCLASS:
+                    retval = BT_dbase_create_record(DB_RECORD_PBAP_PSE, 1U, &record_handle);
+                    break;
+        
+                case BT_SDP_PBAP_PCE_SVCLASS:
+                    retval = BT_dbase_create_record(DB_RECORD_PBAP_PCE, 0U, &record_handle);
+                    break;
+
+                case BT_SDP_MAP_MSE_SVCLASS:
+                    for (index = 0; index < MAP_MAS_NUM_ENTITIES; index++)
+                    {
+                            retval = BT_dbase_get_record_handle(DB_RECORD_MAP_MSE, index, &record_handle);
+                            if(retval != API_SUCCESS)
+                            {
+                                    break;
+                            }
+                    }
+                    if(index < MAP_MAS_NUM_ENTITIES)
+                    {
+                            retval = BT_dbase_create_record(DB_RECORD_MAP_MSE, index, &record_handle);
+                    }	
+                    else
+                    {
+                            return -EBUSY;
+                    }
+                    break;
+                case BT_SDP_MAP_MCE_SVCLASS:
+                    retval = BT_dbase_create_record(DB_RECORD_MAP_MCE, 0U, &record_handle);
+                    break;
+                default :
+                    retval = BT_dbase_create_record(DB_RECORD_SDP, 0U, &record_handle);
+                    break;
+            }
+            if (API_SUCCESS != retval)
+            {
+                    LOG_ERR("BT_dbase_create_record FAILED");
+                    return -1;
+            }
+            retval = BT_dbase_add_service_class_id_list
+            (
+                record_handle,
+                count,
+                service_uuids
+            );
+            if (API_SUCCESS != retval)
+            {
+                LOG_ERR("BT_dbase_add_service_class_id_list FAILED");
+                return -1;
+            }
+            break;
+        }
+    }
+    while (index < service->attr_count)
+    {
+        serviceID = service->attrs[index].id;
+        count = 0;
+        switch (serviceID)
+        {         
+
+        case BT_SDP_ATTR_PROTO_DESC_LIST:
+           lookfor_add_proto_desc_list(&service->attrs[index].val,
+               elems, &count, 1);
+         
+            retval =  BT_dbase_add_proto_desc_list
+                      (
+                          record_handle,
+                          count,
+                          elems
+                      ); 
+            if (API_SUCCESS != retval)
+            {
+                LOG_ERR("BT_dbase_add_proto_desc_list FAILED");
+                return -1;
+            }
+            break;
+            
+        case BT_SDP_ATTR_PROFILE_DESC_LIST:
+            lookfor_profile_descriptor_list(&service->attrs[index].val, &profile_uuid,
+               &version,  &count, 1);
+            retval = BT_dbase_add_profile_descriptor_list
+                      (
+                          record_handle, 
+                          profile_uuid,
+                          version
+                      );
+            if (API_SUCCESS != retval)
+            {
+                LOG_ERR("BT_dbase_add_profile_descriptor_list FAILED");
+                return -1;
+            }
+            break;
+            
+        case BT_SDP_ATTR_LANG_BASE_ATTR_ID_LIST:
+            lookfor_languagebase_attr_id(&service->attrs[index].val, &language,
+                &char_enc, &base_id, &count, 1);
+            retval =  BT_dbase_add_languagebase_attr_id_list
+            (
+              record_handle,
+              language,
+              char_enc,
+              base_id
+            );
+            if (API_SUCCESS != retval)
+            {
+                LOG_ERR("BT_dbase_add_languagebase_attr_id_list FAILED");
+                return -1;
+            }
+            break;
+            
+        case BT_SDP_ATTR_BROWSE_GRP_LIST:
+            lookfor_uuid_16(&service->attrs[index].val,
+                &browse_group_uuids[0], &count, 1);
+            retval = BT_dbase_add_browse_group_list
+            (
+                record_handle,
+                count,
+                browse_group_uuids
+            );
+            if (API_SUCCESS != retval)
+            {
+                LOG_ERR("BT_dbase_add_browse_group_list FAILED");
+                return -1;
+            }
+            break;
+            
+        case BT_SDP_ATTR_SVCNAME_PRIMARY:
+            lookfor_service_name(&service->attrs[index].val,
+                service_name, &count);
+            retval = BT_dbase_add_service_name
+            (
+                record_handle,
+                count,
+                service_name
+            );
+            if (API_SUCCESS != retval)
+            {
+                LOG_ERR("BT_dbase_add_service_name FAILED");
+                return -1;
+            }
+            break;
+            
+        case BT_SDP_ATTR_SUPPORTED_FEATURES:
+            lookfor_supp_features(&service->attrs[index].val,
+                supp_features_buf, &count);
+            retval = BT_dbase_add_attribute_type_uint
+            (
+                record_handle,
+                0x0311,
+                count,
+                supp_features_buf
+            );
+            if (API_SUCCESS != retval)
+            {
+                LOG_ERR("BT_SDP_ATTR_SUPPORTED_FEATURES BT_dbase_add_attribute_type_uint  FAILED");
+                return -1;
+            }
+            break;  
+
+        case BT_SDP_ATTR_PBAP_SUPPORTED_FEATURES:
+            lookfor_uint32_data(&service->attrs[index].val,
+                supp_features_buf, &count);
+            retval = BT_dbase_add_attribute_type_uint
+            (
+                record_handle,
+                0x0317,
+                count,
+                supp_features_buf
+            );
+            if (API_SUCCESS != retval)
+            {
+                LOG_ERR("BT_SDP_ATTR_SUPPORTED_FEATURES BT_SDP_ATTR_PBAP_SUPPORTED_FEATURES  FAILED");
+                return -1;
+            }
+            break; 
+
+        case BT_SDP_ATTR_DOC_URL:
+        case BT_SDP_ATTR_CLNT_EXEC_URL:
+        case BT_SDP_ATTR_ICON_URL:
+            lookfor_url_buf(&service->attrs[index].val,
+                url_buf, &count, 1);
+            retval = BT_dbase_add_attribute_type_url
+            (
+                record_handle,
+                serviceID,
+                count,
+                url_buf
+            );
+            if (API_SUCCESS != retval)
+            {
+                LOG_ERR("BT_dbase_add_attribute_type_url FAILED");
+                return -1;
+            }
+            break;
+
+        case BT_SDP_ATTR_MAS_INSTANCE_ID:
+            lookfor_uint8_data(&service->attrs[index].val,
+                &uint8_data, &count);
+            retval = BT_dbase_add_attribute_type_uint
+            (
+                record_handle,
+                0x0315,
+                count,
+                &uint8_data
+            );
+            if (API_SUCCESS != retval)
+            {
+                LOG_ERR("BT_SDP_ATTR_SUPPORTED_FEATURES BT_SDP_ATTR_MAS_INSTANCE_ID  FAILED");
+                return -1;
+            }
+            break;
+
+        case BT_SDP_ATTR_SUPPORTED_MESSAGE_TYPES:
+            lookfor_uint8_data(&service->attrs[index].val,
+                &uint8_data, &count);
+            retval = BT_dbase_add_attribute_type_uint
+            (
+                record_handle,
+                0x0316,
+                count,
+                &uint8_data
+            );
+            if (API_SUCCESS != retval)
+            {
+                LOG_ERR("BT_SDP_ATTR_SUPPORTED_FEATURES BT_SDP_ATTR_SUPPORTED_MESSAGE_TYPES  FAILED");
+                return -1;
+            }
+            break;
+
+        case BT_SDP_ATTR_GOEP_L2CAP_PSM:
+            lookfor_uint16_data(&service->attrs[index].val,
+                l2cap_psm, &count);
+            retval = BT_dbase_add_attribute_type_uint
+            (
+                record_handle,
+                0x0200, 
+                count,
+                l2cap_psm
+            );
+            if (API_SUCCESS != retval)
+            {
+                LOG_ERR("BT_SDP_ATTR_SUPPORTED_FEATURES BT_SDP_ATTR_GOEP_L2CAP_PSM  FAILED");
+                return -1;
+            }
+            break;
+
+        case BT_SDP_ATTR_SUPPORTED_REPOSITORIES:
+            lookfor_uint8_data(&service->attrs[index].val,
+                &uint8_data, &count);
+            retval = BT_dbase_add_attribute_type_uint
+            (
+                record_handle,
+                0x0314,
+                count,
+                &uint8_data
+            );
+            if (API_SUCCESS != retval)
+            {
+                LOG_ERR("BT_SDP_ATTR_SUPPORTED_FEATURES BT_SDP_ATTR_SUPPORTED_REPOSITORIES  FAILED");
+                return -1;
+            }
+            break;
+        default:
+          /* MISRA 16.4 : The switch statement does not have a non-empty default clause. */
+            break;
+        }
+        index++;
+    }
+    
+    /* Activate the record */
+    BT_dbase_activate_record(record_handle);
+    
+    return 0;  
+#else
 	uint32_t record_handle = 0xFFFFFFFFu;
 	uint32_t index;
-	uint16_t tempVal;
-
+    uint16_t tempVal;
+	
 	for (index = 0; index < service->attr_count; index++)
 	{
 		if ((service->attrs[index].id == BT_SDP_ATTR_SVCLASS_ID_LIST) &&
@@ -399,6 +1026,7 @@ int bt_sdp_register_service(struct bt_sdp_record *service)
 		BT_dbase_activate_record(record_handle);
 	}
 	return 0;
+#endif /* SDP_DYNAMIC_DB */
 }
 
 #define GET_PARAM(__node) \
@@ -459,7 +1087,7 @@ static int sdp_client_ssa_search(struct bt_sdp_client *session)
 		memcpy(&uuid.uuid_union.uuid_128, ((struct bt_uuid_128 *)(param->uuid))->val, 16U);
 		break;
 	default:
-		PRINTF("Unknown UUID type %u", param->uuid->type);
+        LOG_ERR("Unknown UUID type %u", param->uuid->type);
 		return -EINVAL;
 	}
 
@@ -482,7 +1110,7 @@ static int sdp_client_ssa_search(struct bt_sdp_client *session)
 
 	if (API_SUCCESS != retval)
 	{
-		PRINTF("> ** "\
+        LOG_ERR("> ** "\
 				"BT_sdp_servicesearchattributerequest Failed\n");
 
 		sdp_client_notify_result(session, UUID_NOT_RESOLVED);
@@ -577,6 +1205,9 @@ static uint16_t get_record_len(struct net_buf *buf)
 		break;
 	case BT_SDP_SEQ16:
 		len = net_buf_pull_be16(buf);
+		break;
+	case BT_SDP_SEQ32:
+		len = net_buf_pull_be32(buf);
 		break;
 	default:
 		LOG_WRN("Sequence type 0x%02x not handled", seq);
@@ -1277,7 +1908,7 @@ static int sdp_get_uuid_data(const struct bt_sdp_attr_item *attr,
 	ssize_t slen;
 
 	assert(p);
-
+	memset(pd, 0, sizeof(struct bt_sdp_uuid_desc));
 	/* start reading stacked UUIDs in analyzed sequences tree */
 	while (p - attr->val < attr->len) {
 		size_t to_end, left = 0;
@@ -1508,6 +2139,12 @@ int bt_sdp_get_features(const struct net_buf *buf, uint16_t *features)
 		return res;
 	}
 
+	/* assert 16bit can be read safely */
+	if (attr.len < 3) {
+		LOG_ERR("Data length too short %u", attr.len);
+		return -EMSGSIZE;
+	}
+
 	p = attr.val;
 	assert(p);
 
@@ -1516,14 +2153,237 @@ int bt_sdp_get_features(const struct net_buf *buf, uint16_t *features)
 		return -EINVAL;
 	}
 
+	*features = sys_get_be16(++p);
+	p += sizeof(uint16_t);
+
+	if (p - attr.val != attr.len) {
+		LOG_ERR("Invalid data length %u", attr.len);
+		return -EMSGSIZE;
+	}
+
+	return 0;
+}
+
+int bt_sdp_get_goep_l2cap_psm(const struct net_buf *buf, uint16_t *l2cap_psm)
+{
+    struct bt_sdp_attr_item attr;
+	const uint8_t *p;
+	int res;
+ 
+	res = bt_sdp_get_attr(buf, &attr, BT_SDP_ATTR_GOEP_L2CAP_PSM);
+	if (res < 0) {
+		LOG_WRN("Attribute 0x%04x not found, err %d",
+			BT_SDP_ATTR_GOEP_L2CAP_PSM, res);
+		return res;
+	}
+
 	/* assert 16bit can be read safely */
 	if (attr.len < 3) {
 		LOG_ERR("Data length too short %u", attr.len);
 		return -EMSGSIZE;
 	}
 
-	*features = sys_get_be16(++p);
+	p = attr.val;
+	assert(p);
+ 
+	if (p[0] != BT_SDP_UINT16) {
+		LOG_ERR("Invalid DTD 0x%02x", p[0]);
+		return -EINVAL;
+	}
+ 
+	*l2cap_psm = sys_get_be16(++p);
 	p += sizeof(uint16_t);
+ 
+	if (p - attr.val != attr.len) {
+		LOG_ERR("Invalid data length %u", attr.len);
+		return -EMSGSIZE;
+	}
+ 
+	return 0;
+}
+
+int bt_sdp_get_supported_repositories(const struct net_buf *buf, uint8_t *supported_repositories)
+{
+	struct bt_sdp_attr_item attr;
+	const uint8_t *p;
+	int res;
+
+	res = bt_sdp_get_attr(buf, &attr, BT_SDP_ATTR_SUPPORTED_REPOSITORIES);
+	if (res < 0) {
+		LOG_WRN("Attribute 0x%04x not found, err %d",
+			BT_SDP_ATTR_SUPPORTED_REPOSITORIES, res);
+		return res;
+	}
+
+	/* assert 8bit can be read safely */
+	if (attr.len < 2) {
+		LOG_ERR("Data length too short %u", attr.len);
+		return -EMSGSIZE;
+	}
+
+	p = attr.val;
+	assert(p);
+
+	if (p[0] != BT_SDP_UINT8) {
+		LOG_ERR("Invalid DTD 0x%02x", p[0]);
+		return -EINVAL;
+	}
+
+	*supported_repositories = *++p;
+	p += sizeof(uint8_t);
+
+	if (p - attr.val != attr.len) {
+		LOG_ERR("Invalid data length %u", attr.len);
+		return -EMSGSIZE;
+	}
+
+	return 0;
+}
+
+int bt_sdp_get_pbap_map_ctn_features(const struct net_buf *buf, uint32_t *features)
+{
+	struct bt_sdp_attr_item attr;
+	const uint8_t *p;
+	int res;
+
+	res = bt_sdp_get_attr(buf, &attr, BT_SDP_ATTR_PBAP_SUPPORTED_FEATURES);
+	if (res < 0) {
+		LOG_WRN("Attribute 0x%04x not found, err %d",
+			BT_SDP_ATTR_SUPPORTED_FEATURES, res);
+		return res;
+	}
+
+	/* assert 32bit can be read safely */
+	if (attr.len < 5) {
+		LOG_ERR("Data length too short %u", attr.len);
+		return -EMSGSIZE;
+	}
+
+	p = attr.val;
+	assert(p);
+        
+	if (p[0] != BT_SDP_UINT32) {
+		LOG_ERR("Invalid DTD 0x%02x", p[0]);
+		return -EINVAL;
+	}
+
+	*features = sys_get_be32(++p);
+	p += sizeof(uint32_t);
+
+	if (p - attr.val != attr.len) {
+		LOG_ERR("Invalid data length %u", attr.len);
+		return -EMSGSIZE;
+	}
+
+	return 0;
+}
+
+int bt_sdp_get_instance_id(const struct net_buf *buf, uint8_t *id)
+{
+	struct bt_sdp_attr_item attr;
+	const uint8_t *p;
+	int res;
+
+	res = bt_sdp_get_attr(buf, &attr, BT_SDP_ATTR_MAS_INSTANCE_ID);
+	if (res < 0) {
+		LOG_WRN("Attribute 0x%04x not found, err %d",
+			BT_SDP_ATTR_MAS_INSTANCE_ID, res);
+		return res;
+	}
+
+	/* assert 8bit can be read safely */
+	if (attr.len < 2) {
+		LOG_ERR("Data length too short %u", attr.len);
+		return -EMSGSIZE;
+	}
+
+	p = attr.val;
+	assert(p);
+
+	if (p[0] != BT_SDP_UINT8) {
+		LOG_ERR("Invalid DTD 0x%02x", p[0]);
+		return -EINVAL;
+	}
+
+	*id = *++p;
+	p += sizeof(uint8_t);
+
+	if (p - attr.val != attr.len) {
+		LOG_ERR("Invalid data length %u", attr.len);
+		return -EMSGSIZE;
+	}
+
+	return 0;
+}
+
+int bt_sdp_get_supported_msg_type(const struct net_buf *buf, uint8_t *supported_msg_type)
+{
+	struct bt_sdp_attr_item attr;
+	const uint8_t *p;
+	int res;
+
+	res = bt_sdp_get_attr(buf, &attr, BT_SDP_ATTR_MAS_INSTANCE_ID);
+	if (res < 0) {
+		LOG_WRN("Attribute 0x%04x not found, err %d",
+			BT_SDP_ATTR_MAS_INSTANCE_ID, res);
+		return res;
+	}
+
+	/* assert 8bit can be read safely */
+	if (attr.len < 2) {
+		LOG_ERR("Data length too short %u", attr.len);
+		return -EMSGSIZE;
+	}
+
+	p = attr.val;
+	assert(p);
+
+	if (p[0] != BT_SDP_UINT8) {
+		LOG_ERR("Invalid DTD 0x%02x", p[0]);
+		return -EINVAL;
+	}
+
+	*supported_msg_type = *++p;
+	p += sizeof(uint8_t);
+
+	if (p - attr.val != attr.len) {
+		LOG_ERR("Invalid data length %u", attr.len);
+		return -EMSGSIZE;
+	}
+
+	return 0;
+}
+
+int bt_sdp_get_service_name(const struct net_buf *buf, const char **name)
+{
+	struct bt_sdp_attr_item attr;
+	const uint8_t *p;
+	int res;
+
+	res = bt_sdp_get_attr(buf, &attr, BT_SDP_ATTR_SVCNAME_PRIMARY);
+	if (res < 0) {
+		LOG_WRN("Attribute 0x%04x not found, err %d",
+			BT_SDP_ATTR_SVCNAME_PRIMARY, res);
+		return res;
+	}
+
+	p = attr.val;
+	assert(p);
+
+	if (p[0] != BT_SDP_TEXT_STR8) {
+		LOG_ERR("Invalid DTD 0x%02x", p[0]);
+		return -EINVAL;
+	}
+
+	/* assert Text string with 8-bit length can be read safely */
+	if (attr.len < p[1] + 2U) {
+		LOG_ERR("Data length too short %u", attr.len);
+		return -EMSGSIZE;
+	}
+
+	p += 2;
+	*name = (const char *)p;
+	p += strlen(*name) + 1U;
 
 	if (p - attr.val != attr.len) {
 		LOG_ERR("Invalid data length %u", attr.len);
@@ -1583,7 +2443,7 @@ static void ethermind_sdp_callback
 
 
 	case SDP_ErrorResponse:
-		PRINTF("> ** ERROR occoured in SDP Query\n");
+        LOG_ERR("> ** ERROR occoured in SDP Query\n");
 		BT_sdp_close(&session->sdp_handle);
 		break;
 

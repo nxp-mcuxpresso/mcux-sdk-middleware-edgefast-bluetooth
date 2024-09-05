@@ -450,7 +450,7 @@ void bt_conn_cleanup_all(void);
 /* Selects based on connection type right semaphore for ACL packets */
 osa_semaphore_handle_t bt_conn_get_pkts(struct bt_conn *conn);
 
-void bt_conn_process_tx(struct bt_conn *conn);
+int bt_conn_process_tx(struct bt_conn *conn);
 
 /* false - continue, true - stop */
 typedef bool (*bt_conn_scan_cb_t)(struct bt_conn *conn, void *param);

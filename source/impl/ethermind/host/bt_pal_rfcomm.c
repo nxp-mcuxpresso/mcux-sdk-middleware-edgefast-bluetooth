@@ -792,11 +792,14 @@ static API_RESULT rfcomm_callback(uint8_t event_type, RFCOMM_HANDLE * handle, ui
         LOG_INF ("[RFCOMM] RFCOMM CB: Received RFCOMM Write. Result = 0x%04X\n",result);
         if ((NULL != dlc->ops) && (NULL != dlc->ops->sent))
         {
-            buf = bt_rfcomm_create_pdu(&rfcomm_pool);
-            net_buf_add_mem(buf, data, strlen((char const *)data));
-            /** Call application registered sent callback */
-            dlc->ops->sent(dlc, buf);
-            net_buf_unref(buf);
+            if ((data != NULL) && (datalen > 0))
+            {
+                buf = bt_rfcomm_create_pdu(&rfcomm_pool);
+                net_buf_add_mem(buf, data, datalen);
+                /** Call application registered sent callback */
+                dlc->ops->sent(dlc, buf);
+                net_buf_unref(buf);
+            }
         }
         break;
 
@@ -805,10 +808,10 @@ static API_RESULT rfcomm_callback(uint8_t event_type, RFCOMM_HANDLE * handle, ui
 
         if ((NULL != dlc->ops) && (NULL != dlc->ops->recv))
         {
-            if(strlen((char const *)data) > 0)
+            if ((data != NULL) && (datalen > 0))
             {
                 buf = bt_rfcomm_create_pdu(&rfcomm_pool);
-                net_buf_add_mem(buf, data, strlen((char const *)data));
+                net_buf_add_mem(buf, data, datalen);
                 /** Call application registered recv callback */
                 dlc->ops->recv(dlc, buf);
                 net_buf_unref(buf);
