@@ -5,7 +5,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
 #include <porting.h>
 #include <string.h>
 #include <stdio.h>
@@ -44,6 +43,7 @@ LOG_MODULE_DEFINE(LOG_MODULE_NAME, kLOG_LevelTrace);
 NET_BUF_POOL_FIXED_DEFINE(pbap_pool, PBAP_PSE_MAX_ENTITY, PBAP_PSE_MAX_PKT_SIZE, NULL);
 
 static struct bt_pbap_pse_cb *pbap_pse_cb;
+static struct bt_pbap_auth auth_info[PBAP_PSE_MAX_ENTITY];
 
 /** @brief PBAP PCE structure */
 struct bt_pbap_pse
@@ -456,6 +456,7 @@ static API_RESULT ethermind_pbap_pse_event_callback(
     PBAP_HEADERS pbap_resp_header;
     PBAP_CONNECT_STRUCT connect_req_send;
     PBAP_HEADER_STRUCT password;
+    PBAP_HEADER_STRUCT uid;
     struct net_buf *buf;
     char path_name[10]      = {0};
     uint16_t disconn_reason = 0;
@@ -487,15 +488,18 @@ static API_RESULT ethermind_pbap_pse_event_callback(
     {
         case PBAP_PSE_CONNECT_IND:
             pbap_pse->max_pkt_len = pbap_headers->pbap_connect_info->max_recv_size +
-                                    (17U); /* Subtract 17U in stack and add 17U back here. */
+                                    (3U + 17U); /* Subtract 20 in stack and add 20 back here. */
             pbap_pse->peer_feature  = pbap_headers->pbap_connect_info->pbap_supported_features == 0x0U ?
                                           BT_PBAP_SUPPORTED_FEATURES_V11 :
                                           pbap_headers->pbap_connect_info->pbap_supported_features;
             pbap_pse->local_feature = CONFIG_BT_PBAP_PSE_SUPPORTED_FEATURES;
             memset(&connect_req_send, 0, sizeof(connect_req_send));
-            password.value = NULL;
-            password.length = 0;
+            password.value            = NULL;
+            password.length           = 0;
+            uid.value                 = NULL;
+            uid.length                = 0;
             connect_req_send.pin_info = &password;
+            connect_req_send.user_id  = &uid;
             if (((PBAP_SUCCESS_RSP != event_result) && (PBAP_NOT_AUTHENTICATED != event_result) &&
                  (PBAP_UNAUTH_RSP != event_result)) ||
                 (NULL == pbap_headers->pbap_connect_info))
@@ -509,7 +513,7 @@ static API_RESULT ethermind_pbap_pse_event_callback(
                     event_result = PBAP_NOT_ACCEPTABLE_RSP;
                 }
             }
-            else if (event_result == PBAP_NOT_AUTHENTICATED)
+            if (event_result == PBAP_NOT_AUTHENTICATED)
             {
                 if (pbap_pse->auth == NULL || pbap_pse->auth->pin_code == NULL)
                 {
@@ -523,6 +527,8 @@ static API_RESULT ethermind_pbap_pse_event_callback(
                 {
                     password.value  = (UCHAR *)pbap_pse->auth->pin_code;
                     password.length = BT_str_len(pbap_pse->auth->pin_code);
+                    uid.value       = (UCHAR *)pbap_pse->auth->user_id;
+                    uid.length      = (uint16_t)BT_str_len(pbap_pse->auth->user_id);
                     event_result    = PBAP_SUCCESS_RSP;
                     if (pbap_pse->local_auth)
                     {
@@ -547,9 +553,11 @@ static API_RESULT ethermind_pbap_pse_event_callback(
                 if (pbap_pse->auth != NULL && pbap_pse->auth->pin_code != NULL &&
                     BT_str_len(pbap_pse->auth->pin_code) > 0)
                 {
-                    password.value = (UCHAR *)pbap_pse->auth->pin_code;
-                    password.length = BT_str_len(pbap_pse->auth->pin_code);
-                    event_result = PBAP_SUCCESS_RSP;
+                    password.value            = (UCHAR *)pbap_pse->auth->pin_code;
+                    password.length           = BT_str_len(pbap_pse->auth->pin_code);
+                    uid.value                 = (UCHAR *)pbap_pse->auth->user_id;
+                    uid.length                = (uint16_t)BT_str_len(pbap_pse->auth->user_id);
+                    event_result              = PBAP_SUCCESS_RSP;
                     connect_req_send.pin_info = &password;
                 }
             }
@@ -566,7 +574,7 @@ static API_RESULT ethermind_pbap_pse_event_callback(
             }
             else
             {
-                if (event_result != BT_PBAP_FORBIDDEN_RSP && pbap_pse_cb->connected != NULL && pbap_pse != NULL)
+                if (event_result == PBAP_SUCCESS_RSP && pbap_pse_cb->connected != NULL && pbap_pse != NULL)
                 {
                     pbap_pse_cb->connected(pbap_pse);
                 }
@@ -732,8 +740,9 @@ static int bt_pal_pbap_pse_init(void)
     }
     for (uint8_t index = 0; index < PBAP_PSE_MAX_ENTITY; ++index)
     {
-        s_PbapPseInstances[index].flag = BT_OBEX_REQ_END;
+        s_PbapPseInstances[index].flag    = BT_OBEX_REQ_END;
         s_PbapPseInstances[index].cb_flag = BT_OBEX_REQ_END;
+        s_PbapPseInstances[index].auth    = &auth_info[index];
         retval = BT_pbap_pse_start_instance(&s_PbapPseInstances[index].pbap_handle, ethermind_pbap_pse_event_callback);
         if (API_SUCCESS != retval)
         {
@@ -764,7 +773,7 @@ int bt_pbap_pse_register(struct bt_pbap_pse_cb *cb)
 
 int bt_pbap_pse_disconnect(struct bt_pbap_pse *pbap_pse)
 {
-    if(pbap_pse == NULL)
+    if (pbap_pse == NULL)
     {
         return -EINVAL;
     }

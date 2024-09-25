@@ -55,6 +55,7 @@ enum {
 	BT_CONN_CTE_RSP_ENABLED,              /* CTE response procedure is enabled */
 
     BT_CONN_UNPAIRING,                /* Disconnected, unpairing */
+	BT_CONN_WAIT_PKTS,                    /* Waiting for number of completed packets */
 
 	/* Total number of flags - must be at the end of the enum */
 	BT_CONN_NUM_FLAGS,

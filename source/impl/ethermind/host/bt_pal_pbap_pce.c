@@ -56,6 +56,7 @@ typedef enum _pbap_pce_command
 } pbap_pce_command;
 
 static struct bt_pbap_pce_cb *pbap_pce_cb;
+static struct bt_pbap_auth auth_info[PBAP_PCE_MAX_ENTITY];
 
 /* Target ID of PBAP */
 const UCHAR pbap_target_id[] = {0x79U, 0x61U, 0x35U, 0xf0U, 0xf0U, 0xc5U, 0x11U, 0xd8U,
@@ -88,6 +89,7 @@ static struct bt_pbap_pce *pbap_pce_get_instance(struct bt_conn *conn)
         {
             memset(&s_PbapPceInstances[index], 0U, sizeof(s_PbapPceInstances[index]));
             s_PbapPceInstances[index].acl_conn = conn;
+            s_PbapPceInstances[index].auth     = &auth_info[index];
             EDGEFAST_PBAP_PCE_UNLOCK;
             return &s_PbapPceInstances[index];
         }
@@ -139,10 +141,10 @@ static struct bt_pbap_pce *bt_pbap_pce_lookup_bt_conn(struct bt_conn *conn)
 static int bt_pal_pbap_pce_init(void)
 {
     API_RESULT retval;
-   /* PBAP PCE SDP record handle */
-   static uint32_t pbap_pce_record_handle;
-   /* Get PBAP_PCE SDP record handle */
-   BT_dbase_get_record_handle(DB_RECORD_PBAP_PCE, 0, &pbap_pce_record_handle);
+    /* PBAP PCE SDP record handle */
+    static uint32_t pbap_pce_record_handle;
+    /* Get PBAP_PCE SDP record handle */
+    BT_dbase_get_record_handle(DB_RECORD_PBAP_PCE, 0, &pbap_pce_record_handle);
 
     retval = BT_pbap_pce_init();
     if (API_SUCCESS != retval)
@@ -901,7 +903,7 @@ static void appl_params_from_stack_to_buf(struct net_buf *buf, PBAP_APPL_PARAMS 
     for (uint8_t index = 0; index < BT_PBAP_APPL_PARAM_HDR_COUNT; ++index)
     {
         if (PBAP_GET_APPL_PARAM_FLAG(appl_param->appl_param_flag,
-                                        (uint16_t)1U << index % BT_PBAP_APPL_PARAM_HDR_COUNT) != 0)
+                                     (uint16_t)1U << index % BT_PBAP_APPL_PARAM_HDR_COUNT) != 0)
         {
             bt_pabp_set_appl_params_hdr_value(index + 1, appl_param, buf);
         }
@@ -918,6 +920,7 @@ static API_RESULT ethermind_pbap_pce_event_callback(
     PBAP_HEADERS pbap_req_header;
     PBAP_CONNECT_STRUCT connect_req_send;
     PBAP_HEADER_STRUCT password;
+    PBAP_HEADER_STRUCT uid;
     struct net_buf *buf;
     PBAP_APPL_PARAMS *appl_param;
     uint16_t disconn_reason = 0;
@@ -974,7 +977,10 @@ static API_RESULT ethermind_pbap_pce_event_callback(
                     memset(&connect_req_send, 0, sizeof(PBAP_HEADERS));
                     password.value                    = (UCHAR *)pbap_pce->auth->pin_code;
                     password.length                   = (uint16_t)BT_str_len(pbap_pce->auth->pin_code);
+                    uid.value                         = (UCHAR *)pbap_pce->auth->user_id;
+                    uid.length                        = (uint16_t)BT_str_len(pbap_pce->auth->user_id);
                     connect_req_send.pin_info         = &password;
+                    connect_req_send.user_id          = &uid;
                     connect_req_send.auth_flag        = 0U;
                     pbap_req_header.pbap_connect_info = &connect_req_send;
                     retval = BT_pbap_pce_send_request(pbap_pce->pbap_handle, PBAP_PCE_CONNECT_CFM, PBAP_UNAUTH_RSP,
@@ -997,7 +1003,7 @@ static API_RESULT ethermind_pbap_pce_event_callback(
                     break;
                 }
             }
-            pbap_pce->max_pkt_len = pbap_headers->pbap_connect_info->max_recv_size + (5U + 3U); /* Subtract 8 in stack and add 8 back here. */
+            pbap_pce->max_pkt_len = pbap_headers->pbap_connect_info->max_recv_size + (3U + 5U + 3U); /* Subtract 11 in stack and add 11 back here. */
             if (pbap_pce_cb->connected != NULL && pbap_pce != NULL)
             {
                 pbap_pce_cb->connected(pbap_pce);
@@ -1203,7 +1209,7 @@ static int bt_pbap_pce_connect(struct bt_conn *conn,
     struct bt_pbap_pce *_pbap_pce;
     PBAP_CONNECT_STRUCT connect_info;
     PBAP_HEADER_STRUCT pass_word;
-
+    memset(&connect_info, 0, sizeof(connect_info));
 #if CONFIG_BT_ZEPHYR_BUF
     struct net_buf *buf;
     buf = bt_conn_create_pdu(NULL, BT_L2CAP_BUF_SIZE(2U));
@@ -1246,16 +1252,15 @@ static int bt_pbap_pce_connect(struct bt_conn *conn,
     }
     connect_info.max_recv_size = CONFIG_BT_PBAP_PCE_MAX_PKT_LEN;
 
-    _pbap_pce->auth = NULL;
     if (auth != NULL)
     {
-        _pbap_pce->auth = auth;
         if (auth->pin_code != NULL && BT_str_len(auth->pin_code) > 0)
         {
-            pass_word.value        = (UCHAR *)auth->pin_code;
-            pass_word.length       = (uint16_t)BT_str_len(auth->pin_code);
-            connect_info.pin_info  = &pass_word;
-            connect_info.auth_flag = 1;
+            pass_word.value           = (UCHAR *)auth->pin_code;
+            pass_word.length          = (uint16_t)BT_str_len(auth->pin_code);
+            connect_info.pin_info     = &pass_word;
+            connect_info.auth_flag    = 1;
+            _pbap_pce->auth->pin_code = auth->pin_code;
         }
     }
 

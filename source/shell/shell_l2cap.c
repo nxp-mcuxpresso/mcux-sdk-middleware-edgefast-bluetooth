@@ -527,7 +527,7 @@ static shell_status_t cmd_ecred_reconfigure(shell_handle_t shell, int32_t argc, 
 		return kStatus_SHELL_Error;
 	}
 
-	err = bt_l2cap_ecred_chan_reconfigure(l2cap_ecred_chans, mtu);
+	err = bt_l2cap_ecred_chan_reconfigure(l2cap_ecred_chans, mtu, 0);
 	if (err < 0) {
 		shell_error(shell, "Unable to reconfigure channel (err %d)", err);
 	} else {

@@ -96,7 +96,6 @@ struct bt_pbap_pce_cb
      *  connection completes.
      *
      *  @param pbap_pce  PBAP PCE object.
-     *  @param result    BT_PBAP_SUCCESS_RSP in case of success or otherwise in case of error.
      */
     void (*connected)(struct bt_pbap_pce *pbap_pce);
 

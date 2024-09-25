@@ -1096,7 +1096,7 @@ static void smp_br_init(struct bt_smp_br *smp)
 {
 	/* Initialize SMP context without clearing L2CAP channel context */
 	(void)memset(((uint8_t *)(void *)smp) + offsetof(struct bt_smp_br, allowed_cmds), 0,
-		     sizeof(*smp) - offsetof(struct bt_smp, allowed_cmds));
+		     sizeof(*smp) - offsetof(struct bt_smp_br, allowed_cmds));
 
 	atomic_set_bit(smp->allowed_cmds, BT_SMP_CMD_PAIRING_FAIL);
 }
@@ -7051,7 +7051,11 @@ void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
         ((HCI_LINK_KEY_AUTHENTICATED_P_256 == lkey_type) ||
         (HCI_LINK_KEY_UNAUTHENTICATED_P_256 == lkey_type)))
     {
-        (BT_IGNORE_RETURN_VALUE)BT_smp_add_device(&bt_smp_bd_addr, &bd_handle);
+        retval = BT_smp_search_identity_addr(&bt_smp_bd_addr, DQ_LE_LINK, &bd_handle);
+        if (API_SUCCESS != retval)
+        {
+            (BT_IGNORE_RETURN_VALUE)BT_smp_add_device(&bt_smp_bd_addr, &bd_handle);
+        }
 
         auth_info.bonding = SMP_BONDING;
         auth_info.pair_mode = SMP_LESC_MODE;

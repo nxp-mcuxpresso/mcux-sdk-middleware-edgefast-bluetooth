@@ -688,7 +688,7 @@ fail:
 	/* If we get here, something has seriously gone wrong:
 	 * We also need to destroy the `parent` buf.
 	 */
-	OSA_SemaphorePost(bt_conn_get_pkts(conn));
+	bt_conn_give_pkts(conn);
 	if (tx) {
 		/* `buf` might not get destroyed, and its `tx` pointer will still be reachable.
 		 * Make sure that we don't try to use the destroyed context later.
@@ -851,12 +851,18 @@ static void conn_cleanup(struct bt_conn *conn)
 
 			addr.type = BT_ADDR_LE_PUBLIC;
 			addr.a = conn->br.dst;
-			bt_conn_unpair(conn->id, &addr);
+			bt_conn_unpair(conn->id, &addr, NULL);
 		}
 		else
 #endif /* (defined(CONFIG_BT_BREDR) && ((CONFIG_BT_BREDR) > 0U)) */
 		{
-			bt_conn_unpair(conn->id, &conn->le.dst);
+			bt_addr_le_t rpa;
+			if (conn->role == BT_HCI_ROLE_CENTRAL) {
+				bt_addr_le_copy(&rpa, &conn->le.resp_addr);
+			} else {
+				bt_addr_le_copy(&rpa, &conn->le.init_addr);
+			}
+			bt_conn_unpair(conn->id, &conn->le.dst, &rpa);
 		}
 	}
 
@@ -1023,7 +1029,7 @@ int bt_conn_process_tx(struct bt_conn *conn)
 	if(NULL == buf)
 	{
 		/* Since dequeue fail, we need give back the packet for later send. */
-		OSA_SemaphorePost(bt_conn_get_pkts(conn));
+		bt_conn_give_pkts(conn);
 		return -ENOMSG;
 	}
 	/* Since we used `peek`, the queue still owns the reference to the
@@ -1069,7 +1075,7 @@ static void process_unack_tx(struct bt_conn *conn)
 		if (conn->pending_no_cb) {
 			conn->pending_no_cb--;
 			EnableGlobalIRQ(key);
-			OSA_SemaphorePost(bt_conn_get_pkts(conn));
+			bt_conn_give_pkts(conn);
 			continue;
 		}
 
@@ -1089,7 +1095,7 @@ static void process_unack_tx(struct bt_conn *conn)
 
 		conn_tx_destroy(conn, tx);
 
-		OSA_SemaphorePost(bt_conn_get_pkts(conn));
+		bt_conn_give_pkts(conn);
 	}
 }
 

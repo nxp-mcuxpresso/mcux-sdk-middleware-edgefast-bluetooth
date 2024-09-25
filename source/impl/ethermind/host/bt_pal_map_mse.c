@@ -576,6 +576,10 @@ static int map_mse_deinit(void)
 
     if (mse_init == 0)
     {
+        for (uint8_t index = 0; index < CONFIG_BT_MAP_MSE_MAS_NUM_INSTANCES; index++)
+        {
+            BT_map_mse_stop(MAP_ACCESS_SERVICE, &index);
+        }
         BT_map_mse_shutdown();
         if (NULL != s_MapMseLock)
         {
@@ -1642,22 +1646,26 @@ static API_RESULT map_mse_callback
 
     case MAP_MSE_CONNECT_IND:
         LOG_DBG ("Recvd MAP_MSE_CONNECT_IND - 0x%04X\n", event_result);
-        mse_mas = map_mse_mas_lookup_instance_by_addr(event_header->map_connect_info->bd_addr);
+        mse_mas = map_mse_mas_lookup_instance(handle);
         if (mse_mas == NULL)
         {
+            if (event_header->map_connect_info == NULL)
+            {
+                break;
+            }
             conn = bt_conn_lookup_addr_br((const bt_addr_t *)event_header->map_connect_info->bd_addr);
             if (conn == NULL)
             {
                 break;
             }
             mse_mas = map_mse_mas_get_instance(conn);
-        }
-        if (mse_mas != NULL)
-        {
-            if((event_result != BT_MAP_RSP_SUCCESS) || (event_header->map_connect_info == NULL))
+            if (mse_mas == NULL)
             {
-                event_result = BT_MAP_RSP_NOT_ACCEPTABLE;
+                break;
             }
+
+            event_result = (event_result != BT_MAP_RSP_SUCCESS) ? BT_MAP_RSP_NOT_ACCEPTABLE : event_result;
+
             if ((BT_map_mse_send_response(&handle, event_type, (UCHAR)event_result, NULL) == API_SUCCESS) &&
                 (event_result == BT_MAP_RSP_SUCCESS))
             {
@@ -1666,7 +1674,7 @@ static API_RESULT map_mse_callback
                 uint8_t scn = 0;
 
                 mse_mas->handle = handle;
-                mse_mas->max_pkt_len = event_header->map_connect_info->max_recv_size + 17U; /* Subtract 17 in stack and add 17 back here. */
+                mse_mas->max_pkt_len = event_header->map_connect_info->max_recv_size + 3U + 17U; /* Subtract 20 in stack and add 20 back here. */
                 mse_mas->flag = BT_OBEX_REQ_UNSEG;
                 BT_dbase_get_record_handle(DB_RECORD_MAP_MSE, handle, &sdp_record_handle);
                 BT_dbase_get_server_channel(sdp_record_handle, PROTOCOL_DESC_LIST, &scn);
@@ -1676,6 +1684,10 @@ static API_RESULT map_mse_callback
                     mse_mas_cb->connected(mse_mas, psm, scn);
                 }
             }
+            else
+            {
+                map_mse_mas_free_instance(mse_mas);
+            }
         }
         break;
 
@@ -1684,11 +1696,12 @@ static API_RESULT map_mse_callback
         mse_mas = map_mse_mas_lookup_instance(handle);
         if (mse_mas != NULL)
         {
-            if ((mse_mas_cb != NULL) && (mse_mas_cb->disconnected != NULL))
+            event_result = BT_map_mse_transport_close(&mse_mas->handle);
+            if ((event_result != API_SUCCESS) && (mse_mas_cb != NULL) && (mse_mas_cb->disconnected != NULL))
             {
-                mse_mas_cb->disconnected(mse_mas, event_result);
+                mse_mas_cb->disconnected(mse_mas, BT_MAP_RSP_SUCCESS);
+                map_mse_mas_free_instance(mse_mas);
             }
-            map_mse_mas_free_instance(mse_mas);
         }
         break;
 
@@ -1777,12 +1790,12 @@ static API_RESULT map_mse_callback
                 {
                     mse_mns_cb->disconnected(mse_mns, event_result);
                 }
-                BT_map_mse_stop(MAP_ACCESS_SERVICE, &mse_mns->handle);
+                BT_map_mse_stop(MAP_NTF_SERVICE, &mse_mns->handle);
                 map_mse_mns_free_instance(mse_mns);
             }
             else
             {
-                mse_mns->max_pkt_len = event_header->map_connect_info->max_recv_size + 5U + 4U; /* Subtract 9 in stack and add 9 back here. */
+                mse_mns->max_pkt_len = event_header->map_connect_info->max_recv_size + 3U + 5U + 4U; /* Subtract 12 in stack and add 12 back here. */
                 if ((mse_mns_cb != NULL) && (mse_mns_cb->connected != NULL))
                 {
                     mse_mns_cb->connected(mse_mns);

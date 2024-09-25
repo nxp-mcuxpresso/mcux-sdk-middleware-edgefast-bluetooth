@@ -3223,7 +3223,9 @@ static int map_fs_init(void)
     }
 
     /* write one message into inbox */
-    (void)sprintf(&app_mse_instance.path[0], "%s/telecom/msg/inbox/%016llX", MAP_MSE_REPO_ROOT, app_mse_instance.msg_handle);
+    /* Not use %016llX here to avoid uint64_t is not supported in some platforms. */
+    (void)sprintf(&app_mse_instance.path[0], "%s/telecom/msg/inbox/%08X%08X", MAP_MSE_REPO_ROOT,
+    (unsigned int)(app_mse_instance.msg_handle >> 32U), (unsigned int)app_mse_instance.msg_handle);
     app_mse_instance.msg_handle++;
     if (f_open(&map_fdes, &app_mse_instance.path[0], FA_WRITE | FA_CREATE_ALWAYS) != FR_OK)
     {
@@ -4369,7 +4371,9 @@ static void app_mse_push_msg_cb(struct bt_map_mse_mas *mse_mas, struct net_buf *
 
         if (result == BT_MAP_RSP_SUCCESS)
         {
-            (void)sprintf(&path[strlen(&path[0])], "/%016llX", app_mse_instance.msg_handle);
+            /* Not use %016llX here to avoid uint64_t is not supported in some platforms. */
+            (void)sprintf(&path[strlen(&path[0])], "/%08X%08X",
+            (unsigned int)(app_mse_instance.msg_handle >> 32U), (unsigned int)app_mse_instance.msg_handle);
             if (f_open(&map_fdes, &path[0], FA_WRITE | FA_CREATE_ALWAYS) != FR_OK)
             {
                 result = BT_MAP_RSP_INT_SERVER_ERR;
@@ -4395,7 +4399,8 @@ static void app_mse_push_msg_cb(struct bt_map_mse_mas *mse_mas, struct net_buf *
         {
             if ((flag & BT_OBEX_REQ_END) != 0U)
             {
-                (void)sprintf(&msg_handle[0], "%016llX", app_mse_instance.msg_handle);
+                (void)sprintf(&msg_handle[0], "%08X%08X",
+                (unsigned int)(app_mse_instance.msg_handle >> 32U), (unsigned int)app_mse_instance.msg_handle);
                 app_mse_instance.msg_handle++;
                 app_mse_instance.cmd_id = CMD_ID_NONE;
                 name_req = msg_handle;
@@ -4430,29 +4435,9 @@ static void app_mse_set_ntf_reg_cb(struct bt_map_mse_mas *mse_mas, struct net_bu
 
     if ((flag & BT_OBEX_REQ_END) != 0U)
     {
-        result = BT_MAP_RSP_SUCCESS;
-        if (ntf_status == 1U)
+        if (ntf_status <= 1U)
         {
-            if (app_mse_instance.mse_mns == NULL)
-            {
-                app_mse_instance.acl_conn = default_conn;
-                if (bt_sdp_discover(app_mse_instance.acl_conn, &discov_map_mce) != 0)
-                {
-                    shell_print(ctx_shell, "SDP discovery failed: result");
-                }
-                else
-                {
-                    shell_print(ctx_shell, "SDP discovery started");
-                }
-            }
-            else
-            {
-                shell_print(ctx_shell, "MSE MNS connection alreay established");
-            }
-        }
-        else if (ntf_status == 0U)
-        {
-            (void)bt_map_mse_mns_disconnect(app_mse_instance.mse_mns);
+            result = BT_MAP_RSP_SUCCESS;
         }
         else
         {
@@ -4467,6 +4452,35 @@ static void app_mse_set_ntf_reg_cb(struct bt_map_mse_mas *mse_mas, struct net_bu
     if (bt_map_mse_set_ntf_reg_response(mse_mas, result) != 0)
     {
         shell_print(ctx_shell, "Failed to send response");
+    }
+    else
+    {
+        if (result == BT_MAP_RSP_SUCCESS)
+        {
+            if (ntf_status == 1U)
+            {
+                if (app_mse_instance.mse_mns == NULL)
+                {
+                    app_mse_instance.acl_conn = default_conn;
+                    if (bt_sdp_discover(app_mse_instance.acl_conn, &discov_map_mce) != 0)
+                    {
+                        shell_print(ctx_shell, "SDP discovery failed: result");
+                    }
+                    else
+                    {
+                        shell_print(ctx_shell, "SDP discovery started");
+                    }
+                }
+                else
+                {
+                    shell_print(ctx_shell, "MSE MNS connection alreay established");
+                }
+            }
+            else
+            {
+                (void)bt_map_mse_mns_disconnect(app_mse_instance.mse_mns);
+            }
+        }
     }
 }
 

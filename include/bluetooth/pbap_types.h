@@ -196,10 +196,12 @@ struct bt_pbap_connection_hdr
     uint8_t target[16];
 } STRUCT_PACKED_POST;
 
+STRUCT_PACKED_PRE
 struct bt_pbap_push_response_hdr
 {
     uint8_t opcode;
     uint16_t packet_length;
+    struct bt_obex_hdr_u32 conn_id;
     struct bt_obex_hdr_u8 srm;
     struct bt_obex_hdr_u8 srmp;
 } STRUCT_PACKED_POST;

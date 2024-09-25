@@ -152,12 +152,14 @@ void bt_ShellAvrcpInit(shell_handle_t shell);
 #if (defined(CONFIG_BT_HFP_HF) && (CONFIG_BT_HFP_HF > 0))
 void bt_ShellHfpInit(shell_handle_t shell);
 #endif
-#if (defined(CONFIG_BT_PBAP_PCE) && (CONFIG_BT_PBAP_PCE > 0))
+#if ((defined(CONFIG_BT_PBAP_PCE) && (CONFIG_BT_PBAP_PCE > 0)) || \
+     (defined(CONFIG_BT_PBAP_PSE) && (CONFIG_BT_PBAP_PSE > 0)))
 void bt_ShellPbapInit(shell_handle_t shell);
 #endif
-#if (defined(CONFIG_BT_MAP_MCE) && (CONFIG_BT_MAP_MCE > 0))
+#if ((defined(CONFIG_BT_MAP_MCE) && (CONFIG_BT_MAP_MCE > 0)) || \
+     (defined(CONFIG_BT_MAP_MSE) && (CONFIG_BT_MAP_MSE > 0)))
 void bt_ShellMapInit(shell_handle_t shell);
-#endif /* CONFIG_BT_MAP_MCE */
+#endif
 bool passes_scan_filter(const struct bt_le_scan_recv_info *info, const struct net_buf_simple *buf);
 
 #if (defined(CONFIG_BT_ISO) && (CONFIG_BT_ISO > 0))

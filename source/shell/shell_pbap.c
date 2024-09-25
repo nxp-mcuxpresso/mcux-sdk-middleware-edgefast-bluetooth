@@ -85,36 +85,26 @@ NET_BUF_POOL_FIXED_DEFINE(pbap_appl_pool, CONFIG_BT_MAX_CONN, CONFIG_BT_PBAP_PCE
 
 static struct bt_sdp_attribute pbap_pce_attrs[] = {
     BT_SDP_NEW_SERVICE,
-        BT_SDP_LIST(
-        BT_SDP_ATTR_SVCLASS_ID_LIST,
-        /* ServiceClassIDList */
-        BT_SDP_TYPE_SIZE_VAR(BT_SDP_SEQ8, 3), //35 03
-        BT_SDP_DATA_ELEM_LIST(
-        {
-            BT_SDP_TYPE_SIZE(BT_SDP_UUID16), //19
-            BT_SDP_ARRAY_16(BT_SDP_PBAP_PCE_SVCLASS) //11 2E
-        },
-        )
-    ),
-    BT_SDP_LIST(
-        BT_SDP_ATTR_PROFILE_DESC_LIST,
-        BT_SDP_TYPE_SIZE_VAR(BT_SDP_SEQ8, 8), //35 08
-        BT_SDP_DATA_ELEM_LIST(
-        {
-            BT_SDP_TYPE_SIZE_VAR(BT_SDP_SEQ8, 6), //35 06
-            BT_SDP_DATA_ELEM_LIST(
-            {
-                BT_SDP_TYPE_SIZE(BT_SDP_UUID16), //19
-                BT_SDP_ARRAY_16(BT_SDP_PBAP_SVCLASS) //11 30
-            },
-            {
-                BT_SDP_TYPE_SIZE(BT_SDP_UINT16), //09
-                BT_SDP_ARRAY_16(0x0102U) //01 02
-            },
-            )
-        },
-        )
-    ),
+    BT_SDP_LIST(BT_SDP_ATTR_SVCLASS_ID_LIST,
+                /* ServiceClassIDList */
+                BT_SDP_TYPE_SIZE_VAR(BT_SDP_SEQ8, 3), // 35 03
+                BT_SDP_DATA_ELEM_LIST(
+                    {
+                        BT_SDP_TYPE_SIZE(BT_SDP_UUID16),         // 19
+                        BT_SDP_ARRAY_16(BT_SDP_PBAP_PCE_SVCLASS) // 11 2E
+                    }, )),
+    BT_SDP_LIST(BT_SDP_ATTR_PROFILE_DESC_LIST,
+                BT_SDP_TYPE_SIZE_VAR(BT_SDP_SEQ8, 8),                        // 35 08
+                BT_SDP_DATA_ELEM_LIST({BT_SDP_TYPE_SIZE_VAR(BT_SDP_SEQ8, 6), // 35 06
+                                       BT_SDP_DATA_ELEM_LIST(
+                                           {
+                                               BT_SDP_TYPE_SIZE(BT_SDP_UUID16),     // 19
+                                               BT_SDP_ARRAY_16(BT_SDP_PBAP_SVCLASS) // 11 30
+                                           },
+                                           {
+                                               BT_SDP_TYPE_SIZE(BT_SDP_UINT16), // 09
+                                               BT_SDP_ARRAY_16(0x0102U)         // 01 02
+                                           }, )}, )),
     BT_SDP_SERVICE_NAME("Phonebook Access PCE"),
 };
 
@@ -122,14 +112,14 @@ static struct bt_sdp_record pbap_pce_rec = BT_SDP_RECORD(pbap_pce_attrs);
 
 static int stringTonum(char *str, uint64_t *value, uint8_t base)
 {
-    char *p = str;
-    uint64_t total = 0;
+    char *p           = str;
+    uint64_t total    = 0;
     uint8_t chartoint = 0;
-    if(base == 10)
+    if (base == 10)
     {
-        while(p && *p != '\0')
+        while (p && *p != '\0')
         {
-            if(*p >= '0' && *p <= '9')
+            if (*p >= '0' && *p <= '9')
             {
                 total = total * 10 + (*p - '0');
             }
@@ -140,19 +130,19 @@ static int stringTonum(char *str, uint64_t *value, uint8_t base)
             p++;
         }
     }
-    else if(base == 16)
+    else if (base == 16)
     {
-        while(p && *p != '\0')
+        while (p && *p != '\0')
         {
-            if(*p >= '0' && *p <= '9')
+            if (*p >= '0' && *p <= '9')
             {
                 chartoint = *p - '0';
             }
-            else if(*p >= 'a' && *p <= 'f')
+            else if (*p >= 'a' && *p <= 'f')
             {
                 chartoint = *p - 'a' + 10;
             }
-            else if(*p >= 'A' && *p <= 'F')
+            else if (*p >= 'A' && *p <= 'F')
             {
                 chartoint = *p - 'A' + 10;
             }
@@ -163,7 +153,6 @@ static int stringTonum(char *str, uint64_t *value, uint8_t base)
             total = 16 * total + chartoint;
             p++;
         }
-
     }
     *value = total;
     return 0;
@@ -171,15 +160,15 @@ static int stringTonum(char *str, uint64_t *value, uint8_t base)
 
 static int strTouint_64(char *nptr, uint64_t *value)
 {
-    char *p = nptr;
+    char *p    = nptr;
     int result = 0;
-    if(p == NULL)
+    if (p == NULL)
     {
         return -EINVAL;
     }
-    if(*p == '0')
+    if (*p == '0')
     {
-        if(*(p + 1) == 'x' || *(p + 1) == 'X')
+        if (*(p + 1) == 'x' || *(p + 1) == 'X')
         {
             result = stringTonum(p + 2, value, 16);
         }
@@ -197,21 +186,21 @@ static int strTouint_64(char *nptr, uint64_t *value)
 
 static void app_connected(struct bt_pbap_pce *pbap_pce)
 {
-    shell_print(ctx_shell, "PABP connect successfully");
+    shell_print(ctx_shell, "PBAP connect successfully");
 }
 
-static void app_get_auth_info_cb(struct bt_pbap_pce *pbap_pce, struct bt_pbap_auth *pbap_atuh_info)
+static void app_get_auth_info_cb(struct bt_pbap_pce *pbap_pce, struct bt_pbap_auth *pbap_auth_info)
 {
-    g_PbapAuth.user_id = userid;
-    memcpy(password, "0000", sizeof("0000"));
-    g_PbapAuth.pin_code = password;
-    pbap_atuh_info      = &g_PbapAuth;
-    shell_print(ctx_shell, "%s", pbap_atuh_info->pin_code);
+    strcpy(userid, "PBAP");
+    pbap_auth_info->user_id = userid;
+    strcpy(password, "0000");
+    pbap_auth_info->pin_code = password;
+    shell_print(ctx_shell, "%s", pbap_auth_info->pin_code);
 }
 
 static void app_disconnected(struct bt_pbap_pce *pbap_pce, uint8_t result)
 {
-    shell_print(ctx_shell, "PABP disconnct successfully : %x", result);
+    shell_print(ctx_shell, "PBAP disconnct successfully : %x", result);
     if (result == BT_PBAP_FORBIDDEN_RSP)
     {
         shell_print(ctx_shell, "Possible reasons is Authentication failure");
@@ -258,7 +247,7 @@ static void app_error_result(uint8_t result)
         case BT_PBAP_FORBIDDEN_RSP:
             shell_error(ctx_shell, "Temporarily barred: %x", result);
             break;
-        
+
         default:
             break;
     }
@@ -328,9 +317,10 @@ static bool app_app_param_cb(struct bt_data *data, void *user_data)
 static void app_pull_phonebook_cb(struct bt_pbap_pce *pbap_pce, uint8_t result, struct net_buf *buf)
 {
     int revert;
-    if (result != PBAP_CONTINUE_RSP || result != BT_PBAP_SUCCESS_RSP)
+    if (result != PBAP_CONTINUE_RSP && result != BT_PBAP_SUCCESS_RSP)
     {
         app_error_result(result);
+        return;
     }
     else
     {
@@ -351,7 +341,8 @@ static void app_pull_phonebook_cb(struct bt_pbap_pce *pbap_pce, uint8_t result, 
         }
         net_buf_reserve(buf, BT_PBAP_PCE_RSV_LEN_PULL_PHONEBOOK(g_PbapPce.pbap_pceHandle, BT_OBEX_REQ_END));
 
-        revert = bt_pbap_pce_pull_phonebook(g_PbapPce.pbap_pceHandle, buf, NULL, g_PbapPce.lcl_srmp_wait, BT_OBEX_REQ_END);
+        revert =
+            bt_pbap_pce_pull_phonebook(g_PbapPce.pbap_pceHandle, buf, NULL, g_PbapPce.lcl_srmp_wait, BT_OBEX_REQ_END);
         if (revert != 0)
         {
             net_buf_unref(buf);
@@ -378,9 +369,10 @@ static void app_set_path_cb(struct bt_pbap_pce *pbap_pce, uint8_t result)
 static void app_pull_vcardlist_cb(struct bt_pbap_pce *pbap_pce, uint8_t result, struct net_buf *buf)
 {
     int revert;
-    if (result != PBAP_CONTINUE_RSP || result != BT_PBAP_SUCCESS_RSP)
+    if (result != PBAP_CONTINUE_RSP && result != BT_PBAP_SUCCESS_RSP)
     {
         app_error_result(result);
+        return;
     }
     else
     {
@@ -395,14 +387,15 @@ static void app_pull_vcardlist_cb(struct bt_pbap_pce *pbap_pce, uint8_t result, 
         if (result == BT_PBAP_CONTINUE_RSP)
         {
             g_PbapPce.lcl_srmp_wait = --g_PbapPce.num_srmp_wait > 0 ? true : false;
-            buf = net_buf_alloc(&pbap_appl_pool, osaWaitNone_c);
+            buf                     = net_buf_alloc(&pbap_appl_pool, osaWaitNone_c);
             if (buf == NULL)
             {
                 return;
             }
             net_buf_reserve(buf, BT_PBAP_PCE_RSV_LEN_PULL_VCARD_LISTING(g_PbapPce.pbap_pceHandle, BT_OBEX_REQ_END));
 
-            revert = bt_pbap_pce_pull_vcard_listing(g_PbapPce.pbap_pceHandle, buf, NULL, g_PbapPce.lcl_srmp_wait, BT_OBEX_REQ_END);
+            revert = bt_pbap_pce_pull_vcard_listing(g_PbapPce.pbap_pceHandle, buf, NULL, g_PbapPce.lcl_srmp_wait,
+                                                    BT_OBEX_REQ_END);
             if (revert != 0)
             {
                 net_buf_unref(buf);
@@ -416,9 +409,10 @@ static void app_pull_vcardlist_cb(struct bt_pbap_pce *pbap_pce, uint8_t result, 
 static void app_pull_vcardentry_cb(struct bt_pbap_pce *pbap_pce, uint8_t result, struct net_buf *buf)
 {
     int revert;
-    if (result != PBAP_CONTINUE_RSP || result != BT_PBAP_SUCCESS_RSP)
+    if (result != PBAP_CONTINUE_RSP && result != BT_PBAP_SUCCESS_RSP)
     {
         app_error_result(result);
+        return;
     }
     else
     {
@@ -431,14 +425,15 @@ static void app_pull_vcardentry_cb(struct bt_pbap_pce *pbap_pce, uint8_t result,
     if (result == BT_PBAP_CONTINUE_RSP)
     {
         g_PbapPce.lcl_srmp_wait = --g_PbapPce.num_srmp_wait > 0 ? true : false;
-        buf = net_buf_alloc(&pbap_appl_pool, osaWaitNone_c);
+        buf                     = net_buf_alloc(&pbap_appl_pool, osaWaitNone_c);
         if (buf == NULL)
         {
             return;
         }
         net_buf_reserve(buf, BT_PBAP_PCE_RSV_LEN_PULL_VCARD_ENTRY(g_PbapPce.pbap_pceHandle, BT_OBEX_REQ_END));
 
-        revert = bt_pbap_pce_pull_vcard_entry(g_PbapPce.pbap_pceHandle, buf, NULL, g_PbapPce.lcl_srmp_wait, BT_OBEX_REQ_END);
+        revert =
+            bt_pbap_pce_pull_vcard_entry(g_PbapPce.pbap_pceHandle, buf, NULL, g_PbapPce.lcl_srmp_wait, BT_OBEX_REQ_END);
         if (revert != 0)
         {
             net_buf_unref(buf);
@@ -449,9 +444,9 @@ static void app_pull_vcardentry_cb(struct bt_pbap_pce *pbap_pce, uint8_t result,
 }
 
 static struct bt_pbap_pce_cb pce_cb = {
-    .connected     = app_connected,
-    .disconnected  = app_disconnected,
-    .get_auth_info = app_get_auth_info_cb,
+    .connected          = app_connected,
+    .disconnected       = app_disconnected,
+    .get_auth_info      = app_get_auth_info_cb,
     .abort              = app_abort_cb,
     .pull_phonebook     = app_pull_phonebook_cb,
     .set_phonebook_path = app_set_path_cb,
@@ -470,10 +465,10 @@ static uint8_t shell_pbap_init(void)
 static uint8_t bt_pbap_pce_sdp_user(struct bt_conn *conn, struct bt_sdp_client_result *result)
 {
     int res;
-    uint32_t peer_feature = 0;
-    uint16_t rfommchannel = 0;
-    uint16_t l2cappsm     = 0;
-    uint16_t pbap_version = 0;
+    uint32_t peer_feature  = 0;
+    uint16_t rfommchannel  = 0;
+    uint16_t l2cappsm      = 0;
+    uint16_t pbap_version  = 0;
     uint8_t supported_repo = 0;
     if ((result) && (result->resp_buf))
     {
@@ -488,7 +483,7 @@ static uint8_t bt_pbap_pce_sdp_user(struct bt_conn *conn, struct bt_sdp_client_r
             g_PbapPce.pbap_version = pbap_version;
         }
         res = bt_sdp_get_supported_repositories(result->resp_buf, &supported_repo);
-        if(res < 0)
+        if (res < 0)
         {
             shell_error(ctx_shell, "pbap pse supported repositories is not found");
         }
@@ -500,7 +495,8 @@ static uint8_t bt_pbap_pce_sdp_user(struct bt_conn *conn, struct bt_sdp_client_r
         res = bt_sdp_get_pbap_map_ctn_features(result->resp_buf, &peer_feature);
         if (res < 0)
         {
-            shell_error(ctx_shell, "pse supported feature not found, use default feature", BT_PBAP_SUPPORTED_FEATURES_V11);
+            shell_error(ctx_shell, "pse supported feature not found, use default feature",
+                        BT_PBAP_SUPPORTED_FEATURES_V11);
             g_PbapPce.peer_feature = BT_PBAP_SUPPORTED_FEATURES_V11;
         }
         else
@@ -631,20 +627,20 @@ static int bt_pull_phonebook_command_analy(struct net_buf *buf, int32_t argc, ch
     uint64_t value   = 0;
     uint8_t cs_flag  = 0;
     uint8_t cso_flag = 0;
-    for(index = 1; index < argc - 1; index++)
+    for (index = 1; index < argc - 1; index++)
     {
-        if(strcmp(argv[index], "-ps") == 0)
+        if (strcmp(argv[index], "-ps") == 0)
         {
-            if(strTouint_64(argv[index + 1], &value) != 0)
+            if (strTouint_64(argv[index + 1], &value) != 0)
             {
                 shell_error(ctx_shell, " Property Selsector  invaild");
                 return -EINVAL;
             }
             BT_PBAP_ADD_PARAMS_PROPERTY_SELECTOR(buf, value);
         }
-        else if(strcmp(argv[index], "-f") == 0)
+        else if (strcmp(argv[index], "-f") == 0)
         {
-            if(strTouint_64(argv[index + 1], &value) != 0)
+            if (strTouint_64(argv[index + 1], &value) != 0)
             {
                 shell_error(ctx_shell, " Format invaild");
                 return -EINVAL;
@@ -676,7 +672,8 @@ static int bt_pull_phonebook_command_analy(struct net_buf *buf, int32_t argc, ch
         }
         else if (strcmp(argv[index], "-rnmc") == 0)
         {
-            if ((g_PbapPce.peer_feature & BT_PBAP_FEATURE_ENHANCED_MISSED_CALLS) && (g_PbapPce.loacal_feature & BT_PBAP_FEATURE_ENHANCED_MISSED_CALLS))
+            if ((g_PbapPce.peer_feature & BT_PBAP_FEATURE_ENHANCED_MISSED_CALLS) &&
+                (g_PbapPce.loacal_feature & BT_PBAP_FEATURE_ENHANCED_MISSED_CALLS))
             {
                 if (strTouint_64(argv[index + 1], &value) != 0)
                 {
@@ -693,7 +690,8 @@ static int bt_pull_phonebook_command_analy(struct net_buf *buf, int32_t argc, ch
         }
         else if (strcmp(argv[index], "-cs") == 0)
         {
-            if (g_PbapPce.peer_feature & BT_PBAP_FEATURE_VCARD_SELECTING && g_PbapPce.loacal_feature & BT_PBAP_FEATURE_VCARD_SELECTING)
+            if (g_PbapPce.peer_feature & BT_PBAP_FEATURE_VCARD_SELECTING &&
+                g_PbapPce.loacal_feature & BT_PBAP_FEATURE_VCARD_SELECTING)
             {
                 if (strTouint_64(argv[index + 1], &value) != 0)
                 {
@@ -818,7 +816,7 @@ static int bt_pull_vcardlist_command_analy(struct net_buf *buf, int32_t argc, ch
     uint8_t sv_flag  = 0;
     uint8_t cs_flag  = 0;
     uint8_t cso_flag = 0;
-    for(index = 1; index < argc - 1; index++)
+    for (index = 1; index < argc - 1; index++)
     {
         if (strcmp(argv[index], "-o") == 0)
         {
@@ -981,20 +979,20 @@ static int bt_pull_vcardentry_command_analy(struct net_buf *buf, int32_t argc, c
 {
     uint16_t index = 1;
     uint64_t value = 0;
-    for(index = 1; index < argc -1; index++)
+    for (index = 1; index < argc - 1; index++)
     {
-        if(strcmp(argv[index], "-ps") == 0)
+        if (strcmp(argv[index], "-ps") == 0)
         {
-            if(strTouint_64(argv[index + 1], &value) != 0)
+            if (strTouint_64(argv[index + 1], &value) != 0)
             {
                 shell_error(ctx_shell, " Property Selsector  invaild");
                 return -EINVAL;
             }
             BT_PBAP_ADD_PARAMS_PROPERTY_SELECTOR(buf, value);
         }
-        else if(strcmp(argv[index], "-f") == 0)
+        else if (strcmp(argv[index], "-f") == 0)
         {
-            if(strTouint_64(argv[index + 1], &value) != 0)
+            if (strTouint_64(argv[index + 1], &value) != 0)
             {
                 shell_error(ctx_shell, " Format invaild");
                 return -EINVAL;
@@ -1077,14 +1075,14 @@ static shell_status_t cmd_register(shell_handle_t shell, int32_t argc, char *arg
 }
 
 SHELL_STATIC_SUBCMD_SET_CREATE(pce_cmds,
-                SHELL_CMD_ARG(register, NULL, HELP_NONE, cmd_register, 1, 0),
+                               SHELL_CMD_ARG(register, NULL, HELP_NONE, cmd_register, 1, 0),
                 SHELL_CMD_ARG(connect, NULL, "SDP first, then connect.\r\n\
                             -psm(optional).\r\n\
                             obex auth params(optional)\r\n\
                             -uid   : [userid].\r\n\
                             -pwd   : [password].\r\n", cmd_connect, 1, 5),
-                SHELL_CMD_ARG(disconnect, NULL, HELP_NONE, cmd_disconnect, 1, 0),
-                SHELL_CMD_ARG(abort, NULL, HELP_NONE, cmd_abort, 1, 0),
+                               SHELL_CMD_ARG(disconnect, NULL, HELP_NONE, cmd_disconnect, 1, 0),
+                               SHELL_CMD_ARG(abort, NULL, HELP_NONE, cmd_abort, 1, 0),
                 SHELL_CMD_ARG(pull_phonebook, NULL,"\r\n\
                            -name(mandatory) : [name].\r\n \
                            -srmp(optional)  : [Single Response Mode Param(>=0)].\r\n\
@@ -1096,7 +1094,7 @@ SHELL_STATIC_SUBCMD_SET_CREATE(pce_cmds,
                            5: -rnmc: [RestNewMissedCalls(0/1)].\r\n\
                            6: -cs  : [vCardSelector(64-bit)].\r\n\
                            7: -cso : [vCardSelecorOperator(0 : or | 1 : and)]\r\n ", cmd_pull_pb, 3, 18),
-                SHELL_CMD_ARG(set_path, NULL, "[path_name]\r\n", cmd_set_path, 2, 0),
+                               SHELL_CMD_ARG(set_path, NULL, "[path_name]\r\n", cmd_set_path, 2, 0),
                 SHELL_CMD_ARG(pull_vcardlist, NULL, "\r\n \
                            -name(mandatory) : [name].\r\n \
                            -srmp(optional)  : [Single Response Mode Param(>=0)].\r\n\
@@ -1115,7 +1113,7 @@ SHELL_STATIC_SUBCMD_SET_CREATE(pce_cmds,
                            input application parameters(optional).\r\n\
                            1: -ps  : [Property Selector (64-bit)].\r\n\
                            2: -f   : [Format(0: vcard 2.1 | 1 : vcard 3.0)].\r\n", cmd_pull_vcardentry, 3, 6),
-                SHELL_SUBCMD_SET_END);
+                               SHELL_SUBCMD_SET_END);
 #endif /* CONFIG_BT_PBAP_PCE */
 
 #if (defined(CONFIG_BT_PBAP_PSE) && ((CONFIG_BT_PBAP_PSE) > 0U))
@@ -1254,7 +1252,7 @@ app_pbap_pse_t g_PbapPse;
 
 NET_BUF_POOL_FIXED_DEFINE(pbap_appl_pse_pool, CONFIG_BT_MAX_CONN, PBAP_PSE_MAX_PKT_SIZE, NULL);
 
-#define PBAP_CLASS_OF_DEVICE (0x10020CU)/* Object Transfer, Phone, Smartphone */
+#define PBAP_CLASS_OF_DEVICE (0x10020CU) /* Object Transfer, Phone, Smartphone */
 
 static uint8_t sample_primay_folder_version[16] =
        {
@@ -1280,8 +1278,8 @@ static struct bt_sdp_attribute pbap_pse_attrs[] = {
     BT_SDP_LIST(
         BT_SDP_ATTR_SVCLASS_ID_LIST,
         BT_SDP_TYPE_SIZE_VAR(BT_SDP_SEQ8, 3), //35 03
-        BT_SDP_DATA_ELEM_LIST(
-        {
+                BT_SDP_DATA_ELEM_LIST(
+                    {
             BT_SDP_TYPE_SIZE(BT_SDP_UUID16), //19
             BT_SDP_ARRAY_16(BT_SDP_PBAP_PSE_SVCLASS) //11 2F
         },
@@ -1291,11 +1289,11 @@ static struct bt_sdp_attribute pbap_pse_attrs[] = {
     BT_SDP_LIST(
         BT_SDP_ATTR_PROTO_DESC_LIST,
         BT_SDP_TYPE_SIZE_VAR(BT_SDP_SEQ8, 17), //35, 11
-        BT_SDP_DATA_ELEM_LIST(
-        {
+                                       BT_SDP_DATA_ELEM_LIST(
+                                           {
             BT_SDP_TYPE_SIZE_VAR(BT_SDP_SEQ8, 3), // 35 , 3
-            BT_SDP_DATA_ELEM_LIST(
-            {
+                                       BT_SDP_DATA_ELEM_LIST(
+                                           {
                 BT_SDP_TYPE_SIZE(BT_SDP_UUID16), //19
                 BT_SDP_ARRAY_16(BT_SDP_PROTO_L2CAP) //01 00
             },
@@ -1306,9 +1304,9 @@ static struct bt_sdp_attribute pbap_pse_attrs[] = {
             BT_SDP_DATA_ELEM_LIST(
             {
                 BT_SDP_TYPE_SIZE(BT_SDP_UUID16), //19
-                BT_SDP_ARRAY_16(BT_SDP_PROTO_RFCOMM), // 00 03
-            },
-            {
+                                               BT_SDP_ARRAY_16(BT_SDP_PROTO_RFCOMM), // 00 03
+                                           },
+                                           {
                 BT_SDP_TYPE_SIZE(BT_SDP_UINT8), //08
                 BT_SDP_ARRAY_8(BT_RFCOMM_CHAN_PBAP_PSE) //RFCOMM CHANNEL
             },
@@ -1316,10 +1314,10 @@ static struct bt_sdp_attribute pbap_pse_attrs[] = {
         },
         {
             BT_SDP_TYPE_SIZE_VAR(BT_SDP_SEQ8, 3),// 35 03
-            BT_SDP_DATA_ELEM_LIST(
-            {
+                                       BT_SDP_DATA_ELEM_LIST(
+                                           {
                 BT_SDP_TYPE_SIZE(BT_SDP_UUID16), //19
-                BT_SDP_ARRAY_16(BT_SDP_PROTP_OBEX) // 00 08
+                                               BT_SDP_ARRAY_16(BT_SDP_PROTP_OBEX) // 00 08
             },
             )
         },
@@ -1329,15 +1327,15 @@ static struct bt_sdp_attribute pbap_pse_attrs[] = {
     BT_SDP_LIST(
         BT_SDP_ATTR_PROFILE_DESC_LIST,
         BT_SDP_TYPE_SIZE_VAR(BT_SDP_SEQ8, 8), //35 08
-        BT_SDP_DATA_ELEM_LIST(
-        {
+                                       BT_SDP_DATA_ELEM_LIST(
+                                           {
             BT_SDP_TYPE_SIZE_VAR(BT_SDP_SEQ8, 6), //35 06
             BT_SDP_DATA_ELEM_LIST(
             {
                 BT_SDP_TYPE_SIZE(BT_SDP_UUID16), //19
                 BT_SDP_ARRAY_16(BT_SDP_PBAP_SVCLASS) //11 30
-            },
-            {
+                                           },
+                                           {
                 BT_SDP_TYPE_SIZE(BT_SDP_UINT16), //09
                 BT_SDP_ARRAY_16(0x0102U) //01 02
             },
@@ -1346,8 +1344,8 @@ static struct bt_sdp_attribute pbap_pse_attrs[] = {
         )
     ),
     BT_SDP_SERVICE_NAME("Phonebook Access PSE"),
-     /* GoepL2CapPsm */
-   BT_SDP_ATTR_GOEP_L2CAP_PSM,
+    /* GoepL2CapPsm */
+    BT_SDP_ATTR_GOEP_L2CAP_PSM,
    {
        BT_SDP_TYPE_SIZE(BT_SDP_UINT16), 
        BT_SDP_ARRAY_16(BT_BR_PSM_PBAP_PSE)
@@ -1571,7 +1569,7 @@ static bool app_app_pse_param_cb(struct bt_data *data, void *user_data)
 
 static void app_pse_connected(struct bt_pbap_pse *pbap_pse)
 {
-    shell_print(ctx_shell, "PABP connect successfully");
+    shell_print(ctx_shell, "PBAP connect successfully");
     memcpy(g_PbapPse.currentpath, "root", 4);
     g_PbapPse.pbap_pseHandle         = pbap_pse;
     g_PbapPse.lcl_supported_features = CONFIG_BT_PBAP_PSE_SUPPORTED_FEATURES;
@@ -1580,14 +1578,19 @@ static void app_pse_connected(struct bt_pbap_pse *pbap_pse)
     g_PbapPse.remaining_rsp = 0;
 }
 
-static void app_pse_get_auth_info_cb(struct bt_pbap_pse *pbap_pse, struct bt_pbap_auth *pbap_atuh_info, bool *active_auth)
+static void app_pse_get_auth_info_cb(struct bt_pbap_pse *pbap_pse, struct bt_pbap_auth *pbap_auth_info, bool *active_auth)
 {
-    return;
+    strcpy(userid, "PBAP");
+    pbap_auth_info->user_id = userid;
+    strcpy(password, "0000");
+    pbap_auth_info->pin_code = password;
+    *active_auth             = 0;
+    shell_print(ctx_shell, "%s", pbap_auth_info->pin_code);
 }
 
 static void app_pse_disconnected(struct bt_pbap_pse *pbap_pse, uint8_t result)
 {
-    shell_print(ctx_shell, "PABP disconnect successfully : %x", result);
+    shell_print(ctx_shell, "PBAP disconnect successfully : %x", result);
     if (result == BT_PBAP_FORBIDDEN_RSP)
     {
         shell_print(ctx_shell, "Possible reasons is Authentication failure");
@@ -1643,9 +1646,9 @@ static int app_check_pull_phonebook_path(char *name)
 }
 
 static void app_pse_pull_phonebook_cb(struct bt_pbap_pse *pbap_pse,
-                                  struct net_buf *buf,
-                                  char *name,
-                                  enum bt_obex_req_flags flag)
+                                      struct net_buf *buf,
+                                      char *name,
+                                      enum bt_obex_req_flags flag)
 {
     struct pbap_hdr body;
     int revert           = 0;
@@ -1691,7 +1694,7 @@ static void app_pse_pull_phonebook_cb(struct bt_pbap_pse *pbap_pse,
                     return;
                 }
                 net_buf_reserve(buf, BT_PBAP_PSE_RSV_LEN_SEND_RESPONSE(pbap_pse));
-                result = BT_PBAP_NOT_FOUND_RSP;
+                result                  = BT_PBAP_NOT_FOUND_RSP;
                 g_PbapPse.remaining_rsp = 0;
             }
         }
@@ -1888,9 +1891,9 @@ static int app_check_pull_vcard_listing_path(char *name)
 }
 
 static void app_pse_pull_vcard_listing_cb(struct bt_pbap_pse *pbap_pse,
-                                      struct net_buf *buf,
-                                      char *name,
-                                      enum bt_obex_req_flags flag)
+                                          struct net_buf *buf,
+                                          char *name,
+                                          enum bt_obex_req_flags flag)
 {
     struct pbap_hdr body;
     int revert           = 0;
@@ -2019,9 +2022,9 @@ static int app_check_pull_vcard_entry_path(char *name)
 }
 
 static void app_pse_pull_vcard_entry_cb(struct bt_pbap_pse *pbap_pse,
-                                    struct net_buf *buf,
-                                    char *name,
-                                    enum bt_obex_req_flags flag)
+                                        struct net_buf *buf,
+                                        char *name,
+                                        enum bt_obex_req_flags flag)
 {
     struct pbap_hdr body;
     int revert           = 0;
@@ -2131,7 +2134,7 @@ static shell_status_t shell_pbap_pse_init()
     int err;
     bt_sdp_register_service(&pbap_pse_rec);
     err = bt_pbap_pse_register(&pse_cb);
-    if(err != 0)
+    if (err != 0)
     {
         shell_error(ctx_shell, "PBAP register failed");
         return kStatus_SHELL_Error;
@@ -2156,7 +2159,7 @@ static shell_status_t cmd_pse_register(shell_handle_t shell, int32_t argc, char 
         err = -ENOBUFS;
         shell_error(shell, "write class of device failed, Reason : %d", err);
     }
-    if(err < 0)
+    if (err < 0)
     {
         return kStatus_SHELL_Error;
     }
@@ -2177,23 +2180,21 @@ static shell_status_t cmd_pse_disconnect(shell_handle_t shell, int32_t argc, cha
 }
 
 SHELL_STATIC_SUBCMD_SET_CREATE(pse_cmds,
-                SHELL_CMD_ARG(register, NULL, HELP_NONE, cmd_pse_register, 1, 0),
-                SHELL_CMD_ARG(disconnect, NULL, HELP_NONE, cmd_pse_disconnect, 1, 0),
-                SHELL_SUBCMD_SET_END);
+                               SHELL_CMD_ARG(register, NULL, HELP_NONE, cmd_pse_register, 1, 0),
+                               SHELL_CMD_ARG(disconnect, NULL, HELP_NONE, cmd_pse_disconnect, 1, 0),
+                               SHELL_SUBCMD_SET_END);
 #endif /*CONFIG_BT_PBAP_PSE */
-
 
 #if ((defined(CONFIG_BT_PBAP_PCE) && ((CONFIG_BT_PBAP_PCE) > 0U)) || \
      (defined(CONFIG_BT_PBAP_PSE) && ((CONFIG_BT_PBAP_PSE) > 0U)))
 SHELL_STATIC_SUBCMD_SET_CREATE(pbap_cmds,
 #if (defined(CONFIG_BT_PBAP_PCE) && ((CONFIG_BT_PBAP_PCE) > 0U))
-    SHELL_CMD_ARG(pce, pce_cmds, HELP_NONE, NULL, 1, 0),
+                               SHELL_CMD_ARG(pce, pce_cmds, HELP_NONE, NULL, 1, 0),
 #endif
 #if (defined(CONFIG_BT_PBAP_PSE) && ((CONFIG_BT_PBAP_PSE) > 0U))
-    SHELL_CMD_ARG(pse, pse_cmds, HELP_NONE, NULL, 1, 0),
+                               SHELL_CMD_ARG(pse, pse_cmds, HELP_NONE, NULL, 1, 0),
 #endif
-	SHELL_SUBCMD_SET_END
-);
+                               SHELL_SUBCMD_SET_END);
 #endif
 
 static shell_status_t cmd_pbap(shell_handle_t shell, int32_t argc, char **argv)

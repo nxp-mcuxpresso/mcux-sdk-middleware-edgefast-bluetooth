@@ -161,7 +161,7 @@ static struct bt_sdp_attribute avrcp_tg_attrs[] = {
                 )
             },
             {
-                BT_SDP_TYPE_SIZE_VAR(BT_SDP_SEQ8, 6), //35 03
+                BT_SDP_TYPE_SIZE_VAR(BT_SDP_SEQ8, 3), //35 03
                 BT_SDP_DATA_ELEM_LIST(
                 {
                     BT_SDP_TYPE_SIZE(BT_SDP_UUID16), //19

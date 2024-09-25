@@ -573,7 +573,7 @@ static void hci_num_completed_packets(struct net_buf *buf)
 			if (conn->pending_no_cb) {
 				conn->pending_no_cb--;
 				EnableGlobalIRQ(key);
-				OSA_SemaphorePost(bt_conn_get_pkts(conn));
+				bt_conn_give_pkts(conn);
 				continue;
 			}
 
@@ -594,7 +594,7 @@ static void hci_num_completed_packets(struct net_buf *buf)
 			EnableGlobalIRQ(key);
 
 			k_work_submit(&conn->tx_complete_work);
-			OSA_SemaphorePost(bt_conn_get_pkts(conn));
+			bt_conn_give_pkts(conn);
 		}
 
 		bt_conn_unref(conn);
@@ -1984,7 +1984,7 @@ static int set_flow_control(void)
 }
 #endif /* CONFIG_BT_HCI_ACL_FLOW_CONTROL */
 
-void bt_conn_unpair(uint8_t id, const bt_addr_le_t *addr)
+void bt_conn_unpair(uint8_t id, const bt_addr_le_t *addr, const bt_addr_le_t *rpa)
 {
 	struct bt_keys *keys = NULL;
 	struct bt_conn *conn = bt_conn_lookup_addr_le(id, addr);
@@ -2020,32 +2020,46 @@ void bt_conn_unpair(uint8_t id, const bt_addr_le_t *addr)
 			keys = bt_keys_find_addr(id, addr);
 		}
 
-		bd_addr.type = addr->type;
-		memcpy(bd_addr.addr, addr->a.val, sizeof(bd_addr.addr));
-        if (NULL == conn)
-        {
-            retval = BT_smp_get_bd_handle(&bd_addr, &handle);
-            if (API_SUCCESS == retval)
-            {
-                retval = BT_smp_mark_device_untrusted_pl(&handle);
-                if (API_SUCCESS == retval)
-                {
-                }
-            }
-        }
-        else
-        {
-            retval = BT_smp_mark_device_untrusted_pl(&conn->deviceId);
-            if (API_SUCCESS == retval)
-            {
-            }
-        }
+		if (NULL == conn)
+		{
+			bd_addr.type = addr->type;
+			memcpy(bd_addr.addr, addr->a.val, sizeof(bd_addr.addr));
+			retval = BT_smp_get_bd_handle(&bd_addr, &handle);
+			if (API_SUCCESS == retval)
+			{
+				retval = BT_smp_mark_device_untrusted_pl(&handle);
+				if (API_SUCCESS == retval)
+				{
+				}
+			}
+
+			if (rpa != NULL)
+			{
+				bd_addr.type = rpa->type;
+				memcpy(bd_addr.addr, rpa->a.val, sizeof(bd_addr.addr));
+				retval = BT_smp_get_bd_handle(&bd_addr, &handle);
+				if (API_SUCCESS == retval)
+				{
+					retval = BT_smp_mark_device_untrusted_pl(&handle);
+					if (API_SUCCESS == retval)
+					{
+					}
+				}
+			}
+		}
+		else
+		{
+			retval = BT_smp_mark_device_untrusted_pl(&conn->deviceId);
+			if (API_SUCCESS == retval)
+			{
+			}
+		}
 		(void)retval;
 
-        if (keys) {
-            bt_keys_clear(keys);
-        }
-        LOG_DBG("untrust device err %d", retval);
+		if (keys) {
+			bt_keys_clear(keys);
+		}
+		LOG_DBG("untrust device err %d", retval);
 	}
 
 #if !(defined (CONFIG_BT_BLE_DISABLE) && (CONFIG_BT_BLE_DISABLE > 0U))
@@ -2098,7 +2112,7 @@ static void unpair(uint8_t id, const bt_addr_le_t *addr)
         return;
     }
 #endif
-    bt_conn_unpair(id, &id_addr);
+    bt_conn_unpair(id, &id_addr, addr);
 }
 #if 0
 static void unpair_remote(const struct bt_bond_info *info, void *data)
@@ -3161,6 +3175,31 @@ int hci_cmd_le_encrypt_rp_cb_unregister(struct bt_hci_cmd_le_encrypt_rp_cb *cb)
 	return 0;
 }
 
+void bt_conn_give_pkts(struct bt_conn *conn)
+{
+	osa_status_t ret;
+
+	if (KOSA_StatusSuccess != OSA_SemaphorePost(bt_conn_get_pkts(conn)))
+	{
+		return;
+	}
+
+#if (defined(CONFIG_BT_ISO) && (CONFIG_BT_ISO > 0))
+	if (conn->type != BT_CONN_TYPE_ISO)
+	{
+		return;
+	}
+
+	if (atomic_test_and_clear_bit(conn->flags, BT_CONN_WAIT_PKTS))
+	{
+		ret = OSA_MsgQPut(bt_dev.iso_conn, &conn);
+		assert(KOSA_StatusSuccess == ret);
+		bt_set_send_iso_new();
+	}
+#endif /* CONFIG_BT_ISO */
+	(void)ret;
+}
+
 static void hci_tx_thread(void *param)
 {
     osa_status_t ret;
@@ -3190,8 +3229,7 @@ static void hci_tx_thread(void *param)
 				int err = bt_conn_process_tx(conn);
 				if(err == -ENOMEM)
 				{
-						ret = OSA_MsgQPut(bt_dev.iso_conn, &conn);
-						assert(KOSA_StatusSuccess == ret);
+					atomic_set_bit(conn->flags, BT_CONN_WAIT_PKTS);
 				}
 				bt_set_send_iso_new();
 			}

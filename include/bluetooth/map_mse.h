@@ -563,7 +563,7 @@ int bt_map_mse_mns_unregister(void);
 
 /** @brief Create MSE MNS connection based on L2CAP
  *
- *  This function is to be called after after MCE sets SetNotificationRegistration to ON.
+ *  This function is to be called after MCE sets SetNotificationRegistration to ON.
  *  The API is to be used to establish MNS OBEX connection between devices.
  *  This function establishes L2CAP connection.
  *  This function can be called once as there is only one MNS connection for all MAS Instances.
@@ -581,7 +581,7 @@ int bt_map_mse_mns_psm_connect(struct bt_conn *conn, uint16_t psm, uint32_t supp
 
 /** @brief Create MSE MNS connection based on RFCOM
  *
- *  This function is to be called after after MCE sets SetNotificationRegistration to ON.
+ *  This function is to be called after MCE sets SetNotificationRegistration to ON.
  *  The API is to be used to establish MNS OBEX connection between devices.
  *  This function establishes RFCOM connection.
  *  This function can be called once as there is only one MNS connection for all MAS Instances.

@@ -508,7 +508,7 @@ int bt_recv(struct net_buf *buf);
 uint16_t ethermind_hci_event_callback(uint8_t event_type,
                         uint8_t *event_data, uint8_t  event_datalen);
 
-void bt_conn_unpair(uint8_t id, const bt_addr_le_t *addr);
+void bt_conn_unpair(uint8_t id, const bt_addr_le_t *addr, const bt_addr_le_t *rpa);
 
 /* Don't require everyone to include bt_pal_keys.h */
 struct bt_keys;
@@ -607,5 +607,7 @@ struct bt_hci_acl_hdr_simulation
 };
 
 bool update_sec_level(struct bt_conn *conn);
+
+void bt_conn_give_pkts(struct bt_conn *conn);
 
 #endif /* __HCI_CORE_H__ */

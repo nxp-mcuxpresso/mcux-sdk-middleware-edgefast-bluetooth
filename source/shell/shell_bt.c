@@ -4575,12 +4575,14 @@ void bt_CommandInit(shell_handle_t shell)
 #if (defined(CONFIG_BT_HFP_HF) && (CONFIG_BT_HFP_HF > 0))
     bt_ShellHfpInit(shell);
 #endif /* CONFIG_BT_HFP */
-#if (defined(CONFIG_BT_PBAP_PCE) && (CONFIG_BT_PBAP_PCE > 0))
+#if ((defined(CONFIG_BT_PBAP_PCE) && (CONFIG_BT_PBAP_PCE > 0)) || \
+     (defined(CONFIG_BT_PBAP_PSE) && (CONFIG_BT_PBAP_PSE > 0)))
     bt_ShellPbapInit(shell);
-#endif /* CONGIF_BT_PBAP */
-#if (defined(CONFIG_BT_MAP_MCE) && (CONFIG_BT_MAP_MCE > 0))
+#endif /* CONFIG_BT_PBAP_PCE || CONFIG_BT_PBAP_PSE */
+#if ((defined(CONFIG_BT_MAP_MCE) && (CONFIG_BT_MAP_MCE > 0)) || \
+     (defined(CONFIG_BT_MAP_MSE) && (CONFIG_BT_MAP_MSE > 0)))
     bt_ShellMapInit(shell);
-#endif /* CONFIG_BT_MAP_MCE */
+#endif /* CONFIG_BT_MAP_MCE || CONFIG_BT_MAP_MSE */
 #endif /* CONFIG_BT_BREDR */
 #if (defined(CONFIG_BT_RF_TEST_MODE) && (CONFIG_BT_RF_TEST_MODE > 0))
     bt_ShellTestModeInit(shell);
