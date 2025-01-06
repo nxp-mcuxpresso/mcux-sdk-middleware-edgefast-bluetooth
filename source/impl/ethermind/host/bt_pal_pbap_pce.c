@@ -466,6 +466,9 @@ static void bt_pbap_add_pbap_hdr(struct bt_pbap_pce *pbap_pce,
     struct bt_obex_hdr_u8 bt_srm;
     struct bt_obex_hdr_u8 bt_srmp;
     struct bt_obex_hdr_u32 bt_conn_id;
+    memset(&bt_srm, 0, sizeof(bt_srm));
+    memset(&bt_srm, 0, sizeof(bt_srmp));
+    memset(&bt_srm, 0, sizeof(bt_conn_id));
 
     if (NULL == name)
     {
@@ -709,6 +712,7 @@ static void bt_pbap_add_pbap_setPhonebookPath_hdr(struct net_buf *buf, char *nam
     uint16_t length;
     uint16_t packet_len;
     length = (uint16_t)strlen(name);
+    memset(&bt_set_path_hdr, 0, sizeof(bt_set_path_hdr));
     bt_set_path_hdr.opcode = OBEX_SETPATH_OP;
     bt_set_path_hdr.packet_length = 3;
     /*FLAG*/
