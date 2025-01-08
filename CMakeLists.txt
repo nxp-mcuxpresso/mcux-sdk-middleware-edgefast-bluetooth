@@ -9,14 +9,11 @@ endif()
 
 if (CONFIG_MCUX_COMPONENT_middleware.edgefast_bluetooth.pal)
     mcux_add_source(
-        SOURCES boards/template/dummy.txt
+        SOURCES  readme.txt
     )
 endif ()
 
-if (CONFIG_MCUX_COMPONENT_middleware.edgefast_bluetooth.common.ethermind.hci)
-    mcux_add_source(
-        SOURCES boards/template/dummy.txt
-    )
+if (CONFIG_MCUX_PRJSEG_middleware.edgefast_bluetooth.common.ethermind.hci)
 endif ()
 
 if (CONFIG_MCUX_COMPONENT_middleware.edgefast_bluetooth.common.ethermind.hci_uart)
@@ -500,9 +497,6 @@ if (CONFIG_MCUX_COMPONENT_middleware.edgefast_bluetooth.config.ethermind)
     )
     mcux_add_source(
         SOURCES ../wireless/ethermind/bluetooth/private/lib/mcux/default/config/db_gen.h
-    )
-    mcux_add_source(
-        SOURCES boards/template/dummy.txt
     )
 endif ()
 
@@ -2284,9 +2278,6 @@ if (CONFIG_MCUX_COMPONENT_middleware.edgefast_bluetooth.porting.toolchain)
     )
     mcux_add_source(
         SOURCES include/toolchain.h
-    )
-    mcux_add_source(
-        SOURCES boards/template/dummy.txt
     )
     mcux_add_configuration(
         CC "-DCONFIG_ARM=1"

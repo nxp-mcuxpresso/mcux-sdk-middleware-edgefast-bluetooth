@@ -27,7 +27,7 @@ config MCUX_COMPONENT_middleware.edgefast_bluetooth.common.ethermind
     bool
     select MCUX_COMPONENT_middleware.edgefast_bluetooth.extension.common.ethermind
     select MCUX_COMPONENT_middleware.edgefast_bluetooth.config.ethermind
-    select MCUX_COMPONENT_middleware.edgefast_bluetooth.common.ethermind.hci
+    select MCUX_PRJSEG_middleware.edgefast_bluetooth.common.ethermind.hci
     imply MCUX_COMPONENT_middleware.littlefs
     imply MCUX_COMPONENT_middleware.fatfs
     imply MCUX_COMPONENT_component.osa_free_rtos
@@ -157,10 +157,10 @@ config MCUX_COMPONENT_middleware.edgefast_bluetooth.porting.atomic
     bool
 
 # Physical interface of HCI. Currently supports UART and RPMSG.
-config MCUX_COMPONENT_middleware.edgefast_bluetooth.common.ethermind.hci
+config MCUX_PRJSEG_middleware.edgefast_bluetooth.common.ethermind.hci
     bool
 
-if MCUX_COMPONENT_middleware.edgefast_bluetooth.common.ethermind.hci
+if MCUX_PRJSEG_middleware.edgefast_bluetooth.common.ethermind.hci
 
 choice MCUX_COMPONENT_middleware.edgefast_bluetooth.common.ethermind.hci_interface_selection
     prompt "Bluetooth HCI interface Selection"
@@ -190,7 +190,7 @@ config MCUX_COMPONENT_middleware.edgefast_bluetooth.common.ethermind.hci_platfor
 
 endchoice
 
-endif # MCUX_COMPONENT_middleware.edgefast_bluetooth.common.ethermind.hci
+endif # MCUX_PRJSEG_middleware.edgefast_bluetooth.common.ethermind.hci
 
 # For UART HCI, bluetooth controller type need to be confirmed.
 if MCUX_COMPONENT_middleware.edgefast_bluetooth.common.ethermind.hci_uart
