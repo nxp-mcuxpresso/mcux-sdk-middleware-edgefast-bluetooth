@@ -2121,32 +2121,38 @@ static void unpair(uint8_t id, const bt_addr_le_t *addr)
 			bt_lookup_id_addr(id, addr));
 	}
 
+	/* There may be two connections (one br and one ble) that use the same public address,
+	 * disconnect all of them, and delete all the keys of br and ble.
+	 */
 	conn = bt_conn_lookup_addr_le(id, &id_addr);
 	if (NULL != conn) {
-		atomic_set_bit(conn->flags, BT_CONN_UNPAIRING);
-		bt_conn_disconnect(conn, BT_HCI_ERR_REMOTE_USER_TERM_CONN);
+		atomic_set_bit(conn->flags, BT_CONN_UNPAIRING); /* make sure the key is cleared after disconnected */
+		if (conn->state == BT_CONN_CONNECTED) {
+			bt_conn_disconnect(conn, BT_HCI_ERR_REMOTE_USER_TERM_CONN);
+		}
 		bt_conn_unref(conn);
-		return;
 	}
 #if (defined(CONFIG_BT_CLASSIC) && ((CONFIG_BT_CLASSIC) > 0U))
 	conn = bt_conn_lookup_addr_br(&id_addr.a);
 	if (NULL != conn) {
-		atomic_set_bit(conn->flags, BT_CONN_UNPAIRING);
-		bt_conn_disconnect(conn, BT_HCI_ERR_REMOTE_USER_TERM_CONN);
+		atomic_set_bit(conn->flags, BT_CONN_UNPAIRING); /* make sure the key is cleared after disconnected */
+		if (conn->state == BT_CONN_CONNECTED) {
+			bt_conn_disconnect(conn, BT_HCI_ERR_REMOTE_USER_TERM_CONN);
+		}
 		bt_conn_unref(conn);
-		return;
 	}
 #endif
+	/* clear the keys that can be cleared, others (in Ethermind) will be cleared after disconnected */
 	bt_conn_unpair(id, &id_addr, addr);
 }
-#if 0
+
 static void unpair_remote(const struct bt_bond_info *info, void *data)
 {
 	uint8_t *id = (uint8_t *) data;
 
 	unpair(*id, &info->addr);
 }
-#endif
+
 int bt_unpair(uint8_t id, const bt_addr_le_t *addr)
 {
 #if (defined(CONFIG_BT_CLASSIC) && (CONFIG_BT_CLASSIC > 0))
@@ -2157,7 +2163,7 @@ int bt_unpair(uint8_t id, const bt_addr_le_t *addr)
 	API_RESULT retval;
 	DEVICE_LINK_TYPE    link_type;
 #if (defined(CONFIG_BT_CLASSIC) && (CONFIG_BT_CLASSIC > 0))
-	uint8_t count;
+	uint8_t count = SM_MAX_DEVICES; /* max count */
 #endif
 
 	if (id >= CONFIG_BT_ID_MAX) {
@@ -2201,10 +2207,10 @@ int bt_unpair(uint8_t id, const bt_addr_le_t *addr)
 			bt_addr_le_copy(&peer_addr, BT_ADDR_LE_ANY);
 			if (API_SUCCESS == retval)
 			{
-              			memcpy(peer_addr.a.val, bdaddr.addr, sizeof(peer_addr.a.val));
+				memcpy(peer_addr.a.val, bdaddr.addr, sizeof(peer_addr.a.val));
 				if (!bt_addr_le_cmp(&peer_addr, BT_ADDR_LE_ANY))
 				{
-                    			continue;
+					continue;
 				}
 
 				retval = device_queue_get_link_type
@@ -2214,12 +2220,16 @@ int bt_unpair(uint8_t id, const bt_addr_le_t *addr)
 				);
 				if ((API_SUCCESS == retval) && (DQ_LE_LINK == link_type))
 				{
-				peer_addr.type = bdaddr.type;
-				memcpy(peer_addr.a.val, bdaddr.addr, sizeof(peer_addr.a.val));
-				unpair(id, &peer_addr);
+					peer_addr.type = bdaddr.type;
+					memcpy(peer_addr.a.val, bdaddr.addr, sizeof(peer_addr.a.val));
+					unpair(id, &peer_addr);
 				}
 			}
 		}
+
+#if (defined(CONFIG_BT_MAX_PAIRED) && (CONFIG_BT_MAX_PAIRED > 0))
+		bt_foreach_bond(id, unpair_remote, &id);
+#endif
 
 		return 0;
 	}
