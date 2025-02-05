@@ -334,7 +334,7 @@ static void bt_pbap_get_appl_param_hdr_value(struct bt_obex_tag_bytes *tag, PBAP
     return ;
 }
 
-static uint16_t bt_pbap_form_stack_param(struct net_buf *buf, PBAP_APPL_PARAMS *app_par)
+static int bt_pbap_form_stack_param(struct net_buf *buf, PBAP_APPL_PARAMS *app_par)
 {
     (void)memset(app_par, 0, sizeof(PBAP_APPL_PARAMS));
 

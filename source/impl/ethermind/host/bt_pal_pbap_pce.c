@@ -593,6 +593,7 @@ static int8_t bt_pal_pull_phonebook_param(char *name)
 int bt_pbap_pce_pull_phonebook(struct bt_pbap_pce *pbap_pce, struct net_buf *buf, char *name, bool wait, enum bt_obex_req_flags flag)
 {
     API_RESULT retval = 0U;
+    int appl_len = 0;
     PBAP_HEADER_STRUCT name_header;
     PBAP_APPL_PARAMS appl_params;
     PBAP_REQUEST_STRUCT req_info;
@@ -624,8 +625,8 @@ int bt_pbap_pce_pull_phonebook(struct bt_pbap_pce *pbap_pce, struct net_buf *buf
         pbap_pce->lcl_wait = wait;
     }
 
-    retval = bt_pbap_form_stack_param(buf, &appl_params);
-    if (retval < 0)
+    appl_len = bt_pbap_form_stack_param(buf, &appl_params);
+    if (appl_len < 0)
     {
         LOG_ERR("INVAILD PARAMS\r\n");
         return -EINVAL;
@@ -781,7 +782,7 @@ int bt_pbap_pce_set_phonebook_path(struct bt_pbap_pce *pbap_pce, struct net_buf 
     req_info.name = &name_header;
 
     retval = bt_pbap_pce_set_book_path_stack_param(&req_info, name);
-    if (retval != 0)
+    if (API_SUCCESS != retval)
     {
         return retval;
     }
@@ -823,6 +824,7 @@ static int8_t bt_pal_pull_vcard_listing_param(char *name)
 int bt_pbap_pce_pull_vcard_listing(struct bt_pbap_pce *pbap_pce, struct net_buf *buf, char *name, bool wait, enum bt_obex_req_flags flag)
 {
     API_RESULT retval = 0U;
+    int appl_len = 0;
     PBAP_HEADER_STRUCT name_header;
     PBAP_APPL_PARAMS appl_params;
     PBAP_REQUEST_STRUCT req_info;
@@ -855,8 +857,8 @@ int bt_pbap_pce_pull_vcard_listing(struct bt_pbap_pce *pbap_pce, struct net_buf 
         pbap_pce->lcl_wait = wait;
     }
 
-    retval = bt_pbap_form_stack_param(buf, &appl_params);
-    if (retval < 0)
+    appl_len = bt_pbap_form_stack_param(buf, &appl_params);
+    if (appl_len < 0)
     {
         LOG_ERR("INVAILD PARAMS\r\n");
         return -EINVAL;
@@ -913,6 +915,7 @@ static int8_t bt_pal_pull_vcard_entry_param(char *name)
 int bt_pbap_pce_pull_vcard_entry(struct bt_pbap_pce *pbap_pce, struct net_buf *buf, char *name, bool wait, enum bt_obex_req_flags flag)
 {
     API_RESULT retval = 0U;
+    int appl_len = 0;
     PBAP_HEADER_STRUCT name_header;
     PBAP_APPL_PARAMS appl_params;
     PBAP_REQUEST_STRUCT req_info;
@@ -942,8 +945,8 @@ int bt_pbap_pce_pull_vcard_entry(struct bt_pbap_pce *pbap_pce, struct net_buf *b
         pbap_pce->lcl_wait = wait;
     }
 
-    retval = bt_pbap_form_stack_param(buf, &appl_params);
-    if (retval < 0)
+    appl_len = bt_pbap_form_stack_param(buf, &appl_params);
+    if (appl_len < 0)
     {
         LOG_ERR("INVAILD PARAMS\r\n");
         return -EINVAL;
