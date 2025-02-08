@@ -4478,7 +4478,7 @@ uint16_t ethermind_hci_event_callback(uint8_t  event_type, uint8_t *event_data, 
 			opcode = cmdComplete->opcode;
 			if (cmd(bt_dev.sent_cmd)->opcode == opcode)
 			{
-				buf = bt_buf_get_rx(BT_BUF_EVT, K_FOREVER);
+				buf = bt_buf_get_evt(event_type, false, K_FOREVER);
 			}
 		}
 
@@ -4489,7 +4489,7 @@ uint16_t ethermind_hci_event_callback(uint8_t  event_type, uint8_t *event_data, 
 
 		if (NULL == buf)
 		{
-			buf = bt_buf_get_rx(BT_BUF_EVT, K_FOREVER);
+			buf = bt_buf_get_evt(event_type, false, K_FOREVER);
 		}
 	}
 	else
