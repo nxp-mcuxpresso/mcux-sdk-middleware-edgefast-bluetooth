@@ -35,6 +35,8 @@
 #endif
 #include "bt_crypto.h"
 #include "bt_pal_l2cap_br_interface.h"
+#include "smp_internal.h"
+#include "smp_extern.h"
 
 #if (defined(CONFIG_BT_SMP) && ((CONFIG_BT_SMP) > 0U))
 
@@ -7321,6 +7323,7 @@ void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
     struct bt_smp_br *smp;
     DEVICE_HANDLE deviceHandle;
     UCHAR peer_keys;
+    UCHAR di;
 
     LOG_DBG("\n LTK of the device is ...\n");
     LOG_DBG("\n LK of the device is ...\n");
@@ -7377,6 +7380,19 @@ void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
             peer_keys,
             &peer_key_info
         );
+
+	/* Search device index */
+	di = smp_search_device (&bd_handle, SMP_L2CAP_INVALID_SIG_ID);
+
+	/* If device not found in database */
+	if(SMP_MAX_DEVICES != di)
+	{
+		/* Lock SMP */
+		smp_lock();
+		smp_update_device_attr_pl(SMP_DEVICE_ATTR_PL_AUTHENTICATION_COMPLETE, di);
+		/* Unlock SMP */
+		smp_unlock();
+	}
 
 	bt_addr_copy(&peer_addr.a, &conn->br.dst);
 	peer_addr.type = BT_ADDR_LE_PUBLIC;
