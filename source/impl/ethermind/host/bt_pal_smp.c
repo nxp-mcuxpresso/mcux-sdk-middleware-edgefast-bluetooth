@@ -7309,6 +7309,7 @@ static void smp_auth_starting(struct bt_smp *smp)
 #ifdef SMP_LESC_CROSS_TXP_KEY_GEN
 void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
 {
+#if (defined(CONFIG_BT_CLASSIC) && ((CONFIG_BT_CLASSIC) > 0U))
     API_RESULT retval;
     SMP_BD_HANDLE bd_handle;
     SMP_AUTH_INFO auth_info;
@@ -7331,6 +7332,22 @@ void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
         return;
     }
 
+    conn = bt_conn_lookup_device_id(deviceHandle);
+    if (NULL == conn)
+    {
+        LOG_ERR("Connect is not found, invalid bd handle 0x%02X", deviceHandle);
+        return;
+    }
+
+    bt_conn_unref(conn);
+
+    smp = smp_br_chan_get(conn);
+    if (smp == NULL)
+    {
+        LOG_ERR("SMP of conn %p cannot be found", conn);
+        return;
+    }
+
     retval = BT_sm_get_device_link_key_and_type(bt_smp_bd_addr.addr, lkey, &lkey_type);
 
     if ((API_SUCCESS == retval) &&
@@ -7343,7 +7360,7 @@ void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
             (BT_IGNORE_RETURN_VALUE)BT_smp_add_device(&bt_smp_bd_addr, &bd_handle);
         }
 
-        auth_info.bonding = SMP_BONDING;
+        auth_info.bonding = atomic_test_bit(smp->flags, SMP_FLAG_BOND) ? SMP_BONDING : SMP_BONDING_NONE;
         auth_info.pair_mode = SMP_LESC_MODE;
         auth_info.security = (HCI_LINK_KEY_AUTHENTICATED_P_256 == lkey_type)?
             SMP_SEC_LEVEL_2: SMP_SEC_LEVEL_1;
@@ -7360,23 +7377,6 @@ void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
             peer_keys,
             &peer_key_info
         );
-
-	conn = bt_conn_lookup_device_id(deviceHandle);
-	if (NULL == conn)
-	{
-		LOG_ERR("Connect is not found, invalid bd handle 0x%02X", deviceHandle);
-		return;
-	}
-
-	bt_conn_unref(conn);
-
-#if (defined(CONFIG_BT_CLASSIC) && ((CONFIG_BT_CLASSIC) > 0U))
-        smp = smp_br_chan_get(conn);
-        if (smp == NULL)
-        {
-            LOG_ERR("SMP of conn %p cannot be found", conn);
-            return;
-        }
 
 	bt_addr_copy(&peer_addr.a, &conn->br.dst);
 	peer_addr.type = BT_ADDR_LE_PUBLIC;
@@ -7397,8 +7397,8 @@ void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
 
 	k_work_cancel_delayable(&smp->auth_timeout);
 	smp_br_auth_complete(smp);
-#endif
     }
+#endif
 }
 void appl_smp_lesc_xtxp_lk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
 {
@@ -7617,7 +7617,23 @@ static void hci_acl_smp_br_handler(struct net_buf *buf)
 
                             if (API_SUCCESS != retval)
                             {
-								smp->status = (uint8_t)(hdr->pdu.status & 0xFF);
+                                smp->status = (uint8_t)(hdr->pdu.status & 0xFF);
+
+                                /* From the spec, Only CT2 bit is valid in BR smp AuthReq field.
+                                 * If Secure Connections pairing has been initiated over BR/EDR, the following fields of
+                                 * the SM Pairing Request PDU are reserved for future use:
+                                 *  - the IO Capability field,
+                                 *  - the OOB data flag field, and
+                                 *  - all bits in the Auth Req field except the CT2 bit.
+                                 * So the Bonding_Flags of AuthReq is not used in the in cross transport key derivation case,
+                                 * so use BR's SMP_FLAG_BOND flag to determind whether saving LE keys here.
+                                 */
+                                if (!atomic_test_bit(conn->flags, BT_CONN_BR_NOBOND)) {
+                                    atomic_set_bit(smp->flags, SMP_FLAG_BOND);
+                                } else {
+                                    atomic_clear_bit(smp->flags, SMP_FLAG_BOND);
+                                }
+
                                 (BT_IGNORE_RETURN_VALUE)BT_smp_get_ltk_from_lk_pl
                                 (
                                     link_key,
