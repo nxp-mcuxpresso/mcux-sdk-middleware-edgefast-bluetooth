@@ -69,7 +69,11 @@ static int accept_conn(const bt_addr_t *bdaddr)
 
 	cp = net_buf_add(buf, sizeof(*cp));
 	bt_addr_copy(&cp->bdaddr, bdaddr);
+#if defined(CONFIG_BT_CENTRAL_ONLY) && (CONFIG_BT_CENTRAL_ONLY > 0U)
+	cp->role = BT_HCI_ROLE_CENTRAL;
+#else
 	cp->role = BT_HCI_ROLE_PERIPHERAL;
+#endif /* CONFIG_BT_CENTRAL_ONLY */
 
 	err = bt_hci_cmd_send_sync(BT_HCI_OP_ACCEPT_CONN_REQ, buf, NULL);
 	if (err) {

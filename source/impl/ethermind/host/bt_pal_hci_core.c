@@ -3386,8 +3386,13 @@ static int common_init(void)
 	}
 #endif
 
+#if (defined(CONFIG_BT_CENTRAL_ONLY) && (CONFIG_BT_CENTRAL_ONLY > 0U))
+	/* Set default link policy to support sniff mode */
+	BT_hci_write_default_link_policy_settings(0x04);
+#else
 	/* Set default link policy to support role switch and sniff mode */
 	BT_hci_write_default_link_policy_settings(0x05);
+#endif /* CONFIG_BT_CENTRAL_ONLY */
 
 	/* Read Local Supported Features */
 	err = bt_hci_cmd_send_sync(BT_HCI_OP_READ_LOCAL_FEATURES, NULL, &rsp);

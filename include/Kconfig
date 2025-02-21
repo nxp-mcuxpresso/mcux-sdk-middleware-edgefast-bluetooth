@@ -1751,6 +1751,13 @@ config BT_BLE_DISABLE
 
 if BT_CLASSIC
 
+config BT_CENTRAL_ONLY
+    bool "BT_CENTRAL_ONLY"
+    default n
+    help
+      Disable role switch the link policy when the feature is enabled.
+      This symbol is a config macro.
+
 config BT_MAX_SCO_CONN
     int "BT_MAX_SCO_CONN"
     default 1
@@ -1797,12 +1804,12 @@ config BT_HFP_HF_ECNR
     bool "EC and/or NR function for HFP HF [EXPERIMENTAL]"
     help
       This option enables EC and/or NR function for HFP HF
-      
+
 config BT_HFP_HF_3WAY_CALL
     bool "Three-way calling for HFP HF [EXPERIMENTAL]"
     help
       This option enables Three-way calling for HFP HF
-      
+
 config BT_HFP_HF_CLI
     bool "CLI presentation capability for HFP HF [EXPERIMENTAL]"
     default y
@@ -1814,12 +1821,12 @@ config BT_HFP_HF_VOLUME
     default y
     help
       This option enables Remote audio volume control for HFP HF
-      
+
 config BT_HFP_HF_VOICE_RECG
     bool "Voice recognition activation for HFP HF [EXPERIMENTAL]"
     help
       This option enables Voice recognition activation for HFP HF
-      
+
 config BT_HFP_HF_ECS
     bool "Enhanced Call Status for HFP HF [EXPERIMENTAL]"
     default y if BT_HFP_HF_3WAY_CALL
@@ -1831,7 +1838,7 @@ config BT_HFP_HF_ECC
     default y if BT_HFP_HF_3WAY_CALL
     help
       This option enables Enhanced Call Control for HFP HF
-      
+
 config BT_HFP_HF_CODEC_NEG
     bool "Codec Negotiation for HFP HF [EXPERIMENTAL]"
     default y
@@ -1864,12 +1871,12 @@ config BT_HFP_AG_3WAY_CALL
     default y
     help
       This option enables Three-way calling for HFP AG
-      
+
 config BT_HFP_AG_ECNR
     bool "EC and/or NR function for HFP AG [EXPERIMENTAL]"
     help
       This option enables EC and/or NR function for HFP AG
-      
+
 config BT_HFP_AG_VOICE_RECG
     bool "Voice recognition activation for HFP AG [EXPERIMENTAL]"
     help
@@ -1884,13 +1891,13 @@ config BT_HFP_AG_VOICE_TAG
     bool "Ability to Attach no. to voice tag for HFP AG [EXPERIMENTAL]"
     help
       This option enables Attach no. to voice tag for HFP AG
-      
+
 config BT_HFP_AG_REJECT_CALL
     bool "Ability to reject a call for HFP AG [EXPERIMENTAL]"
     default y
     help
       This option enables ability to reject a call for HFP AG
-      
+
 config BT_HFP_AG_ECS
     bool "Enhanced call status for HFP AG [EXPERIMENTAL]"
     default y if BT_HFP_AG_3WAY_CALL
@@ -1902,7 +1909,7 @@ config BT_HFP_AG_ECC
     default y if BT_HFP_AG_3WAY_CALL
     help
       This option enables Enhanced call control for HFP AG
-    
+
 config BT_HFP_AG_EXT_ERR
     bool "Extended Error Result Codes for HFP AG [EXPERIMENTAL]"
     help
