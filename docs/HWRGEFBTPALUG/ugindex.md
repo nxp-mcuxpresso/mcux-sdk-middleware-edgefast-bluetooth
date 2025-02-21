@@ -26,4 +26,5 @@ topics/MCXN548EVK.md
 topics/MCXN947EVK.md
 topics/hardware_rework_guide_for_imxrt1050_evkb_and_murata_m_2_module.md
 topics/hardware_rework_guide_for_mimxrt1180_and_murata_m_2_module.md
+topics/FRDMMCXN947.md
 ```

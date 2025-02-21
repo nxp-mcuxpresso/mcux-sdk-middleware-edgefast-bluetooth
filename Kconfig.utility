@@ -19,7 +19,7 @@ choice MCUX_PRJSEG_middleware.edgefast_bluetooth.storage_selection
                  MCUX_HW_BOARD_rdrw612bga || MCUX_HW_BOARD_frdmrw612 || \
 				 MCUX_HW_BOARD_mimxrt700evk
     default MCUX_PRJSEG_middleware.edgefast_bluetooth_mflash_onchip_fmu if MCUX_HW_BOARD_mcxn5xxevk || \
-                 MCUX_HW_BOARD_mcxn9xxevk
+                 MCUX_HW_BOARD_mcxn9xxevk || MCUX_HW_BOARD_frdmmcxn947
     help
       The codec will be automatically selected based on board.
       It is also possible to select the codec manually.

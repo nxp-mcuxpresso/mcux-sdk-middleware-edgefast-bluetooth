@@ -204,7 +204,8 @@ config MCUX_COMPONENT_middleware.edgefast_bluetooth.wifi_nxp.controller.base
                  MCUX_HW_BOARD_evkbimxrt1050 || MCUX_HW_BOARD_evkbmimxrt1170 || \
                  MCUX_HW_BOARD_evkmimxrt1180 || MCUX_HW_BOARD_evkmimxrt1180a || \
                  MCUX_HW_BOARD_evkmimxrt1160 || MCUX_HW_BOARD_mcxn5xxevk || \
-                 MCUX_HW_BOARD_mcxn9xxevk    || MCUX_HW_BOARD_mimxrt700evk
+                 MCUX_HW_BOARD_mcxn9xxevk    || MCUX_HW_BOARD_mimxrt700evk || \
+                 MCUX_HW_BOARD_frdmmcxn947
     select MCUX_PRJSEG_middleware.edgefast_bluetooth.sdio.template
     select MCUX_COMPONENT_middleware.wifi.fwdnld
     select MCUX_COMPONENT_middleware.wifi.osa_free_rtos
