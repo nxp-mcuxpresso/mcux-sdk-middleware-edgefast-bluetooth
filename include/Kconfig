@@ -1,4 +1,4 @@
-menu "Edgefast Bluetooth Configurations(edgefast_bluetooth_config_Gen.h)"
+menu "Edgefast Bluetooth Configurations(edgefast_bluetooth_config.h)"
 
 config BT_LONG_WQ
     bool "BT_LONG_WQ"
@@ -42,8 +42,28 @@ config BT_BUF_RESERVE
 config BT_SNOOP
     bool "BT_SNOOP"
     default n
+    select BT_HOST_USB_ENABLE
+    select BT_HOST_USB_IRQ_ENABLE
     help
       whether enable bt snoop feature, 0 - disable, 1 - enable.
+      This symbol is a config macro.
+
+config BT_DEBUG_HOST_MSD_FATFS
+    bool "BT_DEBUG_HOST_MSD_FATFS"
+    depends on BT_SNOOP
+    help
+      This symbol is a config macro.
+
+config BT_HOST_USB_ENABLE
+    bool "BT_HOST_USB_ENABLE"
+    depends on BT_SNOOP
+    help
+      This symbol is a config macro.
+
+config BT_HOST_USB_IRQ_ENABLE
+    bool "BT_HOST_USB_IRQ_ENABLE"
+    depends on BT_SNOOP
+    help
       This symbol is a config macro.
 
 config BT_HCI_RESERVE
@@ -2839,5 +2859,50 @@ config BT_SPP_ENABLE_CONTROL_CMD
       This symbol is a config macro.
 
 endif # BT_SPP
+
+config BT_HOST_CRYPTO
+    bool "BT_HOST_CRYPTO"
+    default n
+    help
+      This symbol is a config macro.
+
+config BT_RF_TEST_MODE
+    bool "BT_RF_TEST_MODE"
+    help
+      This symbol is a config macro.
+
+config BT_WHITELIST
+    bool "BT_WHITELIST"
+    help
+      This symbol is a config macro.
+
+config BT_GATT_SERVER
+    bool "BT_GATT_SERVER"
+    help
+      This symbol is a config macro.
+
+config BLE_ADV_REPORT_BUFFER_FILTER
+    bool "BLE_ADV_REPORT_BUFFER_FILTER"
+    help
+      This symbol is a config macro.
+
+config BT_BLE_PLATFORM_INIT_ESCAPE
+    bool "BT_BLE_PLATFORM_INIT_ESCAPE"
+    help
+      This symbol is a config macro.
+      No prefix in generated macro
+
+config WORK_QUEUE_TASK_PRIORITY
+    string "WORK_QUEUE_TASK_PRIORITY"
+    default "(configMAX_PRIORITIES - 2)"
+    help
+      This symbol is a config macro.
+
+config WORK_QUEUE_TASK_STACK_SIZE
+    int "WORK_QUEUE_TASK_STACK_SIZE"
+    default 4096 if BT_SMP
+    default 2048
+    help
+      This symbol is a config macro.
 
 endmenu

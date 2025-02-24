@@ -2539,7 +2539,7 @@ if (CONFIG_MCUX_PRJSEG_middleware.edgefast_bluetooth.host_low_power)
         DEVICE_IDS MIMXRT595S
     )
     mcux_add_source(
-        SOURCES low_power/host/${board}/host_low_power.c
+        SOURCES low_power/host/host_low_power.c
         DEVICE_IDS MIMXRT595S
     )
 endif ()

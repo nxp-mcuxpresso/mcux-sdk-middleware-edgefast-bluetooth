@@ -1,4 +1,4 @@
-menu "Edgefast Bluetooth Debug Configurations(edgefast_bluetooth_debug_config_Gen.h)"
+menu "Edgefast Bluetooth Debug Configurations(edgefast_bluetooth_config.h)"
 
 config BT_LOG_LEGACY
     bool "BT_LOG_LEGACY"

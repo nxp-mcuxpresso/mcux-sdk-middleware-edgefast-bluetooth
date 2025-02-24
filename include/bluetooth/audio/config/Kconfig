@@ -1,5 +1,5 @@
 # Copyright 2024 NXP
-menu "Edgefast Bluetooth Audio Configurations(edgefast_bluetooth_audio_config_Gen.h)"
+menu "Edgefast Bluetooth Audio Configurations(edgefast_bluetooth_audio_config.h)"
 
 config BT_AUDIO
     bool "BT_AUDIO"

@@ -2,14 +2,14 @@
 
 # local storage
 config MCUX_PRJSEG_middleware.edgefast_bluetooth.storage
-    bool "MCUX_PRJSEG_middleware.edgefast_bluetooth.flash"
+    bool "Local storage"
     default y
     imply BT_SETTINGS
 
 if MCUX_PRJSEG_middleware.edgefast_bluetooth.storage
 
 choice MCUX_PRJSEG_middleware.edgefast_bluetooth.storage_selection
-    prompt "Local storage"
+    prompt "Local storage selection"
     default MCUX_PRJSEG_middleware.edgefast_bluetooth_flash_adapter_rt1170evkb if MCUX_HW_BOARD_evkbmimxrt1170
     default MCUX_PRJSEG_middleware.edgefast_bluetooth_flash_adapter_rt595evk if MCUX_HW_BOARD_evkmimxrt595
     default MCUX_PRJSEG_middleware.edgefast_bluetooth_flash_adapter_rt685evk if MCUX_HW_BOARD_evkmimxrt685
@@ -46,6 +46,7 @@ config MCUX_PRJSEG_middleware.edgefast_bluetooth_mflash_offchip
 config MCUX_PRJSEG_middleware.edgefast_bluetooth_mflash_onchip_fmu
     bool "on chip mflash via FMU controller"
     select MCUX_COMPONENT_component.mflash_onchip_fmu
+    depends on MCUX_HW_BOARD_mcxn5xxevk || MCUX_HW_BOARD_mcxn9xxevk
 
 endchoice
 
@@ -53,7 +54,7 @@ endif # MCUX_PRJSEG_middleware.edgefast_bluetooth.storage
 
 # codec selection
 config MCUX_PRJSEG_middleware.edgefast_bluetooth.codec
-    bool "Edegfast_bluetooth CODEC selection"
+    bool "CODEC selection"
 
 if MCUX_PRJSEG_middleware.edgefast_bluetooth.codec
 
@@ -115,3 +116,21 @@ config MCUX_PRJSEG_middleware.edgefast_bluetooth.codec_i2s_dma
 endchoice
 
 endif # MCUX_PRJSEG_middleware.edgefast_bluetooth.codec
+
+# low power component
+config MCUX_PRJSEG_middleware.edgefast_bluetooth.low_power
+    bool "Low power"
+    depends on MCUX_HW_DEVICE_MIMXRT595S || MCUX_HW_DEVICE_RW612 || MCUX_HW_DEVICE_RW610
+    select MCUX_PRJSEG_middleware.edgefast_bluetooth.host_low_power
+    select MCUX_COMPONENT_middleware.edgefast_bluetooth.controller_low_power if !MCUX_HW_DEVICE_RW612 && !MCUX_HW_DEVICE_RW610
+
+config MCUX_PRJSEG_middleware.edgefast_bluetooth.host_low_power
+    bool
+    select MCUX_COMPONENT_middleware.wireless.framework
+    select MCUX_COMPONENT_middleware.wireless.framework.lowpower
+    select MCUX_PRJSEG_middleware.wireless.framework.platform.MIMXRT595S if MCUX_HW_DEVICE_MIMXRT595S
+    select MCUX_PRJSEG_middleware.wireless.framework.platform.rw61x if MCUX_HW_DEVICE_RW612 || MCUX_HW_DEVICE_RW610
+
+config MCUX_COMPONENT_middleware.edgefast_bluetooth.controller_low_power
+    bool
+    depends on !MCUX_HW_DEVICE_RW612 && !MCUX_HW_DEVICE_RW610
