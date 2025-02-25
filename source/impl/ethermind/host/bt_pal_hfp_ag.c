@@ -411,7 +411,7 @@ static void bt_hfp_ag_handle_retval_from_hfag(uint16_t retval)
     return;
 }
 
-static API_RESULT hfp_ag_callback(HFP_AG_EVENTS hfp_ag_event, API_RESULT result, void *data, uint16_t data_length)
+static API_RESULT hfp_ag_callback(HFP_AG_HANDLE handle,HFP_AG_EVENTS hfp_ag_event, API_RESULT result, void *data, uint16_t data_length)
 {
     uint8_t recvd_bd_addr[BT_BD_ADDR_SIZE];
     uint16_t i;
@@ -419,7 +419,7 @@ static API_RESULT hfp_ag_callback(HFP_AG_EVENTS hfp_ag_event, API_RESULT result,
     uint8_t option, index;
     struct bt_hfp_ag *hfp_ag;
     uint32_t codecs = 0;
-
+    BT_IGNORE_UNUSED_PARAM(handle);
     switch (hfp_ag_event)
     {
         case HFP_AG_CONNECT_IND:
@@ -986,6 +986,7 @@ static int hfp_ag_start_pre(void)
 {
     API_RESULT api_retval;
     UINT8 hfp_ag_server_channel;
+    HFP_AG_HANDLE hfp_handle; /* hfp_handle is required only for start in mono HFP AG scenario */
 #ifdef SDP_DYNAMIC_DB
     hfp_ag_server_channel = BT_RFCOMM_CHAN_HFP_AG;
 #else
@@ -1025,7 +1026,7 @@ static int hfp_ag_start_pre(void)
         return -EIO;
     }
 #endif
-    api_retval = BT_hfp_ag_start(hfp_ag_server_channel);
+    api_retval = BT_hfp_ag_instance_start(&hfp_handle,hfp_ag_server_channel);
     if(API_SUCCESS != api_retval)
     {
         return -EIO;
