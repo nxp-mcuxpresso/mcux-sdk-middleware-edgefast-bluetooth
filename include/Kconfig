@@ -50,19 +50,16 @@ config BT_SNOOP
 
 config BT_DEBUG_HOST_MSD_FATFS
     bool "BT_DEBUG_HOST_MSD_FATFS"
-    depends on BT_SNOOP
     help
       This symbol is a config macro.
 
 config BT_HOST_USB_ENABLE
     bool "BT_HOST_USB_ENABLE"
-    depends on BT_SNOOP
     help
       This symbol is a config macro.
 
 config BT_HOST_USB_IRQ_ENABLE
     bool "BT_HOST_USB_IRQ_ENABLE"
-    depends on BT_SNOOP
     help
       This symbol is a config macro.
 
