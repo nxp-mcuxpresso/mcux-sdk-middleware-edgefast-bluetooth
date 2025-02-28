@@ -46,7 +46,7 @@ config MCUX_PRJSEG_middleware.edgefast_bluetooth_mflash_offchip
 config MCUX_PRJSEG_middleware.edgefast_bluetooth_mflash_onchip_fmu
     bool "on chip mflash via FMU controller"
     select MCUX_COMPONENT_component.mflash_onchip_fmu
-    depends on MCUX_HW_BOARD_mcxn5xxevk || MCUX_HW_BOARD_mcxn9xxevk
+    depends on MCUX_HW_BOARD_mcxn5xxevk || MCUX_HW_BOARD_mcxn9xxevk || MCUX_HW_BOARD_frdmmcxn947
 
 endchoice
 
