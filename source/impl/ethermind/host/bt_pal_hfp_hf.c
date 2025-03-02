@@ -296,7 +296,7 @@ static HCI_SCO_IN_PARAMS *bt_hfp_esco_params[2] = {
     &bt_hfp_esco_msbc_params[0]};
 
 static void hfp_hf_disconnected(struct bt_hfp_hf_em *hfp_hf);
-static struct bt_hfp_hf_em *hfp_hf_connected(struct bt_conn *conn);
+static struct bt_hfp_hf_em *hfp_hf_connected(struct bt_conn *conn, int err);
 
 static int bt_hfp_hf_get_status(API_RESULT retval)
 {
@@ -1025,11 +1025,11 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
          * Profile Level Connection and Disconnection related Events.
          */
         case HFP_UNIT_CONNECT_CNF:
-            LOG_DBG("\n> Event          : HFP_UNIT_CONNECT_CNF\n");
-            LOG_DBG("> Instance       : 0x%02X\n", (unsigned int)handle);
-            LOG_DBG("> Event result   : 0x%04X\n", result);
-            if (API_SUCCESS == result)
             {
+                LOG_DBG("\n> Event          : HFP_UNIT_CONNECT_CNF\n");
+                LOG_DBG("> Instance       : 0x%02X\n", (unsigned int)handle);
+                LOG_DBG("> Event result   : 0x%04X\n", result);
+
                 struct bt_conn *conn;
 
                 BT_mem_copy(bt_hfp_hp_peer_bd_addr, data, BT_BD_ADDR_SIZE);
@@ -1047,8 +1047,8 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
                     bt_conn_unref(conn);
                 }
 
-                hfp_hf = hfp_hf_connected(conn);
-                if (!hfp_hf)
+                hfp_hf = hfp_hf_connected(conn, API_SUCCESS == result ? 0 : -EIO);
+                if ((!hfp_hf) || (API_SUCCESS != result))
                 {
                     break;
                 }
@@ -1108,7 +1108,7 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
                     bt_conn_unref(conn);
                 }
 
-                hfp_hf = hfp_hf_connected(conn);
+                hfp_hf = hfp_hf_connected(conn, 0);
                 if (!hfp_hf)
                 {
                     break;
@@ -2018,26 +2018,30 @@ static void hfp_hf_disconnected(struct bt_hfp_hf_em *hfp_hf)
     hfp_hf_DeActiveInstance(hfp_hf);
 }
 
-static struct bt_hfp_hf_em* hfp_hf_connected(struct bt_conn *conn)
+static struct bt_hfp_hf_em* hfp_hf_connected(struct bt_conn *conn, int err)
 {
-    struct bt_hfp_hf_em *hfp_hf;
+    struct bt_hfp_hf_em *hfp_hf = NULL;
 
     LOG_INF("connected\n");
 
-    hfp_hf = hfp_hf_GetNoneActiveInstance();
-    if (conn->type != BT_CONN_TYPE_BR)
+    if (!err)
     {
-        hfp_hf_FreeInstance(hfp_hf);
-        return NULL;
+        hfp_hf = hfp_hf_GetNoneActiveInstance();
+        if (conn->type != BT_CONN_TYPE_BR)
+        {
+            hfp_hf_FreeInstance(hfp_hf);
+            return NULL;
+        }
+
+        memcpy(hfp_hf->peerAddr, conn->br.dst.val, BT_BD_ADDR_SIZE);
+        hfp_hf->actived     = 1U;
+        hfp_hf->bt_conn     = conn;
+        hfp_hf->hf_features = BT_HFP_HF_SUPPORTED_FEATURES;
     }
 
-    memcpy(hfp_hf->peerAddr, conn->br.dst.val, BT_BD_ADDR_SIZE);
-    hfp_hf->actived     = 1U;
-    hfp_hf->bt_conn     = conn;
-    hfp_hf->hf_features = BT_HFP_HF_SUPPORTED_FEATURES;
     if (bt_hf_cb->connected)
     {
-        bt_hf_cb->connected(conn);
+        bt_hf_cb->connected(conn, err);
     }
 
     return hfp_hf;

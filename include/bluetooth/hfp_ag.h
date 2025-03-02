@@ -110,8 +110,9 @@ struct bt_hfp_ag_cb
      *  connection completes.
      *
      *  @param hfp_ag  bt hfp ag Connection object.
+     *  @param err error code. 0 means success, other values mean that connecting fail.
      */
-    void (*connected)(struct bt_hfp_ag *hfp_ag);
+    void (*connected)(struct bt_hfp_ag *hfp_ag, int err);
     /** AG disconnected callback to application
      *
      *  If this callback is provided it will be called whenever the

@@ -426,6 +426,11 @@ static API_RESULT hfp_ag_callback(HFP_AG_HANDLE handle,HFP_AG_EVENTS hfp_ag_even
         {
             struct bt_conn *conn;
 
+            if (API_SUCCESS != result)
+            {
+                break;
+            }
+
             LOG_DBG("BT_HFP_AG HFP_AG_CONNECT_IND \n");
             bt_hfp_agag_state = BT_HFP_AG_STATE_CONNECTED;
 
@@ -465,7 +470,7 @@ static API_RESULT hfp_ag_callback(HFP_AG_HANDLE handle,HFP_AG_EVENTS hfp_ag_even
 
             if ((bt_hfp_ag_cb) && (bt_hfp_ag_cb->connected))
             {
-                bt_hfp_ag_cb->connected(s_actived_bt_hfp_ag);
+                bt_hfp_ag_cb->connected(s_actived_bt_hfp_ag, 0);
             }
 
             if ((bt_hfp_ag_cb) && (bt_hfp_ag_cb->get_config))
@@ -485,14 +490,15 @@ static API_RESULT hfp_ag_callback(HFP_AG_HANDLE handle,HFP_AG_EVENTS hfp_ag_even
 
         case HFP_AG_CONNECT_CNF:
             LOG_DBG("BT_HFP_AG HFP_AG_CONNECT_CNF \n");
+
+            if ((bt_hfp_ag_cb) && (bt_hfp_ag_cb->connected))
+            {
+                bt_hfp_ag_cb->connected(s_actived_bt_hfp_ag, API_SUCCESS == result ? 0 : -EIO);
+            }
+
             if (API_SUCCESS == result)
             {
                 bt_hfp_agag_state = BT_HFP_AG_STATE_CONNECTED;
-
-                if ((bt_hfp_ag_cb) && (bt_hfp_ag_cb->connected))
-                {
-                    bt_hfp_ag_cb->connected(s_actived_bt_hfp_ag);
-                }
 
                 if ((bt_hfp_ag_cb) && (bt_hfp_ag_cb->get_config))
                 {

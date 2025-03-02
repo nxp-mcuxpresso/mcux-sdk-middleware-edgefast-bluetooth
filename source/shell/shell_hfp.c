@@ -96,9 +96,9 @@ static struct bt_sdp_attribute hfp_hf_attrs[] = {
 };
 static struct bt_sdp_record hfp_hf_rec = BT_SDP_RECORD(hfp_hf_attrs);
 
-static void connected(struct bt_conn *conn)
+static void connected(struct bt_conn *conn, int err)
 {
-    printf("HFP HF Connected!\n");
+    printf("HFP HF Connected:%d!\n", err);
     default_conn = conn;
 }
 

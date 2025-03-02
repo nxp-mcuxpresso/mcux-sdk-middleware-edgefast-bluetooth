@@ -122,8 +122,9 @@ struct bt_hfp_hf_cb {
 	 *  connection completes.
 	 *
 	 *  @param conn Connection object.
+	 *  @param err error code. 0 means success, other values mean that connecting fail.
 	 */
-	void (*connected)(struct bt_conn *conn);
+	void (*connected)(struct bt_conn *conn, int err);
 	/** HF disconnected callback to application
 	 *
 	 *  If this callback is provided it will be called whenever the
