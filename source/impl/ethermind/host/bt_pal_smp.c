@@ -1332,6 +1332,18 @@ static void smp_br_auth_starting(struct bt_smp_br *smp)
 			&smp->auth
 		);
 	}
+	else
+	{
+		struct bt_keys *keys;
+		bt_addr_le_t peer_addr;
+
+		bt_addr_copy(&peer_addr.a, &smp->chan.chan.conn->br.dst);
+		peer_addr.type = BT_ADDR_LE_PUBLIC;
+		keys = bt_keys_find(BT_KEYS_IRK, conn->id, &peer_addr);
+		if (keys) {
+			bt_id_del(keys);
+		}
+	}
 }
 
 static void smp_br_auth_complete(struct bt_smp_br *smp)
@@ -7305,6 +7317,18 @@ static void smp_auth_starting(struct bt_smp *smp)
 			&smp->auth
 		);
 	}
+	else
+	{
+		struct bt_keys *keys;
+
+		/* For BLE smp, smp->chan.chan.conn->le.dst may be RPA,
+		 * then the keys can't be found here
+		 */
+		keys = bt_keys_find(BT_KEYS_IRK, conn->id, &smp->chan.chan.conn->le.dst);
+		if (keys) {
+			bt_id_del(keys);
+		}
+	}
 }
 
 #ifdef SMP_LESC
@@ -8043,6 +8067,9 @@ static void hci_acl_smp_br_handler(struct net_buf *buf)
         break;
 
     case SMP_KEY_EXCHANGE_INFO:
+    {
+        bool key_find = false;
+
         LOG_DBG ("Recvd SMP_KEY_EXCHANGE_INFO");
         LOG_DBG ("Status - 0x%04X", hdr->pdu.status);
 
@@ -8062,19 +8089,57 @@ static void hci_acl_smp_br_handler(struct net_buf *buf)
         LOG_HEXDUMP_DBG(key_info->id_info, sizeof (key_info->id_info), "Identity Info:");
         LOG_HEXDUMP_DBG(key_info->id_addr_info, sizeof (key_info->id_addr_info), "Identity Address Info:");
         LOG_HEXDUMP_DBG(key_info->sign_info, sizeof (key_info->sign_info), "Signature Info:");
-		keys = bt_keys_get_type(BT_KEYS_IRK, conn->id, &peer_addr);
+
+		keys = bt_keys_find(BT_KEYS_IRK, conn->id, &peer_addr);
+		if (keys) {
+			key_find = true;
+		} else {
+			keys = bt_keys_get_type(BT_KEYS_IRK, conn->id, &peer_addr);
+		}
+
 		if (!keys)
 		{
 			LOG_ERR("Unable to get keys for %s", bt_addr_le_str(&peer_addr));
 		}
 		else
 		{
+			bool id_add = true;
+
 			(void)memset(keys->ltk.ediv, 0, sizeof(keys->ltk.ediv));
 			(void)memset(keys->ltk.rand, 0, sizeof(keys->ltk.rand));
 			keys->enc_size = kx_param->ekey_size;
-			memcpy(keys->irk.val, key_info->id_info, sizeof(keys->irk.val));
-			bt_keys_add_type(keys, BT_KEYS_IRK);
-			bt_id_add(keys);
+
+			/* All the IRK ID adding/deleting operations should be in system work queue task,
+			 * so don't need to protect it here.
+			 */
+			if (key_find && (keys->keys & BT_KEYS_IRK))
+			{
+				if (!memcmp(keys->irk.val, key_info->id_info, sizeof(keys->irk.val)))
+				{
+					if (keys->state & (BT_KEYS_ID_ADDED | BT_KEYS_ID_PENDING_ADD))
+					{
+						LOG_WRN("The old IRK should already be removed");
+						id_add = false; /* already added */
+					}
+
+					if (keys->state & BT_KEYS_ID_PENDING_DEL)
+					{
+						keys->state &= ~BT_KEYS_ID_PENDING_DEL;
+					}
+				}
+				else
+				{
+					LOG_ERR("The old IRK is invalid, but is not removed");
+				}
+			}
+
+			if (id_add)
+			{
+				memcpy(keys->irk.val, key_info->id_info, sizeof(keys->irk.val));
+				bt_keys_add_type(keys, BT_KEYS_IRK);
+				bt_id_add(keys);
+			}
+
 #if (defined(CONFIG_BT_SIGNING) && (CONFIG_BT_SIGNING > 0U))
 			memcpy(keys->remote_csrk.val, key_info->sign_info, sizeof(keys->remote_csrk.val));
 			bt_keys_add_type(keys, BT_KEYS_REMOTE_CSRK);
@@ -8082,6 +8147,7 @@ static void hci_acl_smp_br_handler(struct net_buf *buf)
 		}
 
         break;
+    }
 
 #ifdef SMP_LESC
     case SMP_NUMERIC_KEY_COMPARISON_CNF_REQUEST:

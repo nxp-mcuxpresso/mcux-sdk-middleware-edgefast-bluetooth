@@ -1006,6 +1006,10 @@ void bt_id_add(struct bt_keys *keys)
 	__ASSERT_NO_MSG(keys != NULL);
 	/* We assume (and could assert) !bt_id_find_conflict(keys) here. */
 
+	if (keys->state & (BT_KEYS_ID_ADDED | BT_KEYS_ID_PENDING_ADD)) {
+		return;
+	}
+
 	/* Nothing to be done if host-side resolving is used */
 	if (!bt_dev.le.rl_size || bt_dev.le.rl_entries > bt_dev.le.rl_size) {
 		bt_dev.le.rl_entries++;
