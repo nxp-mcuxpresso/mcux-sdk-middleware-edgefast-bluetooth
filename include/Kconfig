@@ -1001,7 +1001,7 @@ config BT_HOST_CCM
       This symbol is a config macro.
 
 config BT_SMP_MIN_ENC_KEY_SIZE
-    int
+    int "BT_SMP_MIN_ENC_KEY_SIZE"
     default 16 if BT_SMP_SC_ONLY
     default 7
     help
