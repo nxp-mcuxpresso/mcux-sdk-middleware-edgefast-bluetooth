@@ -1890,6 +1890,14 @@ config BT_HFP_AG
       This symbol is a config macro.
 
 if BT_HFP_AG
+config BT_HFP_AG_MAX_CONN
+    int "Bluetooth HFP AG count [EXPERIMENTAL]"
+    default 1
+    range 1 2
+    help
+      Bluetooth HFP AG count.
+      This symbol is a config macro.
+
 config BT_HFP_AG_3WAY_CALL
     bool "Three-way calling for HFP AG [EXPERIMENTAL]"
     default y
