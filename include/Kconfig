@@ -1080,7 +1080,7 @@ config BT_L2CAP_DYNAMIC_CHANNEL
       This symbol is a config macro.
 
 config BT_L2CAP_UNBLOCK_SEND
-    bool "BT_L2CAP_UNBLOCK_SEND "
+    bool "BT_L2CAP_UNBLOCK_SEND"
     default n
     help
       This option enables support for l2cap unblock_send cmd.
