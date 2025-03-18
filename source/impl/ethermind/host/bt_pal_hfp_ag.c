@@ -1283,7 +1283,7 @@ static void bt_hfp_ag_send_at_rsp(uint8_t rsp_code, void *value)
             sprintf((response + length), "%d\r\n", *((uint8_t *)value));
             break;
         case HFAG_BIND_READ:
-            sprintf((response + length), "%d, %d\r\n", (*(uint8_t *)value + 1),
+            sprintf((response + length), "%d,%d\r\n", (*(uint8_t *)value + 1),
                     s_actived_bt_hfp_ag->bt_hfp_ag_bind[*(uint8_t *)value]);
             break;
 
@@ -1836,7 +1836,7 @@ int bt_hfp_ag_set_hf_indicator(struct bt_hfp_ag *hfp_ag, uint16_t hf_indicator, 
     BT_str_n_copy(at_data, rsp_table[HFAG_BIND_READ], (sizeof(at_data) - 1U));
     length = (uint8_t)BT_str_len(rsp_table[HFAG_BIND_READ]);
     s_actived_bt_hfp_ag->bt_hfp_ag_bind[hf_indicator - 1U] = enable;
-    sprintf((char*)(at_data + length), "%d, %d\r\n", hf_indicator,
+    sprintf((char*)(at_data + length), "%d,%d\r\n", hf_indicator,
             s_actived_bt_hfp_ag->bt_hfp_ag_bind[hf_indicator - 1U]);
     length = (uint8_t)BT_str_len(at_data);
 
