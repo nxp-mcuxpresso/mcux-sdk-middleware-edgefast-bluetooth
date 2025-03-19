@@ -554,6 +554,7 @@ struct bt_smp {
 /* Global BD Address of the SMP procedure */
 #ifdef SMP_LESC_CROSS_TXP_KEY_GEN
 DECL_STATIC BT_DEVICE_ADDR bt_smp_bd_addr;
+DECL_STATIC SMP_BD_HANDLE bt_smp_bd_handle;
 DECL_STATIC UCHAR local_keys;
 DECL_STATIC SMP_KEY_DIST peer_key_info; /* static to reduce stack usage */
 #endif
@@ -7456,17 +7457,14 @@ void appl_smp_lesc_xtxp_lk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
     bt_smp_bd_addr.addr[0], bt_smp_bd_addr.addr[1], bt_smp_bd_addr.addr[2],
     bt_smp_bd_addr.addr[3], bt_smp_bd_addr.addr[4], bt_smp_bd_addr.addr[5]);
 
-    /* Get the BD handle */
-    (BT_IGNORE_RETURN_VALUE)BT_smp_get_bd_handle(&bt_smp_bd_addr, &bd_handle);
-
     /* Initialize */
     BT_mem_set(&auth, 0x00, sizeof(SMP_AUTH_INFO));
 
     retval = BT_smp_get_device_security_info
-             (
-                 &bd_handle,
-                 &auth
-             );
+            (
+                &bt_smp_bd_handle,
+                &auth
+            );
     if (API_SUCCESS == retval)
     {
         type = (SMP_SEC_LEVEL_2 == auth.security) ?
@@ -7737,6 +7735,7 @@ static void hci_acl_smp_br_handler(struct net_buf *buf)
 
                             if (API_SUCCESS != retval)
                             {
+                                bt_smp_bd_handle = handle;
                                 (BT_IGNORE_RETURN_VALUE)BT_smp_get_lk_from_ltk_pl
                                 (
                                     p_key_info.enc_info,
@@ -8471,6 +8470,7 @@ static void hci_acl_smp_handler(struct net_buf *buf)
 
                             if (API_SUCCESS != retval)
                             {
+                                bt_smp_bd_handle = handle;
                                 (BT_IGNORE_RETURN_VALUE)BT_smp_get_lk_from_ltk_pl
                                 (
                                     p_key_info.enc_info,
