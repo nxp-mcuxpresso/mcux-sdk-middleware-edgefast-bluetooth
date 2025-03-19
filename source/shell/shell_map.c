@@ -906,7 +906,7 @@ static int cmd_mce_mns_unregister(const struct shell *sh, size_t argc, char *arg
 
 static int cmd_mce_connect(const struct shell *sh, size_t argc, char *argv[])
 {
-    int err = bt_sdp_discover(default_conn, &discov_map_mse);
+    int err = bt_sdp_discover(default_br_conn, &discov_map_mse);
 
     if (err)
     {
@@ -4461,7 +4461,7 @@ static void app_mse_set_ntf_reg_cb(struct bt_map_mse_mas *mse_mas, struct net_bu
             {
                 if (app_mse_instance.mse_mns == NULL)
                 {
-                    app_mse_instance.acl_conn = default_conn;
+                    app_mse_instance.acl_conn = default_br_conn;
                     if (bt_sdp_discover(app_mse_instance.acl_conn, &discov_map_mce) != 0)
                     {
                         shell_print(ctx_shell, "SDP discovery failed: result");

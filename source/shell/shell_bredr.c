@@ -60,8 +60,8 @@ static int cmd_auth_pincode(const struct shell *sh,
 	struct bt_conn *conn;
 	uint8_t max = 16U;
 
-	if (default_conn) {
-		conn = default_conn;
+	if (default_br_conn) {
+		conn = default_br_conn;
 	} else if (pairing_conn) {
 		conn = pairing_conn;
 	} else {
@@ -801,7 +801,7 @@ static int cmd_sdp_find_record(const struct shell *sh,
 	int res;
 	const char *action;
 
-	if (!default_conn) {
+	if (!default_br_conn) {
 		shell_print(sh, "Not connected");
 		return 0;
 	}
@@ -821,7 +821,7 @@ static int cmd_sdp_find_record(const struct shell *sh,
 
 	shell_print(sh, "SDP UUID \'%s\' gets applied", action);
 
-	res = bt_sdp_discover(default_conn, &discov);
+	res = bt_sdp_discover(default_br_conn, &discov);
 	if (res) {
 		shell_error(sh, "SDP discovery failed: result %d", res);
 		return -ENOEXEC;
@@ -838,7 +838,7 @@ static int cmd_l2cap_connect(const struct shell *sh, size_t argc, char *argv[])
 	uint16_t psm;
 	int err;
 
-	if (!default_conn) {
+	if (!default_br_conn) {
 		shell_error(sh, "Not connected");
 		return -EINVAL;
 	}
@@ -864,7 +864,7 @@ static int cmd_l2cap_connect(const struct shell *sh, size_t argc, char *argv[])
             br_l2cap_channel->ch.chan.ops = &l2cap_mode_ops;
         }
 #endif
-	err = bt_l2cap_chan_connect(default_conn, &br_l2cap_channel->ch.chan, psm);
+	err = bt_l2cap_chan_connect(default_br_conn, &br_l2cap_channel->ch.chan, psm);
 	if (err < 0) {
 		shell_error(sh, "Unable to connect to psm %u (err %d)", psm,
 			    err);
@@ -881,7 +881,7 @@ static int cmd_l2cap_disconnect(const struct shell *sh, size_t argc, char *argv[
 	struct br_l2ch *br_l2cap_channel;
 	int err;
 
-	br_l2cap_channel = l2cap_channel_lookup_conn(default_conn);
+	br_l2cap_channel = l2cap_channel_lookup_conn(default_br_conn);
 	if (NULL == br_l2cap_channel) {
 		shell_error(sh, "Channel is not found");
 		return -EINVAL;
@@ -930,12 +930,12 @@ static int cmd_ecred_reconfigure(const struct shell *sh, size_t argc, char *argv
 	uint16_t mtu;
 	int err = 0;
 
-	if (!default_conn) {
+	if (!default_br_conn) {
 		shell_error(sh, "Not connected");
 		return -ENOEXEC;
 	}
 
-	br_l2cap_channel = l2cap_channel_lookup_conn(default_conn);
+	br_l2cap_channel = l2cap_channel_lookup_conn(default_br_conn);
 	if (NULL == br_l2cap_channel) {
 		shell_error(sh, "Not connected");
 		return -EINVAL;
@@ -967,7 +967,7 @@ static int cmd_ecred_connect(const struct shell *sh, size_t argc, char *argv[])
 	uint16_t psm;
 	int err = 0;
 
-	if (!default_conn) {
+	if (!default_br_conn) {
 		shell_error(sh, "Not connected");
 
 		return -ENOEXEC;
@@ -1002,7 +1002,7 @@ static int cmd_ecred_connect(const struct shell *sh, size_t argc, char *argv[])
 		br_l2cap_channel->ch.required_sec_level = (bt_security_t)sec;
 	}
 
-	err = bt_l2cap_ecred_chan_connect(default_conn, l2cap_ecred_chans, psm);
+	err = bt_l2cap_ecred_chan_connect(default_br_conn, l2cap_ecred_chans, psm);
 	if (err < 0) {
 		shell_error(sh, "Unable to connect to psm %u (err %d)", psm,
 			    err);
@@ -1026,7 +1026,7 @@ static int cmd_l2cap_send(const struct shell *sh, size_t argc, char *argv[])
 		count = strtoul(argv[1], NULL, 10);
 	}
 
-	br_l2cap_channel = l2cap_channel_lookup_conn(default_conn);
+	br_l2cap_channel = l2cap_channel_lookup_conn(default_br_conn);
 	if (NULL == br_l2cap_channel) {
 		shell_error(sh, "Channel is not found");
 		return -EINVAL;

@@ -1644,12 +1644,12 @@ static int cmd_register_source_ep(const struct shell *sh, size_t argc, char *arg
 static int cmd_connect(const struct shell *sh, size_t argc, char *argv[])
 {
     shell_a2dp_init();
-    if (!default_conn) {
+    if (!default_br_conn) {
         shell_error(sh, "Not connected");
         return -EINVAL;
     }
 
-    default_a2dp = bt_a2dp_connect(default_conn);
+    default_a2dp = bt_a2dp_connect(default_br_conn);
     if (NULL == default_a2dp) {
         shell_error(sh, "fail to connect a2dp");
     }

@@ -70,6 +70,7 @@ extern struct bt_csis *csis;
 
 #if (defined(CONFIG_BT_CONN) && (CONFIG_BT_CONN > 0))
 struct bt_conn *default_conn;
+struct bt_conn *default_br_conn;
 
 /* Connection context for BR/EDR legacy pairing in sec mode 3 */
 static struct bt_conn *pairing_conn;
@@ -802,14 +803,28 @@ static void connected(struct bt_conn *conn, uint8_t err)
 	}
 
 	if (info.role == BT_CONN_ROLE_CENTRAL) {
-		if (default_conn != NULL) {
-			bt_conn_unref(default_conn);
-		}
-
-		default_conn = bt_conn_ref(conn);
-	} else if (info.role == BT_CONN_ROLE_PERIPHERAL) {
-		if (default_conn == NULL) {
+		if (info.type != BT_CONN_TYPE_LE) {
+			if (default_br_conn != NULL) {
+				bt_conn_unref(default_br_conn);
+			}
+	
+			default_br_conn = bt_conn_ref(conn);
+		} else {
+			if (default_conn != NULL) {
+				bt_conn_unref(default_conn);
+			}
+	
 			default_conn = bt_conn_ref(conn);
+		}
+	} else if (info.role == BT_CONN_ROLE_PERIPHERAL) {
+		if (info.type != BT_CONN_TYPE_LE) {
+			if (default_br_conn == NULL) {
+				default_br_conn = bt_conn_ref(conn);
+			}
+		} else {
+			if (default_conn != NULL) {
+				bt_conn_unref(default_conn);
+			}
 		}
 	}
 
@@ -861,6 +876,12 @@ static void disconnected(struct bt_conn *conn, uint8_t reason)
 
 		/* If we are connected to other devices, set one of them as default */
 		bt_conn_foreach(BT_CONN_TYPE_LE, disconnected_set_new_default_conn_cb, NULL);
+	} else if (default_br_conn == conn) {
+		bt_conn_unref(default_br_conn);
+		default_br_conn = NULL;
+	}
+	else
+	{
 	}
 
 	s_shellBtPrompt = (char *)current_prompt();
@@ -1199,6 +1220,7 @@ static void bt_ready(int err)
 
 #if (defined(CONFIG_BT_CONN) && (CONFIG_BT_CONN > 0))
 	default_conn = NULL;
+	default_br_conn = NULL;
 
 	/* Unregister to avoid register repeatedly */
 	bt_conn_cb_unregister(&conn_callbacks);

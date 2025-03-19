@@ -99,17 +99,17 @@ static struct bt_sdp_record hfp_hf_rec = BT_SDP_RECORD(hfp_hf_attrs);
 static void connected(struct bt_conn *conn, int err)
 {
     printf("HFP HF Connected:%d!\n", err);
-    default_conn = conn;
+    default_br_conn = conn;
 }
 
 static void disconnected(struct bt_conn *conn)
 {
     PRINTF("HFP BT Disconnected !\n");
 
-    if (default_conn)
+    if (default_br_conn)
     {
-        bt_conn_unref(default_conn);
-        default_conn = NULL;
+        bt_conn_unref(default_br_conn);
+        default_br_conn = NULL;
     }
 }
 

@@ -581,7 +581,7 @@ static int cmd_connect(const struct shell *sh, size_t argc, char *argv[])
         }
     }
 
-    retval = bt_sdp_discover(default_conn, &discov_pbap_pce);
+    retval = bt_sdp_discover(default_br_conn, &discov_pbap_pce);
     if (retval)
     {
         shell_error(sh, "SDP discovery failed: %d", retval);
