@@ -4771,6 +4771,79 @@ SHELL_STATIC_SUBCMD_SET_CREATE(
 	SHELL_SUBCMD_SET_END);
 #endif
 
+#if (defined(CONFIG_BT_HCI_TEST) && (CONFIG_BT_HCI_TEST > 0U))
+#define ITERATIONS_PER_TASK     2
+void shell_hci_test_high_task(void *pvParameters)
+{
+	int err;
+	struct net_buf *rsp;
+
+        for (int i = 0; i < ITERATIONS_PER_TASK; i++) {
+                PRINTF("High_task READ_SUPPORTED_COMMANDS Start \n");
+                err = bt_hci_cmd_send_sync(BT_HCI_OP_READ_SUPPORTED_COMMANDS, NULL, &rsp);
+                if (err) {
+                        PRINTF("High_task bt_hci_cmd_send_sync READ_SUPPORTED_COMMANDS error \n");
+                }
+                PRINTF("High_task READ_SUPPORTED_COMMANDS Done \n");
+                net_buf_unref(rsp);
+
+                PRINTF("High_task READ_LOCAL_FEATURES Start \n");
+                err = bt_hci_cmd_send_sync(BT_HCI_OP_READ_LOCAL_FEATURES, NULL, &rsp);
+                if (err) {
+                        PRINTF("High_task bt_hci_cmd_send_sync READ_LOCAL_FEATURES error\n");
+                }
+                PRINTF("High_task READ_LOCAL_FEATURES Done \n");
+                net_buf_unref(rsp);
+        }
+	vTaskDelete(NULL);
+}
+
+void shell_hci_test_low_task(void *pvParameters)
+{
+        struct net_buf *rsp;
+        int err;
+
+        for (int i = 0; i < ITERATIONS_PER_TASK; i++) {
+                PRINTF("low_task READ_LOCAL_FEATURES Start \n");
+                err = bt_hci_cmd_send_sync(BT_HCI_OP_READ_LOCAL_FEATURES, NULL, &rsp);
+                if (err) {
+                        PRINTF("Low_task bt_hci_cmd_send_sync READ_LOCAL_FEATURES error \n");
+                }
+                PRINTF("low_task READ_LOCAL_FEATURES Done\n");
+                net_buf_unref(rsp);
+
+                PRINTF("low_task READ_LOCAL_VERSION_INFO Start \n");
+                err = bt_hci_cmd_send_sync(BT_HCI_OP_READ_LOCAL_VERSION_INFO, NULL, &rsp);
+                if (err) {
+                        PRINTF("Low_task bt_hci_cmd_send_sync READ_LOCAL_VERSION_INFO error \n");
+                }
+                PRINTF("low_task READ_LOCAL_VERSION_INFO Done \n");
+                net_buf_unref(rsp);
+        }
+        vTaskDelete(NULL);
+}
+static int cmd_bt_hci_test(const struct shell *sh, size_t argc, char *argv[])
+{
+	const char *reset_type;
+
+        shell_info(sh, "HCI command concurrency test start.");
+        if (xTaskCreate(shell_hci_test_low_task, "shell_hci_test_low_task", configMINIMAL_STACK_SIZE * 8, NULL,
+                	tskIDLE_PRIORITY + 1, NULL) != pdPASS)
+        {
+                shell_error(sh, "shell_hci_test_low_task create failed!\r\n");
+                return -1;
+        }
+
+        if (xTaskCreate(shell_hci_test_high_task, "shell_hci_test_high_task", configMINIMAL_STACK_SIZE * 8, NULL,
+                        configMAX_PRIORITIES - 1, NULL) != pdPASS)
+        {
+                shell_error(sh, "shell_hci_test_high_task create failed!\r\n");
+                return -1;
+        }
+    	return 0;
+}
+#endif /* CONFIG_BT_HCI_TEST */
+
 #if (defined(CONFIG_BT_IND_RESET) && (CONFIG_BT_IND_RESET > 0U))
 static int cmd_bt_ind_reset(const struct shell *sh, size_t argc, char *argv[])
 {
@@ -5012,7 +5085,9 @@ SHELL_STATIC_SUBCMD_SET_CREATE(bt_cmds,
 #if (defined(CONFIG_BT_IND_RESET) && (CONFIG_BT_IND_RESET > 0U))
         SHELL_CMD_ARG(ind_reset, NULL, HELP_NONE, cmd_bt_ind_reset, 2, 0),
 #endif /*#define CONFIG_BT_IND_RESET*/
-
+#if (defined(CONFIG_BT_HCI_TEST) && (CONFIG_BT_HCI_TEST > 0U))
+        SHELL_CMD_ARG(hci_test, NULL, HELP_NONE, cmd_bt_hci_test, 1, 0),
+#endif /*#define CONFIG_BT_HCI_TEST*/
 	SHELL_SUBCMD_SET_END
 );
 
