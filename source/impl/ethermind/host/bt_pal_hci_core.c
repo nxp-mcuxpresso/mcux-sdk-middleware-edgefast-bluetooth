@@ -1528,6 +1528,14 @@ void bt_hci_le_enh_conn_complete(struct bt_hci_evt_le_enh_conn_complete *evt)
 	}
 #endif /* defined(CONFIG_BT_USER_PHY_UPDATE) */
 
+#if (defined(CONFIG_BT_ATT_TEST) && (CONFIG_BT_ATT_TEST > 0U))
+	/* Add delay 2S to block the HCI_LE_Enhanced_conn_complete event process to verify ATT,
+	 *  then the peer will send the ATT cmd, then confirm the ATT cmd is processed after the
+	 *  HCI_LE_Enhanced_conn_complete process finish.
+	 */
+	(void)k_sleep(BT_SECONDS(2));
+#endif /* defined(CONFIG_BT_ATT_TEST) */
+
 	bt_conn_set_state(conn, BT_CONN_CONNECTED);
 
 	if (disconnect_reason) {
