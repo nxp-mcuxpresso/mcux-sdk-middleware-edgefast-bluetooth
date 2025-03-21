@@ -2379,7 +2379,7 @@ static void hci_encrypt_change(struct net_buf *buf)
                  * Start SMP over BR/EDR if we are pairing and are
                  * master on the link
                  */
-                if (atomic_test_bit(conn->flags, BT_CONN_BR_PAIRING) &&
+                if (atomic_test_bit(conn->flags, BT_CONN_BR_PAIRED) &&
                     conn->role == BT_CONN_ROLE_CENTRAL) {
                     bt_smp_br_send_pairing_req(conn);
                 }
@@ -4897,6 +4897,18 @@ int bt_set_appearance(uint16_t appearance)
 #endif
 
 bool bt_addr_le_is_bonded(uint8_t id, const bt_addr_le_t *addr)
+{
+	if (IS_ENABLED(CONFIG_BT_SMP)) {
+		struct bt_keys *keys = bt_keys_find_addr(id, addr);
+
+		/* if there are any keys stored then device is bonded */
+		return keys && keys->keys;
+	} else {
+		return false;
+	}
+}
+
+bool bt_le_bond_exists(uint8_t id, const bt_addr_le_t *addr)
 {
 	if (IS_ENABLED(CONFIG_BT_SMP)) {
 		struct bt_keys *keys = bt_keys_find_addr(id, addr);

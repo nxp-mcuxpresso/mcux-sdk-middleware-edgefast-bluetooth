@@ -1403,7 +1403,7 @@ static void smp_br_init(struct bt_smp_br *smp)
 {
 	/* Initialize SMP context without clearing L2CAP channel context */
 	(void)memset(((uint8_t *)(void *)smp) + offsetof(struct bt_smp_br, allowed_cmds), 0,
-		     sizeof(*smp) - offsetof(struct bt_smp, allowed_cmds));
+		     sizeof(*smp) - offsetof(struct bt_smp_br, allowed_cmds));
 
 	atomic_set_bit(smp->allowed_cmds, BT_SMP_CMD_PAIRING_FAIL);
 }
@@ -1599,12 +1599,42 @@ static void smp_br_distribute_keys(struct bt_smp_br *smp)
 #endif
 static bool smp_br_pairing_allowed(struct bt_smp_br *smp)
 {
-	if (smp->chan.chan.conn->encrypt == 0x02) {
+	bt_addr_le_t addr;
+	struct bt_conn *conn;
+	struct bt_keys_link_key *key;
+	bool le_bonded;
+
+	if (!smp->chan.chan.conn) {
+		return false;
+	}
+
+	conn = smp->chan.chan.conn;
+
+	addr.type = BT_ADDR_LE_PUBLIC;
+	bt_addr_copy(&addr.a, &conn->br.dst);
+	le_bonded = bt_le_bond_exists(BT_ID_DEFAULT, &addr);
+
+	key = bt_keys_find_link_key(&conn->br.dst);
+	if (!key) {
+		return false;
+	}
+
+	/**
+	 * Core v6.0, Vol 3, Part C, 14.1 Cross-transport key derivation
+	 *
+	 * If an LE LTK already exists and the BR/EDR link key is weaker in either strength
+	 * or MITM protection, then neither device shall generate an LE LTK using cross-transport
+	 * key derivation from a BR/EDR link key.
+	 */
+	if (le_bonded && !(key->flags & BT_LINK_KEY_AUTHENTICATED)) {
+		return false;
+	}
+
+	if (conn->encrypt == BT_HCI_ENCRYPTION_ON_BR_AES_CCM) {
 		return true;
 	}
 
-	if (IS_ENABLED(CONFIG_BT_SMP_FORCE_BREDR) &&
-	    smp->chan.chan.conn->encrypt == 0x01) {
+	if (IS_ENABLED(CONFIG_BT_SMP_FORCE_BREDR) && conn->encrypt == BT_HCI_ENCRYPTION_ON_BR_E0) {
 		LOG_WRN("Allowing BR/EDR SMP with P-192 key");
 		return true;
 	}
@@ -2189,11 +2219,50 @@ int bt_smp_br_send_pairing_req(struct bt_conn *conn)
     SMP_BD_HANDLE bd_handle;
     auth.pair_mode = SMP_LESC_MODE;
     auth.security = conn->required_sec_level;
+    uint8_t remote_fixed_chan;
+    uint8_t max_key_size;
+
+    remote_fixed_chan = bt_l2cap_br_get_remote_fixed_chan(conn);
+    if (!(remote_fixed_chan & BIT(BT_L2CAP_CID_BR_SMP))) {
+        return -ENOTSUP;
+    }
 
     smp = smp_br_chan_get(conn);
     if (!smp) {
             return -ENOTCONN;
     }
+
+    /* SMP Timeout */
+    if (atomic_test_bit(smp->flags, SMP_FLAG_TIMEOUT)) {
+        return -EIO;
+    }
+
+    /* pairing is in progress */
+    if (atomic_test_bit(smp->flags, SMP_FLAG_PAIRING)) {
+        return -EBUSY;
+    }
+
+    /* check if we are allowed to start SMP over BR/EDR */
+    if (!smp_br_pairing_allowed(smp)) {
+        return 0;
+    }
+
+#if 0 /* not needed for the CTKD case */
+    /* Channel not yet connected, will start pairing once connected */
+    if (!atomic_test_bit(smp->flags, SMP_FLAG_BR_CONNECTED)) {
+        atomic_set_bit(smp->flags, SMP_FLAG_BR_PAIR);
+        return 0;
+    }
+#endif
+
+    max_key_size = bt_conn_enc_key_size(conn);
+    if (!max_key_size) {
+        LOG_DBG("Invalid encryption key size");
+        return -EIO;
+    }
+
+    smp_br_init(smp);
+
 #ifdef SMP_LESC_CROSS_TXP_KEY_GEN
     UCHAR lkey[BT_LINK_KEY_SIZE];
     UCHAR lkey_type;
@@ -2202,9 +2271,7 @@ int bt_smp_br_send_pairing_req(struct bt_conn *conn)
     auth.transport = (UCHAR)1;
     auth.ekey_size = 16U;
     auth.xtx_info =  SMP_XTX_KEYGEN_MASK;
-    if (atomic_test_bit(smp->flags, SMP_FLAG_CT2)) {
-        auth.xtx_info |= 0x2;
-   }
+    auth.xtx_info |= 0x2;
 
 #ifdef SMP_ENABLE_BLURTOOTH_VU_UPDATE
       auth.role = 0;
@@ -2226,6 +2293,10 @@ int bt_smp_br_send_pairing_req(struct bt_conn *conn)
 	{
 		return (uint8_t)(retval & 0x00FF);
 	}
+
+	atomic_set_bit(smp->allowed_cmds, BT_SMP_CMD_PAIRING_RSP);
+
+	atomic_set_bit(smp->flags, SMP_FLAG_PAIRING);
 #endif
 	return 0;
 }
@@ -7446,7 +7517,10 @@ void appl_smp_lesc_xtxp_lk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
     API_RESULT retval;
     SMP_BD_HANDLE bd_handle;
     SMP_AUTH_INFO auth;
-    UCHAR type;
+    struct bt_keys_link_key *link_key;
+    bt_addr_t addr;
+    struct bt_conn *conn;
+    UCHAR type = 0U;
 
     LOG_DBG("\n LK of the device is ...\n");
 
@@ -7465,13 +7539,41 @@ void appl_smp_lesc_xtxp_lk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
                 &bt_smp_bd_handle,
                 &auth
             );
-    if (API_SUCCESS == retval)
-    {
+    if (API_SUCCESS == retval) {
         type = (SMP_SEC_LEVEL_2 == auth.security) ?
             HCI_LINK_KEY_AUTHENTICATED_P_256 : HCI_LINK_KEY_UNAUTHENTICATED_P_256;
+    }
 
-        (BT_IGNORE_RETURN_VALUE) BT_sm_add_device(bt_smp_bd_addr.addr);
-        (BT_IGNORE_RETURN_VALUE) BT_sm_set_device_link_key_and_type(bt_smp_bd_addr.addr, xtxp->lk, &type);
+    (BT_IGNORE_RETURN_VALUE) BT_sm_add_device(bt_smp_bd_addr.addr);
+    (BT_IGNORE_RETURN_VALUE) BT_sm_set_device_link_key_and_type(bt_smp_bd_addr.addr, xtxp->lk, type == 0U ? NULL : &type);
+
+    /*
+     * At this point remote device identity is known so we can use
+     * destination address here
+     */
+    link_key = bt_keys_get_link_key((const bt_addr_t *)&bt_smp_bd_addr.addr[0]);
+    if (!link_key) {
+        LOG_ERR("Unable to get keys");
+        return;
+    }
+
+    memcpy(link_key->val, xtxp->lk, SMP_LK_SIZE);
+    link_key->flags |= BT_LINK_KEY_SC;
+
+    conn = bt_conn_lookup_device_id(bt_smp_bd_handle);
+    if (NULL == conn) {
+        LOG_ERR("Connect is not found, invalid bd handle 0x%02X", *handle);
+    } else {
+        if (conn->le.keys->flags & BT_KEYS_AUTHENTICATED) {
+            link_key->flags |= BT_LINK_KEY_AUTHENTICATED;
+        } else {
+            link_key->flags &= ~BT_LINK_KEY_AUTHENTICATED;
+        }
+    }
+    bt_conn_unref(conn);
+
+    if (IS_ENABLED(CONFIG_BT_SETTINGS)) {
+        bt_keys_link_key_store(link_key);
     }
 }
 #endif
