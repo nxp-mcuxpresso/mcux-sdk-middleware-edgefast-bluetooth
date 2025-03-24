@@ -136,6 +136,38 @@ static int cmd_disconnect(const struct shell *sh, size_t argc, char *argv[])
 	return 0;
 }
 
+static int cmd_select(const struct shell *sh, size_t argc, char *argv[])
+{
+	char addr_str[BT_ADDR_STR_LEN];
+	struct bt_conn *conn;
+	bt_addr_t addr;
+	int err;
+
+	memset(&addr, 0, sizeof(addr));
+	err = bt_addr_from_str(argv[1], &addr);
+	if (err < 0) {
+		shell_error(sh, "Invalid peer address (err %d)", err);
+		return err;
+	}
+
+	conn = bt_conn_lookup_addr_br(&addr);
+	if (!conn) {
+		shell_error(sh, "No matching connection found");
+		return -ENOEXEC;
+	}
+
+	if (default_br_conn) {
+		bt_conn_unref(default_br_conn);
+	}
+
+	default_br_conn = conn;
+
+	bt_addr_to_str(&addr, addr_str, sizeof(addr_str));
+	shell_print(sh, "Selected conn is now: %s", addr_str);
+
+	return 0;
+}
+
 static void br_device_found(const bt_addr_t *addr, int8_t rssi,
 				  const uint8_t cod[3], const uint8_t eir[240])
 {
@@ -1243,6 +1275,7 @@ SHELL_STATIC_SUBCMD_SET_CREATE(br_cmds,
 	SHELL_CMD_ARG(auth-pincode, NULL, "<pincode>", cmd_auth_pincode, 2, 0),
 	SHELL_CMD_ARG(connect, NULL, "<address>", cmd_connect, 2, 0),
 	SHELL_CMD_ARG(disconnect, NULL, HELP_ADDR_LE, cmd_disconnect, 1, 2),
+	SHELL_CMD_ARG(select, NULL, HELP_ADDR_LE, cmd_select, 2, 0),
 	SHELL_CMD_ARG(discovery, NULL,
 		      "<value: on, off> [length: 1-48] [mode: limited]",
 		      cmd_discovery, 2, 2),
@@ -1382,11 +1415,11 @@ static void disconnected_set_new_default_conn_cb(struct bt_conn *conn, void *use
 	}
 
 	if (info.state == BT_CONN_STATE_CONNECTED) {
-		char addr_str[BT_ADDR_LE_STR_LEN];
+		char addr_str[BT_ADDR_STR_LEN];
 
 		default_br_conn = bt_conn_ref(conn);
 
-		bt_addr_le_to_str(info.le.dst, addr_str, sizeof(addr_str));
+		bt_addr_to_str(info.br.dst, addr_str, sizeof(addr_str));
 		shell_print(ctx_shell, "Selected BR conn is now: %s", addr_str);
 	}
 }

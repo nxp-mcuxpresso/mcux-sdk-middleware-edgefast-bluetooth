@@ -72,6 +72,18 @@ extern struct bt_csis *csis;
 struct bt_conn *default_conn;
 struct bt_conn *default_br_conn;
 
+static struct bt_conn *shell_bt_default_conn(void)
+{
+	if (default_conn != NULL) {
+		return default_conn;
+	} else if (default_br_conn != NULL) {
+		return default_br_conn;
+	} else {
+	}
+
+	return NULL;
+}
+
 /* Connection context for BR/EDR legacy pairing in sec mode 3 */
 static struct bt_conn *pairing_conn;
 
@@ -3347,8 +3359,9 @@ static int cmd_info(const struct shell *sh, size_t argc, char *argv[])
 	memset(&addr, 0, sizeof(addr));
 	switch (argc) {
 	case 1:
-		if (default_conn) {
-			conn = bt_conn_ref(default_conn);
+		conn = shell_bt_default_conn();
+		if (conn) {
+			conn = bt_conn_ref(conn);
 		}
 		break;
 	case 2:
@@ -3695,14 +3708,17 @@ static int cmd_security(const struct shell *sh, size_t argc, char *argv[])
 {
 	int err, sec;
 	struct bt_conn_info info;
+	struct bt_conn *conn;
 
-	if (!default_conn || (bt_conn_get_info(default_conn, &info) < 0)) {
+	conn = shell_bt_default_conn();
+
+	if (!conn || (bt_conn_get_info(conn, &info) < 0)) {
 		shell_error(sh, "Not connected");
 		return -ENOEXEC;
 	}
 
 	if (argc < 2) {
-		shell_print(sh, "BT_SECURITY_L%d", bt_conn_get_security(default_conn));
+		shell_print(sh, "BT_SECURITY_L%d", bt_conn_get_security(conn));
 
 		return 0;
 	}
@@ -3730,7 +3746,7 @@ static int cmd_security(const struct shell *sh, size_t argc, char *argv[])
 		}
 	}
 
-	err = bt_conn_set_security(default_conn, (bt_security_t)sec);
+	err = bt_conn_set_security(conn, (bt_security_t)sec);
 	if (err) {
 		shell_error(sh, "Setting security failed (err %d)", err);
 	}
@@ -4171,8 +4187,8 @@ static int cmd_auth_cancel(const struct shell *sh,
 {
 	struct bt_conn *conn;
 
-	if (default_conn) {
-		conn = default_conn;
+	if (shell_bt_default_conn()) {
+		conn = shell_bt_default_conn();
 	} else if (pairing_conn) {
 		conn = pairing_conn;
 	} else {
@@ -4192,24 +4208,24 @@ static int cmd_auth_cancel(const struct shell *sh,
 static int cmd_auth_passkey_confirm(const struct shell *sh,
 				    size_t argc, char *argv[])
 {
-	if (!default_conn) {
+	if (!shell_bt_default_conn()) {
 		shell_print(sh, "Not connected");
 		return -ENOEXEC;
 	}
 
-	bt_conn_auth_passkey_confirm(default_conn);
+	bt_conn_auth_passkey_confirm(shell_bt_default_conn());
 	return 0;
 }
 
 static int cmd_auth_pairing_confirm(const struct shell *sh,
 				    size_t argc, char *argv[])
 {
-	if (!default_conn) {
+	if (!shell_bt_default_conn()) {
 		shell_print(sh, "Not connected");
 		return -ENOEXEC;
 	}
 
-	bt_conn_auth_pairing_confirm(default_conn);
+	bt_conn_auth_pairing_confirm(shell_bt_default_conn());
 	return 0;
 }
 
@@ -4349,7 +4365,7 @@ static int cmd_auth_passkey(const struct shell *sh,
 	unsigned int passkey;
 	int err;
 
-	if (!default_conn) {
+	if (!shell_bt_default_conn()) {
 		shell_print(sh, "Not connected");
 		return -ENOEXEC;
 	}
@@ -4360,7 +4376,7 @@ static int cmd_auth_passkey(const struct shell *sh,
 		return -EINVAL;
 	}
 
-	err = bt_conn_auth_passkey_entry(default_conn, passkey);
+	err = bt_conn_auth_passkey_entry(shell_bt_default_conn(), passkey);
 	if (err) {
 		shell_error(sh, "Failed to set passkey (%d)", err);
 		return err;
@@ -4376,7 +4392,7 @@ static int cmd_auth_passkey_notify(const struct shell *sh,
 	unsigned long type;
 	int err;
 
-	if (!default_conn) {
+	if (!shell_bt_default_conn()) {
 		shell_print(sh, "Not connected");
 		return -ENOEXEC;
 	}
@@ -4392,7 +4408,7 @@ static int cmd_auth_passkey_notify(const struct shell *sh,
 		return -EINVAL;
 	}
 
-	err = bt_conn_auth_keypress_notify(default_conn, type);
+	err = bt_conn_auth_keypress_notify(shell_bt_default_conn(), type);
 	if (err) {
 		shell_error(sh, "bt_conn_auth_keypress_notify errno %d", err);
 		return err;
@@ -4415,7 +4431,7 @@ static int cmd_auth_oob_tk(const struct shell *sh, size_t argc, char *argv[])
 		return -EINVAL;
 	}
 
-	err = bt_le_oob_set_legacy_tk(default_conn, tk);
+	err = bt_le_oob_set_legacy_tk(shell_bt_default_conn(), tk);
 	if (err) {
 		shell_error(sh, "Failed to set TK (%d)", err);
 		return err;
