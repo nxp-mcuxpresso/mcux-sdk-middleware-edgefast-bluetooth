@@ -794,37 +794,27 @@ static void connected(struct bt_conn *conn, uint8_t err)
 		goto done;
 	}
 
-	shell_print(ctx_shell, "Connected: %s", addr);
-
 	info_err = bt_conn_get_info(conn, &info);
 	if (info_err != 0) {
 		shell_error(ctx_shell, "Failed to connection information: %d", info_err);
 		goto done;
 	}
 
+	if (info.type != BT_CONN_TYPE_LE) {
+		return;
+	}
+
+	shell_print(ctx_shell, "BLE Connected: %s", addr);
+
 	if (info.role == BT_CONN_ROLE_CENTRAL) {
-		if (info.type != BT_CONN_TYPE_LE) {
-			if (default_br_conn != NULL) {
-				bt_conn_unref(default_br_conn);
-			}
-	
-			default_br_conn = bt_conn_ref(conn);
-		} else {
-			if (default_conn != NULL) {
-				bt_conn_unref(default_conn);
-			}
-	
-			default_conn = bt_conn_ref(conn);
+		if (default_conn != NULL) {
+			bt_conn_unref(default_conn);
 		}
+
+		default_conn = bt_conn_ref(conn);
 	} else if (info.role == BT_CONN_ROLE_PERIPHERAL) {
-		if (info.type != BT_CONN_TYPE_LE) {
-			if (default_br_conn == NULL) {
-				default_br_conn = bt_conn_ref(conn);
-			}
-		} else {
-			if (default_conn != NULL) {
-				bt_conn_unref(default_conn);
-			}
+		if (default_conn == NULL) {
+			default_conn = bt_conn_ref(conn);
 		}
 	}
 
@@ -866,6 +856,15 @@ static void disconnected_set_new_default_conn_cb(struct bt_conn *conn, void *use
 static void disconnected(struct bt_conn *conn, uint8_t reason)
 {
 	char addr[BT_ADDR_LE_STR_LEN];
+	struct bt_conn_info info;
+
+	if (bt_conn_get_info(conn, &info) != 0) {
+		shell_error(ctx_shell, "Unable to get info: conn %p", conn);
+	} else {
+		if (info.type != BT_CONN_TYPE_LE) {
+			return;
+		}
+	}
 
 	conn_addr_str(conn, addr, sizeof(addr));
 	shell_print(ctx_shell, "Disconnected: %s (reason 0x%02x)", addr, reason);
@@ -876,12 +875,6 @@ static void disconnected(struct bt_conn *conn, uint8_t reason)
 
 		/* If we are connected to other devices, set one of them as default */
 		bt_conn_foreach(BT_CONN_TYPE_LE, disconnected_set_new_default_conn_cb, NULL);
-	} else if (default_br_conn == conn) {
-		bt_conn_unref(default_br_conn);
-		default_br_conn = NULL;
-	}
-	else
-	{
 	}
 
 	s_shellBtPrompt = (char *)current_prompt();
@@ -1225,6 +1218,8 @@ static void bt_ready(int err)
 	/* Unregister to avoid register repeatedly */
 	bt_conn_cb_unregister(&conn_callbacks);
 	bt_conn_cb_register(&conn_callbacks);
+	bt_conn_cb_unregister(&br_conn_callbacks);
+	bt_conn_cb_register(&br_conn_callbacks);
 #endif /* CONFIG_BT_CONN */
 
 #if (defined(CONFIG_BT_PER_ADV_SYNC) && (CONFIG_BT_PER_ADV_SYNC > 0))
@@ -3987,11 +3982,15 @@ static void auth_pairing_oob_data_request(struct bt_conn *conn,
 static void auth_pairing_complete(struct bt_conn *conn, bool bonded)
 {
 	char addr[BT_ADDR_LE_STR_LEN];
+	const bt_addr_le_t *dst;
 
-	bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
+	dst = bt_conn_get_dst(conn);
+	if (dst != NULL) {
+		bt_addr_le_to_str(dst, addr, sizeof(addr));
 
-	shell_print(ctx_shell, "%s with %s", bonded ? "Bonded" : "Paired",
-		    addr);
+		shell_print(ctx_shell, "%s with %s", bonded ? "Bonded" : "Paired",
+			    addr);
+	}
 }
 
 static void auth_pairing_failed(struct bt_conn *conn, enum bt_security_err err)
@@ -4004,49 +4003,20 @@ static void auth_pairing_failed(struct bt_conn *conn, enum bt_security_err err)
 		    security_err_str(err), err);
 }
 
-#if (defined(CONFIG_BT_CLASSIC) && (CONFIG_BT_CLASSIC > 0))
-static void auth_pincode_entry(struct bt_conn *conn, bool highsec)
-{
-	char addr[BT_ADDR_STR_LEN];
-	struct bt_conn_info info;
-
-	if (bt_conn_get_info(conn, &info) < 0) {
-		return;
-	}
-
-	if (info.type != BT_CONN_TYPE_BR) {
-		return;
-	}
-
-	bt_addr_to_str(info.br.dst, addr, sizeof(addr));
-
-	if (highsec) {
-		shell_print(ctx_shell, "Enter 16 digits wide PIN code for %s",
-			    addr);
-	} else {
-		shell_print(ctx_shell, "Enter PIN code for %s", addr);
-	}
-
-	/*
-	 * Save connection info since in security mode 3 (link level enforced
-	 * security) PIN request callback is called before connected callback
-	 */
-	if (!default_conn && !pairing_conn) {
-		pairing_conn = bt_conn_ref(conn);
-	}
-}
-#endif
-
 #if (defined(CONFIG_BT_SMP_APP_PAIRING_ACCEPT) && (CONFIG_BT_SMP_APP_PAIRING_ACCEPT > 0))
 enum bt_security_err pairing_accept(
 	struct bt_conn *conn, const struct bt_conn_pairing_feat *const feat)
 {
-	shell_print(ctx_shell, "Remote pairing features: "
-			       "IO: 0x%02x, OOB: %d, AUTH: 0x%02x, Key: %d, "
-			       "Init Kdist: 0x%02x, Resp Kdist: 0x%02x",
-			       feat->io_capability, feat->oob_data_flag,
-			       feat->auth_req, feat->max_enc_key_size,
-			       feat->init_key_dist, feat->resp_key_dist);
+	if (feat != NULL) {
+		shell_print(ctx_shell, "Remote pairing features: "
+				"IO: 0x%02x, OOB: %d, AUTH: 0x%02x, Key: %d, "
+				"Init Kdist: 0x%02x, Resp Kdist: 0x%02x",
+				feat->io_capability, feat->oob_data_flag,
+				feat->auth_req, feat->max_enc_key_size,
+				feat->init_key_dist, feat->resp_key_dist);
+	} else {
+		shell_print(ctx_shell, "Remote pairing");
+	}
 
 	return BT_SECURITY_ERR_SUCCESS;
 }

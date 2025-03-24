@@ -1979,6 +1979,7 @@ struct shell {
 extern const struct shell *ctx_shell;
 extern struct bt_conn *default_conn;
 extern struct bt_conn *default_br_conn;
+extern struct bt_conn_cb br_conn_callbacks;
 
 enum shell_vt100_color {
 	SHELL_VT100_COLOR_BLACK,
@@ -2176,4 +2177,6 @@ ssize_t audio_pa_data_add(struct bt_data *data_array,
 ssize_t csis_ad_data_add(struct bt_data *data, const size_t data_size, const bool discoverable);
 
 bool is_substring(const char *substr, const char *str);
+
+void auth_pincode_entry(struct bt_conn *conn, bool highsec);
 #endif /* __BT_H */

@@ -108,7 +108,6 @@ static void disconnected(struct bt_conn *conn)
 
     if (default_br_conn)
     {
-        bt_conn_unref(default_br_conn);
         default_br_conn = NULL;
     }
 }
