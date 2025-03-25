@@ -7515,10 +7515,8 @@ void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
 void appl_smp_lesc_xtxp_lk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
 {
     API_RESULT retval;
-    SMP_BD_HANDLE bd_handle;
     SMP_AUTH_INFO auth;
     struct bt_keys_link_key *link_key;
-    bt_addr_t addr;
     struct bt_conn *conn;
     UCHAR type = 0U;
 

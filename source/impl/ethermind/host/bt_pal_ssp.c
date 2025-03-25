@@ -48,7 +48,7 @@ static const uint8_t ssp_method[4 /* remote */][4 /* local */] = {
 	      { JUST_WORKS, JUST_WORKS, JUST_WORKS, JUST_WORKS },
 };
 
-#if defined(CONFIG_BT_SMP_APP_PAIRING_ACCEPT)
+#if (defined(CONFIG_BT_SMP_APP_PAIRING_ACCEPT) && (CONFIG_BT_SMP_APP_PAIRING_ACCEPT > 0U))
 /* all the sm_get_io_capability_pl is called with sm_lock,
  * so it is ok to use on global variable to protect it.
  */
@@ -199,9 +199,13 @@ static uint8_t get_local_auth(const struct bt_conn *conn)
 		di = sm_search_device_entity (NULL, 0x0U, &handle);
 		if (di != SM_MAX_DEVICES) {
 			sm_lock();
+#if (defined(CONFIG_BT_SMP_APP_PAIRING_ACCEPT) && (CONFIG_BT_SMP_APP_PAIRING_ACCEPT > 0U))
 			dont_pairing_accept_call = true;
+#endif
 			retval = sm_get_io_capability_pl(di, &cap);
+#if (defined(CONFIG_BT_SMP_APP_PAIRING_ACCEPT) && (CONFIG_BT_SMP_APP_PAIRING_ACCEPT > 0U))
 			dont_pairing_accept_call = false;
+#endif
 			sm_unlock();
 		}
 	}
@@ -912,7 +916,7 @@ void bt_hci_io_capa_resp(struct net_buf *buf)
 #endif
 }
 
-#if defined(CONFIG_BT_SMP_APP_PAIRING_ACCEPT)
+#if (defined(CONFIG_BT_SMP_APP_PAIRING_ACCEPT) && (CONFIG_BT_SMP_APP_PAIRING_ACCEPT > 0U))
 API_RESULT sm_pairing_accept(BT_DEVICE_ADDR* device_addr)
 {
 	struct bt_conn *conn = NULL;
