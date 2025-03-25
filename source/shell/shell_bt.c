@@ -70,15 +70,19 @@ extern struct bt_csis *csis;
 
 #if (defined(CONFIG_BT_CONN) && (CONFIG_BT_CONN > 0))
 struct bt_conn *default_conn;
+#if (defined(CONFIG_BT_CLASSIC) && (CONFIG_BT_CLASSIC > 0))
 struct bt_conn *default_br_conn;
+#endif
 
 static struct bt_conn *shell_bt_default_conn(void)
 {
 	if (default_conn != NULL) {
 		return default_conn;
+#if (defined(CONFIG_BT_CLASSIC) && (CONFIG_BT_CLASSIC > 0))
 	} else if (default_br_conn != NULL) {
 		return default_br_conn;
 	} else {
+#endif
 	}
 
 	return NULL;
@@ -1225,13 +1229,17 @@ static void bt_ready(int err)
 
 #if (defined(CONFIG_BT_CONN) && (CONFIG_BT_CONN > 0))
 	default_conn = NULL;
+#if (defined(CONFIG_BT_CLASSIC) && (CONFIG_BT_CLASSIC > 0))
 	default_br_conn = NULL;
+#endif
 
 	/* Unregister to avoid register repeatedly */
 	bt_conn_cb_unregister(&conn_callbacks);
 	bt_conn_cb_register(&conn_callbacks);
+#if (defined(CONFIG_BT_CLASSIC) && (CONFIG_BT_CLASSIC > 0))
 	bt_conn_cb_unregister(&br_conn_callbacks);
 	bt_conn_cb_register(&br_conn_callbacks);
+#endif
 #endif /* CONFIG_BT_CONN */
 
 #if (defined(CONFIG_BT_PER_ADV_SYNC) && (CONFIG_BT_PER_ADV_SYNC > 0))

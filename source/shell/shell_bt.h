@@ -1978,8 +1978,10 @@ struct shell {
 
 extern const struct shell *ctx_shell;
 extern struct bt_conn *default_conn;
+#if (defined(CONFIG_BT_CLASSIC) && (CONFIG_BT_CLASSIC > 0))
 extern struct bt_conn *default_br_conn;
 extern struct bt_conn_cb br_conn_callbacks;
+#endif
 
 enum shell_vt100_color {
 	SHELL_VT100_COLOR_BLACK,
