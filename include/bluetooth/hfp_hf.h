@@ -40,6 +40,7 @@ enum bt_hfp_hf_at_cmd {
 #define HFP_HF_CMD_ERROR          1
 #define HFP_HF_CMD_CME_ERROR      2
 #define HFP_HF_CMD_UNKNOWN_ERROR  4
+#define HFP_HF_CMD_ERR_FROM_AG    0x18
 
 /** @brief HFP HF Command completion field */
 struct bt_hfp_hf_cmd_complete {
