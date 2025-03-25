@@ -1,7 +1,7 @@
 /* hfp_hf.c - Hands free Profile - Handsfree side handling */
 
 /*
- * Copyright (C) 2021, 2024 NXP Ltd.
+ * Copyright (C) 2021, 2024-2025 NXP Ltd.
  * Copyright (c) 2015-2016 Intel Corporation
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -1424,7 +1424,10 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             LOG_DBG("> Number        : %s\n", app_parser_result.result_param.clcc_resp_result.number);
             LOG_DBG("> Type          : %d\n", app_parser_result.result_param.clcc_resp_result.type);
             LOG_DBG("> Operator Name : %s\n", app_parser_result.result_param.clcc_resp_result.alpha);
-
+            if (bt_hf_cb->list_current_calls)
+            {
+                bt_hf_cb->list_current_calls(hfp_hf->bt_conn, (bt_hfp_hf_current_calls_state_t *)&app_parser_result.result_param.clcc_resp_result);
+            }
             break;
 
         case HFP_UNIT_PEER_IND_STATUS_IND:
@@ -2699,6 +2702,35 @@ int bt_hfp_hf_get_peer_indicator_status(struct bt_conn *conn)
     if (api_retval != API_SUCCESS)
     {
         LOG_ERR("Failed to get indcators' status api_retval :%d ", api_retval);
+        status = bt_hfp_hf_get_status(api_retval);
+    }
+
+    return status;
+}
+
+int bt_hfp_hf_query_list_current_calls(struct bt_conn *conn)
+{
+    struct bt_hfp_hf_em *hf;
+    int api_retval;
+    int status = 0;
+
+    if (!conn)
+    {
+        LOG_ERR("Invalid connection");
+        return -ENOTCONN;
+    }
+
+    hf = bt_hfp_hf_lookup_bt_conn(conn);
+    if (!hf)
+    {
+        LOG_ERR("No HF connection found");
+        return -ENOTCONN;
+    }
+
+    api_retval = BT_hfp_unit_query_list_current_calls(hf->handle);
+    if (api_retval != API_SUCCESS)
+    {
+        LOG_ERR("Failed to query list current calls api_retval :%d ", api_retval);
         status = bt_hfp_hf_get_status(api_retval);
     }
 

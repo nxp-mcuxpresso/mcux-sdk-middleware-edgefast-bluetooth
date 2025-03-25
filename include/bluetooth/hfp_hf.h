@@ -3,7 +3,7 @@
  */
 
 /*
- * Copyright 2024 NXP
+ * Copyright 2024-2025 NXP
  * Copyright (c) 2015-2016 Intel Corporation
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -107,6 +107,27 @@ typedef struct _hf_indicator_status_t
     /* "callheld" indicator */
     uint8_t callheld;
 } hf_indicator_status_t;
+
+/** @brief bt hf current calls state */
+typedef struct _hf_current_calls_state_t
+{
+    /** Call identifier, uniquely identifies the call */
+    uint8_t id;
+    /** Direction of the call: 0 = outgoing, 1 = incoming */
+    uint8_t dir;
+    /** Call status: 0 = active, 1 = held, 2 = dialing, 3 = alerting, 4 = incoming, 5 = waiting */
+    uint8_t status;
+    /** Call mode: 0 = voice, 1 = data, 2 = fax */
+    uint8_t mode;
+    /** Multiparty call flag: 0 = not multiparty, 1 = multiparty call */
+    uint8_t mprty;
+    /** Phone number of the call in ASCII format */
+    char    number[HFP_HF_DIGIT_ARRAY_SIZE];
+    /** Type of number (refer to GSM 04.08 subclause 10.5.4.7) */
+    uint8_t type;
+    /** Caller name in ASCII format if provided by the AG */
+    uint8_t alpha[HFP_HF_MAX_OPERATOR_NAME_LEN];
+} bt_hfp_hf_current_calls_state_t;
 
 /** @brief HFP profile application callback
   *
@@ -298,6 +319,17 @@ struct bt_hfp_hf_cb {
        *  @param config get the config from upper layer.
        */
       void (*get_config)(hfp_hf_get_config **config);
+
+      /** HF list current calls indication callback to application
+       *
+       *  If this callback is provided it will be called whenever the
+       *  AG responds to the AT+CLCC command with current call information.
+       *
+       * @param conn Connection object.
+       * @param calls_state Pointer to structure containing current call information.
+       */
+      void (*list_current_calls)(struct bt_conn *conn,
+                                 bt_hfp_hf_current_calls_state_t *calls_state);
 };
 
 /** @brief Register HFP HF profile
@@ -572,6 +604,21 @@ int bt_hfp_hf_open_audio(struct bt_conn *conn, uint8_t codec);
  *
  */
 int bt_hfp_hf_close_audio(struct bt_conn *sco_conn);
+
+/**
+ *
+ * @brief     Query the list of current calls from the AG
+ *
+ * This function sends the AT+CLCC command to the AG to request
+ * the list of current call information. The AG will respond with
+ * call information which will be delivered through registered callbacks.
+ *
+ * @param     conn Connection object.
+ *
+ * @return    0 in case of success or negative value in case of error.
+ *
+ */
+int bt_hfp_hf_query_list_current_calls(struct bt_conn *conn);
 
 #ifdef __cplusplus
 }
