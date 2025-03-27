@@ -7567,8 +7567,8 @@ void appl_smp_lesc_xtxp_lk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
         } else {
             link_key->flags &= ~BT_LINK_KEY_AUTHENTICATED;
         }
+        bt_conn_unref(conn);
     }
-    bt_conn_unref(conn);
 
     if (IS_ENABLED(CONFIG_BT_SETTINGS)) {
         bt_keys_link_key_store(link_key);
