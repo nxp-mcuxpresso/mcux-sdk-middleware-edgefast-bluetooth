@@ -3750,6 +3750,13 @@ static uint8_t smp_pairing_req(struct bt_smp *smp, struct bt_smp_pairing *req, S
     }
 #endif
 
+#if !(defined(CONFIG_BT_CLASSIC) && ((CONFIG_BT_CLASSIC) > 0U))
+	rsp->resp_key_dist &= ~BT_SMP_DIST_LINK_KEY;
+	rsp->init_key_dist &= ~BT_SMP_DIST_LINK_KEY;
+#ifdef SMP_LESC_CROSS_TXP_KEY_GEN
+	auth->xtx_info &= ~SMP_XTX_KEYGEN_MASK;
+#endif
+#endif
 	/* for Local */
 	keyDistribution = rsp->resp_key_dist;
 	/* for Remote */
