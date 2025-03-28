@@ -2404,6 +2404,7 @@ static int l2cap_br_accept(struct bt_conn *conn, struct bt_l2cap_chan **chan)
 
 uint8_t bt_l2cap_br_get_remote_fixed_chan(struct bt_conn *conn)
 {
+#if 0
 	struct bt_l2cap_chan *chan_sig;
 	struct bt_l2cap_br *br_chan_sig;
 
@@ -2415,8 +2416,11 @@ uint8_t bt_l2cap_br_get_remote_fixed_chan(struct bt_conn *conn)
 	br_chan_sig = CONTAINER_OF(chan_sig, struct bt_l2cap_br, chan.chan);
 
 	return br_chan_sig->info_fixed_chan;
+#endif
+	return 0;
 }
 
+#if 0
 API_RESULT ethermind_l2cap_getinfo_cnf
            (
               /* IN */ DEVICE_HANDLE  * handle,
@@ -2481,6 +2485,7 @@ void bt_l2cap_register_ethermind_cb()
 	common_cb.l2ca_getinfo_cnf = ethermind_l2cap_getinfo_cnf;
 	(void)l2cap_register_common_cb(&common_cb);
 }
+#endif
 
 BT_L2CAP_BR_CHANNEL_DEFINE(br_fixed_chan, BT_L2CAP_CID_BR_SIG, l2cap_br_accept);
 
@@ -2489,7 +2494,9 @@ void bt_l2cap_br_init(void)
 	struct bt_l2cap_server *server, *next;
 	sys_slist_t temp;
 
+#if 0
 	bt_l2cap_register_ethermind_cb();
+#endif
 
 	/* Clear register server. */
 	temp = br_servers;
