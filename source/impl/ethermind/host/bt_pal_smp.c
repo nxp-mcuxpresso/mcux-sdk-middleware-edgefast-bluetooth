@@ -1131,6 +1131,7 @@ static void smp_sign_info_sent(struct bt_conn *conn, void *user_data)
 
 #if (defined(CONFIG_BT_CLASSIC) && ((CONFIG_BT_CLASSIC) > 0U))
 
+#if 0
 static void sc_derive_link_key(struct bt_smp *smp)
 {
 	/* constants as specified in Core Spec Vol.3 Part H 2.4.2.4 */
@@ -1188,6 +1189,7 @@ static void sc_derive_link_key(struct bt_smp *smp)
 		bt_keys_link_key_store(link_key);
 	}
 }
+#endif
 
 static void smp_br_reset(struct bt_smp_br *smp)
 {
@@ -2371,7 +2373,7 @@ static void smp_pairing_complete(struct bt_smp *smp, uint8_t status)
 	}
 
 	if (!status) {
-#if (defined(CONFIG_BT_CLASSIC) && ((CONFIG_BT_CLASSIC) > 0U))
+#if 0
 		/*
 		 * Don't derive if Debug Keys are used.
 		 * TODO should we allow this if BR/EDR is already connected?
@@ -5504,6 +5506,7 @@ static void bt_smp_encrypt_change(struct bt_l2cap_chan *chan,
 		return;
 	}
 
+#if 0
 	/* derive BR/EDR LinkKey if supported by both sides */
 	if (atomic_test_bit(smp->flags, SMP_FLAG_SC)) {
 		if ((smp->local_dist & BT_SMP_DIST_LINK_KEY) &&
@@ -5529,6 +5532,10 @@ static void bt_smp_encrypt_change(struct bt_l2cap_chan *chan,
 		smp->local_dist &= ~BT_SMP_DIST_LINK_KEY;
 		smp->remote_dist &= ~BT_SMP_DIST_LINK_KEY;
 	}
+#else
+	smp->local_dist &= ~BT_SMP_DIST_LINK_KEY;
+	smp->remote_dist &= ~BT_SMP_DIST_LINK_KEY;
+#endif
 
 	if (smp->remote_dist & BT_SMP_DIST_ENC_KEY) {
 		atomic_set_bit(smp->allowed_cmds, BT_SMP_CMD_ENCRYPT_INFO);
