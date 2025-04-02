@@ -2394,6 +2394,16 @@ config BT_COD
       https://www.bluetooth.com/specifications/assigned-numbers
       This symbol is a config macro.
 
+if !BT_BLE_DISABLE
+config BT_CTKD_STRENGTH_CHECK
+    bool "BT_CTKD_STRENGTH_CHECK"
+    default 0
+    help
+      Cross-Transport Key Derivation (CTKD) strength check.
+      This option enables it or not.
+      This symbol is a config macro.
+endif # !BT_BLE_DISABLE
+
 endif # BT_CLASSIC
 
 config BT_BUF_ACL_TX_SIZE

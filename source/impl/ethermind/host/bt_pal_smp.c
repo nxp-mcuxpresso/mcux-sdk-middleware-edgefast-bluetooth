@@ -1599,6 +1599,7 @@ static void smp_br_distribute_keys(struct bt_smp_br *smp)
 #endif /* CONFIG_BT_SIGNING */
 }
 #endif
+#if (defined(CONFIG_BT_CTKD_STRENGTH_CHECK) && (CONFIG_BT_CTKD_STRENGTH_CHECK > 0u))
 static bool smp_br_pairing_allowed(struct bt_smp_br *smp)
 {
 	bt_addr_le_t addr;
@@ -1643,6 +1644,7 @@ static bool smp_br_pairing_allowed(struct bt_smp_br *smp)
 
 	return false;
 }
+#endif
 
 #if (defined(CONFIG_BT_CLASSIC) && ((CONFIG_BT_CLASSIC) > 0U))
 static uint8_t send_br_pairing_rsp(struct bt_smp_br *smp)
@@ -1680,6 +1682,7 @@ static uint8_t smp_br_pairing_req(struct bt_smp_br *smp, struct bt_smp_pairing *
 
 	auth->param = SMP_ERROR_NONE;
 
+#if (defined(CONFIG_BT_CTKD_STRENGTH_CHECK) && (CONFIG_BT_CTKD_STRENGTH_CHECK > 0u))
 	/*
 	 * If a Pairing Request is received over the BR/EDR transport when
 	 * either cross-transport key derivation/generation is not supported or
@@ -1687,7 +1690,6 @@ static uint8_t smp_br_pairing_req(struct bt_smp_br *smp, struct bt_smp_pairing *
 	 * using P256, a Pairing Failed shall be sent with the error code
 	 * "Cross-transport Key Derivation/Generation not allowed" (0x0E)."
 	 */
-#if 0
 	if (!smp_br_pairing_allowed(smp)) {
 		return BT_SMP_ERR_CROSS_TRANSP_NOT_ALLOWED;
 	}
@@ -2244,10 +2246,12 @@ int bt_smp_br_send_pairing_req(struct bt_conn *conn)
         return -EBUSY;
     }
 
+#if (defined(CONFIG_BT_CTKD_STRENGTH_CHECK) && (CONFIG_BT_CTKD_STRENGTH_CHECK > 0u))
     /* check if we are allowed to start SMP over BR/EDR */
     if (!smp_br_pairing_allowed(smp)) {
         return 0;
     }
+#endif
 
 #if 0 /* not needed for the CTKD case */
     /* Channel not yet connected, will start pairing once connected */
@@ -7526,6 +7530,70 @@ void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
     }
 #endif
 }
+
+#if (defined(CONFIG_BT_CTKD_STRENGTH_CHECK) && (CONFIG_BT_CTKD_STRENGTH_CHECK > 0u))
+#if (defined(CONFIG_BT_CLASSIC) && ((CONFIG_BT_CLASSIC) > 0U))
+static bool ltk_derive_link_key_allowed(struct bt_smp *smp)
+{
+	struct bt_conn *conn;
+	struct bt_keys_link_key *link_key;
+	struct bt_keys *keys;
+	SMP_AUTH_INFO le_auth_info;
+
+	if (!smp->chan.chan.conn) {
+		return false;
+	}
+
+	conn = smp->chan.chan.conn;
+	keys = conn->le.keys;
+	if (keys == NULL) {
+		return false;
+	}
+
+	/* Check whether it is has been bonded */
+	link_key = bt_keys_find_link_key(&conn->le.dst.a);
+	if (link_key == NULL) {
+		return true;
+	}
+
+	if (link_key->flags & BT_LINK_KEY_DEBUG) {
+		LOG_DBG("Debug LK can be overwrote");
+		return true;
+	}
+
+	ret = BT_smp_get_device_security_info (&conn->deviceId, &le_auth_info);
+	if (API_SUCCESS != ret) {
+		return false;
+	}
+
+#if 0
+	if ((link_key->flags & BT_LINK_KEY_AUTHENTICATED) &&
+	    ((keys->flags & BT_KEYS_AUTHENTICATED) == 0)) {
+		LOG_DBG("Stronger LK (MITM) cannot be overwrote by weaker LTK");
+		return false;
+	}
+
+	if ((link_key->flags & BT_LINK_KEY_SC) && ((keys->flags & BT_KEYS_SC) == 0)) {
+		LOG_DBG("Stronger LK (SC) cannot be overwrote by weaker LTK");
+		return false;
+	}
+#endif
+	if ((link_key->flags & BT_LINK_KEY_AUTHENTICATED) &&
+	    (SMP_SEC_LEVEL_2 != le_auth_info.security)) {
+		LOG_DBG("Stronger LK (MITM) cannot be overwrote by weaker LTK");
+		return false;
+	}
+
+	if ((link_key->flags & BT_LINK_KEY_SC) && (SMP_LESC_MODE != le_auth_info.pair_mode)) {
+		LOG_DBG("Stronger LK (SC) cannot be overwrote by weaker LTK");
+		return false;
+	}
+
+	return true;
+}
+#endif
+#endif
+
 void appl_smp_lesc_xtxp_lk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
 {
     API_RESULT retval;
@@ -7570,21 +7638,21 @@ void appl_smp_lesc_xtxp_lk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
     }
 
     memcpy(link_key->val, xtxp->lk, SMP_LK_SIZE);
-    link_key->flags |= BT_LINK_KEY_SC;
+    if (API_SUCCESS == retval) {
+        if (SMP_LESC_MODE == auth.pair_mode) {
+            link_key->flags |= BT_LINK_KEY_SC;
+        } else {
+            link_key->flags &= ~BT_LINK_KEY_SC;
+        }
 
-    conn = bt_conn_lookup_device_id(bt_smp_bd_handle);
-    if (NULL == conn) {
-        LOG_ERR("Connect is not found, invalid bd handle 0x%02X", *handle);
-    } else {
-        if (conn->le.keys->flags & BT_KEYS_AUTHENTICATED) {
+        if (SMP_SEC_LEVEL_2 == auth.security) {
             link_key->flags |= BT_LINK_KEY_AUTHENTICATED;
         } else {
             link_key->flags &= ~BT_LINK_KEY_AUTHENTICATED;
         }
-        bt_conn_unref(conn);
     }
 
-    if (IS_ENABLED(CONFIG_BT_SETTINGS)) {
+    if (auth.bonding) {
         bt_keys_link_key_store(link_key);
     }
 }
@@ -8457,6 +8525,14 @@ static void hci_acl_smp_handler(struct net_buf *buf)
                                     retval = API_FAILURE;
                                 }
                             }
+
+#if (defined(CONFIG_BT_CTKD_STRENGTH_CHECK) && (CONFIG_BT_CTKD_STRENGTH_CHECK > 0u))
+                            if ((smp != NULL) && (!ltk_derive_link_key_allowed(smp)))
+                            {
+                                LOG_DBG("LK cannot be derived by LTK");
+                                retval = API_SUCCESS;
+                            }
+#endif
 
                             if (API_SUCCESS != retval)
                             {
