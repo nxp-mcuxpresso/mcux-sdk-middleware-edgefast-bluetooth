@@ -7795,70 +7795,7 @@ static void hci_acl_smp_br_handler(struct net_buf *buf)
                             }
                         }
                     }
-                    else
 #endif /* CLASSIC_SEC_MANAGER */
-                    {
-                        SMP_BD_HANDLE handle;
-
-                        /* Check for the BLE handle of the same BD Address to get security info */
-                        retval = BT_smp_get_bd_handle(&bdaddr, &handle);
-
-                        retval = BT_smp_get_device_keys
-                                 (
-                                     &handle,
-                                     &p_keys,
-                                     &p_key_info
-                                 );
-
-                        if (API_SUCCESS != retval)
-                        {
-                            LOG_ERR("Failed to get Peer Device Keys!!\n");
-                        }
-                        else
-                        {
-                            if (16U != auth->ekey_size)
-                            {
-#ifdef APPL_SMP_VALIDATE_KEYSIZE_FOR_CTKD
-                                LOG_ERR("EncKey Size check failed for LinkKey generation.\n");
-                                break;
-#else /* APPL_SMP_VALIDATE_KEYSIZE_FOR_CTKD */
-                                BT_smp_get_raw_lesc_ltk(&handle, p_key_info.enc_info);
-#endif /* APPL_SMP_VALIDATE_KEYSIZE_FOR_CTKD */
-                            }
-
-                            /* Save the Identity BD Address if valid */
-                            if (SMP_DIST_MASK_ID_KEY & p_keys)
-                            {
-                                BT_COPY_BD_ADDR(bt_smp_bd_addr.addr, &p_key_info.id_addr_info[1]);
-                                bt_smp_bd_addr.type = p_key_info.id_addr_info[0];
-                            }
-
-                            /* Check if the device already has BR LK which is stronger than the CTKD LK */
-                            retval = BT_sm_get_device_link_key_and_type(bd_addr, link_key, &lk_type);
-                            if (API_SUCCESS == retval)
-                            {
-                                if ((HCI_LINK_KEY_AUTHENTICATED_P_256 == lk_type) && (SMP_SEC_LEVEL_2 != auth->security))
-                                {
-                                    retval = API_SUCCESS;
-                                }
-                                else
-                                {
-                                    retval = API_FAILURE;
-                                }
-                            }
-
-                            if (API_SUCCESS != retval)
-                            {
-                                bt_smp_bd_handle = handle;
-                                (BT_IGNORE_RETURN_VALUE)BT_smp_get_lk_from_ltk_pl
-                                (
-                                    p_key_info.enc_info,
-                                    appl_smp_lesc_xtxp_lk_complete,
-                                    (auth->xtx_info & SMP_XTX_H7_MASK)
-                                );
-                            }
-                        }
-                    }
                 }
 #endif /* SMP_LESC_CROSS_TXP_KEY_GEN */
             }
@@ -8469,69 +8406,8 @@ static void hci_acl_smp_handler(struct net_buf *buf)
                     /* Save the BD Address */
                     BT_COPY_BD_ADDR_AND_TYPE(&bt_smp_bd_addr, &bdaddr);
 
-#ifdef CLASSIC_SEC_MANAGER
                     /* Compare key strengths before generating */
-                    if (SMP_LINK_BREDR == auth->transport)
-                    {
-#ifdef BTSIG_ERRATA_11838
-                        SM_DEVICE_STATE state;
-
-                        retval = BT_sm_get_device_security_state(bd_addr, &state);
-                        if ((API_SUCCESS != retval) || (16U != state.ekey_size))
-                        {
-                            LOG_ERR("EncKey Size check failed for LTK generation.\n");
-                            break;
-                        }
-#endif /* BTSIG_ERRATA_11838 */
-
-                        /* Get the BREDR link key for the device */
-                        retval = BT_sm_get_device_link_key_and_type(bd_addr, link_key, &lk_type);
-                        if (API_SUCCESS != retval)
-                        {
-                            LOG_ERR("FAILED ! Reason = 0x%04X\n", retval);
-                            break;
-                        }
-                        else
-                        {
-                            SMP_BD_HANDLE handle;
-
-                            /* Check for the BLE handle of the same BD Address to get security info */
-                            retval = BT_smp_get_bd_handle(&bdaddr, &handle);
-
-                            if (API_SUCCESS == retval)
-                            {
-                                /* Check if the device already has LE LTK which is stronger than the CTKD LTK */
-                                retval = BT_smp_get_device_security_info
-                                         (
-                                             &handle,
-                                             &info
-                                         );
-                                if (API_SUCCESS == retval)
-                                {
-                                    if ((SMP_SEC_LEVEL_2 == info.security) && (HCI_LINK_KEY_AUTHENTICATED_P_256 != lk_type))
-                                    {
-                                        retval = API_SUCCESS;
-                                    }
-                                    else
-                                    {
-                                        retval = API_FAILURE;
-                                    }
-                                }
-                            }
-
-                            if (API_SUCCESS != retval)
-                            {
-                                (BT_IGNORE_RETURN_VALUE)BT_smp_get_ltk_from_lk_pl
-                                (
-                                    link_key,
-                                    appl_smp_lesc_xtxp_ltk_complete,
-                                    (auth->xtx_info & SMP_XTX_H7_MASK)
-                                );
-                            }
-                        }
-                    }
-                    else
-#endif /* CLASSIC_SEC_MANAGER */
+                    if (SMP_LINK_BREDR != auth->transport)
                     {
                         SMP_BD_HANDLE handle;
 
