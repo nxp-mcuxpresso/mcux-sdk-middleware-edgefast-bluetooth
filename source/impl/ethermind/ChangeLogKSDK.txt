@@ -4,7 +4,44 @@
 
 @section edgefast_ethermind_implementation EdgeFast Bluetooth Protocol Abstraction Layer Implementation for MCUXpresso SDK
 
-  The current version is 1.7.0.
+  The current version is 1.9.0.
+  - 1.9.0
+    - Improvements:
+      - Improved Bluetooth connection reliability:
+        - Fixed common connection failure scenarios that previously caused crashes
+        - Enhanced connection management to prevent disconnection issues
+        - Improved address resolution handling for better device identification
+      - Enhanced Bluetooth security with improved Cross-Transport Key Derivation (CTKD):
+        - More reliable pairing between BLE and BR/EDR transport types
+        - Better key management when switching between Bluetooth modes
+        - Automatic disabling of unnecessary key derivation processes
+      - Expanded Hands-Free Profile (HFP) capabilities:
+        - Added support for call list management with new Query List of Current Calls API
+        - Added battery level reporting for connected headsets
+        - Added new error code for handling Audio Gateway feedback
+    - New Features:
+      - Added dual HFP-AG functionality, allowing simultaneous connections to multiple audio devices
+      - Improved device address lookup capabilities for classic Bluetooth connections
+  - 1.8.0
+    - Improvements:
+      - Improved security handling:
+        - Better pairing experience with enhanced user prompts
+        - More configurable minimum encryption key size settings
+        - Fixed issues with device unpairing that previously caused incomplete device removal
+      - Increased connection reliability:
+        - Fixed deadlock scenarios when resources were exhausted
+        - Improved reconnection behavior for profiles like RFCOMM and IPSP
+        - Better thread synchronization to prevent connection drops
+      - Enhanced file system and logging reliability:
+        - Thread-safe file operations to prevent data corruption
+        - Improved logging during heavy system load
+      - Better configuration experience:
+        - Streamlined Kconfig options for more intuitive setup
+        - Improved documentation with Markdown integration
+        - Reduced configuration warnings and conflicts
+    - New Features:
+      - Added Central-only mode for classic Bluetooth connections
+      - Ability to configure Enhanced SCO packet settings for improved audio quality in HFP
   - 1.7.0
     - Improvement:
       - Update source files to align Zephyr V3.7 base.
