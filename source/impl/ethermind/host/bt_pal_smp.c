@@ -7650,10 +7650,10 @@ void appl_smp_lesc_xtxp_lk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
         } else {
             link_key->flags &= ~BT_LINK_KEY_AUTHENTICATED;
         }
-    }
 
-    if (auth.bonding) {
-        bt_keys_link_key_store(link_key);
+        if (auth.bonding) {
+            bt_keys_link_key_store(link_key);
+        }
     }
 }
 #endif
