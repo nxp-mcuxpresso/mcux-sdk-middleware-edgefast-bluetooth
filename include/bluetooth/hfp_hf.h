@@ -589,6 +589,8 @@ int bt_hfp_hf_get_peer_indicator_status(struct bt_conn *conn);
  *
  *  This function is to open audio codec for hfp funciton
  *
+ * @note This function is implemented for PTS testing, has not been verified with a real AG device.
+ *
  * @param  conn  Connection object.
  * @param  codec HFP Codec Id.
  *
@@ -599,6 +601,10 @@ int bt_hfp_hf_open_audio(struct bt_conn *conn, uint8_t codec);
 /** @brief hfp hf close audio for codec
  *
  *  This function is to close audio codec for hfp funciton
+ *
+ * @note This function is implemented for PTS testing, has not been verified with a real AG device.
+ *
+ * @param  sco_conn  Sco connection object.
  *
  *  @return 0 in case of success or negative value in case of error.
  *
