@@ -10,29 +10,18 @@ if MCUX_PRJSEG_middleware.edgefast_bluetooth.storage
 
 choice MCUX_PRJSEG_middleware.edgefast_bluetooth.storage_selection
     prompt "Local storage selection"
-    default MCUX_PRJSEG_middleware.edgefast_bluetooth_flash_adapter_rt1170evkb if MCUX_HW_BOARD_evkbmimxrt1170
-    default MCUX_PRJSEG_middleware.edgefast_bluetooth_flash_adapter_rt595evk if MCUX_HW_BOARD_evkmimxrt595
     default MCUX_PRJSEG_middleware.edgefast_bluetooth_flash_adapter_rt685evk if MCUX_HW_BOARD_evkmimxrt685
     default MCUX_PRJSEG_middleware.edgefast_bluetooth_mflash_offchip if MCUX_HW_BOARD_evkbimxrt1050 || \
                  MCUX_HW_BOARD_evkcmimxrt1060 || MCUX_HW_BOARD_evkmimxrt1040 || \
                  MCUX_HW_BOARD_evkmimxrt1180 || MCUX_HW_BOARD_mimxrt685audevk || \
                  MCUX_HW_BOARD_rdrw612bga || MCUX_HW_BOARD_frdmrw612 || \
-				 MCUX_HW_BOARD_mimxrt700evk
+				 MCUX_HW_BOARD_mimxrt700evk || MCUX_HW_BOARD_evkbmimxrt1170 || \
+                 MCUX_HW_BOARD_evkmimxrt595
     default MCUX_PRJSEG_middleware.edgefast_bluetooth_mflash_onchip_fmu if MCUX_HW_BOARD_mcxn5xxevk || \
                  MCUX_HW_BOARD_mcxn9xxevk || MCUX_HW_BOARD_frdmmcxn947
     help
       The codec will be automatically selected based on board.
       It is also possible to select the codec manually.
-
-config MCUX_PRJSEG_middleware.edgefast_bluetooth_flash_adapter_rt1170evkb
-    bool "rt1170evkb flash adapter"
-    select MCUX_COMPONENT_component.flexspi_nor_flash_adapter_rt1170evkb
-    depends on MCUX_HW_BOARD_evkbmimxrt1170
-
-config MCUX_PRJSEG_middleware.edgefast_bluetooth_flash_adapter_rt595evk
-    bool "rt595evk flash adapter"
-    select MCUX_COMPONENT_component.flexspi_nor_flash_adapter_rt595evk
-    depends on MCUX_HW_BOARD_evkmimxrt595
 
 config MCUX_PRJSEG_middleware.edgefast_bluetooth_flash_adapter_rt685evk
     bool "rt685evk flash adapter"
