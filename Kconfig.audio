@@ -86,9 +86,6 @@ config MCUX_COMPONENT_middleware.edgefast_bluetooth.le_audio.gmap
 config MCUX_COMPONENT_middleware.edgefast_bluetooth.le_audio.pbp
     bool "pbp"
 
-config MCUX_COMPONENT_middleware.edgefast_bluetooth.liblc3codec
-    bool "liblc3codec"
-
 config MCUX_COMPONENT_middleware.edgefast_bluetooth.asrc_sw
     bool "asrc_sw"
 
