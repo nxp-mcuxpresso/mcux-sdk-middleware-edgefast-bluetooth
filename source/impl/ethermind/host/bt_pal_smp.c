@@ -556,6 +556,7 @@ struct bt_smp {
 DECL_STATIC BT_DEVICE_ADDR bt_smp_bd_addr;
 DECL_STATIC SMP_BD_HANDLE bt_smp_bd_handle;
 DECL_STATIC UCHAR local_keys;
+DECL_STATIC UCHAR peer_keys;
 DECL_STATIC SMP_KEY_DIST peer_key_info; /* static to reduce stack usage */
 #endif
 static unsigned int fixed_passkey = BT_PASSKEY_INVALID;
@@ -7423,7 +7424,7 @@ static void smp_auth_starting(struct bt_smp *smp)
 
 #ifdef SMP_LESC
 #ifdef SMP_LESC_CROSS_TXP_KEY_GEN
-void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
+void appl_smp_rpa_search_complete(SMP_RPA_RESOLV_INFO* rpa_info, UINT16 status)
 {
 #if (defined(CONFIG_BT_CLASSIC) && ((CONFIG_BT_CLASSIC) > 0U))
     API_RESULT retval;
@@ -7436,8 +7437,6 @@ void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
     struct bt_keys *keys;
     struct bt_smp_br *smp;
     DEVICE_HANDLE deviceHandle;
-    UCHAR peer_keys;
-    UCHAR di;
 
     LOG_DBG("\n LTK of the device is ...\n");
     LOG_DBG("\n LK of the device is ...\n");
@@ -7471,10 +7470,18 @@ void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
         ((HCI_LINK_KEY_AUTHENTICATED_P_256 == lkey_type) ||
         (HCI_LINK_KEY_UNAUTHENTICATED_P_256 == lkey_type)))
     {
-        retval = BT_smp_search_identity_addr(&bt_smp_bd_addr, DQ_LE_LINK, &bd_handle);
-        if (API_SUCCESS != retval)
+        if (API_SUCCESS != status)
         {
-            (BT_IGNORE_RETURN_VALUE)BT_smp_add_device(&bt_smp_bd_addr, &bd_handle);
+            retval = BT_smp_search_identity_addr(&bt_smp_bd_addr, DQ_LE_LINK, &bd_handle);
+            if (API_SUCCESS != retval)
+            {
+                (BT_IGNORE_RETURN_VALUE)BT_smp_add_device(&bt_smp_bd_addr, &bd_handle);
+            }
+        }
+        else
+        {
+            bd_handle = rpa_info->bd_handle;
+            LOG_INF("NXP_D Updating Device Handle - 0x%02X\n", bd_handle);
         }
 
         auth_info.bonding = atomic_test_bit(smp->flags, SMP_FLAG_BOND) ? SMP_BONDING : SMP_BONDING_NONE;
@@ -7483,8 +7490,6 @@ void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
             SMP_SEC_LEVEL_2: SMP_SEC_LEVEL_1;
 
         /* Update the keys */
-        BT_smp_get_device_keys(&deviceHandle, &peer_keys, &peer_key_info);
-        BT_mem_copy(peer_key_info.enc_info, xtxp->ltk, 16U);
         (BT_IGNORE_RETURN_VALUE)BT_smp_update_security_info
         (
             &bd_handle,
@@ -7495,19 +7500,6 @@ void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
             &peer_key_info
         );
 
-	/* Search device index */
-	di = smp_search_device (&bd_handle, SMP_L2CAP_INVALID_SIG_ID);
-
-	/* If device not found in database */
-	if(SMP_MAX_DEVICES != di)
-	{
-		/* Lock SMP */
-		smp_lock();
-		smp_update_device_attr_pl(SMP_DEVICE_ATTR_PL_AUTHENTICATION_COMPLETE, di);
-		/* Unlock SMP */
-		smp_unlock();
-	}
-
 	bt_addr_copy(&peer_addr.a, &conn->br.dst);
 	peer_addr.type = BT_ADDR_LE_PUBLIC;
 
@@ -7517,7 +7509,7 @@ void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
 		LOG_ERR("Unable to get keys for %s", bt_addr_le_str(&peer_addr));
 		return;
 	}
-	memcpy(keys->ltk.val, xtxp->ltk, sizeof(keys->ltk.val));
+	memcpy(keys->ltk.val, peer_key_info.enc_info, sizeof(keys->ltk.val));
 
 	if (lkey_type == HCI_LINK_KEY_AUTHENTICATED_P_256) {
 		keys->flags |= BT_KEYS_AUTHENTICATED;
@@ -7528,6 +7520,58 @@ void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
 	k_work_cancel_delayable(&smp->auth_timeout);
 	smp_br_auth_complete(smp);
     }
+#endif
+}
+
+void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
+{
+#if (defined(CONFIG_BT_CLASSIC) && ((CONFIG_BT_CLASSIC) > 0U))
+	API_RESULT retval;
+	DEVICE_HANDLE deviceHandle;
+
+	retval = device_queue_search_br_edr_remote_addr(&deviceHandle, &bt_smp_bd_addr);
+	if (API_SUCCESS != retval)
+	{
+		LOG_ERR("The address cannot be found");
+		return;
+	}
+
+	retval = BT_smp_get_device_keys(&deviceHandle, &peer_keys, &peer_key_info);
+	if (API_SUCCESS == retval)
+	/* Save the LTK */
+	{
+		SMP_BD_HANDLE bd_handle;
+
+		BT_mem_copy(peer_key_info.enc_info, xtxp->ltk, 16U);
+
+		/* try to find the smp entity with the identity address */
+		retval = BT_smp_search_identity_addr(&bt_smp_bd_addr, DQ_LE_LINK, &bd_handle);
+		if (API_SUCCESS != retval)
+		{
+			LOG_DBG("Retval - 0x%04X\n", retval);
+			/* Fetch any connection entity if already available */
+			LOG_INF("Search existing RPA connection...\n");
+			retval = BT_smp_search_rpa_connection(peer_key_info.id_info, appl_smp_rpa_search_complete);
+			LOG_DBG("Retval - 0x%04X\n", retval);
+
+			if (API_SUCCESS != retval)
+			{
+				LOG_INF("Failure in RPA...\n");
+				appl_smp_rpa_search_complete(NULL, retval);
+			}
+		}
+		else
+		{
+			SMP_RPA_RESOLV_INFO rpa_info;
+
+			rpa_info.bd_handle = bd_handle;
+			appl_smp_rpa_search_complete(&rpa_info, API_SUCCESS);
+		}
+	}
+	else
+	{
+		LOG_ERR("fail to get br smp security info\n");
+	}
 #endif
 }
 
