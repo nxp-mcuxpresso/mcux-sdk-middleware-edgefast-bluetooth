@@ -1749,6 +1749,7 @@ int bt_avrcp_send_vendor_dependent(struct bt_conn *conn, uint8_t pdu_id, void *p
             net_buf_add_be16(buf, add->uid_counter);
 
             pdu_info.pdu_id         = BT_AVRCP_PDU_ID_ADD_TO_NOW_PLAYING;
+            pdu_info.cmd_type       = BT_AVRCP_COMMAND_TYPE_CONTROL;
             pdu_info.vd_cmd_data    = buf->data;
             pdu_info.vd_cmd_datalen = buf->len;
             break;
@@ -1772,6 +1773,7 @@ int bt_avrcp_send_vendor_dependent(struct bt_conn *conn, uint8_t pdu_id, void *p
             net_buf_add_be16(buf, play->uid_counter);
 
             pdu_info.pdu_id         = BT_AVRCP_PDU_ID_PLAY_ITEMS;
+            pdu_info.cmd_type       = BT_AVRCP_COMMAND_TYPE_CONTROL;
             pdu_info.vd_cmd_data    = buf->data;
             pdu_info.vd_cmd_datalen = buf->len;
             break;
