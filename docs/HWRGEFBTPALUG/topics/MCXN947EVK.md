@@ -11,13 +11,13 @@ This section is a brief hardware rework guidance of the EdgeFast Bluetooth PAL o
     -   Mount R835
     -   Connect JP45 2-3 to supply 1.8V for GPIO4
 -   M.2 SDIO interface rework
-
+    -   Connect JP47 2-3 to supply 1.8V for GPIO2
     -   Remove R818, connect R823
     -   Remove R819, connect R824
     -   Remove R817, connect R822
     -   Remove R815, connect R816
     -   Remove R820, connect R825
     -   Remove R821, connect R826
-    ![](../images/MCXN947-EVK.svg "MCXN947-EVK")
+    ![](../images/MCXN947-EVK.jpg "MCXN947-EVK")
 
 

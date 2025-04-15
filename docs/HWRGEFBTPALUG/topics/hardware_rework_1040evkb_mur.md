@@ -4,6 +4,8 @@
     -   Solder R93 and R96
 2.  PCM interface rework
     -   Solder R70 and R79; remove R76 and R86; Connect J80.
+3.  Wake pin rework
+    -   When using 2LL M.2 module, remove R456 and R457 to avoid the module has an impact on boot configuration.
 
 **Note:** Make sure to disconnect J80 when debugging. Otherwise, the debugger downloading fails.
 

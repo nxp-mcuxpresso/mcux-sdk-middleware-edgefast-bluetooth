@@ -6,6 +6,7 @@ The hardware rework has two parts:
 
 -   HCI UART rework
 -   PCM interface rework
+-   Wake pin rework
 
 
 ```{include} ../topics/hardware_rework_1040evkb_mur.md
