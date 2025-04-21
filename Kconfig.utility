@@ -10,13 +10,12 @@ if MCUX_PRJSEG_middleware.edgefast_bluetooth.storage
 
 choice MCUX_PRJSEG_middleware.edgefast_bluetooth.storage_selection
     prompt "Local storage selection"
-    default MCUX_PRJSEG_middleware.edgefast_bluetooth_flash_adapter_rt685evk if MCUX_HW_BOARD_evkmimxrt685
     default MCUX_PRJSEG_middleware.edgefast_bluetooth_mflash_offchip if MCUX_HW_BOARD_evkbimxrt1050 || \
                  MCUX_HW_BOARD_evkcmimxrt1060 || MCUX_HW_BOARD_evkmimxrt1040 || \
                  MCUX_HW_BOARD_evkmimxrt1180 || MCUX_HW_BOARD_mimxrt685audevk || \
                  MCUX_HW_BOARD_rdrw612bga || MCUX_HW_BOARD_frdmrw612 || \
 				 MCUX_HW_BOARD_mimxrt700evk || MCUX_HW_BOARD_evkbmimxrt1170 || \
-                 MCUX_HW_BOARD_evkmimxrt595
+                 MCUX_HW_BOARD_evkmimxrt595 || MCUX_HW_BOARD_evkmimxrt685
     default MCUX_PRJSEG_middleware.edgefast_bluetooth_mflash_onchip_fmu if MCUX_HW_BOARD_mcxn5xxevk || \
                  MCUX_HW_BOARD_mcxn9xxevk || MCUX_HW_BOARD_frdmmcxn947
     help
