@@ -7480,6 +7480,12 @@ void appl_smp_rpa_search_complete(SMP_RPA_RESOLV_INFO* rpa_info, UINT16 status)
         }
         else
         {
+            retval = BT_smp_search_identity_addr(&bt_smp_bd_addr, DQ_LE_LINK, &bd_handle);
+            if ((API_SUCCESS == retval) && (bd_handle != rpa_info->bd_handle)) {
+                /* clear the old smp entity */
+                BT_smp_mark_device_untrusted_pl(&bd_handle);
+            }
+
             bd_handle = rpa_info->bd_handle;
             LOG_INF("NXP_D Updating Device Handle - 0x%02X\n", bd_handle);
         }
@@ -7544,28 +7550,14 @@ void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
 
 		BT_mem_copy(peer_key_info.enc_info, xtxp->ltk, 16U);
 
-		/* try to find the smp entity with the identity address */
-		retval = BT_smp_search_identity_addr(&bt_smp_bd_addr, DQ_LE_LINK, &bd_handle);
+		/* The peer's IRK may changes, so do the rpa search always */
+		LOG_INF("Search existing RPA connection...\n");
+		retval = BT_smp_search_rpa_connection(peer_key_info.id_info, appl_smp_rpa_search_complete);
+		LOG_DBG("Retval - 0x%04X\n", retval);
 		if (API_SUCCESS != retval)
 		{
-			LOG_DBG("Retval - 0x%04X\n", retval);
-			/* Fetch any connection entity if already available */
-			LOG_INF("Search existing RPA connection...\n");
-			retval = BT_smp_search_rpa_connection(peer_key_info.id_info, appl_smp_rpa_search_complete);
-			LOG_DBG("Retval - 0x%04X\n", retval);
-
-			if (API_SUCCESS != retval)
-			{
-				LOG_INF("Failure in RPA...\n");
-				appl_smp_rpa_search_complete(NULL, retval);
-			}
-		}
-		else
-		{
-			SMP_RPA_RESOLV_INFO rpa_info;
-
-			rpa_info.bd_handle = bd_handle;
-			appl_smp_rpa_search_complete(&rpa_info, API_SUCCESS);
+			LOG_INF("Failure in RPA...\n");
+			appl_smp_rpa_search_complete(NULL, retval);
 		}
 	}
 	else
