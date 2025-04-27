@@ -1726,7 +1726,7 @@ static uint8_t smp_br_pairing_req(struct bt_smp_br *smp, struct bt_smp_pairing *
 	rsp->oob_flag = 0x00;
 	rsp->max_key_size = max_key_size;
 	rsp->init_key_dist = (req->init_key_dist & BR_RECV_KEYS_SC);
-	rsp->resp_key_dist = (req->resp_key_dist & BR_RECV_KEYS_SC);
+	rsp->resp_key_dist = (req->resp_key_dist & BR_SEND_KEYS_SC);
 
 	smp->local_dist = rsp->resp_key_dist;
 	smp->remote_dist = rsp->init_key_dist;
@@ -2226,6 +2226,12 @@ int bt_smp_br_send_pairing_req(struct bt_conn *conn)
     auth.security = conn->required_sec_level;
     uint8_t remote_fixed_chan;
     uint8_t max_key_size;
+    uint8_t keyDistribution;
+
+    /* Only secure connection support CTKD */
+    if (!(conn->br.link_key->flags & BT_LINK_KEY_SC)) {
+        return -ENOTSUP;
+    }
 
     remote_fixed_chan = bt_l2cap_br_get_remote_fixed_chan(conn);
     if (!(remote_fixed_chan & BIT(BT_L2CAP_CID_BR_SMP))) {
@@ -2290,6 +2296,12 @@ int bt_smp_br_send_pairing_req(struct bt_conn *conn)
 #endif
       auth.pair_mode = SMP_LESC_MODE;
       auth.transport = SMP_LINK_BREDR;
+
+    /* for Local */
+    keyDistribution = BR_SEND_KEYS_SC;
+    /* for Remote */
+    keyDistribution |= (BR_RECV_KEYS_SC) << 4;
+    (void)BT_smp_set_key_distribution_flag_pl(keyDistribution);
 
       API_RESULT  retval = BT_smp_authenticate
                        (
@@ -6933,6 +6945,7 @@ int bt_smp_start_security(struct bt_conn *conn)
 	struct bt_smp *smp;
     SMP_AUTH_INFO auth;
     API_RESULT    retval;
+    uint8_t keyDistribution;
 
 	LOG_DBG("");
 	smp = smp_chan_get(conn);
@@ -7005,6 +7018,26 @@ int bt_smp_start_security(struct bt_conn *conn)
 			bt_auth->oob_data_request(conn, &info);
 		}
 	}
+
+#if (defined(CONFIG_BT_SMP_SC_ONLY) && (CONFIG_BT_SMP_SC_ONLY > 0))
+	/* for Local */
+	keyDistribution = SEND_KEYS_SC;
+	/* for Remote */
+	keyDistribution |= (RECV_KEYS_SC) << 4;
+#else
+	/* for Local */
+	keyDistribution = SEND_KEYS;
+	/* for Remote */
+	keyDistribution |= (RECV_KEYS) << 4;
+#endif /* (defined(CONFIG_BT_SMP_SC_ONLY) && (CONFIG_BT_SMP_SC_ONLY > 0)) */
+
+	/* Only secure connection support CTKD */
+	if (auth.pair_mode != SMP_LESC_MODE)
+	{
+		keyDistribution &= ~BT_SMP_DIST_LINK_KEY;
+		keyDistribution &= ~(BT_SMP_DIST_LINK_KEY << 4);
+	}
+	(void)BT_smp_set_key_distribution_flag_pl(keyDistribution);
 
 	retval = BT_smp_authenticate
 			(
