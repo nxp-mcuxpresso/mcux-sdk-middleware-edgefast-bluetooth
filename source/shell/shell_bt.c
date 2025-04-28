@@ -5193,7 +5193,9 @@ void bt_CommandInit(shell_handle_t shell)
 #if (defined(CONFIG_BT_RF_TEST_MODE) && (CONFIG_BT_RF_TEST_MODE > 0))
     bt_ShellTestModeInit(shell);
 #endif /* CONFIG_BT_RF_TEST_MODE */
-
+#if (defined(CONFIG_BT_PLATFORM) && (CONFIG_BT_PLATFORM > 0))
+	bt_ShellPlatformInit(shell);
+#endif /* CONFIG_BT_PLATFORM */
 	bt_sh.sh = shell;
 	ctx_shell = &bt_sh;
 

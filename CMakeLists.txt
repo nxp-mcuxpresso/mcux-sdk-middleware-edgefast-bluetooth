@@ -2717,6 +2717,12 @@ if (CONFIG_MCUX_COMPONENT_middleware.edgefast_bluetooth.shell_ble)
     )
 endif ()
 
+if (CONFIG_MCUX_COMPONENT_middleware.edgefast_bluetooth.shell_ble.power_switch)
+    mcux_add_source(
+        SOURCES source/shell/shell_platform.c
+    )
+endif ()
+
 if (CONFIG_MCUX_COMPONENT_middleware.edgefast_bluetooth.btble.ethermind.lib)
     mcux_add_library(
         LIBS ../wireless/ethermind/bluetooth/private/lib/mcux/default/btdm/${wireless_ble_lib_sel}/gcc/libethermind_bt_a2dp.a

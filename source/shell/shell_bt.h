@@ -2065,6 +2065,9 @@ void bt_CommandInit(shell_handle_t shell);
 
 void bt_ShellGattInit(shell_handle_t shell);
 void bt_ShellL2capInit(shell_handle_t shell);
+#if (defined(CONFIG_BT_PLATFORM) && (CONFIG_BT_PLATFORM > 0))
+void bt_ShellPlatformInit(shell_handle_t shell);
+#endif
 #if (defined(CONFIG_BT_ISO) && (CONFIG_BT_ISO > 0))
 void bt_ShellIsoInit(shell_handle_t shell);
 #endif

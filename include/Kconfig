@@ -1669,6 +1669,24 @@ config BT_ISO_MAX_BIG
 
 endif # BT_ISO
 
+config BT_PLATFORM
+    bool "BT_PLATFORM"
+    default n
+    help
+      This option enables the bt platform cmdlist.
+      This symbol is a config macro.
+      
+if BT_PLATFORM
+
+config BT_PLATFORM_POWER_SWITCH
+    bool "BT_PLATFORM_POWER_SWITCH"
+    default n
+    depends on BT_PLATFORM
+    help
+      This option enables support for bt platform power_switch subcommand.
+      This symbol is a config macro.
+
+endif # BT_PLATFORM
 
 config BT_SETTINGS
     bool "BT_SETTINGS"

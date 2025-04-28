@@ -21,3 +21,10 @@ config MCUX_COMPONENT_middleware.edgefast_bluetooth.shell_ble
     depends on MCUX_COMPONENT_middleware.edgefast_bluetooth.ble.ethermind
     help
       Activate Bluetooth shell based on BLE.
+
+config MCUX_COMPONENT_middleware.edgefast_bluetooth.shell_ble.power_switch
+    bool "Bluetooth shell based on BLE"
+    default n
+    depends on MCUX_COMPONENT_middleware.edgefast_bluetooth.shell_ble && (MCUX_HW_DEVICE_RW612 || MCUX_HW_DEVICE_RW610)
+    help 
+      this option is enabled, it means that the shell_platform.c file is introduced when compiling the shell app. In this way, you can choose to enable the power_switch cmd.
