@@ -2066,6 +2066,18 @@ void bt_conn_unpair(uint8_t id, const bt_addr_le_t *addr, const bt_addr_le_t *rp
 				}
 			}
 
+			retval = BT_smp_search_identity_addr(&bd_addr, DQ_LE_LINK, &handle);
+			if (API_SUCCESS == retval)
+			{
+				(BT_IGNORE_RETURN_VALUE)BT_smp_mark_device_untrusted_pl(&handle);
+			}
+
+			retval = BT_smp_search_identity_addr(&bd_addr, DQ_BR_LINK, &handle);
+			if (API_SUCCESS == retval)
+			{
+				(BT_IGNORE_RETURN_VALUE)BT_smp_mark_device_untrusted_pl(&handle);
+			}
+
 			if (rpa != NULL)
 			{
 				bd_addr.type = rpa->type;
