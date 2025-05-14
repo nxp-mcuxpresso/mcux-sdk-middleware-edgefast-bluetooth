@@ -7588,6 +7588,42 @@ void appl_smp_rpa_search_complete(SMP_RPA_RESOLV_INFO* rpa_info, UINT16 status)
 
 	k_work_cancel_delayable(&smp->auth_timeout);
 	smp_br_auth_complete(smp);
+
+	/* Check whether need to notify the identity address */
+	if (NULL != ble_conn) {
+		const bt_addr_le_t *dst;
+
+		/*
+		* We can't use conn->dst here as this might already contain
+		* identity address known from previous pairing. Since all keys
+		* are cleared on re-pairing we wouldn't store IRK distributed
+		* in new pairing.
+		*/
+		if (ble_conn->role == BT_HCI_ROLE_CENTRAL) {
+			dst = &ble_conn->le.resp_addr;
+		} else {
+			dst = &ble_conn->le.init_addr;
+		}
+
+		if (bt_addr_le_is_rpa(dst)) {
+			/* always update last use RPA */
+			bt_addr_copy(&ble_conn->le.keys->irk.rpa, &dst->a);
+
+			/*
+			* Update connection address and notify about identity
+			* resolved only if connection wasn't already reported
+			* with identity address. This may happen if IRK was
+			* present before ie. due to re-pairing.
+			*/
+			if (!bt_addr_le_is_identity(&ble_conn->le.dst)) {
+				bt_addr_le_copy(&ble_conn->le.dst, &peer_addr);
+
+				bt_conn_identity_resolved(ble_conn);
+			}
+		}
+
+		bt_conn_unref(ble_conn);
+	}
     }
 #endif
 }
