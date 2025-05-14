@@ -7466,8 +7466,9 @@ void appl_smp_rpa_search_complete(SMP_RPA_RESOLV_INFO* rpa_info, UINT16 status)
     UCHAR lkey[BT_LINK_KEY_SIZE];
     UCHAR lkey_type;
     struct bt_conn *conn;
+    struct bt_conn *ble_conn;
     bt_addr_le_t peer_addr;
-    struct bt_keys *keys;
+    struct bt_keys *keys = NULL;
     struct bt_smp_br *smp;
     DEVICE_HANDLE deviceHandle;
 
@@ -7542,12 +7543,41 @@ void appl_smp_rpa_search_complete(SMP_RPA_RESOLV_INFO* rpa_info, UINT16 status)
 	bt_addr_copy(&peer_addr.a, &conn->br.dst);
 	peer_addr.type = BT_ADDR_LE_PUBLIC;
 
-	keys = bt_keys_get_type(BT_KEYS_LTK, conn->id, &peer_addr);
+	/* get the conn matched with bd_handle */
+	ble_conn = bt_conn_lookup_device_id(bd_handle);
+	if (NULL != ble_conn) {
+		keys = ble_conn->le.keys;
+	}
+
+	if (keys) {
+		/* Update the keys' identity address */
+		bt_addr_le_copy(&keys->addr, &peer_addr);
+	} else {
+		keys = bt_keys_get_type(BT_KEYS_LTK, conn->id, &peer_addr);
+	}
+
 	if (!keys)
 	{
+		if (NULL != ble_conn) {
+			bt_conn_unref(ble_conn);
+		}
 		LOG_ERR("Unable to get keys for %s", bt_addr_le_str(&peer_addr));
 		return;
 	}
+
+	if (NULL != ble_conn) {
+		if (NULL == ble_conn->le.keys) {
+			ble_conn->le.keys = keys;
+		}
+		else if (ble_conn->le.keys != keys) {
+			LOG_ERR("different keys for same conn");
+			bt_keys_clear(ble_conn->le.keys);
+			ble_conn->le.keys = keys;
+		}
+		else {
+		}
+	}
+
 	memcpy(keys->ltk.val, peer_key_info.enc_info, sizeof(keys->ltk.val));
 
 	if (lkey_type == HCI_LINK_KEY_AUTHENTICATED_P_256) {
