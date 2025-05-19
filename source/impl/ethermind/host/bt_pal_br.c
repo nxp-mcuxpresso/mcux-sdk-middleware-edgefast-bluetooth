@@ -418,7 +418,6 @@ static bool check_request_name(void)
 
 static void report_discovery_results(void)
 {
-	bool resolving_names = false;
 	int i;
 	struct bt_br_discovery_cb *listener, *next;
 
