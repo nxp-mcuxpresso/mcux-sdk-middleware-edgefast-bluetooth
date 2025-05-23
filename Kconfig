@@ -110,23 +110,23 @@ config MCUX_COMPONENT_middleware.edgefast_bluetooth.porting
 if MCUX_COMPONENT_middleware.edgefast_bluetooth.porting
 
 choice MCUX_COMPONENT_middleware.edgefast_bluetooth.porting_debug_console_selection
-    prompt "Debug Console Selection"
+    prompt "Debug Console Mode Selection"
     default MCUX_COMPONENT_middleware.edgefast_bluetooth.porting_DEPEND_ANYOF_OPTION_1
     help
       Debug Console Selection.
 
 config MCUX_COMPONENT_middleware.edgefast_bluetooth.porting_DEPEND_ANYOF_OPTION_1
-    bool "debug_console"
-    select MCUX_COMPONENT_utility.assert
+    bool "Non-blocking mode"
+    imply MCUX_COMPONENT_utility.assert
     select MCUX_PRJSEG_utility.debug_console_transfer_non_blocking
 
 config MCUX_COMPONENT_middleware.edgefast_bluetooth.porting_DEPEND_ANYOF_OPTION_2
-    bool "debug_console_lite"
-    select MCUX_COMPONENT_utility.assert_lite
+    bool "Blocking mode(lite)"
+    imply MCUX_COMPONENT_utility.assert_lite
 
 config MCUX_COMPONENT_middleware.edgefast_bluetooth.porting_DEPEND_ANYOF_OPTION_3
-    bool "debug_console blocking mode"
-    select MCUX_COMPONENT_utility.assert
+    bool "Blocking mode"
+    imply MCUX_COMPONENT_utility.assert
 
 endchoice
 
