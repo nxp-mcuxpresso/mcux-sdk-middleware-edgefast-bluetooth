@@ -434,6 +434,7 @@ if (CONFIG_MCUX_COMPONENT_middleware.edgefast_bluetooth.wifi_nxp.controller.base
     )
     mcux_add_macro(
         CC "-DSDIO_ENABLED=1"
+        CX "-DSDIO_ENABLED=1"
     )
 endif ()
 
