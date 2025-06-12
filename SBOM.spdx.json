@@ -1,0 +1,123 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "spdxVersion": "SPDX-2.3",
+  "creationInfo": {
+    "created": "2025-06-12T02:06:20Z",
+    "creators": [
+      "Organization: NXP"
+    ],
+    "licenseListVersion": "3.20"
+  },
+  "name": "mcux-sdk-middleware-edgefast-bluetooth-v25.06.00",
+  "dataLicense": "CC0-1.0",
+  "documentNamespace": "https://nxp.com/spdx/e51f9e9e-4f89-49a7-af94-69ee2d449f97",
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-package-e51f9e9e-4f89-49a7-af94-69ee2d449f97",
+      "name": "mcux-sdk-middleware-edgefast-bluetooth",
+      "versionInfo": "v25.06.00",
+      "licenseConcluded": "(BSD-3-Clause)",
+      "licenseDeclared": "(BSD-3-Clause)",
+      "downloadLocation": "https://github.com/nxp-mcuxpresso/mcux-sdk-middleware-edgefast-bluetooth",
+      "originator": "Organization: NXP",
+      "supplier": "NOASSERTION",
+      "externalRefs": [],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-1471e568-f459-4322-9e0f-9d09e7519ae8",
+      "name": "mbed TLS",
+      "versionInfo": "mbedtls-2.19.0d1",
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "homepage": "https://www.trustedfirmware.org/",
+      "downloadLocation": "NOASSERTION",
+      "originator": "Organization: mbed-tls",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:arm:mbed_tls:2.19.0:-:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:arm:mbed_tls:2.19.0:d2:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:arm:mbed_tls:2.19.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:arm:mbed_tls:2.19.0:d1:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:mbed:mbedtls:2.19.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:github/Mbed-TLS/mbedtls@mbedtls-2.19.0d1",
+          "referenceType": "purl"
+        },
+        {
+          "referenceCategory": "OTHER",
+          "referenceLocator": "8e5d862f-b5be-4b15-88f8-7a757ca07f65",
+          "referenceType": "BlackDuck-ComponentOrigin"
+        }
+      ],
+      "filesAnalyzed": false
+    },
+    {
+      "SPDXID": "SPDXRef-package-090a8a48-6b72-44ed-add9-17eaf9f57e57",
+      "name": "zephyr",
+      "versionInfo": "v3.7.0",
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "homepage": "https://zephyrproject.org/doc",
+      "downloadLocation": "https://github.com/zephyrproject-rtos/zephyr/releases/tag/v3.7.0",
+      "originator": "Organization: zephyr",
+      "supplier": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:zephyrproject:zephyr:3.7.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:o:zephyrproject:zephyr:3.7.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceLocator": "cpe:2.3:a:zephyrproject_rtos:zephyr:3.7.0:*:*:*:*:*:*:*",
+          "referenceType": "cpe23Type"
+        }
+      ],
+      "filesAnalyzed": false
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-package-e51f9e9e-4f89-49a7-af94-69ee2d449f97"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-e51f9e9e-4f89-49a7-af94-69ee2d449f97",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-package-1471e568-f459-4322-9e0f-9d09e7519ae8"
+    },
+    {
+      "spdxElementId": "SPDXRef-package-e51f9e9e-4f89-49a7-af94-69ee2d449f97",
+      "relationshipType": "CONTAINS",
+      "relatedSpdxElement": "SPDXRef-package-090a8a48-6b72-44ed-add9-17eaf9f57e57"
+    }
+  ]
+}
