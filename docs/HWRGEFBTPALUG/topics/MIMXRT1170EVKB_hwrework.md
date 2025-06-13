@@ -1,4 +1,4 @@
-# Hardware rework
+# Hardware rework 
 
 -   **HCI UART rework**
     1.  Remove resistors R183 and R1816.
@@ -19,5 +19,5 @@
         ![](../images/MIMXRT1170-EVKB-PCM_Back.png "MIMXRT1170-EVKB PCM Back")
 
 
-**Parent topic:**[Hardware Rework Guide for MIMXRT1170-EVKB and Murata 1ZM M.2 Adapter](../topics/MIMXRT1170-EVKB_Murata_1ZM.md)
+**Parent topic:**[Hardware Rework Guide for MIMXRT1170-EVKB and Murata M.2 Module](../topics/RT1170EVKB_Murata_M2.md)
 
