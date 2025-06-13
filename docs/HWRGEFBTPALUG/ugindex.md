@@ -5,8 +5,7 @@
 :maxdepth: 4
 :caption: Table of Contents
 
-topics/MIMXRT1170-EVKB_Murata_1XKM2.md
-topics/MIMXRT1170-EVKB_Murata_1ZM.md
+topics/RT1170EVKB_Murata_M2.md
 topics/MIMXRT1170-EVKB_Murata_2EL.md
 topics/hardware_rework_guide_for_mimxrt685-evk_and_aw-am4.md
 topics/hardware_rework_guide_for_mimxrt685-evk_and_aw-cm3.md
@@ -19,12 +18,12 @@ topics/hardware_rework_guide_for_mimxrt595-evk_with_murata1XKM2Module.md
 topics/hardware_rework_guide_for_mimxrt595-evk_and_aw-am5.md
 topics/hardware_rework_guide_for_mimxrt595-evk_with_aw-cm.md
 topics/hardware_rework_guide_for_mimxrt1040-evkb_and_mura.md
-topics/RT1060EVKC_Murata_1XKM2.md
-topics/MIMXRT1060EVKC_Murata1ZMM2.md
+topics/RT1060EVKC_Murata_M2.md
 topics/MIMXRT1060EVKC_Murata2EL.md
 topics/MCXN548EVK.md
 topics/MCXN947EVK.md
 topics/hardware_rework_guide_for_imxrt1050_evkb_and_murata_m_2_module.md
 topics/hardware_rework_guide_for_mimxrt1180_and_murata_m_2_module.md
-topics/FRDMMCXN947.md
+topics/FRDMMCXN947_m2.md
+topics/FRDMMCXN947_am510.md
 ```

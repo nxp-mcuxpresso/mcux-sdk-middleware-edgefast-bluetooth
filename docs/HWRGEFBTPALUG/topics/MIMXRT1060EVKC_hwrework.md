@@ -16,5 +16,5 @@
 
 ![](../images/RT1060EVKC.svg "MIMXRT1060-EVKC")
 
-**Parent topic:**[Hardware Rework Guide for MIMXRT1060-EVKC and Murata 1XK M.2 Adapter](../topics/RT1060EVKC_Murata_1XKM2.md)
+**Parent topic:**[Hardware Rework Guide for MIMXRT1060-EVKC and Murata M.2 Module](../topics/RT1060EVKC_Murata_M2.md)
 
