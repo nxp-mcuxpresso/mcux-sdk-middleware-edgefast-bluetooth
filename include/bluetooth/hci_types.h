@@ -542,6 +542,12 @@ struct bt_hci_cp_io_capability_neg_reply {
 	uint8_t   reason;
 } __packed;
 
+#define BT_HCI_OP_WRITE_LINK_POLICY_SETTINGS    BT_OP(BT_OGF_LINK_POLICY, 0x000d)
+struct bt_hci_cp_write_link_policy_settings {
+	uint16_t handle;
+	uint16_t link_policy_settings;
+} __packed;
+
 #define BT_HCI_OP_SWITCH_ROLE                   BT_OP(BT_OGF_LINK_POLICY, 0x000b)
 struct bt_hci_cp_switch_role {
 	bt_addr_t bdaddr;

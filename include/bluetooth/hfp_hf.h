@@ -28,6 +28,7 @@ extern "C" {
 enum bt_hfp_hf_at_cmd {
 	BT_HFP_HF_ATA,
 	BT_HFP_HF_AT_CHUP,
+	BT_HFP_HF_AT_BAC,
 };
 
 #define HFP_HF_DIGIT_ARRAY_SIZE                       32
@@ -250,6 +251,17 @@ struct bt_hfp_hf_cb {
 	 */
        void (*call_phnum)(struct bt_conn *conn, char* number);
 
+   	/** HF calling phone name string indication callback to application
+   	 *
+   	 *  If this callback is provided it will be called whenever there
+   	 *  is an incoming call and bt_hfp_hf_enable_clip_notification is called.
+   	 *
+   	 * @param conn Connection object.
+   	 * @param char to phone name string.
+   	 */
+
+       void (*call_phname)(struct bt_conn *conn, char* name);
+
       /** HF waiting call indication callback to application
        *
        *  If this callback is provided it will be called in waiting call state
@@ -319,7 +331,22 @@ struct bt_hfp_hf_cb {
        *  @param config get the config from upper layer.
        */
       void (*get_config)(hfp_hf_get_config **config);
-
+      /** Codec selection after connection.
+       *
+       *  This callback is used to select the codec for sco bridge scenario
+       *
+       *  @param conn Connection object.
+       *  @param codec is it HFP AG supported codec for sco bridge scenario.
+       */
+      void (*codec_selection_cb)(struct bt_conn *conn, uint8_t *codec);
+      
+      /** Get peer_supported_features_ext for application.
+       *
+       *  This callback is used to get peer_supported_features_ext(bt_hfp_hf_peer_supported_features_ext)
+       *
+       *  @param out-> bt_hfp_hf_peer_supported_features_ext will contain the value of peer_supported_features_ext for upper layer.
+       */
+      void (*get_peer_supported_features_ext)(uint32_t bt_hfp_hf_peer_supported_features_ext);
       /** HF list current calls indication callback to application
        *
        *  If this callback is provided it will be called whenever the
@@ -375,6 +402,8 @@ int bt_hfp_hf_connect(struct bt_conn *conn, uint8_t channel);
  *  of error.
  */
 int bt_hfp_hf_disconnect(struct bt_conn *conn);
+
+int bt_hfp_sco_disconnect(struct bt_conn *conn);
 
 /** @brief hfp_hf discover callback function
  *

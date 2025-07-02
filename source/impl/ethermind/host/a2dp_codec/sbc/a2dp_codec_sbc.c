@@ -86,3 +86,16 @@ uint32_t bt_a2dp_sbc_get_sampling_frequency(struct bt_a2dp_codec_sbc_params *sbc
         return 0U;
     }
 }
+
+uint8_t bt_a2dp_sbc_get_allocation_method(struct bt_a2dp_codec_sbc_params *sbc_codec)
+{
+	assert(sbc_codec != NULL);
+
+	/* Mask allocation method bits from sbc_codec->config[1]*/
+	uint8_t allocation_method = sbc_codec->config[1] &
+			(A2DP_SBC_ALLOC_MTHD_SNR | A2DP_SBC_ALLOC_MTHD_LOUDNESS);
+
+	// Return the bitmask directly
+	return allocation_method;
+}
+

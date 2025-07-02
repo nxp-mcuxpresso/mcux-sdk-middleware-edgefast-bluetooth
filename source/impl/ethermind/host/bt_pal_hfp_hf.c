@@ -1060,6 +1060,11 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
                 /* Get peer supported features */
                 BT_hfp_unit_get_peer_supported_features(handle, &bt_hfp_hf_peer_supported_features_ext);
 
+                if (bt_hf_cb->get_peer_supported_features_ext)
+                {
+                	bt_hf_cb->get_peer_supported_features_ext(bt_hfp_hf_peer_supported_features_ext);
+                }
+
                 hfp_hf->bt_hfp_hp_hfu_slc = 1;
                 hfp_hf->hfp_work_retry_at_cmds = 0x0;
                 hfp_hf->hfp_work_retry_count = 0x0;
@@ -1277,7 +1282,11 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             LOG_DBG("> Number   : %s\n", app_parser_result.result_param.cli_info.digits);
             if (BT_str_len(app_parser_result.result_param.cli_info.name))
             {
-                LOG_DBG("> Name : %s\n", app_parser_result.result_param.cli_info.name);
+            	LOG_DBG("> Name : %s\n", app_parser_result.result_param.cli_info.name);
+                if (bt_hf_cb->call_phname)
+                {
+                    bt_hf_cb->call_phname(hfp_hf->bt_conn, (char *)app_parser_result.result_param.cli_info.name);
+                }
             }
             if (bt_hf_cb->call_phnum)
             {
@@ -1744,6 +1753,13 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             /* Get Codec ID from event buffer */
             hfp_hf->esco_codec_id = data_to_app->buffer[data_to_app->parser_resp->param->start_of_value_index] - '0';
 
+            uint8_t codec_id_from_app = hfp_hf->esco_codec_id;
+
+            if ((1 != hfp_hf->esco_codec_id) && (bt_hf_cb->codec_selection_cb))
+            {
+                bt_hf_cb->codec_selection_cb(hfp_hf->bt_conn, &codec_id_from_app);
+            }
+
             /* Based on Codec ID, update eSCO parameters */
             if ((HFP_UNIT_CODEC_ID_CVSD == hfp_hf->esco_codec_id) || (HFP_UNIT_CODEC_ID_MSBC == hfp_hf->esco_codec_id))
             {
@@ -1754,14 +1770,20 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             {
                 LOG_ERR("Codec Selection: ???\n");
             }
-
-            if (0 != bt_hfp_hf_start_at_cmd(hfp_hf, HFP_HF_BCS_CMD))
-            {
-                LOG_ERR("HFP_HF_BCS_CMD bt_hfp_hf_start_at_cmd failure");
-            }
-            retval = BT_hfp_unit_codec_confirmation_num(hfp_hf->handle, hfp_hf->esco_codec_id);
-            bt_hfp_hf_at_cmd_ret_handling(hfp_hf, retval, HFP_HF_BCS_CMD);
-
+            if(hfp_hf->esco_codec_id == codec_id_from_app)
+			{
+				if (0 != bt_hfp_hf_start_at_cmd(hfp_hf, HFP_HF_BCS_CMD))
+				{
+					LOG_ERR("HFP_HF_BCS_CMD bt_hfp_hf_start_at_cmd failure");
+				}
+				retval = BT_hfp_unit_codec_confirmation_num(hfp_hf->handle, hfp_hf->esco_codec_id);
+				bt_hfp_hf_at_cmd_ret_handling(hfp_hf, retval, HFP_HF_BCS_CMD);
+			}
+			else
+			{
+				LOG_DBG("WBS-NBS change");
+				retval = BT_hfp_unit_avl_cdc_list_num(hfp_hf->handle, &codec_id_from_app,sizeof(codec_id_from_app));
+			}
             break;
 
 #endif /* HFP_UNIT_1_6 */
@@ -2045,7 +2067,7 @@ static struct bt_hfp_hf_em* hfp_hf_connected(struct bt_conn *conn, int err)
     if (bt_hf_cb->connected)
     {
         bt_hf_cb->connected(conn, err);
-    }
+	}
 
     return hfp_hf;
 }
@@ -2151,6 +2173,19 @@ int bt_hfp_hf_send_cmd(struct bt_conn *conn, enum bt_hfp_hf_at_cmd cmd)
                 status = bt_hfp_hf_get_status(api_retval);
             }
             break;
+        case BT_HFP_HF_AT_BAC:
+                    uint8_t nb_codec_id[1] = {1};
+                    if (0 != (bt_hfp_hf_peer_supported_features_ext & 0x0200))
+                    {
+                    	LOG_DBG("\nSend AT+BAC=1\n");
+						api_retval = BT_hfp_unit_avl_cdc_list_num(hf->handle,nb_codec_id,sizeof(nb_codec_id));
+						if (api_retval < 0)
+						{
+							LOG_ERR("Failed AT+BAC api_retval : %d", api_retval);
+							status = bt_hfp_hf_get_status(api_retval);
+						}
+                    }
+                    break;
         default:
             LOG_ERR("Invalid AT Command");
             status = -EINVAL;
@@ -2770,6 +2805,21 @@ int bt_hfp_hf_disconnect(struct bt_conn *conn)
         return -EIO;
     }
 
+    return 0;
+}
+
+int bt_hfp_sco_disconnect(struct bt_conn *conn)
+{
+    API_RESULT api_retval;
+    struct bt_hfp_hf_em *hf;
+
+    hf = bt_hfp_hf_lookup_bt_conn(conn);
+    if (!hf)
+    {
+        LOG_ERR("No HF connection found");
+        return -ENOTCONN;
+    }
+    bt_hfp_hf_close_audio(hf->sco_chan.sco);
     return 0;
 }
 
