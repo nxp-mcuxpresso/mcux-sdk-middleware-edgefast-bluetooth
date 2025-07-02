@@ -12,7 +12,9 @@
 
 #include <porting.h>
 #include <bluetooth/gatt.h>
+#if (defined(CONFIG_BT_TBS_CLIENT_CCID) && (CONFIG_BT_TBS_CLIENT_CCID > 0))
 #include <bluetooth/audio/tbs.h>
+#endif
 #include <bluetooth/audio/csip.h>
 #include <bluetooth/conn.h>
 #include <bluetooth/uuid.h>
@@ -87,10 +89,12 @@ BT_GATT_SERVICE_DEFINE(cas_svc,
 
 bool bt_cap_acceptor_ccid_exist(const struct bt_conn *conn, uint8_t ccid)
 {
+#if (defined(CONFIG_BT_TBS_CLIENT_CCID) && (CONFIG_BT_TBS_CLIENT_CCID > 0))
 	if (IS_ENABLED(CONFIG_BT_TBS_CLIENT_CCID) &&
 	    bt_tbs_client_get_by_ccid(conn, ccid) != NULL) {
 		return true;
 	}
+#endif
 
 	/* TODO: check mcs */
 
