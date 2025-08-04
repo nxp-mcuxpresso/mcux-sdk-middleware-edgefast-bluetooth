@@ -1091,7 +1091,6 @@ static int hfp_ag_start_pre(void)
 {
     API_RESULT api_retval;
     UINT8 hfp_ag_server_channel;
-    HFP_AG_HANDLE hfp_handle; /* hfp_handle is required only for start in mono HFP AG scenario */
 #ifdef SDP_DYNAMIC_DB
     hfp_ag_server_channel = BT_RFCOMM_CHAN_HFP_AG;
 #else

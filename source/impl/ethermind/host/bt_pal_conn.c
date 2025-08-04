@@ -612,11 +612,13 @@ static bool is_classic_conn(struct bt_conn *conn)
 		conn->type == BT_CONN_TYPE_BR);
 }
 
+#if (defined(CONFIG_BT_ISO_TX) && (CONFIG_BT_ISO_TX > 0))
 static bool is_iso_tx_conn(struct bt_conn *conn)
 {
 	return IS_ENABLED(CONFIG_BT_ISO_TX) &&
 		conn->type == BT_CONN_TYPE_ISO;
 }
+#endif /* CONFIG_BT_ISO_TX*/
 
 static bool is_le_conn(struct bt_conn *conn)
 {
