@@ -4874,6 +4874,8 @@ SHELL_STATIC_SUBCMD_SET_CREATE(mse_cmds,
    SHELL_SUBCMD_SET_END);
 #endif
 
+#if ((defined(CONFIG_BT_MAP_MCE) && ((CONFIG_BT_MAP_MCE) > 0U)) || \
+     (defined(CONFIG_BT_MAP_MSE) && ((CONFIG_BT_MAP_MSE) > 0U)))
 static int cmd_mce_mse(const struct shell *sh, size_t argc, char **argv)
 {
     if (argc == 1)
@@ -4888,8 +4890,6 @@ static int cmd_mce_mse(const struct shell *sh, size_t argc, char **argv)
     return -EINVAL;
 }
 
-#if ((defined(CONFIG_BT_MAP_MCE) && ((CONFIG_BT_MAP_MCE) > 0U)) || \
-     (defined(CONFIG_BT_MAP_MSE) && ((CONFIG_BT_MAP_MSE) > 0U)))
 SHELL_STATIC_SUBCMD_SET_CREATE(map_cmds,
 #if (defined(CONFIG_BT_MAP_MCE) && ((CONFIG_BT_MAP_MCE) > 0U))
     SHELL_CMD_ARG(mce, mce_cmds, HELP_NONE, cmd_mce_mse, 1, 0),

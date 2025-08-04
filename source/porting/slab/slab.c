@@ -76,6 +76,10 @@ int k_mem_slab_init(struct k_mem_slab *slab, void *buffer,
 
 	SYS_PORT_TRACING_OBJ_INIT(k_mem_slab, slab, ret);
 
+	/* for fix "_k_mem_slab_list_start/end" was declared but never referenced warning. */
+	(void)TYPE_SECTION_START(k_mem_slab);
+	(void)TYPE_SECTION_END(k_mem_slab);
+
 	return ret;
 }
 

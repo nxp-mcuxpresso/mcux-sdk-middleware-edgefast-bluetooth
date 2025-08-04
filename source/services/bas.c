@@ -73,11 +73,13 @@ static BT_GATT_SERVICE_DEFINE(bas,
 	BT_GATT_CPF(&level_cpf),
 );
 
+#if 0
 static int bas_init(void)
 {
 
 	return 0;
 }
+#endif
 
 uint8_t bt_bas_get_battery_level(void)
 {

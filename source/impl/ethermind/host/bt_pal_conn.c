@@ -1011,6 +1011,8 @@ void bt_conn_tx_processor(void)
 	bt_conn_tx_cb_t cb = NULL;
 	size_t buf_len;
 	void *ud = NULL;
+	bool last_buf = false;
+	int err = 0;
 
 	if (!IS_ENABLED(CONFIG_BT_CONN_TX)) {
 		/* Mom, can we have a real compiler? */
@@ -1060,7 +1062,7 @@ void bt_conn_tx_processor(void)
 		goto exit;
 	}
 
-	bool last_buf = conn_mtu(conn) >= buf_len;
+	last_buf = conn_mtu(conn) >= buf_len;
 
 	if (last_buf) {
 		/* Only pull the callback info from the last buffer.
@@ -1073,7 +1075,7 @@ void bt_conn_tx_processor(void)
 	LOG_DBG("TX process: conn %p buf %p (%s)",
 		conn, buf, last_buf ? "last" : "frag");
 
-	int err = send_buf(conn, buf, buf_len, (void *)cb, ud);
+	err = send_buf(conn, buf, buf_len, (void *)cb, ud);
 
 	if (err) {
 		/* -EIO means `unrecoverable error`. It can be an assertion that
@@ -1162,6 +1164,7 @@ void bt_conn_set_state(struct bt_conn *conn, bt_conn_state_t state)
 	bt_conn_state_t old_state;
 
 	LOG_DBG("%s -> %s", state2str(conn->state), state2str(state));
+	(void)state2str(conn->state); /* for fix declared but never referenced warning. */
 
 	if (conn->state == state) {
 		LOG_WRN("no transition %s", state2str(state));

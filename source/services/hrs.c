@@ -92,6 +92,7 @@ static BT_GATT_SERVICE_DEFINE(hrs_svc,
 			       NULL, NULL, NULL),
 );
 
+#if 0
 static int hrs_init(void)
 {
 
@@ -99,6 +100,7 @@ static int hrs_init(void)
 
 	return 0;
 }
+#endif
 
 int bt_hrs_cb_register(struct bt_hrs_cb *cb)
 {

@@ -4811,7 +4811,7 @@ static API_RESULT ethermind_bt_att_cb
 	return (0 == err) ? API_SUCCESS : API_FAILURE;
 }
 
-static void bt_eatt_init(void);
+extern void bt_eatt_init(void);
 
 void bt_att_init(void)
 {

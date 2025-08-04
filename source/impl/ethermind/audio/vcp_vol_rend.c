@@ -101,6 +101,7 @@ static void notify_work_reschedule(struct bt_vcp_vol_rend *inst, enum vol_rend_n
 	if (err < 0) {
 		LOG_ERR("Failed to reschedule %s notification err %d", vol_rend_notify_str(notify),
 			err);
+		(void)vol_rend_notify_str(notify); /* for fix defined but not used warning. */
 	} else if (!K_TIMEOUT_EQ(delay, K_NO_WAIT)) {
 		LOG_DBG("%s notification scheduled in %dms", vol_rend_notify_str(notify),
 			k_ticks_to_ms_floor32(k_work_delayable_remaining_get(&inst->notify_work)));
@@ -325,6 +326,7 @@ static struct bt_gatt_attr vcs_attrs[] = {
 
 static struct bt_gatt_service vcs_svc;
 
+#if defined(CONFIG_BT_VCP_VOL_REND_VOCS_INSTANCE_COUNT) && (CONFIG_BT_VCP_VOL_REND_VOCS_INSTANCE_COUNT > 0)
 static int prepare_vocs_inst(struct bt_vcp_vol_rend_register_param *param)
 {
 #if CONFIG_BT_VCP_VOL_REND_VOCS_INSTANCE_COUNT > 0
@@ -375,7 +377,9 @@ static int prepare_vocs_inst(struct bt_vcp_vol_rend_register_param *param)
 
 	return 0;
 }
+#endif
 
+#if defined(CONFIG_BT_VCP_VOL_REND_AICS_INSTANCE_COUNT) && (CONFIG_BT_VCP_VOL_REND_AICS_INSTANCE_COUNT > 0)
 static int prepare_aics_inst(struct bt_vcp_vol_rend_register_param *param)
 {
 #if CONFIG_BT_VCP_VOL_REND_AICS_INSTANCE_COUNT > 0
@@ -428,6 +432,7 @@ static int prepare_aics_inst(struct bt_vcp_vol_rend_register_param *param)
 
 	return 0;
 }
+#endif
 
 /****************************** PUBLIC API ******************************/
 int bt_vcp_vol_rend_register(struct bt_vcp_vol_rend_register_param *param)

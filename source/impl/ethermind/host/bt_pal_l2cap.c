@@ -85,9 +85,11 @@ NET_BUF_POOL_FIXED_DEFINE(disc_pool, 1,
 
 #define l2cap_lookup_ident(conn, ident) __l2cap_lookup_ident(conn, ident, false)
 #define l2cap_remove_ident(conn, ident) __l2cap_lookup_ident(conn, ident, true)
+
+#if (defined (CONFIG_BT_CLASSIC) && (CONFIG_BT_CLASSIC > 0U))
 #define br_l2cap_lookup_ident(conn, ident) __br_l2cap_lookup_ident(conn, ident, false)
 #define br_l2cap_remove_ident(conn, ident) __br_l2cap_lookup_ident(conn, ident, true)
-
+#endif 
 
 static sys_slist_t servers;
 
@@ -205,6 +207,7 @@ __l2cap_lookup_ident(struct bt_conn *conn, uint16_t ident, bool remove)
 	return NULL;
 }
 
+#if (defined (CONFIG_BT_CLASSIC) && (CONFIG_BT_CLASSIC > 0U))
 static struct bt_l2cap_br_chan *
 __br_l2cap_lookup_ident(struct bt_conn *conn, uint16_t ident, bool remove)
 {
@@ -225,6 +228,8 @@ __br_l2cap_lookup_ident(struct bt_conn *conn, uint16_t ident, bool remove)
 
 	return NULL;
 }
+#endif
+
 #endif /* CONFIG_BT_L2CAP_DYNAMIC_CHANNEL */
 
 void bt_l2cap_chan_remove(struct bt_conn *conn, struct bt_l2cap_chan *ch)
@@ -968,6 +973,7 @@ struct net_buf *bt_l2cap_create_pdu_timeout(struct net_buf_pool *pool,
 					  timeout);
 }
 
+#if (defined(CONFIG_BT_L2CAP_DYNAMIC_CHANNEL) && (CONFIG_BT_L2CAP_DYNAMIC_CHANNEL > 0))
 static void raise_data_ready(struct bt_l2cap_le_chan *le_chan)
 {
 	if (!atomic_set(&le_chan->_pdu_ready_lock, 1)) {
@@ -999,6 +1005,7 @@ static void lower_data_ready(struct bt_l2cap_le_chan *le_chan)
 
 	__ASSERT_NO_MSG(old);
 }
+#endif
 
 static void cancel_data_ready(struct bt_l2cap_le_chan *le_chan)
 {
@@ -1060,6 +1067,8 @@ static void chan_take_credit(struct bt_l2cap_le_chan *lechan)
 #endif
 }
 #endif
+
+#if (defined(CONFIG_BT_L2CAP_DYNAMIC_CHANNEL) && (CONFIG_BT_L2CAP_DYNAMIC_CHANNEL > 0))
 static struct bt_l2cap_le_chan *get_ready_chan(struct bt_conn *conn)
 {
 	struct bt_l2cap_le_chan *lechan;
@@ -1110,6 +1119,8 @@ static void l2cap_chan_sdu_sent(struct bt_conn *conn, void *user_data, int err)
 		chan->ops->sent(chan);
 	}
 }
+#endif
+
 #if 0
 static uint16_t get_pdu_len(struct bt_l2cap_le_chan *lechan,
 			    struct net_buf *buf)
@@ -1626,6 +1637,7 @@ static void l2cap_chan_tx_give_credits(struct bt_l2cap_le_chan *chan,
 	}
 }
 
+#if (defined (CONFIG_BT_CLASSIC) && (CONFIG_BT_CLASSIC > 0U))
 static void br_l2cap_chan_tx_give_credits(struct bt_l2cap_br_chan *chan,
 				       uint16_t credits)
 {
@@ -1638,6 +1650,7 @@ static void br_l2cap_chan_tx_give_credits(struct bt_l2cap_br_chan *chan,
 		chan->chan.ops->status(&chan->chan, chan->chan.status);
 	}
 }
+#endif
 
 static void l2cap_chan_destroy(struct bt_l2cap_chan *chan)
 {
@@ -1834,6 +1847,7 @@ static uint16_t l2cap_check_security(struct bt_conn *conn,
 #endif /* CONFIG_BT_CONN_DISABLE_SECURITY */
 }
 
+#if (defined (CONFIG_BT_CLASSIC) && (CONFIG_BT_CLASSIC > 0U))
 static uint16_t br_l2cap_check_security(struct bt_conn *conn,
 				 struct bt_l2cap_server *server)
 {
@@ -1917,6 +1931,7 @@ static uint16_t br_l2cap_check_security(struct bt_conn *conn,
 
 #endif /* CONFIG_BT_CONN_DISABLE_SECURITY */
 }
+#endif
 
 static void le_conn_req(struct bt_l2cap *l2cap, uint8_t ident,
 			struct net_buf *buf)
@@ -2552,6 +2567,7 @@ static int l2cap_change_security(struct bt_l2cap_le_chan *chan, uint16_t err)
 #endif
 }
 
+#if (defined (CONFIG_BT_CLASSIC) && (CONFIG_BT_CLASSIC > 0U))
 static int br_l2cap_change_security(struct bt_l2cap_br_chan *chan, uint16_t err)
 {
 #if ((defined(CONFIG_BT_SMP) && ((CONFIG_BT_SMP) > 0U)) || (defined(CONFIG_BT_CLASSIC) && ((CONFIG_BT_CLASSIC) > 0U)))
@@ -2602,6 +2618,7 @@ static int br_l2cap_change_security(struct bt_l2cap_br_chan *chan, uint16_t err)
     return -ESRCH;
 #endif
 }
+#endif
 
 #if (defined(CONFIG_BT_L2CAP_ECRED) && ((CONFIG_BT_L2CAP_ECRED) > 0))
 static void le_ecred_conn_rsp(struct bt_l2cap *l2cap, uint8_t ident,

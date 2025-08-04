@@ -257,10 +257,12 @@ void k_thread_system_pool_assign(struct k_thread *thread)
 }
 #endif /* (CONFIG_HEAP_MEM_POOL_SIZE > 0) */
 
+#if 0
 static k_ticks_t k_thread_get_tick(void)
 {
     return (k_ticks_t)k_uptime_ticks();
 }
+#endif
 
 /**
  * @brief Sleep until a thread exits

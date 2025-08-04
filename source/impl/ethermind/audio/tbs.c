@@ -290,6 +290,7 @@ static void tbs_set_terminate_reason(struct tbs_service_inst *inst,
 	inst->terminate_reason.reason = reason;
 	LOG_DBG("Index %u: call index 0x%02x, reason %s", inst_index(&inst->inst), call_index,
 		bt_tbs_term_reason_str(reason));
+	(void)inst_index(&inst->inst); /* for fix declared but never referenced warning. */ 
 
 	bt_gatt_notify_uuid(NULL, BT_UUID_TBS_TERMINATE_REASON,
 			    inst->inst.attrs,

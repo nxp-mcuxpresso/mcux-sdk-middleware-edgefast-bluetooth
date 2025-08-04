@@ -99,6 +99,9 @@ void net_buf_reset(struct net_buf *buf)
 	__ASSERT_NO_MSG(buf->flags == 0U);
 	__ASSERT_NO_MSG(buf->frags == NULL);
 
+	/* for fix "_net_buf_pool_list_end" was declared but never referenced warning. */
+	(void)TYPE_SECTION_END(net_buf_pool);
+
 	net_buf_simple_reset(&buf->b);
 }
 

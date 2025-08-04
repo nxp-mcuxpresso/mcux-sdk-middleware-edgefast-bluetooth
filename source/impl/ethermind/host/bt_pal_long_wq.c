@@ -27,6 +27,7 @@ int bt_long_wq_submit(struct k_work *work)
 	return k_work_submit_to_queue(&bt_long_wq, work);
 }
 
+#if 0
 static int long_wq_init(void)
 {
 
@@ -40,5 +41,6 @@ static int long_wq_init(void)
 
 	return 0;
 }
+#endif
 
 #endif /* CONFIG_BT_LONG_WQ */

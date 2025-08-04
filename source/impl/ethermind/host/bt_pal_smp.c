@@ -555,9 +555,11 @@ struct bt_smp {
 #ifdef SMP_LESC_CROSS_TXP_KEY_GEN
 DECL_STATIC BT_DEVICE_ADDR bt_smp_bd_addr;
 DECL_STATIC SMP_BD_HANDLE bt_smp_bd_handle;
+#if (defined(CONFIG_BT_CLASSIC) && ((CONFIG_BT_CLASSIC) > 0U))
 DECL_STATIC UCHAR local_keys;
 DECL_STATIC UCHAR peer_keys;
 DECL_STATIC SMP_KEY_DIST peer_key_info; /* static to reduce stack usage */
+#endif
 #endif
 static unsigned int fixed_passkey = BT_PASSKEY_INVALID;
 
@@ -717,12 +719,14 @@ static const struct bt_conn_auth_cb *latch_auth_cb(struct bt_smp *smp)
 	return atomic_ptr_get(&smp->auth_cb);
 }
 
+#if 0
 static bool latch_bondable(struct bt_smp *smp)
 {
 	(void)atomic_cas(&smp->bondable, BT_SMP_BONDABLE_UNINITIALIZED, (atomic_val_t)bondable);
 
 	return atomic_get(&smp->bondable);
 }
+#endif
 
 static uint8_t get_io_capa(struct bt_smp *smp)
 {
@@ -7645,8 +7649,6 @@ void appl_smp_lesc_xtxp_ltk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
 	if (API_SUCCESS == retval)
 	/* Save the LTK */
 	{
-		SMP_BD_HANDLE bd_handle;
-
 		BT_mem_copy(peer_key_info.enc_info, xtxp->ltk, 16U);
 
 		/* The peer's IRK may changes, so do the rpa search always */

@@ -3795,7 +3795,7 @@ static int bt_eatt_accept(struct bt_conn *conn, struct bt_l2cap_server *server,
 	return -ENOMEM;
 }
 
-static void bt_eatt_init(void)
+void bt_eatt_init(void)
 {
 	int err;
 	static struct bt_l2cap_server eatt_l2cap = {
