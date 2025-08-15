@@ -653,6 +653,37 @@ int bt_a2dp_send_delay_report(struct bt_a2dp_endpoint *endpoint, int16_t delay);
 
 #endif
 
+#if !((defined(CONFIG_A2DP_CODEC_EXTERNAL)) && (CONFIG_A2DP_CODEC_EXTERNAL > 0U))
+#if ((defined(CONFIG_BT_A2DP_CODEC_CONTROL)) && (CONFIG_BT_A2DP_CODEC_CONTROL > 0U))
+/** @brief control the internal codec state
+ *
+ *  @param endpoint The endpoint.
+ *  @param enable Enable/Disable the internal codec's encoder or decoder.
+ *  Only support SBC endpoint. For source ep, it controls state of internal encoder;
+ *  for sink ep, it controls the state of internal decoder.
+ *
+ *  @return 0 in case of success and error code in case of error.
+ */
+int bt_a2dp_set_ep_codec_enable(struct bt_a2dp_endpoint *endpoint, bool enable);
+#endif
+
+#if ((defined(CONFIG_BT_A2DP_WRITE_EXT)) && (CONFIG_BT_A2DP_WRITE_EXT > 0U))
+#if ((defined(CONFIG_BT_A2DP_SOURCE)) && (CONFIG_BT_A2DP_SOURCE > 0U))
+/** @brief send a2dp streamer data
+ *
+ *  @param endpoints The endpoint array, it must point to global data, the last one must be NULL.
+ *  @param data The streamer data.
+ *  Only support SBC, data's format is PCM data.
+ *  Use the first endpoint to do the encoding, then transfer the encoded data to all the endpoints.
+ *  @param datalen The streamer data length.
+ *
+ *  @return 0 in case of success and error code in case of error.
+ */
+int bt_a2dp_src_media_write_ext(struct bt_a2dp_endpoint *endpoints[], uint8_t *data, uint16_t datalen);
+#endif
+#endif
+#endif
+
 #ifdef __cplusplus
 }
 #endif

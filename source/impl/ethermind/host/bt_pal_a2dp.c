@@ -175,10 +175,17 @@ struct bt_a2dp_endpoint_state
     uint8_t multiplexing_config;
 #endif
 #if !((defined(CONFIG_A2DP_CODEC_EXTERNAL)) && (CONFIG_A2DP_CODEC_EXTERNAL > 0U))
+#if ((defined(CONFIG_BT_A2DP_WRITE_EXT)) && (CONFIG_BT_A2DP_WRITE_EXT > 0U))
+    struct bt_a2dp_endpoint **same_data_eps;
+#endif
     struct bt_a2dp_codec_state *codec;
     uint8_t *buffer_points[JPL_INITIAL_NUM_DATA_READ_IND];
     uint8_t buffer_produce;
     uint8_t buffer_consume;
+#if ((defined(CONFIG_BT_A2DP_CODEC_CONTROL)) && (CONFIG_BT_A2DP_CODEC_CONTROL > 0U))
+    /* for source ep, it is the state of internal encoder; for sink ep, it is the state of internal decoder */
+    bool codec_enabled;
+#endif
 #endif
 };
 
@@ -566,12 +573,21 @@ static int a2dp_set_a2dp_source_codec_encoder(struct bt_a2dp_codec_state *codec,
     API_RESULT retval;
     /* Get SBC Encoder Codec Parameters */
     SBC_CODEC_PARAM * codec_param;
-    struct bt_a2dp_sbc_encoder *sbc_encoder = &codec->sbc_encoder;
+    struct bt_a2dp_sbc_encoder *sbc_encoder;
+
+#if ((defined(CONFIG_BT_A2DP_CODEC_CONTROL)) && (CONFIG_BT_A2DP_CODEC_CONTROL > 0U))
+    if (codec == NULL)
+    {
+        return 0;;
+    }
+#endif
 
     if (codecType != AVDTP_CODEC_AUDIO_SBC)
     {
         return 0;
     }
+
+    sbc_encoder = &codec->sbc_encoder;
 
     codec_param = &sbc_encoder->a2dp_sbc_encoder_io.encoder_params;
     /* Decode Sampling Frequency */
@@ -1061,7 +1077,11 @@ static API_RESULT jpl_callback_handle
         LOG_DBG("U ");
     }
 
+#if ((defined(CONFIG_BT_A2DP_CODEC_CONTROL)) && (CONFIG_BT_A2DP_CODEC_CONTROL > 0U))
+    if ((jpl_active_ep != NULL) && (jpl_active_ep->codec != NULL))
+#else
     if (jpl_active_ep != NULL)
+#endif
     {
         a2dp_streamer_data_t streamerData;
         streamerData.data = jpl_active_ep->codec->sbc_decoder.a2dp_jpl_pof = event_data;
@@ -1206,8 +1226,16 @@ static API_RESULT a2dp_encode_n_send
     API_RESULT        retval;
     uint16_t            count;
     uint16_t            sbc_datalen;
-    struct bt_a2dp_sbc_encoder *sbc_enc = &ep_state->codec->sbc_encoder;
+    struct bt_a2dp_sbc_encoder *sbc_enc;
 
+#if ((defined(CONFIG_BT_A2DP_CODEC_CONTROL)) && (CONFIG_BT_A2DP_CODEC_CONTROL > 0U))
+    if (ep_state->codec == NULL)
+    {
+        return API_SUCCESS;
+    }
+#endif
+
+    sbc_enc = &ep_state->codec->sbc_encoder;
     /* Convert UCHAR LE16 PCM Data to uint16_t LE16 */
     for (count = 0; count < (pcm_datalen >> 1); count ++)
     {
@@ -1240,26 +1268,80 @@ static API_RESULT a2dp_encode_n_send
     /* Update SBC Frame Size */
     sbc_datalen = sbc_enc->a2dp_sbc_encoder_io.encoder_output_buflen;
 
-    /* Write to A2DP */
-#ifndef A2DP_SUPPORT_MULTIPLE_MEDIA_FRAME_WRITE
-    retval = BT_a2dp_media_write
-             (
-                 ep_state->ethermind_a2dp_codec_index,
-                 sbc_enc->a2dp_sbc_data,
-                 sbc_datalen
-             );
-#else
-    retval = BT_a2dp_media_write
-             (
-                 ep_state->ethermind_a2dp_codec_index,
-                 1,
-                 sbc_enc->a2dp_sbc_data,
-                 sbc_datalen
-             );
-#endif /* A2DP_SUPPORT_MULTIPLE_MEDIA_FRAME_WRITE */
-    if (API_SUCCESS != retval)
+#if ((defined(CONFIG_BT_A2DP_WRITE_EXT)) && (CONFIG_BT_A2DP_WRITE_EXT > 0U))
+    if ((ep_state->same_data_eps != NULL) && (ep_state->same_data_eps[0] == ep_state->endpoint) &&
+        (ep_state->same_data_eps[1] != NULL))
     {
-        LOG_DBG("A2DP media write failed - 0x%X\r\n", retval);
+        uint8_t index = 0;
+        struct bt_a2dp_endpoint *endpoint;
+        struct bt_a2dp_endpoint_state *send_ep_state;
+
+        endpoint = ep_state->same_data_eps[0];
+
+        do
+        {
+            if ((endpoint == NULL) || (endpoint->info.sep.tsep != BT_A2DP_SOURCE) ||
+                (endpoint->codec_id != BT_A2DP_SBC))
+            {
+                break;
+            }
+
+            send_ep_state = bt_a2dp_get_endpoint_state(endpoint);
+            if ((send_ep_state == NULL) || (!send_ep_state->codec_enabled))
+            {
+                break;
+            }
+
+            /* Write to A2DP */
+#ifndef A2DP_SUPPORT_MULTIPLE_MEDIA_FRAME_WRITE
+            retval = BT_a2dp_media_write
+                    (
+                        send_ep_state->ethermind_a2dp_codec_index,
+                        sbc_enc->a2dp_sbc_data,
+                        sbc_datalen
+                    );
+#else
+            retval = BT_a2dp_media_write
+                    (
+                        send_ep_state->ethermind_a2dp_codec_index,
+                        1,
+                        sbc_enc->a2dp_sbc_data,
+                        sbc_datalen
+                    );
+#endif /* A2DP_SUPPORT_MULTIPLE_MEDIA_FRAME_WRITE */
+            if (API_SUCCESS != retval)
+            {
+                LOG_DBG("A2DP media write failed - 0x%X\r\n", retval);
+            }
+
+            index++;
+            endpoint = ep_state->same_data_eps[index];
+        } while (endpoint != NULL);
+    }
+    else
+#endif
+    {
+        /* Write to A2DP */
+#ifndef A2DP_SUPPORT_MULTIPLE_MEDIA_FRAME_WRITE
+        retval = BT_a2dp_media_write
+                (
+                    ep_state->ethermind_a2dp_codec_index,
+                    sbc_enc->a2dp_sbc_data,
+                    sbc_datalen
+                );
+#else
+        retval = BT_a2dp_media_write
+                (
+                    ep_state->ethermind_a2dp_codec_index,
+                    1,
+                    sbc_enc->a2dp_sbc_data,
+                    sbc_datalen
+                );
+#endif /* A2DP_SUPPORT_MULTIPLE_MEDIA_FRAME_WRITE */
+        if (API_SUCCESS != retval)
+        {
+            LOG_DBG("A2DP media write failed - 0x%X\r\n", retval);
+        }
     }
 
     return retval;
@@ -1269,8 +1351,17 @@ static void edgefast_a2dp_src_write_task (struct bt_a2dp_endpoint_state *ep_stat
 {
     int32_t  rd_ptr, remaining;
     uint16_t bytes_to_send, bytes_to_copy, buf_index, encode_len;
-    struct bt_a2dp_sbc_encoder *sbc_encoder = &ep_state->codec->sbc_encoder;
+    struct bt_a2dp_sbc_encoder *sbc_encoder;
     uint32_t priMask = 0U;
+
+#if ((defined(CONFIG_BT_A2DP_CODEC_CONTROL)) && (CONFIG_BT_A2DP_CODEC_CONTROL > 0U))
+    if (ep_state->codec == NULL)
+    {
+        return;
+    }
+#endif
+
+    sbc_encoder = &ep_state->codec->sbc_encoder;
 
     for(;;)
     {
@@ -2018,7 +2109,11 @@ static API_RESULT ethermind_a2dp_notify_cb
 #if !((defined(CONFIG_A2DP_CODEC_EXTERNAL)) && (CONFIG_A2DP_CODEC_EXTERNAL > 0U))
                 if (BT_A2DP_SINK == ep_state->endpoint->info.sep.tsep)
                 {
+#if ((defined(CONFIG_BT_A2DP_CODEC_CONTROL)) && (CONFIG_BT_A2DP_CODEC_CONTROL > 0U))
+                    if ((ep_state->endpoint->codec_id == BT_A2DP_SBC) && (ep_state->codec != NULL))
+#else
                     if (ep_state->endpoint->codec_id == BT_A2DP_SBC)
+#endif
                     {
                         /* only for a2dp sink */
                         BT_jpl_init(jpl_callback_handle);
@@ -2084,7 +2179,11 @@ static API_RESULT ethermind_a2dp_notify_cb
                 a2dp->a2dp_state = INTERNAL_STATE_CONFIGURED_OPENED;
                 a2dp_configure_ep_callback_call(a2dp, ep_state, event_result);
 #if !((defined(CONFIG_A2DP_CODEC_EXTERNAL)) && (CONFIG_A2DP_CODEC_EXTERNAL > 0U))
+#if ((defined(CONFIG_BT_A2DP_CODEC_CONTROL)) && (CONFIG_BT_A2DP_CODEC_CONTROL > 0U))
+                if ((ep_state->endpoint->codec_id == BT_A2DP_SBC) && (ep_state->codec != NULL))
+#else
                 if (ep_state->endpoint->codec_id == BT_A2DP_SBC)
+#endif
                 {
                     /* only for a2dp sink */
                     BT_jpl_init(jpl_callback_handle);
@@ -2193,56 +2292,72 @@ static API_RESULT ethermind_a2dp_notify_cb
 #if !((defined(CONFIG_A2DP_CODEC_EXTERNAL)) && (CONFIG_A2DP_CODEC_EXTERNAL > 0U))
             if (ep_state->endpoint->codec_id == BT_A2DP_SBC)
             {
-                uint32_t timestamp;
-                uint8_t *data;
-                uint16_t seq_number;
-                uint8_t offset;
+#if ((defined(CONFIG_BT_A2DP_CODEC_CONTROL)) && (CONFIG_BT_A2DP_CODEC_CONTROL > 0U))
+                if (ep_state->codec_enabled)
+                {
+#endif
+                    uint32_t timestamp;
+                    uint8_t *data;
+                    uint16_t seq_number;
+                    uint8_t offset;
 
-                /**
-                 *   Media Packet: 12 Octets of RTP header, followed by Media Payload
-                 *   For SBC, the Media Payload will have one byte of header containing
-                 *   number of frames, followed by SBC Frames.
-                 */
-                data = (uint8_t *)event_data;
+                    /**
+                     *   Media Packet: 12 Octets of RTP header, followed by Media Payload
+                     *   For SBC, the Media Payload will have one byte of header containing
+                     *   number of frames, followed by SBC Frames.
+                     */
+                    data = (uint8_t *)event_data;
 
-                /* Extract Sequence Number */
-                seq_number = *(data + 2);
-                seq_number <<= 8;
-                seq_number |= *(data + 3);
+                    /* Extract Sequence Number */
+                    seq_number = *(data + 2);
+                    seq_number <<= 8;
+                    seq_number |= *(data + 3);
 
-                /* Extract Time Stamp */
-                timestamp = *(data + 4);
-                timestamp <<= 8;
-                timestamp |= *(data + 5);
-                timestamp <<= 8;
-                timestamp |= *(data + 6);
-                timestamp <<= 8;
-                timestamp |= *(data + 7);
+                    /* Extract Time Stamp */
+                    timestamp = *(data + 4);
+                    timestamp <<= 8;
+                    timestamp |= *(data + 5);
+                    timestamp <<= 8;
+                    timestamp |= *(data + 6);
+                    timestamp <<= 8;
+                    timestamp |= *(data + 7);
 
-                offset = 12U;
+                    offset = 12U;
 #if ((defined(CONFIG_BT_A2DP_CP_SERVICE)) && (CONFIG_BT_A2DP_CP_SERVICE > 0U))
-                if (ep_state->cp_header_len > 0U) {
-                    /* todo: the decrypt may be need in furture. */
-                    offset += ep_state->cp_header_len;
+                    if (ep_state->cp_header_len > 0U) {
+                        /* todo: the decrypt may be need in furture. */
+                        offset += ep_state->cp_header_len;
+                    }
+#endif
+                    /**
+                     * Add SBC media frames to JPL.
+                     *
+                     * JPL to be provided with the one byte of SBC header,
+                     * along with the SBC frames.
+                     */
+                    retval = BT_jpl_add_frames
+                            (
+                                seq_number,
+                                timestamp,
+                                (data + offset),
+                                (event_datalen - offset)
+                            );
+                    if (API_SUCCESS != retval)
+                    {
+                        LOG_DBG("JPL Add Frames Failed - 0x%X\r\n", retval);
+                    }
+#if ((defined(CONFIG_BT_A2DP_CODEC_CONTROL)) && (CONFIG_BT_A2DP_CODEC_CONTROL > 0U))
+                }
+                else
+                {
+                    /* callback the original encoded data */
+                    a2dp_streamer_data_t streamerData;
+
+                    streamerData.data = (uint8_t *)event_data;
+                    streamerData.data_length = event_datalen;
+                    a2dp_control_ind_callback_call(ep_state, A2DP_CONTROL_SINK_STREAMER_DATA, 0, &streamerData);
                 }
 #endif
-                /**
-                 * Add SBC media frames to JPL.
-                 *
-                 * JPL to be provided with the one byte of SBC header,
-                 * along with the SBC frames.
-                 */
-                retval = BT_jpl_add_frames
-                         (
-                             seq_number,
-                             timestamp,
-                             (data + offset),
-                             (event_datalen - offset)
-                         );
-                if (API_SUCCESS != retval)
-                {
-                    LOG_DBG("JPL Add Frames Failed - 0x%X\r\n", retval);
-                }
             }
             else
 #endif
@@ -2260,7 +2375,11 @@ static API_RESULT ethermind_a2dp_notify_cb
         case A2DP_START_IND:
 #if ((defined(CONFIG_BT_A2DP_SOURCE)) && (CONFIG_BT_A2DP_SOURCE > 0U))
 #if !((defined(CONFIG_A2DP_CODEC_EXTERNAL)) && (CONFIG_A2DP_CODEC_EXTERNAL > 0U))
+#if ((defined(CONFIG_BT_A2DP_CODEC_CONTROL)) && (CONFIG_BT_A2DP_CODEC_CONTROL > 0U))
+            if ((ep_state->endpoint->info.sep.tsep == BT_A2DP_SOURCE) && (ep_state->codec != NULL))
+#else
             if (ep_state->endpoint->info.sep.tsep == BT_A2DP_SOURCE)
+#endif
             {
                 ep_state->codec->sbc_encoder.a2dp_src_wr_th_state = APP_A2DP_SRC_WR_TH_INIT;
                 ep_state->codec->sbc_encoder.a2dp_src_buffer_size = A2DP_SRC_MAX_BUFFER_SIZE;
@@ -2275,7 +2394,11 @@ static API_RESULT ethermind_a2dp_notify_cb
 #if !((defined(CONFIG_A2DP_CODEC_EXTERNAL)) && (CONFIG_A2DP_CODEC_EXTERNAL > 0U))
             if (BT_A2DP_SINK == ep_state->endpoint->info.sep.tsep)
             {
+#if ((defined(CONFIG_BT_A2DP_CODEC_CONTROL)) && (CONFIG_BT_A2DP_CODEC_CONTROL > 0U))
+                if ((BT_A2DP_SBC == ep_state->endpoint->codec_id) && (ep_state->codec_enabled) && (ep_state->codec != NULL))
+#else
                 if (BT_A2DP_SBC == ep_state->endpoint->codec_id)
+#endif
                 {
                     jpl_active_ep = ep_state;
                     /* Start JPL */
@@ -2615,11 +2738,20 @@ int bt_a2dp_register_endpoint(struct bt_a2dp_endpoint *endpoint, uint8_t media_t
             {
                 a2dp_endpoint_states[index].codec = (struct bt_a2dp_codec_state *)&endpoint->codec_buffer[0];
             }
+            else
+            {
+                a2dp_endpoint_states[index].codec = NULL;
+            }
 #endif
 
 #if ((defined(CONFIG_BT_A2DP_SINK)) && (CONFIG_BT_A2DP_SINK > 0U))
 #if !((defined(CONFIG_A2DP_CODEC_EXTERNAL)) && (CONFIG_A2DP_CODEC_EXTERNAL > 0U))
+#if ((defined(CONFIG_BT_A2DP_CODEC_CONTROL)) && (CONFIG_BT_A2DP_CODEC_CONTROL > 0U))
+            if ((endpoint->codec_id == BT_A2DP_SBC) && (role == BT_A2DP_SINK) &&
+                (a2dp_endpoint_states[index].codec != NULL) && endpoint->codec_buffer_nocached != NULL)
+#else
             if ((endpoint->codec_id == BT_A2DP_SBC) && (role == BT_A2DP_SINK))
+#endif
             {
                 a2dp_endpoint_states[index].codec->sbc_decoder.buf =
                           (struct bt_a2dp_sbc_decoder_buf *)&endpoint->codec_buffer_nocached[0];
@@ -2627,6 +2759,9 @@ int bt_a2dp_register_endpoint(struct bt_a2dp_endpoint *endpoint, uint8_t media_t
 #endif
 #endif
             a2dp_endpoint_states[index].endpoint = endpoint;
+#if ((defined(CONFIG_BT_A2DP_CODEC_CONTROL)) && (CONFIG_BT_A2DP_CODEC_CONTROL > 0U))
+            a2dp_endpoint_states[index].codec_enabled = true; /* default enabled */
+#endif
 #if ((defined(CONFIG_BT_A2DP_CP_SERVICE)) && (CONFIG_BT_A2DP_CP_SERVICE > 0U))
             a2dp_endpoint_states[index].cp_header_len = 0u;
 #endif
@@ -2825,7 +2960,7 @@ int bt_a2dp_start(struct bt_a2dp_endpoint *endpoint)
 
 #if !((defined(CONFIG_A2DP_CODEC_EXTERNAL)) && (CONFIG_A2DP_CODEC_EXTERNAL > 0U))
 #if ((defined(CONFIG_BT_A2DP_SOURCE)) && (CONFIG_BT_A2DP_SOURCE > 0U))
-    if (endpoint->info.sep.tsep == BT_A2DP_SOURCE)
+    if ((endpoint->info.sep.tsep == BT_A2DP_SOURCE) && (ep_state->codec != NULL))
     {
         ep_state->codec->sbc_encoder.a2dp_src_wr_th_state = APP_A2DP_SRC_WR_TH_INIT;
         ep_state->codec->sbc_encoder.a2dp_src_buffer_size = A2DP_SRC_MAX_BUFFER_SIZE;
@@ -2889,7 +3024,7 @@ static void a2dp_src_enqueue
     struct bt_a2dp_sbc_encoder *sbc_encoder;
 
     ep_state = bt_a2dp_get_endpoint_state(endpoint);
-    if (ep_state == NULL)
+    if ((ep_state == NULL) || (ep_state->codec == NULL))
     {
         return;
     }
@@ -2979,19 +3114,10 @@ static void a2dp_src_enqueue
 }
 #endif
 
-int bt_a2dp_src_media_write(struct bt_a2dp_endpoint *endpoint,
-                            uint8_t *data, uint16_t datalen)
+int bt_a2dp_src_write_direct(struct bt_a2dp_endpoint_state *ep_state, uint8_t *data, uint16_t datalen)
 {
-#if ((defined(CONFIG_A2DP_CODEC_EXTERNAL)) && (CONFIG_A2DP_CODEC_EXTERNAL > 0U))
     API_RESULT retval;
-    struct bt_a2dp_endpoint_state *ep_state;
     uint8_t offset;
-
-    ep_state = bt_a2dp_get_endpoint_state(endpoint);
-    if (ep_state == NULL)
-    {
-        return -EIO;
-    }
 
     offset = BT_AVDTP_MEDIA_HDR_SIZE;
 #if ((defined(CONFIG_BT_A2DP_CP_SERVICE)) && (CONFIG_BT_A2DP_CP_SERVICE > 0U))
@@ -3029,20 +3155,52 @@ int bt_a2dp_src_media_write(struct bt_a2dp_endpoint *endpoint,
         LOG_DBG("A2DP media write failed - 0x%X\r\n", retval);
         return -EIO;
     }
-#else
+
+    return 0;
+}
+
+int bt_a2dp_src_media_write(struct bt_a2dp_endpoint *endpoint,
+                            uint8_t *data, uint16_t datalen)
+{
+    struct bt_a2dp_endpoint_state *ep_state;
+
     if ((endpoint == NULL) || (endpoint->info.sep.tsep != BT_A2DP_SOURCE))
     {
         return -EIO;
     }
 
-    if (endpoint->codec_id == BT_A2DP_SBC)
+    ep_state = bt_a2dp_get_endpoint_state(endpoint);
+    if (ep_state == NULL)
     {
-        a2dp_src_enqueue(endpoint, data, datalen);
+        return -EIO;
     }
+
+#if ((defined(CONFIG_BT_A2DP_WRITE_EXT)) && (CONFIG_BT_A2DP_WRITE_EXT > 0U))
+    ep_state->same_data_eps = NULL;
+#endif
+
+#if ((defined(CONFIG_A2DP_CODEC_EXTERNAL)) && (CONFIG_A2DP_CODEC_EXTERNAL > 0U))
+    return bt_a2dp_src_write_direct(ep_state, data, datalen);
+#else
+#if ((defined(CONFIG_BT_A2DP_CODEC_CONTROL)) && (CONFIG_BT_A2DP_CODEC_CONTROL > 0U))
+    if (ep_state->codec_enabled)
+#endif
+    {
+        if (endpoint->codec_id == BT_A2DP_SBC)
+        {
+            a2dp_src_enqueue(endpoint, data, datalen);
+        }
+        else
+        {
+            //todo: other codec encoded data sending.
+        }
+    }
+#if ((defined(CONFIG_BT_A2DP_CODEC_CONTROL)) && (CONFIG_BT_A2DP_CODEC_CONTROL > 0U))
     else
     {
-        //todo: other codec encoded data sending.
+        return bt_a2dp_src_write_direct(ep_state, data, datalen);
     }
+#endif
 #endif
     return 0;
 }
@@ -3065,6 +3223,14 @@ int bt_a2dp_snk_media_sync(struct bt_a2dp_endpoint *endpoint,
     {
         return -EINVAL;
     }
+
+#if ((defined(CONFIG_BT_A2DP_CODEC_CONTROL)) && (CONFIG_BT_A2DP_CODEC_CONTROL > 0U))
+    if ((!ep_state->codec_enabled) || (ep_state->codec == NULL))
+    {
+        return -EINVAL;
+    }
+#endif
+
     sbc_decoder = &ep_state->codec->sbc_decoder;
 
     if (endpoint->codec_id == BT_A2DP_SBC)
@@ -3458,6 +3624,85 @@ int bt_a2dp_send_delay_report(struct bt_a2dp_endpoint *endpoint, int16_t delay)
     }
 }
 
+#endif
+#endif
+
+#if !((defined(CONFIG_A2DP_CODEC_EXTERNAL)) && (CONFIG_A2DP_CODEC_EXTERNAL > 0U))
+#if ((defined(CONFIG_BT_A2DP_CODEC_CONTROL)) && (CONFIG_BT_A2DP_CODEC_CONTROL > 0U))
+int bt_a2dp_set_ep_codec_enable(struct bt_a2dp_endpoint *endpoint, bool enable)
+{
+    struct bt_a2dp_endpoint_state *ep_state;
+
+    if (endpoint == NULL)
+    {
+        return -EINVAL;
+    }
+
+    ep_state = bt_a2dp_get_endpoint_state(endpoint);
+    if (ep_state == NULL)
+    {
+        return -EINVAL;
+    }
+
+    ep_state->codec_enabled = enable;
+    return 0;
+}
+#endif
+
+#if ((defined(CONFIG_BT_A2DP_WRITE_EXT)) && (CONFIG_BT_A2DP_WRITE_EXT > 0U))
+#if ((defined(CONFIG_BT_A2DP_SOURCE)) && (CONFIG_BT_A2DP_SOURCE > 0U))
+int bt_a2dp_src_media_write_ext(struct bt_a2dp_endpoint *endpoints[], uint8_t *data, uint16_t datalen)
+{
+    struct bt_a2dp_endpoint_state *ep_state;
+    struct bt_a2dp_endpoint *endpoint;
+    uint8_t index = 0;
+
+    if (endpoints == NULL)
+    {
+        return -EINVAL;
+    }
+
+    endpoint = endpoints[0];
+    do
+    {
+        if ((endpoint == NULL) || (endpoint->info.sep.tsep != BT_A2DP_SOURCE) ||
+            (endpoint->codec_id != BT_A2DP_SBC))
+        {
+            return -EINVAL;
+        }
+
+        ep_state = bt_a2dp_get_endpoint_state(endpoint);
+        if ((ep_state == NULL) || (!ep_state->codec_enabled))
+        {
+            return -EINVAL;
+        }
+
+        index++;
+        endpoint = endpoints[index];
+    } while (endpoint != NULL);
+
+    /* Only use the first endpoint to do the encoding */
+    ep_state = bt_a2dp_get_endpoint_state(endpoints[0]);
+    if ((ep_state == NULL) || (ep_state->codec == NULL))
+    {
+        return -EINVAL;
+    }
+
+    if (endpoints[1] != NULL)
+    {
+        ep_state->same_data_eps = endpoints;
+    }
+    else
+    {
+        /* Please use bt_a2dp_src_media_write if only writting to one endpoint */
+        return bt_a2dp_src_media_write(endpoints[0], data, datalen);
+    }
+
+    a2dp_src_enqueue(endpoints[0], data, datalen);
+
+    return 0;
+}
+#endif
 #endif
 #endif
 

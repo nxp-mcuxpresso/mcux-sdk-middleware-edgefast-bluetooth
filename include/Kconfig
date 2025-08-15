@@ -2209,6 +2209,24 @@ config BT_A2DP_MAX_ENDPOINT_COUNT
     help
       This symbol is a config macro.
 
+config A2DP_CODEC_EXTERNAL
+    bool "A2DP_CODEC_EXTERNAL"
+    default 0
+    help
+      This symbol is a config macro.
+
+config BT_A2DP_CODEC_CONTROL
+    bool "BT_A2DP_CODEC_CONTROL"
+    default 0
+    help
+      This symbol is a config macro.
+
+config BT_A2DP_WRITE_EXT
+    bool "BT_A2DP_WRITE_EXT"
+    default 0
+    help
+      This symbol is a config macro.
+
 if BT_A2DP_SOURCE
 
 config BT_A2DP_SBC_ENCODER_PCM_BUFFER_SIZE
