@@ -2158,10 +2158,33 @@ if (CONFIG_MCUX_COMPONENT_middleware.edgefast_bluetooth.pal.crypto.ethermind)
         INCLUDES source/impl/ethermind/host
     )
     mcux_add_source(
-        SOURCES source/impl/ethermind/crypto/bt_crypto.c
-    )
-    mcux_add_source(
         SOURCES source/impl/ethermind/crypto/bt_crypto.h
+    )
+endif ()
+
+if (CONFIG_MCUX_COMPONENT_middleware.edgefast_bluetooth.crypto.psa)
+   mcux_add_source(
+       SOURCES source/impl/ethermind/crypto/bt_crypto_psa.c
+   )
+endif ()
+
+if(CONFIG_MCUX_COMPONENT_middleware.edgefast_bluetooth.crypto.no_psa)
+   mcux_add_source(
+       SOURCES source/impl/ethermind/crypto/bt_crypto.c
+   )
+   mcux_add_configuration(
+    CC  "-DMBEDTLS_CONFIG_FILE=\\\"mcux_mbedtls_config.h\\\""
+)
+   mcux_add_source(
+       CONFIG TRUE
+       SOURCES port/mcux_mbedtls_config.h
+               port/mcux_mbedtls_accelerator_config.h
+               port/mcux_psa_defines.h
+       BASE_PATH ${SdkRootDirPath}/middleware/mbedtls3x/
+    )
+    mcux_add_include(
+        INCLUDES port
+        BASE_PATH ${SdkRootDirPath}/middleware/mbedtls3x/
     )
 endif ()
 
