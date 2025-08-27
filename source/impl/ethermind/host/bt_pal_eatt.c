@@ -435,6 +435,8 @@ static struct net_buf *eatt_get_first_buf_matching_chan(struct k_fifo *fifo, str
 		struct net_buf *ret = NULL;
 		struct bt_att_tx_meta_data *meta;
 
+		memset(&skipped, 0, sizeof(skipped));
+
 		k_fifo_init(&skipped);
 
 		while ((buf = net_buf_get(fifo, K_NO_WAIT))) {
