@@ -98,7 +98,7 @@ static struct bt_sdp_record hfp_hf_rec = BT_SDP_RECORD(hfp_hf_attrs);
 
 static void connected(struct bt_conn *conn, int err)
 {
-    printf("HFP HF Connected:%d!\n", err);
+    PRINTF("HFP HF Connected:%d!\n", err);
     default_br_conn = conn;
 }
 
@@ -124,7 +124,7 @@ static int cmd_init(const struct shell *sh, size_t argc, char *argv[])
     err = bt_hfp_hf_register(&hf_cb);
     if (err < 0)
     {
-        printf("HFP HF Registration failed (err %d)\n", err);
+        PRINTF("HFP HF Registration failed (err %d)\n", err);
         return -EINVAL;
     }
     return 0;

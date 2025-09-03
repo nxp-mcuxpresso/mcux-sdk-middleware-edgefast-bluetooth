@@ -315,10 +315,10 @@ static void bt_hfp_ag_dump_bytes(uint8_t *buffer, uint16_t length)
     uint16_t offset, count;
     uint8_t c;
 
-    printf("\n");
-    printf("-- Dumping %d Bytes --\n", (int)length);
+    PRINTF("\n");
+    PRINTF("-- Dumping %d Bytes --\n", (int)length);
 
-    printf("-------------------------------------------------------------------\n");
+    PRINTF("-------------------------------------------------------------------\n");
 
     count  = 0;
     offset = 0;
@@ -345,7 +345,7 @@ static void bt_hfp_ag_dump_bytes(uint8_t *buffer, uint16_t length)
             count              = 0;
             offset             = 0;
 
-            printf("%s   %s\n", hex_stream, char_stream);
+            PRINTF("%s   %s\n", hex_stream, char_stream);
 
             BT_mem_set(hex_stream, 0, 49);
             BT_mem_set(char_stream, 0, 17);
@@ -357,12 +357,12 @@ static void bt_hfp_ag_dump_bytes(uint8_t *buffer, uint16_t length)
         char_stream[count] = '\0';
 
         /* Maintain the alignment */
-        printf("%-48s   %s\n", hex_stream, char_stream);
+        PRINTF("%-48s   %s\n", hex_stream, char_stream);
     }
 
-    printf("-------------------------------------------------------------------\n");
+    PRINTF("-------------------------------------------------------------------\n");
 
-    printf("\n");
+    PRINTF("\n");
 #endif /* APPL_LIMIT_LOGS */
 
     return;

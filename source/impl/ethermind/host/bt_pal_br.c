@@ -223,11 +223,11 @@ static void appl_hci_esco_audio_config(uint8_t coding)
              );
     if (API_SUCCESS != retval)
     {
-        printf ("Setup for SCO audio failed\n");
+        PRINTF ("Setup for SCO audio failed\n");
     }
     else
     {
-        printf ("Setup for SCO audio: Success\n");
+        PRINTF ("Setup for SCO audio: Success\n");
     }
 #endif
 
