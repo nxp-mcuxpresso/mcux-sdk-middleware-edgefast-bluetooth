@@ -380,7 +380,7 @@ void bt_iso_connected(struct bt_conn *iso)
 	}
 
 	err = bt_iso_setup_data_path(chan);
-	if (err != 0) {
+	if ((err != 0) && (err != -EACCES)) {
 		if (false) {
 
 #if (defined(CONFIG_BT_ISO_BROADCAST) && (CONFIG_BT_ISO_BROADCAST > 0))
