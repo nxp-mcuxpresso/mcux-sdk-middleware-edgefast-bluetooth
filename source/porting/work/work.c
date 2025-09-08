@@ -7,6 +7,10 @@
 
 #include <porting.h>
 
+#if !(defined(configSUPPORT_STATIC_ALLOCATION) && (configSUPPORT_STATIC_ALLOCATION > 0))
+#error "configSUPPORT_STATIC_ALLOCATION should be set"
+#endif /* !(defined(configSUPPORT_STATIC_ALLOCATION) && (configSUPPORT_STATIC_ALLOCATION > 0)) */
+
 /*! @brief Work queue task priority.
  */
 #ifndef CONFIG_WORK_QUEUE_TASK_PRIORITY

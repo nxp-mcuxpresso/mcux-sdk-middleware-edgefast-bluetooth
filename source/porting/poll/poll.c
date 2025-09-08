@@ -8,6 +8,10 @@
 
 #include <porting.h>
 
+#if !(defined(configSUPPORT_STATIC_ALLOCATION) && (configSUPPORT_STATIC_ALLOCATION > 0))
+#error "configSUPPORT_STATIC_ALLOCATION should be set"
+#endif /* !(defined(configSUPPORT_STATIC_ALLOCATION) && (configSUPPORT_STATIC_ALLOCATION > 0)) */
+
 static void poll_event_update(struct k_poll_event *event);
 static void poller_init(void);
 

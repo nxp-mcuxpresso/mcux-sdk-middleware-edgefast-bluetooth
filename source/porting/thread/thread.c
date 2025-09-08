@@ -7,6 +7,10 @@
 
 #include <porting.h>
 
+#if !(defined(configSUPPORT_STATIC_ALLOCATION) && (configSUPPORT_STATIC_ALLOCATION > 0))
+#error "configSUPPORT_STATIC_ALLOCATION should be set"
+#endif /* !(defined(configSUPPORT_STATIC_ALLOCATION) && (configSUPPORT_STATIC_ALLOCATION > 0)) */
+
 static sys_slist_t threads = SYS_SLIST_STATIC_INIT(&threads);
 
 const char k_thread_alloc_mem_tag[4] = {0xA5,0xAA,0x55,0x5A};

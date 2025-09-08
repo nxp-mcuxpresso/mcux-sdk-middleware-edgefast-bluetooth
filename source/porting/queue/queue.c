@@ -8,6 +8,10 @@
 
 #include "porting.h"
 
+#if !(defined(configSUPPORT_STATIC_ALLOCATION) && (configSUPPORT_STATIC_ALLOCATION > 0))
+#error "configSUPPORT_STATIC_ALLOCATION should be set"
+#endif /* !(defined(configSUPPORT_STATIC_ALLOCATION) && (configSUPPORT_STATIC_ALLOCATION > 0)) */
+
 #define LOG_ENABLE IS_ENABLED(CONFIG_BT_DEBUG_FIFO)
 #define LOG_MODULE_NAME bt_fifo
 #include "fsl_component_log.h"
