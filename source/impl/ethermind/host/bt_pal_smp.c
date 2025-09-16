@@ -1276,7 +1276,7 @@ static void smp_br_timeout(struct k_work *work)
 	smp_pairing_br_complete(smp, BT_SMP_ERR_UNSPECIFIED);
 	atomic_set_bit(smp->flags, SMP_FLAG_TIMEOUT);
 }
-#endif
+
 static void smp_br_send(struct bt_smp_br *smp, struct net_buf *buf,
 			bt_conn_tx_cb_t cb)
 {
@@ -1294,7 +1294,7 @@ static void smp_br_send(struct bt_smp_br *smp, struct net_buf *buf,
 	k_work_reschedule(&smp->work, SMP_TIMEOUT);
 #endif
 }
-
+#endif
 static uint8_t smp_br_pairing_req(struct bt_smp_br *smp, struct bt_smp_pairing *req, SMP_AUTH_INFO *auth);
 
 static void smp_br_auth_starting(struct bt_smp_br *smp)
@@ -1487,6 +1487,7 @@ static void smp_br_derive_ltk(struct bt_smp_br *smp)
 	LOG_DBG("LTK derived from LinkKey");
 }
 #endif
+#if 0
 static struct net_buf *smp_br_create_pdu(struct bt_smp_br *smp, uint8_t op,
 					 size_t len)
 {
@@ -1518,7 +1519,7 @@ static struct net_buf *smp_br_create_pdu(struct bt_smp_br *smp, uint8_t op,
 
 	return buf;
 }
-#if 0
+
 static void smp_br_distribute_keys(struct bt_smp_br *smp)
 {
 	struct bt_conn *conn = smp->chan.chan.conn;

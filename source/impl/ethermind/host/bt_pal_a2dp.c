@@ -3116,7 +3116,7 @@ static void a2dp_src_enqueue
 
 int bt_a2dp_src_write_direct(struct bt_a2dp_endpoint_state *ep_state, uint8_t *data, uint16_t datalen)
 {
-    API_RESULT retval;
+    API_RESULT retval = API_SUCCESS;
     uint8_t offset;
 
     offset = BT_AVDTP_MEDIA_HDR_SIZE;

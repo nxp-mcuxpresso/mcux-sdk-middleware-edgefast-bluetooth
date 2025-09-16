@@ -953,8 +953,6 @@ static int cmd_l2cap_disconnect(const struct shell *sh, size_t argc, char *argv[
 #if (defined(CONFIG_BT_L2CAP_ECRED) && (CONFIG_BT_L2CAP_ECRED> 0))
 static int cmd_ecred_register(const struct shell *sh, size_t argc, char *argv[])
 {
-	const char *policy;
-
 	if (br_server.psm) {
 		shell_error(sh, "Already registered");
 		return -ENOEXEC;

@@ -486,6 +486,8 @@ static struct bt_hfp_hf_em *bt_hfp_hf_lookup_bt_handle(uint16_t handle)
     EDGEFAST_HFP_HF_UNLOCK;
     return NULL;
 }
+
+#if 0
 static struct bt_hfp_hf_em *bt_hfp_hf_lookup_bt_addr(uint8_t *peerAddr)
 {
     EDGEFAST_HFP_HF_LOCK;
@@ -504,6 +506,7 @@ static struct bt_hfp_hf_em *bt_hfp_hf_lookup_bt_addr(uint8_t *peerAddr)
     EDGEFAST_HFP_HF_UNLOCK;
     return NULL;
 }
+#endif
 
 static struct bt_hfp_hf_em *bt_hfp_hf_lookup_bt_conn(struct bt_conn *conn)
 {
@@ -2138,6 +2141,7 @@ int bt_hfp_hf_register(struct bt_hfp_hf_cb *cb)
 int bt_hfp_hf_send_cmd(struct bt_conn *conn, enum bt_hfp_hf_at_cmd cmd)
 {
     struct bt_hfp_hf_em *hf;
+    uint8_t nb_codec_id[1] = {1};
     int api_retval;
     int status                                 = 0;
 
@@ -2174,7 +2178,6 @@ int bt_hfp_hf_send_cmd(struct bt_conn *conn, enum bt_hfp_hf_at_cmd cmd)
             }
             break;
         case BT_HFP_HF_AT_BAC:
-                    uint8_t nb_codec_id[1] = {1};
                     if (0 != (bt_hfp_hf_peer_supported_features_ext & 0x0200))
                     {
                     	LOG_DBG("\nSend AT+BAC=1\n");
@@ -2810,7 +2813,6 @@ int bt_hfp_hf_disconnect(struct bt_conn *conn)
 
 int bt_hfp_sco_disconnect(struct bt_conn *conn)
 {
-    API_RESULT api_retval;
     struct bt_hfp_hf_em *hf;
 
     hf = bt_hfp_hf_lookup_bt_conn(conn);

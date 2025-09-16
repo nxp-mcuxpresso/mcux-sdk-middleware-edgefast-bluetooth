@@ -2166,12 +2166,14 @@ static void unpair(uint8_t id, const bt_addr_le_t *addr)
 	bt_conn_unpair(id, &id_addr, addr);
 }
 
+#if (defined(CONFIG_BT_MAX_PAIRED) && (CONFIG_BT_MAX_PAIRED > 0))
 static void unpair_remote(const struct bt_bond_info *info, void *data)
 {
 	uint8_t *id = (uint8_t *) data;
 
 	unpair(*id, &info->addr);
 }
+#endif /*CONFIG_BT_MAX_PAIRED*/
 
 int bt_unpair(uint8_t id, const bt_addr_le_t *addr)
 {
@@ -2527,6 +2529,7 @@ static void hci_hardware_error(struct net_buf *buf)
 }
 
 #if (defined(CONFIG_BT_SMP) && ((CONFIG_BT_SMP) > 0U))
+#if !(defined(CONFIG_BT_BLE_DISABLE) && ((CONFIG_BT_BLE_DISABLE) > 0U))
 static void le_ltk_neg_reply(uint16_t handle)
 {
 	struct bt_hci_cp_le_ltk_req_neg_reply *cp;
@@ -2563,7 +2566,7 @@ static void le_ltk_reply(uint16_t handle, uint8_t *ltk)
 
 	bt_hci_cmd_send(BT_HCI_OP_LE_LTK_REQ_REPLY, buf);
 }
-#if !(defined(CONFIG_BT_BLE_DISABLE) && ((CONFIG_BT_BLE_DISABLE) > 0U))
+
 static void le_ltk_request(struct net_buf *buf)
 {
 	struct bt_hci_evt_le_ltk_request *evt = (struct bt_hci_evt_le_ltk_request *)buf->data;

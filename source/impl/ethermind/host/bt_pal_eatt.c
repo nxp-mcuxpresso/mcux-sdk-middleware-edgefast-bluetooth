@@ -463,6 +463,7 @@ static struct net_buf *eatt_get_first_buf_matching_chan(struct k_fifo *fifo, str
 	}
 }
 
+#if 0
 static struct bt_att_req *eatt_get_first_req_matching_chan(sys_slist_t *reqs, struct bt_att_chan *chan)
 {
 	if (IS_ENABLED(CONFIG_BT_EATT)) {
@@ -495,6 +496,7 @@ static struct bt_att_req *eatt_get_first_req_matching_chan(sys_slist_t *reqs, st
 		}
 	}
 }
+#endif
 
 static int eatt_process_queue(struct bt_att_chan *chan, struct k_fifo *queue)
 {

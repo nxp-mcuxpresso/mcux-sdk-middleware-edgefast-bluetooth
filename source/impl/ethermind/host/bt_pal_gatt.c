@@ -581,7 +581,8 @@ static void set_change_aware(struct gatt_cf_cfg *cfg, bool aware)
 }
 #endif
 
-#if ((defined(CONFIG_BT_SETTINGS)) && (CONFIG_BT_SETTINGS))
+#if ((defined(CONFIG_BT_SETTINGS)) && (CONFIG_BT_SETTINGS)) && \
+	(defined(CONFIG_BT_SMP) && ((CONFIG_BT_SMP) > 0U))
 static int bt_gatt_store_cf(uint8_t id, const bt_addr_le_t *peer);
 #endif
 
@@ -1053,7 +1054,8 @@ static ssize_t sf_read(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 static struct gatt_cf_cfg *find_cf_cfg_by_addr(uint8_t id,
 					       const bt_addr_le_t *addr);
 
-#if ((defined(CONFIG_BT_SETTINGS)) && (CONFIG_BT_SETTINGS))
+#if ((defined(CONFIG_BT_SETTINGS)) && (CONFIG_BT_SETTINGS)) && \
+	(defined(CONFIG_BT_SMP) && ((CONFIG_BT_SMP) > 0U))
 static int bt_gatt_store_cf(uint8_t id, const bt_addr_le_t *peer)
 {
 #if (defined(CONFIG_BT_GATT_CACHING) && ((CONFIG_BT_GATT_CACHING) > 0U))

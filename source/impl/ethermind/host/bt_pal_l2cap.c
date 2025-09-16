@@ -734,19 +734,19 @@ static int l2cap_ecred_conn_req(struct bt_l2cap_chan **chan, int channels)
 {
 	//struct net_buf *buf;
 	//struct bt_l2cap_ecred_conn_req *req;
-	struct bt_l2cap_le_chan *ch;
+	struct bt_l2cap_le_chan *ch = NULL;
 #if (defined (CONFIG_BT_CLASSIC) && (CONFIG_BT_CLASSIC > 0U))
-	struct bt_l2cap_br_chan *br_ch;
+	struct bt_l2cap_br_chan *br_ch = NULL;
 #endif /* CONFIG_BT_CLASSIC */
 	int i;
 	uint16_t remote_psm;
 #if 0
 	uint8_t ident;
 	uint16_t req_psm;
+	uint16_t req_mtu;
 #endif
 	API_RESULT retval;
 	int err;
-	uint16_t req_mtu;
 
 	LOG_DBG("");
 
@@ -2090,8 +2090,7 @@ static void le_ecred_conn_req(struct bt_l2cap *l2cap, uint8_t ident,
 		{
 			if (NULL == conn->br.pending_l2cap_ecbfc_req)
 			{
-				net_buf_ref(buf);
-				conn->br.pending_l2cap_ecbfc_req = buf;
+				conn->br.pending_l2cap_ecbfc_req = net_buf_ref(buf);
 				net_buf_push(buf, sizeof(*req));
 				net_buf_push(buf, sizeof(struct bt_l2cap_sig_hdr));
 			}
@@ -5319,6 +5318,7 @@ static API_RESULT ethermind_ecbfc_get_edgefast_state(DEVICE_HANDLE *handle, stru
 	return API_SUCCESS;
 }
 
+#if 0
 static API_RESULT ethermind_ecbfc_get_edgefast_state_by_lcid(UINT16 lcid, struct ethermind_ecbfc_edgefast_state *state)
 {
 	struct bt_l2cap_chan *l2cap = NULL;
@@ -5368,6 +5368,7 @@ static API_RESULT ethermind_ecbfc_get_edgefast_state_by_lcid(UINT16 lcid, struct
 
 	return API_SUCCESS;
 }
+#endif
 
 void l2cap_ecbfc_conn_req_recovery(struct bt_conn *conn, struct net_buf *buf)
 {
