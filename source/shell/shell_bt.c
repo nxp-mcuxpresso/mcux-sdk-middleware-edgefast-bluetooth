@@ -63,6 +63,7 @@ uint8_t selected_id = BT_ID_DEFAULT;
 struct shell bt_sh;
 const struct shell *ctx_shell;
 static char *s_shellBtPrompt = NULL;
+static volatile bool adv_printf;
 
 #if (defined(CONFIG_BT_CSIP) && (CONFIG_BT_CSIP > 0))
 extern struct bt_csis *csis;
@@ -595,27 +596,30 @@ static void scan_recv(const struct bt_le_scan_recv_info *info, struct net_buf_si
 	}
 #endif /* CONFIG_BLE_ADV_REPORT_BUFFER_FILTER */
 
-	shell_print(ctx_shell, "%s%s, AD evt type %u, RSSI %i %s "
-		    "C:%u S:%u D:%d SR:%u E:%u Prim: %s, Secn: %s, "
-		    "Interval: 0x%04x (%u us), SID: 0x%x",
-		    scan_response_label,
-		    le_addr, info->adv_type, info->rssi, name,
-		    (info->adv_props & BT_GAP_ADV_PROP_CONNECTABLE) != 0,
-		    (info->adv_props & BT_GAP_ADV_PROP_SCANNABLE) != 0,
-		    (info->adv_props & BT_GAP_ADV_PROP_DIRECTED) != 0,
-		    (info->adv_props & BT_GAP_ADV_PROP_SCAN_RESPONSE) != 0,
-		    (info->adv_props & BT_GAP_ADV_PROP_EXT_ADV) != 0,
-		    phy2str(info->primary_phy), phy2str(info->secondary_phy),
-		    info->interval, BT_CONN_INTERVAL_TO_US(info->interval),
-		    info->sid);
+	if (adv_printf)
+	{
+		shell_print(ctx_shell, "%s%s, AD evt type %u, RSSI %i %s "
+			"C:%u S:%u D:%d SR:%u E:%u Prim: %s, Secn: %s, "
+			"Interval: 0x%04x (%u us), SID: 0x%x",
+			scan_response_label,
+			le_addr, info->adv_type, info->rssi, name,
+			(info->adv_props & BT_GAP_ADV_PROP_CONNECTABLE) != 0,
+			(info->adv_props & BT_GAP_ADV_PROP_SCANNABLE) != 0,
+			(info->adv_props & BT_GAP_ADV_PROP_DIRECTED) != 0,
+			(info->adv_props & BT_GAP_ADV_PROP_SCAN_RESPONSE) != 0,
+			(info->adv_props & BT_GAP_ADV_PROP_EXT_ADV) != 0,
+			phy2str(info->primary_phy), phy2str(info->secondary_phy),
+			info->interval, BT_CONN_INTERVAL_TO_US(info->interval),
+			info->sid);
 
-	if (scan_verbose_output) {
-		shell_info(ctx_shell,
-			   "%*s[SCAN DATA START - %s]",
-			   strlen(scan_response_label), "",
-			   scan_response_type_txt(info->adv_type));
-		bt_data_parse(&buf_copy, data_verbose_cb, NULL);
-		shell_info(ctx_shell, "%*s[SCAN DATA END]", strlen(scan_response_label), "");
+		if (scan_verbose_output) {
+			shell_info(ctx_shell,
+				"%*s[SCAN DATA START - %s]",
+				strlen(scan_response_label), "",
+				scan_response_type_txt(info->adv_type));
+			bt_data_parse(&buf_copy, data_verbose_cb, NULL);
+			shell_info(ctx_shell, "%*s[SCAN DATA END]", strlen(scan_response_label), "");
+		}
 	}
 
 	/* Store address for later use */
@@ -1649,8 +1653,10 @@ static int cmd_scan(const struct shell *sh, size_t argc, char *argv[])
 
 	action = argv[1];
 	if (!strcmp(action, "on")) {
+		adv_printf = true;
 		return cmd_active_scan_on(sh, options, timeout);
 	} else if (!strcmp(action, "off")) {
+		adv_printf = false;
 		return cmd_scan_off(sh);
 	} else if (!strcmp(action, "passive")) {
 		return cmd_passive_scan_on(sh, options, timeout);
