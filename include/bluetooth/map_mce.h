@@ -907,4 +907,8 @@ int bt_map_mce_mns_get_max_pkt_len(struct bt_map_mce_mns *mce_mns, uint16_t *max
 }
 #endif
 
+/**
+ * @}
+ */
+
 #endif /* ZEPHYR_INCLUDE_BLUETOOTH_MAP_MCE_H_ */

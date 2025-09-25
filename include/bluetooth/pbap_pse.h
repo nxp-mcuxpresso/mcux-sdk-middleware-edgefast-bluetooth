@@ -277,6 +277,7 @@ int bt_pbap_pse_get_peer_supported_features(struct bt_pbap_pse *pbap_pse, uint32
 #ifdef __cplusplus
 }
 #endif
+
 /**
  * @}
  */

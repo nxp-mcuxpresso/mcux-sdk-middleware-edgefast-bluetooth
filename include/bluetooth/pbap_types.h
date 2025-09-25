@@ -241,4 +241,8 @@ struct bt_pbap_push_response_hdr
 }
 #endif
 
+/**
+ * @}
+ */
+
 #endif /* ZEPHYR_INCLUDE_BLUETOOTH_PBAP_TYPES_H_ */

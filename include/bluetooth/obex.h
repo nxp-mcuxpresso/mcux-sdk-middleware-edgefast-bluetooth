@@ -12,6 +12,13 @@
 #ifndef ZEPHYR_INCLUDE_BLUETOOTH_OBEX_H_
 #define ZEPHYR_INCLUDE_BLUETOOTH_OBEX_H_
 
+/**
+ * @brief IrDA Object Exchange Protocol (OBEX)
+ * @defgroup bt_obex IrDA Object Exchange Protocol (OBEX)
+ * @ingroup bluetooth
+ * @{
+ */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -280,5 +287,9 @@ static inline void bt_obex_app_param_parse(struct net_buf *buf,
 #ifdef __cplusplus
 }
 #endif
+
+/**
+ * @}
+ */
 
 #endif /* ZEPHYR_INCLUDE_BLUETOOTH_OBEX_H_ */

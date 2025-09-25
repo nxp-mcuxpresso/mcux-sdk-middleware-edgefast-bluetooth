@@ -678,4 +678,8 @@ int bt_map_mse_mns_get_max_pkt_len(struct bt_map_mse_mns *mse_mns, uint16_t *max
 }
 #endif
 
+/**
+ * @}
+ */
+
 #endif /* ZEPHYR_INCLUDE_BLUETOOTH_MAP_H_ */

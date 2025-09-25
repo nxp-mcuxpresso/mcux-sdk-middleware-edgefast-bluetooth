@@ -12,6 +12,13 @@
 #ifndef ZEPHYR_INCLUDE_BLUETOOTH_MAP_TYPES_H_
 #define ZEPHYR_INCLUDE_BLUETOOTH_MAP_TYPES_H_
 
+/**
+ * @brief Message Access Profile (MAP)
+ * @defgroup bt_map Message Access Profile (MAP)
+ * @ingroup bluetooth
+ * @{
+ */
+
 #include <bluetooth/obex.h>
 
 #ifdef __cplusplus
@@ -481,5 +488,9 @@ struct bt_map_resp_hdr
 #ifdef __cplusplus
 }
 #endif
+
+/**
+ * @}
+ */
 
 #endif /* ZEPHYR_INCLUDE_BLUETOOTH_MAP_TYPES_H_ */
