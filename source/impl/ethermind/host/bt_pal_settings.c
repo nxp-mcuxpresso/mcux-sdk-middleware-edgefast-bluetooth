@@ -146,7 +146,7 @@ static int set_setting(const char *name, size_t len_rd, settings_read_cb read_cb
 		}
 
 		len = read_cb(cb_arg, &bt_dev.id_addr, sizeof(bt_dev.id_addr));
-		if (len < sizeof(bt_dev.id_addr[0])) {
+		if (len < (ssize_t)sizeof(bt_dev.id_addr[0])) {
 			if (len < 0) {
 				LOG_ERR("Failed to read ID address from storage"
 				       " (err %zd)", len);
