@@ -4521,11 +4521,30 @@ static void rx_work_handler(struct k_work *work)
 	}
 }
 
+static bool is_discardable_event(uint8_t event_type, uint8_t *event_data, uint8_t event_datalen)
+{
+	if ((BT_HCI_EVT_INQUIRY_RESULT_WITH_RSSI == event_type) || (BT_HCI_EVT_EXTENDED_INQUIRY_RESULT == event_type)) {
+		return true;
+	}
+
+	if (BT_HCI_EVT_LE_META_EVENT != event_type) {
+		return false;
+	}
+
+	if ((event_data[0] == BT_HCI_EVT_LE_ADVERTISING_REPORT) || (event_data[0] == BT_HCI_EVT_LE_EXT_ADVERTISING_REPORT)) {
+		return true;
+	}
+
+	return false;
+}
+
 uint16_t ethermind_hci_event_callback(uint8_t  event_type, uint8_t *event_data, uint8_t event_datalen)
 {
 	struct net_buf *buf = NULL;
 	struct bt_hci_evt_hdr hdr;
 	uint16_t opcode = 0;
+	bool discardable = false;
+
 	LOG_DBG("eventCode %d len %d 0x%02X 0x%02X 0x%02X\r\n", event_type, event_datalen, event_data[0], event_data[1], event_data[2]);
 
 	if ((BT_HCI_EVT_CMD_COMPLETE == event_type) || (BT_HCI_EVT_CMD_STATUS == event_type))
@@ -4556,7 +4575,16 @@ uint16_t ethermind_hci_event_callback(uint8_t  event_type, uint8_t *event_data, 
 	}
 	else
 	{
-		buf = bt_buf_get_evt(event_type, false, K_FOREVER);
+		discardable = is_discardable_event(event_type, event_data, event_datalen);
+		buf = bt_buf_get_evt(event_type, discardable, discardable ? K_NO_WAIT : K_FOREVER);
+		if (buf == NULL) {
+			if (!discardable) {
+				LOG_ERR("Failed to allocate buffer for event type %d", event_type);
+			} else {
+				LOG_DBG("Discard event type %d", event_type);
+			}
+			return API_SUCCESS;
+		}
 	}
 
 	hdr.evt = event_type;

@@ -1675,7 +1675,7 @@ config BT_PLATFORM
     help
       This option enables the bt platform cmdlist.
       This symbol is a config macro.
-      
+
 if BT_PLATFORM
 
 config BT_PLATFORM_POWER_SWITCH
@@ -2569,7 +2569,7 @@ config BT_BUF_EVT_RX_COUNT
 config BT_BUF_EVT_DISCARDABLE_SIZE
     int "BT_BUF_EVT_DISCARDABLE_SIZE"
     default 255 if BT_CLASSIC || BT_EXT_ADV
-    default 43
+    default BT_BUF_EVT_RX_SIZE
     help
       Maximum supported discardable HCI Event buffer length, ranging from 43 to 255
       Maximum support discardable HCI event size of buffers in the separate
