@@ -4604,6 +4604,18 @@ uint16_t ethermind_hci_event_callback(uint8_t  event_type, uint8_t *event_data, 
 	return API_SUCCESS;
 }
 
+API_RESULT ethermind_hci_error_indication_callback(UINT16 opcode, UINT16 error_code)
+{
+	if ((error_code != API_SUCCESS) && (bt_dev.sent_cmd != NULL) &&
+	    (cmd(bt_dev.sent_cmd)->opcode == opcode)) {
+		hci_cmd_done(opcode, BT_HCI_ERR_UNSPECIFIED, bt_dev.sent_cmd);
+		k_sem_give(&bt_dev.ncmd_sem);
+		bt_tx_irq_raise();
+	}
+
+	return API_SUCCESS;
+}
+
 #if (defined(CONFIG_BT_ISO) && (CONFIG_BT_ISO > 0))
 API_RESULT ethermind_iso_data_in_callback(UCHAR *header, UCHAR *data, UINT16 datalen)
 {
@@ -4726,6 +4738,8 @@ int bt_enable(bt_ready_cb_t cb)
 #endif
 
 	BT_ethermind_init();
+
+	(void)BT_hci_register_error_indication_callback(ethermind_hci_error_indication_callback);
 
 	/* TODO: Enable Snoop Logging */
 #if (defined(CONFIG_BT_SNOOP) && (CONFIG_BT_SNOOP > 0))
