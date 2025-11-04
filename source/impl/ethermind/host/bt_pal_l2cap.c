@@ -89,7 +89,7 @@ NET_BUF_POOL_FIXED_DEFINE(disc_pool, 1,
 #if (defined (CONFIG_BT_CLASSIC) && (CONFIG_BT_CLASSIC > 0U))
 #define br_l2cap_lookup_ident(conn, ident) __br_l2cap_lookup_ident(conn, ident, false)
 #define br_l2cap_remove_ident(conn, ident) __br_l2cap_lookup_ident(conn, ident, true)
-#endif 
+#endif
 
 static sys_slist_t servers;
 
@@ -1805,8 +1805,6 @@ static uint16_t l2cap_check_security(struct bt_conn *conn,
 				 struct bt_l2cap_server *server)
 {
 	const struct bt_keys *keys = bt_keys_find_addr(conn->id, &conn->le.dst);
-	bool ltk_present;
-
 
 #if (defined(CONFIG_BT_CONN_DISABLE_SECURITY) && ((CONFIG_BT_CONN_DISABLE_SECURITY) > 0U))
 	if (IS_ENABLED(CONFIG_BT_CONN_DISABLE_SECURITY)) {
@@ -1823,6 +1821,7 @@ static uint16_t l2cap_check_security(struct bt_conn *conn,
 		return BT_L2CAP_LE_ERR_AUTHENTICATION;
 	}
 #endif /* CONFIG_BT_SMP */
+	bool ltk_present;
 
 	if (keys) {
 		if (conn->role == BT_HCI_ROLE_CENTRAL) {

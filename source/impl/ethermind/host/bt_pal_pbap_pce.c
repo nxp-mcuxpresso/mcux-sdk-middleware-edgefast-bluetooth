@@ -1263,6 +1263,7 @@ static API_RESULT ethermind_pbap_pce_event_callback(
     return API_SUCCESS;
 }
 
+#if CONFIG_BT_ZEPHYR_BUF
 static void bt_pbap_add_connect_hdr(struct net_buf *buf, char *password, uint32_t peer_feature)
 {
     uint16_t packet_length = 1U + 2U + 1U + 1U + 2U + 19U;
@@ -1302,6 +1303,7 @@ static void bt_pbap_add_connect_hdr(struct net_buf *buf, char *password, uint32_
         BT_PBAP_ADD_PARAMS_PBAP_SUPPORTED_FEATURES(buf, CONFIG_BT_PBAP_PCE_SUPPORTED_FEATURE);
     }
 }
+#endif
 
 static int bt_pbap_pce_connect(struct bt_conn *conn,
                                uint8_t channel,

@@ -187,39 +187,6 @@ static struct bt_map_mce_mns *map_mce_mns_lookup_instance(MAP_HANDLE handle)
     return NULL;
 }
 
-static struct bt_map_mce_mas *map_mce_mas_lookup_instance_by_addr(uint8_t *bd_addr)
-{
-    EDGEFAST_MAP_MCE_LOCK;
-    for (uint8_t index = 0; index < (uint8_t)CONFIG_BT_MAP_MCE_MAS_NUM_INSTANCES; ++index)
-    {
-        if ((map_mce_mas_instances[index].acl_conn != NULL) &&
-            (memcmp(&map_mce_mas_instances[index].acl_conn->br.dst.val[0], bd_addr, BT_BD_ADDR_SIZE) == 0))
-        {
-            EDGEFAST_MAP_MCE_UNLOCK;
-            return &map_mce_mas_instances[index];
-        }
-    }
-
-    EDGEFAST_MAP_MCE_UNLOCK;
-    return NULL;
-}
-
-static struct bt_map_mce_mns *map_mce_mns_lookup_instance_by_addr(uint8_t *bd_addr)
-{
-    EDGEFAST_MAP_MCE_LOCK;
-    for (uint8_t index = 0; index < (uint8_t)CONFIG_BT_MAP_MCE_MNS_NUM_INSTANCES; ++index)
-    {
-        if ((map_mce_mns_instances[index].acl_conn != NULL) &&
-            (memcmp(&map_mce_mns_instances[index].acl_conn->br.dst.val[0], bd_addr, BT_BD_ADDR_SIZE) == 0))
-        {
-            EDGEFAST_MAP_MCE_UNLOCK;
-            return &map_mce_mns_instances[index];
-        }
-    }
-
-    EDGEFAST_MAP_MCE_UNLOCK;
-    return NULL;
-}
 
 static int bt_map_copy_tag_from_buf_to_stack(struct bt_obex_tag_bytes *tag, MAP_APPL_PARAMS *appl_param)
 {

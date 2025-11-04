@@ -107,22 +107,6 @@ static bool endwith(char *str, char *suffix)
     return strcmp(endpart, suffix) == 0;
 }
 
-static struct bt_pbap_pse *pbap_pse_get_instance(struct bt_conn *conn)
-{
-    EDGEFAST_PBAP_PSE_LOCK;
-    for (uint8_t index = 0; index < PBAP_PSE_MAX_ENTITY; ++index)
-    {
-        if (s_PbapPseInstances[index].acl_conn == NULL)
-        {
-            (void)memset(&s_PbapPseInstances[index], 0, sizeof(s_PbapPseInstances[index]));
-            s_PbapPseInstances[index].acl_conn = conn;
-            (void)EDGEFAST_PBAP_PSE_UNLOCK;
-            return &s_PbapPseInstances[index];
-        }
-    }
-    (void)EDGEFAST_PBAP_PSE_UNLOCK;
-    return NULL;
-}
 
 static void pbap_pse_free_instance(struct bt_pbap_pse *pbap_pse)
 {
@@ -164,29 +148,6 @@ static struct bt_pbap_pse *bt_pbap_pse_lookup_bt_conn(struct bt_conn *conn)
     return NULL;
 }
 
-static int bt_pal_pbap_pse_stop_instance(struct bt_pbap_pse *pbap_pse)
-{
-    API_RESULT retval = 0;
-
-    if (pbap_pse == NULL)
-    {
-        return -EINVAL;
-    }
-
-    retval = BT_pbap_pse_stop_instance(pbap_pse->pbap_handle);
-
-    if (API_SUCCESS != retval)
-    {
-        LOG_ERR("Stop instance Failed. Reason 0x%04X \n", retval);
-        return -EIO;
-    }
-    else
-    {
-        LOG_INF("Successfully stopped PBAP PCE Entity %d \n", pbap_pce->pbap_handle);
-    }
-
-    return 0;
-}
 
 static void bt_pabp_set_appl_params_hdr_value(uint8_t tag_id, PBAP_APPL_PARAMS *appl_params, struct net_buf *buf)
 {
