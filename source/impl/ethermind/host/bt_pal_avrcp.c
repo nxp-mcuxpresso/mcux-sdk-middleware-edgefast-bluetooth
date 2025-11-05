@@ -2273,20 +2273,14 @@ struct bt_avrcp_browsing_rsp *bt_avrcp_parse_browsing_rsp_data(uint8_t *data, ui
             rsp->num_of_attr = net_buf_pull_u8(buf);
             for (uint8_t index = 0; index < rsp->num_of_attr; index++)
             {
-                uint16_t item_len                    = 8;
                 struct bt_avrcp_attr_val_entry *item = &rsp->attrs[index];
 
-                item_len += item->value_len;
-
-                if (item_len < net_buf_tailroom(buf))
-                {
-                    CHECK_BUF_RET_NULL(8)
-                    item->attr_id   = net_buf_pull_be32(buf);
-                    item->char_set  = net_buf_pull_be16(buf);
-                    item->value_len = net_buf_pull_be16(buf);
-                    CHECK_BUF_RET_NULL(item->value_len)
-                    item->value_str = net_buf_pull_mem(buf, item->value_len);
-                }
+                CHECK_BUF_RET_NULL(8)
+                item->attr_id   = net_buf_pull_be32(buf);
+                item->char_set  = net_buf_pull_be16(buf);
+                item->value_len = net_buf_pull_be16(buf);
+                CHECK_BUF_RET_NULL(item->value_len)
+                item->value_str = net_buf_pull_mem(buf, item->value_len);
             }
             break;
         }
