@@ -318,6 +318,24 @@ int prng_init(void)
 	return prng_reseed();
 }
 
+int prng_deinit(void)
+{
+#if (((defined(CONFIG_BT_SMP)) && (CONFIG_BT_SMP)))
+#if CONFIG_BT_AES_128_ENCRYPT_SW
+#if defined(CONFIG_BT_USE_SW_SECLIB) && (CONFIG_BT_USE_SW_SECLIB > 0)
+	/* Software security library cleanup if needed */
+#else
+	/* Free mbedtls resources */
+	mbedtls_ctr_drbg_free(&rng_ctx);
+	mbedtls_entropy_free(&entropy);
+#endif
+#endif /* CONFIG_BT_AES_128_ENCRYPT_SW */
+#else
+#endif /* CONFIG_BT_SMP */
+
+	return 0;
+}
+
 int bt_rand(void *buf, size_t len)
 {
 	uint32_t rng;
