@@ -78,7 +78,6 @@ struct bt_hfp_hf_em
     uint32_t hf_features;
     uint32_t ag_features;
     int8_t ind_table[HF_MAX_AG_INDICATORS];
-    hfp_hf_get_config *bt_hfp_hf_config;
     uint32_t hfp_work_retry_at_cmds;
     uint32_t running_at_cmds;
     uint32_t hfp_work_retry_count;
@@ -2086,12 +2085,14 @@ static struct bt_hfp_hf_em* hfp_hf_connected(struct bt_conn *conn, int err)
  */
 int bt_hfp_hf_register(struct bt_hfp_hf_cb *cb)
 {
+    hfp_hf_get_config *bt_hfp_hf_config;
+    struct bt_hfp_hf_em *hfp_hf;
+    
     if (!cb)
     {
         return -EINVAL;
     }
 
-    struct bt_hfp_hf_em *hfp_hf;
     if (NULL == s_HfpHfLock)
     {
         if (KOSA_StatusSuccess == OSA_MutexCreate((osa_mutex_handle_t)s_HfpHfLockMutex))
@@ -2103,28 +2104,30 @@ int bt_hfp_hf_register(struct bt_hfp_hf_cb *cb)
             return -EIO;
         }
     }
-    hfp_hf = hfp_hf_GetNoneActiveInstance();
-    if (NULL == hfp_hf)
+
+    bt_hf_cb = cb;
+    hfp_hf_init();
+    
+    if ((bt_hf_cb) && (bt_hf_cb->get_config))
+    {
+      bt_hf_cb->get_config(&bt_hfp_hf_config);
+    }
+    
+    for (uint8_t index = 0; index < HFP_UNIT_MAX_CONNECTIONS; ++index)
     {
         hfp_hf = hfp_hf_GetInstance();
         if (NULL == hfp_hf)
         {
-            return -EIO;
+            return -ENOBUFS;
         }
+        
+        hfp_hf->actived = 0;
+        memset((char *)&hfp_hf->bt_hfp_hp_speaker_volume[0], 0x0, 3);
+        memset((char *)&hfp_hf->bt_hfp_hp_microphone_gain[0], 0x0, 3);
+        sprintf((char *)&hfp_hf->bt_hfp_hp_speaker_volume[0], "%d", bt_hfp_hf_config->bt_hfp_hf_vgs);
+        sprintf((char *)&hfp_hf->bt_hfp_hp_microphone_gain[0], "%d", bt_hfp_hf_config->bt_hfp_hf_vgm);
+        k_work_init_delayable(&hfp_hf->hf_at_cmd_retry_delayed_work, bt_work_hf_retry_at_cmd_handling);
     }
-
-    bt_hf_cb = cb;
-    if ((bt_hf_cb) && (bt_hf_cb->get_config))
-    {
-        bt_hf_cb->get_config(&hfp_hf->bt_hfp_hf_config);
-    }
-    hfp_hf_init();
-    hfp_hf->actived = 0;
-    memset((char *)&hfp_hf->bt_hfp_hp_speaker_volume[0], 0x0, 3);
-    memset((char *)&hfp_hf->bt_hfp_hp_microphone_gain[0], 0x0, 3);
-    sprintf((char *)&hfp_hf->bt_hfp_hp_speaker_volume[0], "%d", hfp_hf->bt_hfp_hf_config->bt_hfp_hf_vgs);
-    sprintf((char *)&hfp_hf->bt_hfp_hp_microphone_gain[0], "%d", hfp_hf->bt_hfp_hf_config->bt_hfp_hf_vgm);
-    k_work_init_delayable(&hfp_hf->hf_at_cmd_retry_delayed_work, bt_work_hf_retry_at_cmd_handling);
 
     return 0;
 }
