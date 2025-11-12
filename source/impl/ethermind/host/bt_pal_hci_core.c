@@ -4912,9 +4912,6 @@ int bt_disable(void)
 	*/
 	atomic_set(bt_dev.flags, ATOMIC_MASK(BT_DEV_DISABLE));
 
-	/* PRNG deinit to free allocated resources */
-	(void)prng_deinit();
-
 	return 0;
 }
 

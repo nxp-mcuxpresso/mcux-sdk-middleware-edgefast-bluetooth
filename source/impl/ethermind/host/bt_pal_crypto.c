@@ -31,11 +31,7 @@
 #include "SecLib.h"
 #include "CryptoLibSW.h"
 #else
-#include "mbedtls/aes.h"
-#include "mbedtls/entropy.h"
-#include "mbedtls/ctr_drbg.h"
-static mbedtls_entropy_context entropy;
-static mbedtls_ctr_drbg_context rng_ctx;
+#include "psa/crypto.h"
 SDK_ALIGN(static uint8_t out_aes_crypt_buff[MAX(16U, EDGEFAST_BT_CACHE_LINESIZE)], MAX(16U, EDGEFAST_BT_CACHE_LINESIZE));
 static OSA_MUTEX_HANDLE_DEFINE(aes_crypt_mutex_handle);
 #endif
@@ -119,7 +115,11 @@ static int bt_aes_128_encrypt(const uint8_t in[16],
 #if defined(CONFIG_BT_USE_SW_SECLIB) && (CONFIG_BT_USE_SW_SECLIB > 0)
 	AES_128_Encrypt(in, key, out);
 #else
-	mbedtls_aes_context ctx;
+	psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
+	psa_key_id_t key_id = MBEDTLS_SVC_KEY_ID_INIT;
+	psa_status_t status, destroy_status;
+	size_t out_len;
+
 	osa_status_t ret;
 	static uint8_t mutex_initialized = 0;
 	if (mutex_initialized == 0)
@@ -132,21 +132,36 @@ static int bt_aes_128_encrypt(const uint8_t in[16],
 		mutex_initialized = 1;
 	}
 	(void)OSA_MutexLock((osa_mutex_handle_t)aes_crypt_mutex_handle, osaWaitForever_c);
-	mbedtls_aes_init(&ctx);
 
-	if(0 != mbedtls_aes_setkey_enc(&ctx, (const unsigned char *)key, 128))
-	{
+	psa_set_key_type(&attr, PSA_KEY_TYPE_AES);
+	psa_set_key_bits(&attr, 128);
+	psa_set_key_usage_flags(&attr, PSA_KEY_USAGE_ENCRYPT);
+	psa_set_key_algorithm(&attr, PSA_ALG_ECB_NO_PADDING);
+	status = psa_import_key(&attr, key, 16, &key_id);
+	if (status != PSA_SUCCESS) {
+		LOG_ERR("Failed to import AES key %d", status);
 		(void)OSA_MutexUnlock((osa_mutex_handle_t)aes_crypt_mutex_handle);
 		return -1;
 	}
 
-	if(0 != mbedtls_aes_crypt_ecb(&ctx, MBEDTLS_AES_ENCRYPT, (const unsigned char *)in, (unsigned char *)out_aes_crypt_buff))
-	{
+	status = psa_cipher_encrypt(key_id, PSA_ALG_ECB_NO_PADDING, in, 16,
+		out_aes_crypt_buff, 16, &out_len);
+	if (status != PSA_SUCCESS) {
+		LOG_ERR("AES encryption failed %d", status);
+	}
+
+	destroy_status = psa_destroy_key(key_id);
+	if (destroy_status != PSA_SUCCESS) {
+		LOG_ERR("Failed to destroy AES key %d", destroy_status);
+	}
+
+	if ((status != PSA_SUCCESS) || (destroy_status != PSA_SUCCESS)) {
 		(void)OSA_MutexUnlock((osa_mutex_handle_t)aes_crypt_mutex_handle);
 		return -1;
 	}
+
 	(void)memcpy(out, (unsigned char *)out_aes_crypt_buff, 16);
-	mbedtls_aes_free(&ctx);
+
 	(void)OSA_MutexUnlock((osa_mutex_handle_t)aes_crypt_mutex_handle);
 #endif
 	return 0;
@@ -283,15 +298,6 @@ static int prng_reseed()
 #if CONFIG_BT_AES_128_ENCRYPT_SW
 #if defined(CONFIG_BT_USE_SW_SECLIB) && (CONFIG_BT_USE_SW_SECLIB > 0)
 	(void)SecLib_set_rng_seed(*((uint32_t *)seed));
-#else
-	mbedtls_entropy_init(&entropy);
-
-	mbedtls_ctr_drbg_init(&rng_ctx);
-
-	if(0 != mbedtls_ctr_drbg_seed(&rng_ctx, mbedtls_entropy_func, &entropy, NULL, 0))
-	{
-		return -1;
-	}
 #endif
 #endif /* CONFIG_BT_AES_128_ENCRYPT_SW */
 #else
@@ -318,24 +324,6 @@ int prng_init(void)
 	return prng_reseed();
 }
 
-int prng_deinit(void)
-{
-#if (((defined(CONFIG_BT_SMP)) && (CONFIG_BT_SMP)))
-#if CONFIG_BT_AES_128_ENCRYPT_SW
-#if defined(CONFIG_BT_USE_SW_SECLIB) && (CONFIG_BT_USE_SW_SECLIB > 0)
-	/* Software security library cleanup if needed */
-#else
-	/* Free mbedtls resources */
-	mbedtls_ctr_drbg_free(&rng_ctx);
-	mbedtls_entropy_free(&entropy);
-#endif
-#endif /* CONFIG_BT_AES_128_ENCRYPT_SW */
-#else
-#endif /* CONFIG_BT_SMP */
-
-	return 0;
-}
-
 int bt_rand(void *buf, size_t len)
 {
 	uint32_t rng;
@@ -350,7 +338,7 @@ int bt_rand(void *buf, size_t len)
 #if defined(CONFIG_BT_USE_SW_SECLIB) && (CONFIG_BT_USE_SW_SECLIB > 0)
 		rng = SecLib_get_random();
 #else
-		if(0 != mbedtls_ctr_drbg_random(&rng_ctx, (unsigned char *)&rng, 4))
+		if(PSA_SUCCESS != psa_generate_random((uint8_t *)&rng, 4))
 		{
 			return -1;
 		}

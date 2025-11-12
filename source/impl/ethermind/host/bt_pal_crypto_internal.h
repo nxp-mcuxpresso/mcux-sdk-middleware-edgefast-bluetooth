@@ -21,7 +21,6 @@ typedef struct bt_aes_128_cmac_state
 } bt_aes_128_cmac_state_t;
 
 int prng_init(void);
-int prng_deinit(void);
 
 int bt_aes_128_cmac_be(const uint8_t *key, const uint8_t *in, size_t len,
            uint8_t *out);
