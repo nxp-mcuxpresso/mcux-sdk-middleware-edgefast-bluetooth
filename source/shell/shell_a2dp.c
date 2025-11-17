@@ -461,6 +461,8 @@ int8_t a2dp_pcm_task_init(void)
             return -EIO;
         }
     }
+
+	return 0;
 }
 
 void a2dp_pcm_task(osa_task_param_t arg)
