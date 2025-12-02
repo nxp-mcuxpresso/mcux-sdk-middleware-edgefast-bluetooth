@@ -21,6 +21,9 @@ typedef struct bt_aes_128_cmac_state
 } bt_aes_128_cmac_state_t;
 
 int prng_init(void);
+#if (((defined(CONFIG_NO_PSA)) && (CONFIG_NO_PSA)))
+int prng_deinit(void);
+#endif /* CONFIG_NO_PSA */
 
 int bt_aes_128_cmac_be(const uint8_t *key, const uint8_t *in, size_t len,
            uint8_t *out);
