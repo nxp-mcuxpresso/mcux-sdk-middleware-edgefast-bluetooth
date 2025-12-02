@@ -15,7 +15,14 @@
 #include "SecLib.h"
 #include "CryptoLibSW.h"
 #else
+#if (((defined(CONFIG_NO_PSA)) && (CONFIG_NO_PSA)))
+#include "mbedtls/entropy.h"
+#include "mbedtls/ctr_drbg.h"
+static mbedtls_entropy_context entropy;
+static mbedtls_ctr_drbg_context rng_ctx;
+#else
 #include "psa/crypto.h"
+#endif /* CONFIG_NO_PSA */
 #endif
 #endif /* CONFIG_BT_SMP */
 
@@ -70,20 +77,35 @@ __WEAK_FUNC int16_t RNG_GetPseudoRandomNo (uint8_t* pOut,
         return (int16_t)-1;
     }
 
-#if defined(CONFIG_BT_USE_SW_SECLIB) && (CONFIG_BT_USE_SW_SECLIB > 0)
     if (NULL != pSeed)
     {
+#if defined(CONFIG_BT_USE_SW_SECLIB) && (CONFIG_BT_USE_SW_SECLIB > 0)
         (void)SecLib_set_rng_seed(*((uint32_t *)pSeed));
-    }
+#else
+#if (((defined(CONFIG_NO_PSA)) && (CONFIG_NO_PSA)))
+        mbedtls_entropy_init(&entropy);
+
+        mbedtls_ctr_drbg_init(&rng_ctx);
+
+        if(0 != mbedtls_ctr_drbg_seed(&rng_ctx, mbedtls_entropy_func, &entropy, NULL, 0))
+        {
+            return -1;
+        }
+#endif /* CONFIG_NO_PSA */
 #endif
+    }
 
     for (size_t index = 0; index < outBytes; index+=sizeof(rng))
     {
 #if defined(CONFIG_BT_USE_SW_SECLIB) && (CONFIG_BT_USE_SW_SECLIB > 0)
         rng = SecLib_get_random();
 #else
+#if (((defined(CONFIG_NO_PSA)) && (CONFIG_NO_PSA)))
+		if(0 != mbedtls_ctr_drbg_random(&rng_ctx, (unsigned char *)&rng, 4))
+#else
 		psa_status_t status = psa_generate_random(pOut, (size_t)outBytes);
 		if(status != PSA_SUCCESS)
+#endif /* CONFIG_NO_PSA */
 		{
 			return -1;
 		}
@@ -93,6 +115,15 @@ __WEAK_FUNC int16_t RNG_GetPseudoRandomNo (uint8_t* pOut,
             ((uint8_t *)pOut)[index + i] = ((uint8_t *)&rng)[i];
         }
     }
+
+#if (((defined(CONFIG_NO_PSA)) && (CONFIG_NO_PSA)))
+#if defined(CONFIG_BT_USE_SW_SECLIB) && (CONFIG_BT_USE_SW_SECLIB > 0)
+#else
+    mbedtls_ctr_drbg_free(&rng_ctx);
+
+    mbedtls_entropy_free(&entropy);
+#endif
+#endif /* CONFIG_NO_PSA */
 
     return 0;
 #else

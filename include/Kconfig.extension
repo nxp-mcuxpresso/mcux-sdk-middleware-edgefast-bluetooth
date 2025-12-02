@@ -25,4 +25,9 @@ config BUTTON_COUNT
       This symbol is a config macro.
       No prefix in generated macro
 
+config NO_PSA
+    bool
+    help
+      This symbol is a config macro.
+
 endmenu

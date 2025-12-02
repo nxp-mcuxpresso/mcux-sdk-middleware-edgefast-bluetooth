@@ -4912,6 +4912,11 @@ int bt_disable(void)
 	*/
 	atomic_set(bt_dev.flags, ATOMIC_MASK(BT_DEV_DISABLE));
 
+#if (((defined(CONFIG_NO_PSA)) && (CONFIG_NO_PSA)))
+	/* PRNG deinit to free allocated resources */
+	(void)prng_deinit();
+#endif /* CONFIG_NO_PSA */
+
 	return 0;
 }
 
