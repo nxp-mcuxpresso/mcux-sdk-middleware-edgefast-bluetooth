@@ -133,22 +133,6 @@ static struct bt_pbap_pse *bt_pabp_pse_lookup_bt_handle(uint8_t handle)
     return NULL;
 }
 
-static struct bt_pbap_pse *bt_pbap_pse_lookup_bt_conn(struct bt_conn *conn)
-{
-    EDGEFAST_PBAP_PSE_LOCK;
-    for (uint8_t index = 0; index < PBAP_PSE_MAX_ENTITY; ++index)
-    {
-        if (conn == s_PbapPseInstances[index].acl_conn)
-        {
-            (void)EDGEFAST_PBAP_PSE_UNLOCK;
-            return &s_PbapPseInstances[index];
-        }
-    }
-    (void)EDGEFAST_PBAP_PSE_UNLOCK;
-    return NULL;
-}
-
-
 static void bt_pabp_set_appl_params_hdr_value(uint8_t tag_id, PBAP_APPL_PARAMS *appl_params, struct net_buf *buf)
 {
     switch (tag_id)

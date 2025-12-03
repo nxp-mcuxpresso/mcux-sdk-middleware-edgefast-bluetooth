@@ -141,21 +141,6 @@ static struct bt_pbap_pce *bt_pabp_pce_lookup_bt_handle(uint8_t handle)
     return NULL;
 }
 
-static struct bt_pbap_pce *bt_pbap_pce_lookup_bt_conn(struct bt_conn *conn)
-{
-    EDGEFAST_PBAP_PCE_LOCK;
-    for (uint8_t index = 0; index < PBAP_PCE_MAX_ENTITY; ++index)
-    {
-        if (conn == s_PbapPceInstances[index].acl_conn)
-        {
-            (void)EDGEFAST_PBAP_PCE_UNLOCK;
-            return &s_PbapPceInstances[index];
-        }
-    }
-    (void)EDGEFAST_PBAP_PCE_UNLOCK;
-    return NULL;
-}
-
 static int bt_pal_pbap_pce_init(void)
 {
     API_RESULT retval;
@@ -315,6 +300,14 @@ static int bt_pal_pbap_pce_stop_instance(struct bt_pbap_pce *pbap_pce)
     return 0;
 }
 
+#if CONFIG_BT_ZEPHYR_BUF
+static void bt_pbap_add_nonce(struct net_buf *buf, uint8_t tag_id, char *value)
+{
+    char nonce[16] = {0};
+    (void)memcpy(nonce, value, 16);
+    bt_obex_add_app_param(buf, tag_id, (uint8_t *)nonce, 16);
+}
+
 static void pbap_ascii_to_unicode(uint8_t *des, const uint8_t *src)
 {
     uint32_t i = 0;
@@ -332,126 +325,6 @@ static void pbap_ascii_to_unicode(uint8_t *des, const uint8_t *src)
 
     des[(i << 1U)]      = 0x00U;
     des[(i << 1U) + 1U] = 0x00U; /* terminate with 0x00, 0x00 */
-}
-
-static void pbap_unicode_to_ascii(uint8_t *des, const uint8_t *src)
-{
-    uint32_t i = 0;
-
-    if ((src == NULL) || (des == NULL))
-    {
-        return;
-    }
-
-    while ((src[i] != 0U) || (src[i + 1U] != 0U))
-    {
-        des[i >> 1U] = src[i];
-        i += 2U;
-    }
-    des[i >> 1U] = 0x00U; /* terminate with  0x00 */
-}
-
-#if CONFIG_BT_ZEPHYR_BUF
-static void bt_pbap_add_nonce(struct net_buf *buf, uint8_t tag_id, char *value)
-{
-    char nonce[16] = {0};
-    (void)memcpy(nonce, value, 16);
-    bt_obex_add_app_param(buf, tag_id, (uint8_t *)nonce, 16);
-}
-#endif 
-
-static int bt_pbap_get_appl_param_hdr_value(struct bt_obex_tag_bytes *tag, PBAP_APPL_PARAMS *appl_params)
-{
-    uint64_t value;
-    switch (tag->id)
-    {
-        case BT_PBAP_TAG_ID_ORDER:
-            appl_params->order = *tag->value;
-            break;
-        case BT_PBAP_TAG_ID_SEARCH_VALUE:
-            appl_params->search_value.value  = tag->value;
-            appl_params->search_value.length = tag->length;
-            break;
-        case BT_PBAP_TAG_ID_SEARCH_PROPERTY:
-            appl_params->search_attr = *tag->value;
-            break;
-        case BT_PBAP_TAG_ID_MAX_LIST_COUNT:
-            appl_params->max_list_count = sys_get_be16(tag->value);
-            break;
-        case BT_PBAP_TAG_ID_LIST_START_OFFSET:
-            appl_params->list_start_offset = sys_get_be16(tag->value);
-            break;
-        case BT_PBAP_TAG_ID_PROPERTY_SELECTOR:
-            (void)memcpy(appl_params->filter, tag->value, sizeof(appl_params->filter));
-            value = sys_get_be64((uint8_t *)appl_params->filter);
-            (void)memcpy(appl_params->filter, &value, sizeof(appl_params->filter));
-            break;
-        case BT_PBAP_TAG_ID_FORMAT:
-            appl_params->format = *tag->value;
-            break;
-        case BT_PBAP_TAG_ID_PHONE_BOOK_SIZE:
-            appl_params->phonebook_size = sys_get_be16(tag->value);
-            break;
-        case BT_PBAP_TAG_ID_NEW_MISSED_CALLS:
-            appl_params->new_missed_calls = *tag->value;
-            break;
-        case BT_PBAP_TAG_ID_PRIMARY_FOLDER_VERSION:
-            (void)memcpy(appl_params->primary_folder_ver, tag->value, BT_PBAP_FLDR_VER_CNTR_SIZE);
-            break;
-        case BT_PBAP_TAG_ID_SECONDARY_FOLDER_VERSION:
-            (void)memcpy(appl_params->secondary_folder_ver, tag->value, BT_PBAP_FLDR_VER_CNTR_SIZE);
-            break;
-        case BT_PBAP_TAG_ID_VCARD_SELECTOR:
-            (void)memcpy(appl_params->vcard_selector, tag->value, sizeof(appl_params->vcard_selector));
-            value = sys_get_be64((uint8_t *)appl_params->vcard_selector);
-            (void)memcpy((uint8_t *)appl_params->vcard_selector, &value, sizeof(appl_params->vcard_selector));
-            break;
-        case BT_PBAP_TAG_ID_DATABASE_IDENTIFIER:
-            (void)memcpy(appl_params->database_identifier, tag->value, BT_PBAP_DATABASE_IDENTIFIER_SIZE);
-            break;
-        case BT_PBAP_TAG_ID_VCARD_SELECTOR_OPERATOR:
-            appl_params->vcard_selector_operator = *tag->value;
-            break;
-        case BT_PBAP_TAG_ID_RESET_NEW_MISSED_CALLS:
-            appl_params->reset_new_missed_calls = *tag->value;
-            break;
-        case BT_PBAP_TAG_ID_PBAP_SUPPORTED_FEATURES:
-            appl_params->supported_features = sys_get_be32(tag->value);
-            break;
-        default:
-            LOG_ERR("ERROR TAG\n");
-            break;
-    }
-    return 0;
-}
-
-static int bt_pbap_form_stack_param(struct net_buf *buf, PBAP_APPL_PARAMS *app_par)
-{
-    (void)memset(app_par, 0, sizeof(PBAP_APPL_PARAMS));
-
-    uint16_t appl_param_len = 0;
-    uint16_t hdr_length;
-    uint8_t *hdr_value;
-    struct bt_obex_tag_bytes tag;
-
-    if (bt_obex_get_hdr(buf, OBEX_HDR_APP_PARAM, &hdr_value, &hdr_length) == 0)
-    {
-        appl_param_len = sizeof(struct bt_obex_hdr_bytes) + hdr_length;
-        while (hdr_length > 0U)
-        {
-            (void)bt_pbap_get_appl_param_hdr_value((struct bt_obex_tag_bytes *)(void*)hdr_value, app_par);
-            tag.id = ((struct bt_obex_tag_bytes *)(void*)hdr_value)->id - 1U;
-            PBAP_SET_APPL_PARAM_FLAG(app_par->appl_param_flag, ((uint16_t)1U << tag.id % BT_PBAP_APPL_PARAM_HDR_COUNT));
-            tag.length = ((struct bt_obex_tag_bytes *)(void*)hdr_value)->length + (uint8_t)sizeof(struct bt_obex_tag_bytes);
-            if (hdr_length < tag.length)
-            {
-                return -EINVAL;
-            }
-            hdr_length -= tag.length;
-            hdr_value += tag.length;
-        }
-    }
-    return appl_param_len;
 }
 
 static void bt_pbap_add_pbap_hdr(struct bt_pbap_pce *pbap_pce,
@@ -545,6 +418,101 @@ static void bt_pbap_add_pbap_hdr(struct bt_pbap_pce *pbap_pce,
     /* Opcode */
     opcode = OBEX_GET_FINAL_OP;
     net_buf_push_u8(buf, opcode);
+}
+#endif
+
+static int bt_pbap_get_appl_param_hdr_value(struct bt_obex_tag_bytes *tag, PBAP_APPL_PARAMS *appl_params)
+{
+    uint64_t value;
+    switch (tag->id)
+    {
+        case BT_PBAP_TAG_ID_ORDER:
+            appl_params->order = *tag->value;
+            break;
+        case BT_PBAP_TAG_ID_SEARCH_VALUE:
+            appl_params->search_value.value  = tag->value;
+            appl_params->search_value.length = tag->length;
+            break;
+        case BT_PBAP_TAG_ID_SEARCH_PROPERTY:
+            appl_params->search_attr = *tag->value;
+            break;
+        case BT_PBAP_TAG_ID_MAX_LIST_COUNT:
+            appl_params->max_list_count = sys_get_be16(tag->value);
+            break;
+        case BT_PBAP_TAG_ID_LIST_START_OFFSET:
+            appl_params->list_start_offset = sys_get_be16(tag->value);
+            break;
+        case BT_PBAP_TAG_ID_PROPERTY_SELECTOR:
+            (void)memcpy(appl_params->filter, tag->value, sizeof(appl_params->filter));
+            value = sys_get_be64((uint8_t *)appl_params->filter);
+            (void)memcpy(appl_params->filter, &value, sizeof(appl_params->filter));
+            break;
+        case BT_PBAP_TAG_ID_FORMAT:
+            appl_params->format = *tag->value;
+            break;
+        case BT_PBAP_TAG_ID_PHONE_BOOK_SIZE:
+            appl_params->phonebook_size = sys_get_be16(tag->value);
+            break;
+        case BT_PBAP_TAG_ID_NEW_MISSED_CALLS:
+            appl_params->new_missed_calls = *tag->value;
+            break;
+        case BT_PBAP_TAG_ID_PRIMARY_FOLDER_VERSION:
+            (void)memcpy(appl_params->primary_folder_ver, tag->value, BT_PBAP_FLDR_VER_CNTR_SIZE);
+            break;
+        case BT_PBAP_TAG_ID_SECONDARY_FOLDER_VERSION:
+            (void)memcpy(appl_params->secondary_folder_ver, tag->value, BT_PBAP_FLDR_VER_CNTR_SIZE);
+            break;
+        case BT_PBAP_TAG_ID_VCARD_SELECTOR:
+            (void)memcpy(appl_params->vcard_selector, tag->value, sizeof(appl_params->vcard_selector));
+            value = sys_get_be64((uint8_t *)appl_params->vcard_selector);
+            (void)memcpy((uint8_t *)appl_params->vcard_selector, &value, sizeof(appl_params->vcard_selector));
+            break;
+        case BT_PBAP_TAG_ID_DATABASE_IDENTIFIER:
+            (void)memcpy(appl_params->database_identifier, tag->value, BT_PBAP_DATABASE_IDENTIFIER_SIZE);
+            break;
+        case BT_PBAP_TAG_ID_VCARD_SELECTOR_OPERATOR:
+            appl_params->vcard_selector_operator = *tag->value;
+            break;
+        case BT_PBAP_TAG_ID_RESET_NEW_MISSED_CALLS:
+            appl_params->reset_new_missed_calls = *tag->value;
+            break;
+        case BT_PBAP_TAG_ID_PBAP_SUPPORTED_FEATURES:
+            appl_params->supported_features = sys_get_be32(tag->value);
+            break;
+        default:
+            LOG_ERR("ERROR TAG\n");
+            break;
+    }
+    return 0;
+}
+
+static int bt_pbap_form_stack_param(struct net_buf *buf, PBAP_APPL_PARAMS *app_par)
+{
+    (void)memset(app_par, 0, sizeof(PBAP_APPL_PARAMS));
+
+    uint16_t appl_param_len = 0;
+    uint16_t hdr_length;
+    uint8_t *hdr_value;
+    struct bt_obex_tag_bytes tag;
+
+    if (bt_obex_get_hdr(buf, OBEX_HDR_APP_PARAM, &hdr_value, &hdr_length) == 0)
+    {
+        appl_param_len = sizeof(struct bt_obex_hdr_bytes) + hdr_length;
+        while (hdr_length > 0U)
+        {
+            (void)bt_pbap_get_appl_param_hdr_value((struct bt_obex_tag_bytes *)(void*)hdr_value, app_par);
+            tag.id = ((struct bt_obex_tag_bytes *)(void*)hdr_value)->id - 1U;
+            PBAP_SET_APPL_PARAM_FLAG(app_par->appl_param_flag, ((uint16_t)1U << tag.id % BT_PBAP_APPL_PARAM_HDR_COUNT));
+            tag.length = ((struct bt_obex_tag_bytes *)(void*)hdr_value)->length + (uint8_t)sizeof(struct bt_obex_tag_bytes);
+            if (hdr_length < tag.length)
+            {
+                return -EINVAL;
+            }
+            hdr_length -= tag.length;
+            hdr_value += tag.length;
+        }
+    }
+    return appl_param_len;
 }
 
 static int8_t bt_pal_pull_phonebook_param(char *name)
@@ -714,6 +682,7 @@ static int bt_pbap_pce_set_book_path_stack_param(PBAP_REQUEST_STRUCT *req_info, 
     return -EINVAL;
 }
 
+#if CONFIG_BT_ZEPHYR_BUF
 static void bt_pbap_add_pbap_setPhonebookPath_hdr(struct net_buf *buf, char *name)
 {
     uint8_t hi;
@@ -762,7 +731,7 @@ static void bt_pbap_add_pbap_setPhonebookPath_hdr(struct net_buf *buf, char *nam
     bt_set_path_hdr.packet_length = (uint16_t)sys_cpu_to_be16(packet_len);
     (void)net_buf_push_mem(buf, &bt_set_path_hdr, sizeof(bt_set_path_hdr));
 }
-
+#endif
 /*
    root :    /
    parent    ..

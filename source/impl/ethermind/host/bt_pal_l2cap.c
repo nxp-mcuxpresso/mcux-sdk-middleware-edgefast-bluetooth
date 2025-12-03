@@ -1637,6 +1637,7 @@ static void l2cap_chan_tx_give_credits(struct bt_l2cap_le_chan *chan,
 	}
 }
 
+#if (defined(CONFIG_BT_L2CAP_ECRED) && ((CONFIG_BT_L2CAP_ECRED) > 0))
 #if (defined (CONFIG_BT_CLASSIC) && (CONFIG_BT_CLASSIC > 0U))
 static void br_l2cap_chan_tx_give_credits(struct bt_l2cap_br_chan *chan,
 				       uint16_t credits)
@@ -1650,6 +1651,7 @@ static void br_l2cap_chan_tx_give_credits(struct bt_l2cap_br_chan *chan,
 		chan->chan.ops->status(&chan->chan, chan->chan.status);
 	}
 }
+#endif
 #endif
 
 static void l2cap_chan_destroy(struct bt_l2cap_chan *chan)
@@ -1846,6 +1848,7 @@ static uint16_t l2cap_check_security(struct bt_conn *conn,
 #endif /* CONFIG_BT_CONN_DISABLE_SECURITY */
 }
 
+#if (defined(CONFIG_BT_L2CAP_ECRED) && ((CONFIG_BT_L2CAP_ECRED) > 0))
 #if (defined (CONFIG_BT_CLASSIC) && (CONFIG_BT_CLASSIC > 0U))
 static uint16_t br_l2cap_check_security(struct bt_conn *conn,
 				 struct bt_l2cap_server *server)
@@ -1930,6 +1933,7 @@ static uint16_t br_l2cap_check_security(struct bt_conn *conn,
 
 #endif /* CONFIG_BT_CONN_DISABLE_SECURITY */
 }
+#endif
 #endif
 
 static void le_conn_req(struct bt_l2cap *l2cap, uint8_t ident,
@@ -2565,6 +2569,7 @@ static int l2cap_change_security(struct bt_l2cap_le_chan *chan, uint16_t err)
 #endif
 }
 
+#if (defined (CONFIG_BT_L2CAP_ECRED) && (CONFIG_BT_L2CAP_ECRED > 0U))
 #if (defined (CONFIG_BT_CLASSIC) && (CONFIG_BT_CLASSIC > 0U))
 static int br_l2cap_change_security(struct bt_l2cap_br_chan *chan, uint16_t err)
 {
@@ -2616,6 +2621,7 @@ static int br_l2cap_change_security(struct bt_l2cap_br_chan *chan, uint16_t err)
     return -ESRCH;
 #endif
 }
+#endif
 #endif
 
 #if (defined(CONFIG_BT_L2CAP_ECRED) && ((CONFIG_BT_L2CAP_ECRED) > 0))

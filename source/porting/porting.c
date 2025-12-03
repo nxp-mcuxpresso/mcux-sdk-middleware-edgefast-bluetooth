@@ -70,7 +70,7 @@ __WEAK_FUNC int16_t RNG_GetPseudoRandomNo (uint8_t* pOut,
                                uint8_t* pSeed)
 {
 #if ((defined(CONFIG_BT_SMP)) && (CONFIG_BT_SMP))
-    uint32_t rng;
+    uint32_t rng = 0;
 
     if (NULL == pOut)
     {
