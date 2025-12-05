@@ -38,7 +38,7 @@ extern "C" {
 
 /* Host wakeup interrupt trigger mode. */
 #ifndef HOST_WAKEUP_MODE
-#define HOST_WAKEUP_MODE kHAL_GpioInterruptFallingEdge
+#define HOST_WAKEUP_MODE kHAL_GpioInterruptLogicZero
 #endif /* HOST_WAKEUP_MODE */
 
 #define WAIT_CMD_COMPLETE 100    /* 0.1s */
