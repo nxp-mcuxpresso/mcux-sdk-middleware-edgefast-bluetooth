@@ -2085,7 +2085,7 @@ static struct bt_hfp_hf_em* hfp_hf_connected(struct bt_conn *conn, int err)
  */
 int bt_hfp_hf_register(struct bt_hfp_hf_cb *cb)
 {
-    hfp_hf_get_config *bt_hfp_hf_config;
+    hfp_hf_get_config *bt_hfp_hf_config = NULL;
     struct bt_hfp_hf_em *hfp_hf;
     
     if (!cb)
@@ -2124,8 +2124,10 @@ int bt_hfp_hf_register(struct bt_hfp_hf_cb *cb)
         hfp_hf->actived = 0;
         memset((char *)&hfp_hf->bt_hfp_hp_speaker_volume[0], 0x0, 3);
         memset((char *)&hfp_hf->bt_hfp_hp_microphone_gain[0], 0x0, 3);
-        sprintf((char *)&hfp_hf->bt_hfp_hp_speaker_volume[0], "%d", bt_hfp_hf_config->bt_hfp_hf_vgs);
-        sprintf((char *)&hfp_hf->bt_hfp_hp_microphone_gain[0], "%d", bt_hfp_hf_config->bt_hfp_hf_vgm);
+        if (bt_hfp_hf_config != NULL) {
+            sprintf((char *)&hfp_hf->bt_hfp_hp_speaker_volume[0], "%d", bt_hfp_hf_config->bt_hfp_hf_vgs);
+            sprintf((char *)&hfp_hf->bt_hfp_hp_microphone_gain[0], "%d", bt_hfp_hf_config->bt_hfp_hf_vgm);
+        }
         k_work_init_delayable(&hfp_hf->hf_at_cmd_retry_delayed_work, bt_work_hf_retry_at_cmd_handling);
     }
 
