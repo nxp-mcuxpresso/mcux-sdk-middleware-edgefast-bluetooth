@@ -8950,7 +8950,6 @@ static void hci_acl_smp_handler(struct net_buf *buf)
         bd_addr[0],bd_addr[1],bd_addr[2],bd_addr[3],bd_addr[4],bd_addr[5]);
         LOG_DBG("BD addr type : %s",
         (0 == bd_addr_type)? "Public Address": "Random Address");
-
         LOG_DBG("Passkey : %06u", (*((UINT32 *)event_data) % 1000000));
 
 		smp->method = PASSKEY_DISPLAY;
@@ -9289,6 +9288,31 @@ static void hci_acl_smp_handler(struct net_buf *buf)
     bt_conn_unref(conn);
 }
 
+static API_RESULT ethermind_bt_smp_pre_handle
+           (
+               /* IN */ SMP_BD_HANDLE   * bd_handle,
+               /* IN */ UCHAR      event,
+               /* IN */ API_RESULT status,
+               /* IN */ void     * eventdata,
+               /* IN */ UINT16     data_len
+           )
+{
+        switch (event) {
+                case SMP_PASSKEY_DISPLAY_REQUEST:
+                #if defined(CONFIG_BT_FIXED_PASSKEY)
+                        if (fixed_passkey != BT_PASSKEY_INVALID) {
+                                sys_put_le32(fixed_passkey, eventdata);
+                                return SMP_DISPLAY_PASSKEY_UPDATED;
+                        }
+                #endif /* CONFIG_BT_FIXED_PASSKEY */
+                        break;
+                default:
+                        break;
+        }
+
+        return API_SUCCESS;
+}
+
 static API_RESULT ethermind_bt_smp_cb
            (
                /* IN */ SMP_BD_HANDLE   * bd_handle,
@@ -9299,6 +9323,7 @@ static API_RESULT ethermind_bt_smp_cb
            )
 {
     struct net_buf *buf;
+    API_RESULT ret;
 
     assert(data_len <= SMP_LE_RX_PDU);
 
@@ -9312,6 +9337,8 @@ static API_RESULT ethermind_bt_smp_cb
         net_buf_reserve(buf, BT_BUF_RESERVE);
 		bt_buf_set_type(buf, BT_BUF_ACL_IN);
 
+        ret = ethermind_bt_smp_pre_handle(bd_handle, event, status, eventdata, data_len);
+
         hdr.hdr.handler = hci_acl_smp_handler;
         hdr.hdr.len = sizeof(struct smp_le_rx_pdu) + data_len;
         hdr.pdu.bd_handle = *bd_handle;
@@ -9322,7 +9349,7 @@ static API_RESULT ethermind_bt_smp_cb
         (void)net_buf_add_mem(buf, eventdata, data_len);
         LOG_DBG("RX queue put buf %p", buf);
         bt_recv(buf);
-        return API_SUCCESS;
+        return ret;
     }
     else
     {

@@ -871,8 +871,8 @@ config BT_ID_UNPAIR_MATCHING_BONDS
       This symbol is a config macro.
 
 config BT_FIXED_PASSKEY
-    int "BT_FIXED_PASSKEY"
-    default 0
+    bool "BT_FIXED_PASSKEY"
+    default n
     help
       Use a fixed passkey for pairing, set passkey to fixed or not.
       With this option enabled, the application will be able to call the
