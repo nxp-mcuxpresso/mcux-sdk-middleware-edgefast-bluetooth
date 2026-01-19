@@ -182,6 +182,7 @@ struct bt_a2dp_endpoint_state
     uint8_t *buffer_points[JPL_INITIAL_NUM_DATA_READ_IND];
     uint8_t buffer_produce;
     uint8_t buffer_consume;
+    uint8_t codec_state;
 #if ((defined(CONFIG_BT_A2DP_CODEC_CONTROL)) && (CONFIG_BT_A2DP_CODEC_CONTROL > 0U))
     /* for source ep, it is the state of internal encoder; for sink ep, it is the state of internal decoder */
     bool codec_enabled;
@@ -1877,6 +1878,12 @@ static API_RESULT ethermind_a2dp_avdtp_notify_cb
                     if ((a2dp_endpoint_states[index].endpoint->info.sep.tsep != a2dp->current_seid_info.tsep) &&
                         (a2dp_endpoint_states[index].endpoint->codec_id == sep_cap.codec_cap.codec_type))
                     {
+			            if ((a2dp_endpoint_states[index].codec_state != A2DP_DISCONNECT_IND) &&
+                             (a2dp_endpoint_states[index].codec_state != A2DP_DISCONNECT_CNF) &&
+                             (a2dp_endpoint_states[index].codec_state != 0))
+                        {
+                            continue;
+                        }
                         if ((a2dp->select_peer_seid == 0) || (index < a2dp->select_peer_index))
                         {
                             a2dp->peer_seid_info = a2dp->current_seid_info;
@@ -2068,6 +2075,8 @@ static API_RESULT ethermind_a2dp_notify_cb
     {
         return API_SUCCESS;
     }
+
+    ep_state->codec_state = event_type;
 
     if ((a2dp == NULL) && (A2DP_CONNECT_IND != event_type) && (A2DP_CONFIGURE_IND != event_type))
     {
