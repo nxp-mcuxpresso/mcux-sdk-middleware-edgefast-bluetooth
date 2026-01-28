@@ -614,6 +614,8 @@ void register_player_event(uint8_t event_id, uint8_t tl)
     }
 }
 
+static uint8_t current_volume;
+
 void avrcp_target_rsp_notify_cmd_interim(
     struct bt_conn *conn, struct bt_avrcp_control_msg *msg, uint8_t *data, uint16_t *rsp_len, uint8_t *response_type)
 {
@@ -702,7 +704,7 @@ void avrcp_target_rsp_notify_cmd_interim(
 
         case BT_AVRCP_EVENT_VOLUME_CHANGED:
             shell_print(ctx_shell, "    Event-ID ->BT_AVRCP_EVENT_VOLUME_CHANGED<0x%x>.", event_id);
-            rsp->absolute_volume = 10;
+            rsp->absolute_volume = current_volume;
             register_player_event(event_id, msg->header.tl);
             break;
 
@@ -1046,6 +1048,8 @@ static void avrcp_target_handle_vendor_dependent_msg(struct bt_conn *conn, struc
             data[0] = vendor_msg->parameter;
             shell_print(ctx_shell, "    PDU-ID -> Set Absolute Volume<0x%x>.", vendor_msg->pdu_id);
             shell_print(ctx_shell, "    Volume: 0x%02x", vendor_msg->parameter);
+            response_type = BT_AVRCP_RESPONSE_TYPE_ACCEPTED;
+            current_volume = vendor_msg->parameter;
             rsp_param = &data[0];
             rsp_len   = 1;
             break;
@@ -3469,7 +3473,16 @@ static int cmd_tg_notify(const struct shell *sh, size_t argc, char *argv[])
             break;
 
         case BT_AVRCP_EVENT_VOLUME_CHANGED:
-            rsp->absolute_volume = 10;
+            /* only for test, the volume is toggle between 0x00 and 0x7f
+             * the max value is 0x7f.
+             */
+            if (current_volume != 0x7fu) {
+                current_volume = 0x7fu;
+            } else {
+                current_volume = 0x00u;
+            }
+
+            rsp->absolute_volume = current_volume;
             break;
 
         default:
