@@ -1506,6 +1506,23 @@ config BT_SCAN_WITH_IDENTITY
       this option.
       This symbol is a config macro.
 
+config BT_SCAN_AND_INITIATE_IN_PARALLEL
+    bool "Allow concurrent scanning and initiating"
+    depends on (BT_CENTRAL && BT_OBSERVER)
+    select BT_EXT_ADV if BT_BROADCASTER
+    select BT_SCAN_WITH_IDENTITY if !BT_PRIVACY
+    help
+      Allow concurrent scanning and initiating.
+      This will allow the application to initiate a connection
+      to a peer device without stopping the scanner.
+      If privacy is disabled, the scanner will use its identity
+      address.
+      This feature is only available when extended advertising
+      HCI commands are used to prevent degraded performance
+      when the advertiser is used.
+      Scanning with a timeout is not supported when this
+      feature is enabled.
+
 config BT_ISO
     bool
     help
