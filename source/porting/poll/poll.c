@@ -316,6 +316,10 @@ static inline void clear_event_registrations(struct k_poll_event *events,
 					      int num_events,
 					      k_spinlock_key_t key)
 {
+	if (num_events <= 0) {
+		return;
+	}
+
 	while (num_events--) {
 		clear_event_registration(&events[num_events]);
 		k_spin_unlock(&lock, key);
