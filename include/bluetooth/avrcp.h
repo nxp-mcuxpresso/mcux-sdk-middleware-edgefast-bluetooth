@@ -238,6 +238,7 @@ extern "C" {
 #define BT_AVRCP_CA_NO_SERVICE_RSP      0xD3
 #define BT_AVRCP_CA_FORBIDDEN_RSP       0xC3
 #define BT_AVRCP_CA_SERVER_ERROR        0xD0
+#define BT_AVRCP_CA_ERROR               0xFF
 
 /** @brief avrcp message header */
 struct bt_avrcp_header
@@ -634,7 +635,7 @@ struct bt_avrcp_get_item_attrs_cmd
 /** @brief search */
 struct bt_avrcp_search_cmd
 {
-    uint8_t char_set;
+    uint16_t char_set;
     uint16_t length;
     uint8_t *str;
 } __packed;

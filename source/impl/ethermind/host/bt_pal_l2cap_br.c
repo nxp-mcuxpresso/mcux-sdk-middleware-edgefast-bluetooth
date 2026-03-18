@@ -1262,7 +1262,8 @@ static void l2cap_get_conn_by_addr(struct bt_conn *conn, void *data)
 {
 	uint8_t *addr = (uint8_t *)data;
 
-	if (memcmp(&conn->br.dst, addr, 6u) == 0u)
+	/* compare memcmp result to 0 without unsigned cast. */
+	if (memcmp(&conn->br.dst, addr, 6U) == 0)
 	{
 		l2cap_get_conn = conn;
 	}
@@ -1302,7 +1303,8 @@ static API_RESULT reg_l2cap_connect_ind
 	bt_conn_foreach(BT_CONN_TYPE_BR, l2cap_get_conn_by_addr, &bd_addr[0]);
 	conn = l2cap_get_conn;
 	if (conn == NULL) {
-		return -1;
+		/* avoid returning -1 (cast to UINT16 by EtherMind). */
+		return API_FAILURE;
 	}
 
 	l2cap_get_remote_cid(cid, &rcid);
@@ -1336,7 +1338,8 @@ API_RESULT reg_l2cap_connect_cfm
 	bt_conn_foreach(BT_CONN_TYPE_BR, l2cap_get_conn_by_addr, &bd_addr[0]);
 	conn = l2cap_get_conn;
 	if (conn == NULL) {
-		return -1;
+		/* avoid returning -1 (cast to UINT16 by EtherMind). */
+		return API_FAILURE;
 	}
 
 	l2cap_get_remote_cid(lcid, &rcid);
@@ -1356,7 +1359,8 @@ API_RESULT reg_l2cap_config_ind
 	l2cap_get_conn = NULL;
 	bt_conn_foreach(BT_CONN_TYPE_BR, l2cap_get_conn_by_lcid, &lcid);
 	if (l2cap_get_conn == NULL) {
-		return -1;
+		/* avoid returning -1 (cast to UINT16 by EtherMind). */
+		return API_FAILURE;
 	}
 
 	l2cap_br_conf_req(l2cap_get_conn, 0, lcid, config_option);
@@ -1373,7 +1377,8 @@ API_RESULT reg_l2cap_config_cfm
 	l2cap_get_conn = NULL;
 	bt_conn_foreach(BT_CONN_TYPE_BR, l2cap_get_conn_by_lcid, &lcid);
 	if (l2cap_get_conn == NULL) {
-		return -1;
+		/* avoid returning -1 (cast to UINT16 by EtherMind). */
+		return API_FAILURE;
 	}
 
 	l2cap_br_conf_rsp(l2cap_get_conn, lcid, result, config_option);
@@ -1391,7 +1396,8 @@ API_RESULT reg_l2cap_disconnect_ind
 	l2cap_get_conn = NULL;
 	bt_conn_foreach(BT_CONN_TYPE_BR, l2cap_get_conn_by_lcid, &lcid);
 	if (l2cap_get_conn == NULL) {
-		return -1;
+		/* avoid returning -1 (cast to UINT16 by EtherMind). */
+		return API_FAILURE;
 	}
 
 	l2cap_get_remote_cid(lcid, &rcid);
@@ -1411,7 +1417,8 @@ API_RESULT reg_l2cap_disconnect_cfm
 	l2cap_get_conn = NULL;
 	bt_conn_foreach(BT_CONN_TYPE_BR, l2cap_get_conn_by_lcid, &lcid);
 	if (l2cap_get_conn == NULL) {
-		return -1;
+		/* avoid returning -1 (cast to UINT16 by EtherMind). */
+		return API_FAILURE;
 	}
 
 	l2cap_get_remote_cid(lcid, &rcid);
@@ -1431,12 +1438,13 @@ API_RESULT reg_l2cap_data_read
 	l2cap_get_conn = NULL;
 	bt_conn_foreach(BT_CONN_TYPE_BR, l2cap_get_conn_by_lcid, &lcid);
 	if (l2cap_get_conn == NULL) {
-		return -1;
+		/* avoid returning -1 (cast to UINT16 by EtherMind). */
+		return API_FAILURE;
 	}
 
 	chan = bt_l2cap_br_lookup_rx_cid(l2cap_get_conn, lcid);
 	if (!chan) {
-		return -1;
+		return API_FAILURE;
 	}
 
 	if ((chan->ops != NULL) && (chan->ops->recv != NULL)) {
@@ -1461,12 +1469,13 @@ API_RESULT reg_l2cap_get_fec_params(UINT16 lcid, L2CAP_FEC_OPTION *fec_option)
 	l2cap_get_conn = NULL;
 	bt_conn_foreach(BT_CONN_TYPE_BR, l2cap_get_conn_by_lcid, &lcid);
 	if (l2cap_get_conn == NULL) {
-		return -1;
+		/* MSG/Coverity CID 41309611: avoid returning -1 (cast to UINT16 by EtherMind). */
+		return API_FAILURE;
 	}
 
 	chan = bt_l2cap_br_lookup_rx_cid(l2cap_get_conn, lcid);
 	if (!chan) {
-		return -1;
+		return API_FAILURE;
 	}
 
 	/* get chan configuration according to fec_option->mode */
@@ -2078,6 +2087,12 @@ int bt_l2cap_br_chan_send(struct bt_l2cap_chan *chan, struct net_buf *buf)
 	} else
 #endif
 	{
+		/*  validate before narrowing to uint16_t in l2ca_data_write. */
+		if ((buf->len + L2CAP_HDR_LEN) > UINT16_MAX)
+		{
+			return -EMSGSIZE;
+		}
+
 		if (buf->len + L2CAP_HDR_LEN > BT_STATIC_DATA_SIZE){
 			ether_buf = OSA_MemoryAllocate(buf->len + L2CAP_HDR_LEN);
 			if (ether_buf == NULL) {
@@ -2187,7 +2202,7 @@ static void l2cap_br_conn_pend(struct bt_l2cap_chan *chan, uint8_t status)
 		l2cap_br_conn_req_reply(chan, BT_L2CAP_BR_ERR_SEC_BLOCK);
 
 		/* Release channel allocated to outgoing connection request */
-		if (atomic_test_bit(BR_CHAN(chan)->flags,
+	if (atomic_test_bit(BR_CHAN(chan)->flags,
 				    L2CAP_FLAG_CONN_PENDING)) {
 			l2cap_br_chan_cleanup(chan);
 		}
@@ -2213,6 +2228,9 @@ static void l2cap_br_conn_pend(struct bt_l2cap_chan *chan, uint8_t status)
 	} else if (atomic_test_and_clear_bit(BR_CHAN(chan)->flags,
 					     L2CAP_FLAG_CONN_PENDING)) {
 		buf = bt_l2cap_create_pdu(&br_sig_pool, 0);
+		if (buf == NULL) {
+			return;
+		}
 
 		hdr = net_buf_add(buf, sizeof(*hdr));
 		hdr->code = BT_L2CAP_CONN_REQ;

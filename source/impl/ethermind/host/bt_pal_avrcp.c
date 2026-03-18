@@ -121,7 +121,8 @@ static void avrcp_get_conn(struct bt_conn *conn, void *data)
 {
     uint8_t *addr = (uint8_t *)data;
 
-    if (memcmp(&conn->br.dst, addr, 6u) == 0u)
+    /* don't cast memcmp result; compare explicitly. */
+    if (memcmp(&conn->br.dst, addr, 6u) == 0)
     {
         get_conn = conn;
     }
@@ -2118,6 +2119,7 @@ struct bt_avrcp_browsing_rsp *bt_avrcp_parse_browsing_rsp_data(uint8_t *data, ui
     struct bt_avrcp_browsing_rsp *browsing_rsp = (struct bt_avrcp_browsing_rsp *)&parse_data[0];
     struct net_buf data_buf;
     struct net_buf *buf;
+    uint32_t left_parse_buf_size = PARSE_DATA_BUFF_SIZE;
 
     if ((data == NULL) || (len == 0U))
     {
@@ -2130,7 +2132,7 @@ struct bt_avrcp_browsing_rsp *bt_avrcp_parse_browsing_rsp_data(uint8_t *data, ui
     data_buf.len   = len;
     buf            = &data_buf;
 
-    CHECK_BUF_RET_NULL(4)
+    CHECK_BOTH_BUF_RET_NULL(4)
     browsing_rsp->header.tl_pt_cr_ipid = net_buf_pull_u8(buf);
     // browsing_rsp->header.pid = net_buf_pull_be16(buf);
     browsing_rsp->header.pdu_id        = net_buf_pull_u8(buf);
@@ -2142,14 +2144,14 @@ struct bt_avrcp_browsing_rsp *bt_avrcp_parse_browsing_rsp_data(uint8_t *data, ui
         {
             struct bt_avrcp_get_folder_items_rsp *rsp = &browsing_rsp->folder_items;
 
-            CHECK_BUF_RET_NULL(1)
+            CHECK_BOTH_BUF_RET_NULL(1)
             rsp->status       = net_buf_pull_u8(buf);
             if (rsp->status != BT_AVRCP_METADATA_ERROR_OPERATION_SUCCESSFUL)
             {
                 break;
             }
 
-            CHECK_BUF_RET_NULL(4)
+            CHECK_BOTH_BUF_RET_NULL(4)
             rsp->uid_counter  = net_buf_pull_be16(buf);
             rsp->num_of_items = net_buf_pull_be16(buf);
 
@@ -2158,7 +2160,7 @@ struct bt_avrcp_browsing_rsp *bt_avrcp_parse_browsing_rsp_data(uint8_t *data, ui
                 uint16_t item_len;
                 struct bt_avrcp_item *item = (struct bt_avrcp_item *)&rsp->items[index];
 
-                CHECK_BUF_RET_NULL(3)
+                CHECK_BOTH_BUF_RET_NULL(3)
                 item->item_type = net_buf_pull_u8(buf);
                 item_len        = net_buf_pull_be16(buf);
                 if (item_len > buf->len)
@@ -2169,7 +2171,7 @@ struct bt_avrcp_browsing_rsp *bt_avrcp_parse_browsing_rsp_data(uint8_t *data, ui
                 switch (item->item_type)
                 {
                     case AVRCP_ITEM_MEDIA_PLAYER:
-                        CHECK_BUF_RET_NULL(28)
+                        CHECK_BOTH_BUF_RET_NULL(28)
                         item->player_item.player_id      = net_buf_pull_be16(buf);
                         item->player_item.player_type    = net_buf_pull_u8(buf);
                         item->player_item.player_subtype = net_buf_pull_be32(buf);
@@ -2178,35 +2180,39 @@ struct bt_avrcp_browsing_rsp *bt_avrcp_parse_browsing_rsp_data(uint8_t *data, ui
                         item->player_item.char_set = net_buf_pull_be16(buf);
                         item->player_item.name_len = net_buf_pull_be16(buf);
                         CHECK_BUF_RET_NULL(item->player_item.name_len)
+                        CHECK_PARSE_BUF_RET_NULL(4)
                         item->player_item.name     = net_buf_pull_mem(buf, item->player_item.name_len);
                         break;
                     case AVRCP_ITEM_FOLDER:
-                        CHECK_BUF_RET_NULL(14)
+                        CHECK_BOTH_BUF_RET_NULL(14)
                         memcpy(item->folder_item.folder_uid, net_buf_pull_mem(buf, 8u), 8u);
                         item->folder_item.folder_type = net_buf_pull_u8(buf);
                         item->folder_item.playable    = net_buf_pull_u8(buf);
                         item->folder_item.char_set    = net_buf_pull_be16(buf);
                         item->folder_item.name_len    = net_buf_pull_be16(buf);
                         CHECK_BUF_RET_NULL(item->folder_item.name_len)
+                        CHECK_PARSE_BUF_RET_NULL(4)
                         item->folder_item.name        = net_buf_pull_mem(buf, item->folder_item.name_len);
                         break;
                     case AVRCP_ITEM_MEDIA_ELEMENT:
-                        CHECK_BUF_RET_NULL(13)
+                        CHECK_BOTH_BUF_RET_NULL(13)
                         memcpy(item->media_item.media_uid, net_buf_pull_mem(buf, 8u), 8u);
                         item->media_item.media_type  = net_buf_pull_u8(buf);
                         item->media_item.char_set    = net_buf_pull_be16(buf);
                         item->media_item.name_len    = net_buf_pull_be16(buf);
                         CHECK_BUF_RET_NULL(item->media_item.name_len)
+                        CHECK_PARSE_BUF_RET_NULL(4)
                         item->media_item.name        = net_buf_pull_mem(buf, item->media_item.name_len);
-                        CHECK_BUF_RET_NULL(1)
+                        CHECK_BOTH_BUF_RET_NULL(1)
                         item->media_item.num_of_attr = net_buf_pull_u8(buf);
                         for (uint8_t ind = 0; ind < item->media_item.num_of_attr; ind++)
                         {
-                            CHECK_BUF_RET_NULL(8)
+                            CHECK_BOTH_BUF_RET_NULL(8)
                             item->media_item.attrs[ind].attr_id   = net_buf_pull_be32(buf);
                             item->media_item.attrs[ind].char_set  = net_buf_pull_be16(buf);
                             item->media_item.attrs[ind].value_len = net_buf_pull_be16(buf);
                             CHECK_BUF_RET_NULL(item->media_item.attrs[ind].value_len)
+                            CHECK_PARSE_BUF_RET_NULL(4)
                             item->media_item.attrs[ind].value_str =
                                 net_buf_pull_mem(buf, item->media_item.attrs[ind].value_len);
                         }
@@ -2222,13 +2228,13 @@ struct bt_avrcp_browsing_rsp *bt_avrcp_parse_browsing_rsp_data(uint8_t *data, ui
         {
             struct bt_avrcp_set_browsed_player_rsp *rsp = &browsing_rsp->set_browsed_player;
 
-            CHECK_BUF_RET_NULL(1)
+            CHECK_BOTH_BUF_RET_NULL(1)
             rsp->status       = net_buf_pull_u8(buf);
             if (rsp->status != BT_AVRCP_METADATA_ERROR_OPERATION_SUCCESSFUL)
             {
                 break;
             }
-            CHECK_BUF_RET_NULL(9)
+            CHECK_BOTH_BUF_RET_NULL(9)
             rsp->uid_counter  = net_buf_pull_be16(buf);
             rsp->num_of_items = net_buf_pull_be32(buf);
             rsp->char_set     = net_buf_pull_be16(buf);
@@ -2236,9 +2242,10 @@ struct bt_avrcp_browsing_rsp *bt_avrcp_parse_browsing_rsp_data(uint8_t *data, ui
 
             for (uint8_t index = 0; index < rsp->folder_depth; index++)
             {
-                CHECK_BUF_RET_NULL(2)
+                CHECK_BOTH_BUF_RET_NULL(2)
                 rsp->folder_names[index].folder_name_len = net_buf_pull_be16(buf);
                 CHECK_BUF_RET_NULL(rsp->folder_names[index].folder_name_len)
+                CHECK_PARSE_BUF_RET_NULL(4)
                 rsp->folder_names[index].folder_name = net_buf_pull_mem(buf, rsp->folder_names[index].folder_name_len);
             }
             break;
@@ -2248,13 +2255,13 @@ struct bt_avrcp_browsing_rsp *bt_avrcp_parse_browsing_rsp_data(uint8_t *data, ui
         {
             struct bt_avrcp_change_path_rsp *rsp = &browsing_rsp->change_path;
 
-            CHECK_BUF_RET_NULL(1)
+            CHECK_BOTH_BUF_RET_NULL(1)
             rsp->status       = net_buf_pull_u8(buf);
             if (rsp->status != BT_AVRCP_METADATA_ERROR_OPERATION_SUCCESSFUL)
             {
                 break;
             }
-            CHECK_BUF_RET_NULL(4)
+            CHECK_BOTH_BUF_RET_NULL(4)
             rsp->num_of_items = net_buf_pull_be32(buf);
             break;
         }
@@ -2263,23 +2270,24 @@ struct bt_avrcp_browsing_rsp *bt_avrcp_parse_browsing_rsp_data(uint8_t *data, ui
         {
             struct bt_avrcp_get_item_attrs_rsp *rsp = &browsing_rsp->get_item_attrs;
 
-            CHECK_BUF_RET_NULL(1)
+            CHECK_BOTH_BUF_RET_NULL(1)
             rsp->status      = net_buf_pull_u8(buf);
             if (rsp->status != BT_AVRCP_METADATA_ERROR_OPERATION_SUCCESSFUL)
             {
                 break;
             }
-            CHECK_BUF_RET_NULL(1)
+            CHECK_BOTH_BUF_RET_NULL(1)
             rsp->num_of_attr = net_buf_pull_u8(buf);
             for (uint8_t index = 0; index < rsp->num_of_attr; index++)
             {
                 struct bt_avrcp_attr_val_entry *item = &rsp->attrs[index];
 
-                CHECK_BUF_RET_NULL(8)
+                CHECK_BOTH_BUF_RET_NULL(8)
                 item->attr_id   = net_buf_pull_be32(buf);
                 item->char_set  = net_buf_pull_be16(buf);
                 item->value_len = net_buf_pull_be16(buf);
                 CHECK_BUF_RET_NULL(item->value_len)
+                CHECK_PARSE_BUF_RET_NULL(4)
                 item->value_str = net_buf_pull_mem(buf, item->value_len);
             }
             break;
@@ -2289,13 +2297,13 @@ struct bt_avrcp_browsing_rsp *bt_avrcp_parse_browsing_rsp_data(uint8_t *data, ui
         {
             struct bt_avrcp_search_rsp *rsp = &browsing_rsp->search;
 
-            CHECK_BUF_RET_NULL(1)
+            CHECK_BOTH_BUF_RET_NULL(1)
             rsp->status       = net_buf_pull_u8(buf);
             if (rsp->status != BT_AVRCP_METADATA_ERROR_OPERATION_SUCCESSFUL)
             {
                 break;
             }
-            CHECK_BUF_RET_NULL(6)
+            CHECK_BOTH_BUF_RET_NULL(6)
             rsp->uid_counter  = net_buf_pull_be16(buf);
             rsp->num_of_items = net_buf_pull_be32(buf);
             break;
@@ -2305,13 +2313,13 @@ struct bt_avrcp_browsing_rsp *bt_avrcp_parse_browsing_rsp_data(uint8_t *data, ui
         {
             struct bt_avrcp_get_total_num_of_items_rsp *rsp = &browsing_rsp->get_total_num_of_items;
 
-            CHECK_BUF_RET_NULL(1)
+            CHECK_BOTH_BUF_RET_NULL(1)
             rsp->status       = net_buf_pull_u8(buf);
             if (rsp->status != BT_AVRCP_METADATA_ERROR_OPERATION_SUCCESSFUL)
             {
                 break;
             }
-            CHECK_BUF_RET_NULL(6)
+            CHECK_BOTH_BUF_RET_NULL(6)
             rsp->uid_counter  = net_buf_pull_be16(buf);
             rsp->num_of_items = net_buf_pull_be32(buf);
             break;
@@ -2329,22 +2337,26 @@ struct bt_avrcp_browsing_rsp *bt_avrcp_parse_browsing_rsp_data(uint8_t *data, ui
 #if (defined(CONFIG_BT_AVRCP_TG) && ((CONFIG_BT_AVRCP_TG) > 0U))
 static uint16_t get_item_len(struct bt_avrcp_item *item)
 {
-    uint16_t len = 0;
+    uint32_t len = 0;
 
     switch (item->item_type)
     {
         case AVRCP_ITEM_MEDIA_PLAYER:
-            len = AVRCP_PLAYER_ITEM_LEN + item->player_item.name_len;
+            len = (uint32_t)AVRCP_PLAYER_ITEM_LEN + item->player_item.name_len;
             break;
         case AVRCP_ITEM_FOLDER:
-            len = AVRCP_FOLDER_ITEM_LEN + item->folder_item.name_len;
+            len = (uint32_t)AVRCP_FOLDER_ITEM_LEN + item->folder_item.name_len;
             break;
         case AVRCP_ITEM_MEDIA_ELEMENT:
-            len = AVRCP_MEDIA_ITEM_LEN + item->media_item.name_len;
-            len += 1;
+            len = (uint32_t)AVRCP_MEDIA_ITEM_LEN + item->media_item.name_len;
+            len += 1U;
             for (uint8_t index = 0; index < item->media_item.num_of_attr; index++)
             {
-                len += 8;
+                if (len > (UINT32_MAX - (8U + item->media_item.attrs[index].value_len)))
+                {
+                    return 0U;
+                }
+                len += 8U;
                 len += item->media_item.attrs[index].value_len;
             }
             break;
@@ -2352,7 +2364,12 @@ static uint16_t get_item_len(struct bt_avrcp_item *item)
             break;
     }
 
-    return len;
+    if (len > UINT16_MAX)
+    {
+        return 0U;
+    }
+
+    return (uint16_t)len;
 }
 
 struct bt_avrcp_browsing_cmd *bt_avrcp_parse_browsing_cmd_data(uint8_t *data, uint32_t len)
@@ -2360,6 +2377,7 @@ struct bt_avrcp_browsing_cmd *bt_avrcp_parse_browsing_cmd_data(uint8_t *data, ui
     struct net_buf data_buf;
     struct net_buf *buf;
     struct bt_avrcp_browsing_cmd *browsing_cmd = (struct bt_avrcp_browsing_cmd *)&parse_data[0];
+    uint32_t left_parse_buf_size = PARSE_DATA_BUFF_SIZE;
 
     if ((data == NULL) || (len == 0U))
     {
@@ -2371,7 +2389,7 @@ struct bt_avrcp_browsing_cmd *bt_avrcp_parse_browsing_cmd_data(uint8_t *data, ui
     data_buf.len   = len;
     buf            = &data_buf;
 
-    CHECK_BUF_RET_NULL(4)
+    CHECK_BOTH_BUF_RET_NULL(4)
     browsing_cmd->header.tl_pt_cr_ipid = net_buf_pull_u8(buf);
     // browsing_cmd->header.pid = net_buf_pull_be16(buf);
     browsing_cmd->header.pdu_id        = net_buf_pull_u8(buf);
@@ -2382,7 +2400,7 @@ struct bt_avrcp_browsing_cmd *bt_avrcp_parse_browsing_cmd_data(uint8_t *data, ui
         {
             struct bt_avrcp_get_folder_items_cmd *cmd = &browsing_cmd->folder_items;
 
-            CHECK_BUF_RET_NULL(10)
+            CHECK_BOTH_BUF_RET_NULL(10)
             cmd->scope      = net_buf_pull_u8(buf);
             cmd->start_item = net_buf_pull_be32(buf);
             cmd->end_item   = net_buf_pull_be32(buf);
@@ -2390,7 +2408,7 @@ struct bt_avrcp_browsing_cmd *bt_avrcp_parse_browsing_cmd_data(uint8_t *data, ui
 
             for (uint8_t index = 0; index < cmd->attr_count; index++)
             {
-                CHECK_BUF_RET_NULL(4)
+                CHECK_BOTH_BUF_RET_NULL(4)
                 cmd->attr_list[index] = net_buf_pull_be32(buf);
             }
             break;
@@ -2400,38 +2418,38 @@ struct bt_avrcp_browsing_cmd *bt_avrcp_parse_browsing_cmd_data(uint8_t *data, ui
         {
             struct bt_avrcp_set_browsed_player_cmd *cmd = &browsing_cmd->set_browsed_player;
 
-            CHECK_BUF_RET_NULL(2)
+            CHECK_BOTH_BUF_RET_NULL(2)
             cmd->player_id = net_buf_pull_be16(buf);
             break;
         }
 
         case BT_AVRCP_PDU_ID_CHANGE_PATH:
         {
-            uint8_t *data;
+            uint8_t *uid_data;
             struct bt_avrcp_change_path_cmd *cmd = &browsing_cmd->change_path;
 
-            CHECK_BUF_RET_NULL(11)
+            CHECK_BOTH_BUF_RET_NULL(11)
             cmd->uid_counter = net_buf_pull_be16(buf);
             cmd->direction   = net_buf_pull_u8(buf);
-            data             = net_buf_pull_mem(buf, 8u);
-            memcpy(cmd->folder_uid, data, 8u);
+            uid_data         = net_buf_pull_mem(buf, 8u);
+            memcpy(cmd->folder_uid, uid_data, 8u);
             break;
         }
 
         case BT_AVRCP_PDU_ID_GET_ITEM_ATTRIBUTES:
         {
-            uint8_t *data;
+            uint8_t *uid_data;
             struct bt_avrcp_get_item_attrs_cmd *cmd = &browsing_cmd->get_item_attrs;
 
-            CHECK_BUF_RET_NULL(12)
+            CHECK_BOTH_BUF_RET_NULL(12)
             cmd->scope = net_buf_pull_u8(buf);
-            data       = net_buf_pull_mem(buf, 8u);
-            memcpy(cmd->uid, data, 8u);
+            uid_data   = net_buf_pull_mem(buf, 8u);
+            memcpy(cmd->uid, uid_data, 8u);
             cmd->uid_counter = net_buf_pull_be16(buf);
             cmd->num_of_attr = net_buf_pull_u8(buf);
             for (uint8_t index = 0; index < cmd->num_of_attr; index++)
             {
-                CHECK_BUF_RET_NULL(4)
+                CHECK_BOTH_BUF_RET_NULL(4)
                 cmd->attr_list[index] = net_buf_pull_be32(buf);
             }
             break;
@@ -2441,10 +2459,11 @@ struct bt_avrcp_browsing_cmd *bt_avrcp_parse_browsing_cmd_data(uint8_t *data, ui
         {
             struct bt_avrcp_search_cmd *cmd = &browsing_cmd->search;
 
-            CHECK_BUF_RET_NULL(4)
+            CHECK_BOTH_BUF_RET_NULL(4)
             cmd->char_set = net_buf_pull_be16(buf);
             cmd->length   = net_buf_pull_be16(buf);
             CHECK_BUF_RET_NULL(cmd->length)
+            CHECK_PARSE_BUF_RET_NULL(4)
             cmd->str      = net_buf_pull_mem(buf, cmd->length);
             break;
         }
@@ -2453,7 +2472,7 @@ struct bt_avrcp_browsing_cmd *bt_avrcp_parse_browsing_cmd_data(uint8_t *data, ui
         {
             struct bt_avrcp_get_total_num_of_items_cmd *cmd = &browsing_cmd->get_total_num_of_items;
 
-            CHECK_BUF_RET_NULL(1)
+            CHECK_BOTH_BUF_RET_NULL(1)
             cmd->scope = net_buf_pull_u8(buf);
             break;
         }
@@ -2474,11 +2493,6 @@ int bt_avrcp_response_browsing(struct bt_conn *conn,
     struct net_buf *buf;
     AVRCP_AL_BROW_RSP_INFO rsp_info;
     struct bt_avrcp_instance *avrcp = bt_avrcp_get_instance(conn);
-
-    if (avrcp == NULL)
-    {
-        return -EINVAL;
-    }
 
     if (avrcp == NULL)
     {
@@ -2536,7 +2550,12 @@ int bt_avrcp_response_browsing(struct bt_conn *conn,
                 {
 				    CHECK_BUF_FREE(3)
                     net_buf_add_u8(buf, item->item_type);
-                    net_buf_add_be16(buf, (item_len - 3));
+                    /* validate before subtracting/narrowing item_len. */
+                    if (item_len < 3U)
+                    {
+                        return -EINVAL;
+                    }
+                    net_buf_add_be16(buf, (uint16_t)(item_len - 3U));
                     switch (item->item_type)
                     {
                         case AVRCP_ITEM_MEDIA_PLAYER:
@@ -2627,7 +2646,12 @@ int bt_avrcp_response_browsing(struct bt_conn *conn,
                 uint16_t item_len                    = 8;
                 struct bt_avrcp_attr_val_entry *item = &rsp->attrs[index];
 
-                item_len += item->value_len;
+                /* prevent unsigned wrap on item_len += value_len. */
+                if (item_len > (uint16_t)(UINT16_MAX - item->value_len))
+                {
+                    return -EINVAL;
+                }
+                item_len = (uint16_t)(item_len + item->value_len);
 
                 if (item_len < net_buf_tailroom(buf))
                 {
@@ -2705,6 +2729,25 @@ static API_RESULT ethermind_avrcp_cai_cb(AVRCP_CA_HANDLE *avrcp_ca_handle,
     uint8_t callback = 1;
     struct bt_avrcp_cover_art_rsp rsp;
 
+    switch (event_result) {
+        case BT_AVRCP_CA_SUCCESS_RSP:
+        case BT_AVRCP_CA_CONTINUE_RSP:
+        case BT_AVRCP_CA_BAD_REQ_RSP:
+        case BT_AVRCP_CA_NOT_IMPLEMENTED_RSP:
+        case BT_AVRCP_CA_UNAUTH_RSP:
+        case BT_AVRCP_CA_PRECOND_FAILED_RSP:
+        case BT_AVRCP_CA_NOT_FOUND_RSP:
+        case BT_AVRCP_CA_NOT_ACCEPTABLE_RSP:
+        case BT_AVRCP_CA_NO_SERVICE_RSP: 
+        case BT_AVRCP_CA_FORBIDDEN_RSP:
+        case BT_AVRCP_CA_SERVER_ERROR:
+            rsp.response = (uint8_t)event_result;
+            break;
+        default:
+            rsp.response = BT_AVRCP_CA_ERROR;
+            break;
+    }
+
     switch (event_type)
     {
         case AVRCP_CAI_TRANSPORT_CLOSE_CNF:
@@ -2739,21 +2782,18 @@ static API_RESULT ethermind_avrcp_cai_cb(AVRCP_CA_HANDLE *avrcp_ca_handle,
 
         case AVRCP_CAI_GET_IMAGE_PROPERTIES_CNF:
             rsp.cmd             = BT_AVRCP_COVER_ART_GET_PROP;
-            rsp.response        = event_result;
             rsp.get_prop.data   = avrcp_ca_headers->ca_rsp_info->body->value;
             rsp.get_prop.length = avrcp_ca_headers->ca_rsp_info->body->length;
             break;
 
         case AVRCP_CAI_GET_IMAGE_CNF:
             rsp.cmd              = BT_AVRCP_COVER_ART_GET_IMAGE;
-            rsp.response         = event_result;
             rsp.get_image.data   = avrcp_ca_headers->ca_rsp_info->body->value;
             rsp.get_image.length = avrcp_ca_headers->ca_rsp_info->body->length;
             break;
 
         case AVRCP_CAI_GET_LINKED_THUMBNAIL_CNF:
             rsp.cmd              = BT_AVRCP_COVER_ART_GET_THUMB;
-            rsp.response         = event_result;
             rsp.get_thumb.data   = avrcp_ca_headers->ca_rsp_info->body->value;
             rsp.get_thumb.length = avrcp_ca_headers->ca_rsp_info->body->length;
             break;

@@ -337,14 +337,13 @@ API_RESULT BT_avrcp_al_send_info_rsp
         data[marker++] = 0x07;
 
         /* Add Unit Type info */
-        data[marker++] = sub_unit_type << 3;
+        data[marker++] = (UCHAR)((sub_unit_type & 0x1FU) << 3);
 
         /* Company ID */
-        data[marker++] = (UCHAR )(BT_SIG_REGISTERED_COMPANY_ID >> 16);
-
-        data[marker++] = (UCHAR )(BT_SIG_REGISTERED_COMPANY_ID >> 8);
-
-        data[marker++] = (UCHAR )(BT_SIG_REGISTERED_COMPANY_ID);
+        /* explicit 8-bit extraction. */
+        data[marker++] = (UCHAR)((BT_SIG_REGISTERED_COMPANY_ID >> 16) & 0xFFU);
+        data[marker++] = (UCHAR)((BT_SIG_REGISTERED_COMPANY_ID >> 8) & 0xFFU);
+        data[marker++] = (UCHAR)(BT_SIG_REGISTERED_COMPANY_ID & 0xFFU);
 
     }
 
@@ -431,6 +430,14 @@ API_RESULT BT_avrcp_al_send_passthrough_cmd_rsp
         }
 
         /* Yes, Form AVRCP Vendor-Unique Passthrough Command */
+        if (vu_op_id > UINT8_MAX)
+        {
+            /* validate vu_op_id before narrowing to UCHAR. */
+            avrcp_al_unlock();
+            BT_free_mem(data);
+            return retval;
+        }
+
         AVRCP_UPDATE_PASSTHROUGH_VU_PKT
         (
             &data[AVCTP_HDR_LEN],
@@ -444,7 +451,8 @@ API_RESULT BT_avrcp_al_send_passthrough_cmd_rsp
     else
     {
         /* Update the operation with state(press or release) */
-        state = ((state << 7) | (operation_id & 0x7F));
+        /* compose state byte explicitly. */
+        state = (UCHAR)(((state & 0x01U) << 7U) | (operation_id & 0x7FU));
 
         /*
          * Allocate Memory as required for command.
@@ -833,7 +841,16 @@ API_RESULT BT_avrcp_al_send_metadata_pdu
             /**
              * Allocating buffer for complete VD PDU packet.
              */
-            vd_datalen = AVCTP_HDR_LEN + vd_pkt_hdr_len + pdu_info->vd_cmd_datalen;
+            /* validate before narrowing total length to UINT16. */
+            {
+                uint32_t tmp_len = (uint32_t)AVCTP_HDR_LEN + (uint32_t)vd_pkt_hdr_len + (uint32_t)pdu_info->vd_cmd_datalen;
+                if (tmp_len > UINT16_MAX)
+                {
+                    BT_free_mem(data);
+                    return API_FAILURE;
+                }
+                vd_datalen = (UINT16)tmp_len;
+            }
             vd_data = (UCHAR *) BT_alloc_mem (vd_datalen);
             if (NULL == vd_data)
             {
@@ -870,7 +887,18 @@ API_RESULT BT_avrcp_al_send_metadata_pdu
                 max_vd_pdu_paramlen
             );
 
-            datalen = AVCTP_HDR_LEN + vd_pkt_hdr_len + max_vd_pdu_paramlen;
+            /* validate before narrowing total length to UINT16. */
+            {
+                uint32_t tmp_len = (uint32_t)AVCTP_HDR_LEN + (uint32_t)vd_pkt_hdr_len + (uint32_t)max_vd_pdu_paramlen;
+                if (tmp_len > UINT16_MAX)
+                {
+                    BT_free_mem(vd_data);
+                    vd_data = NULL;
+                    BT_free_mem(data);
+                    return API_FAILURE;
+                }
+                datalen = (UINT16)tmp_len;
+            }
             vd_pkt_offset = datalen;
 
             /* Copy the data */
@@ -901,7 +929,16 @@ API_RESULT BT_avrcp_al_send_metadata_pdu
                 pdu_info->vd_cmd_datalen
             );
 
-            datalen = AVCTP_HDR_LEN + vd_pkt_hdr_len + pdu_info->vd_cmd_datalen;
+            /* validate before narrowing total length to UINT16. */
+            {
+                uint32_t tmp_len = (uint32_t)AVCTP_HDR_LEN + (uint32_t)vd_pkt_hdr_len + (uint32_t)pdu_info->vd_cmd_datalen;
+                if (tmp_len > UINT16_MAX)
+                {
+                    BT_free_mem(data);
+                    return API_FAILURE;
+                }
+                datalen = (UINT16)tmp_len;
+            }
 
             /* Copy the PDU parameters */
             if (NULL != pdu_info->vd_cmd_data)
@@ -917,6 +954,12 @@ API_RESULT BT_avrcp_al_send_metadata_pdu
     }
     else if (AVRCP_METADATA_PACKET_TYPE_CONTINUE == pdu_info->packet_type)
     {
+        if (vd_data == NULL)
+        {
+            BT_free_mem(data);
+            return API_FAILURE;
+        }
+
         /* Validate PDU id for continue response */
         if (pdu_info->pdu_id != vd_data[AVCTP_HDR_LEN + 6])
         {
@@ -947,7 +990,20 @@ API_RESULT BT_avrcp_al_send_metadata_pdu
             /* Copy the data */
             BT_mem_copy(&data[AVCTP_HDR_LEN + vd_pkt_hdr_len], &vd_data[vd_pkt_offset], max_vd_pdu_paramlen);
 
-            datalen = AVCTP_HDR_LEN + vd_pkt_hdr_len + max_vd_pdu_paramlen;
+            /* validate before narrowing total length to UINT16. */
+            {
+                uint32_t tmp_len = (uint32_t)AVCTP_HDR_LEN + (uint32_t)vd_pkt_hdr_len + (uint32_t)max_vd_pdu_paramlen;
+                if (tmp_len > UINT16_MAX)
+                {
+                    BT_free_mem(data);
+                    BT_free_mem(vd_data);
+                    vd_data = NULL;
+                    vd_datalen = 0;
+                    vd_pkt_offset = 0;
+                    return API_FAILURE;
+                }
+                datalen = (UINT16)tmp_len;
+            }
             vd_pkt_offset += max_vd_pdu_paramlen;
         }
         else
@@ -973,7 +1029,20 @@ API_RESULT BT_avrcp_al_send_metadata_pdu
             /* Copy the data */
             BT_mem_copy(&data[AVCTP_HDR_LEN + vd_pkt_hdr_len], &vd_data[vd_pkt_offset], vd_pdu_paramlen);
 
-            datalen = AVCTP_HDR_LEN + vd_pkt_hdr_len + vd_pdu_paramlen;
+            /* validate before narrowing total length to UINT16. */
+            {
+                uint32_t tmp_len = (uint32_t)AVCTP_HDR_LEN + (uint32_t)vd_pkt_hdr_len + (uint32_t)vd_pdu_paramlen;
+                if (tmp_len > UINT16_MAX)
+                {
+                    BT_free_mem(data);
+                    BT_free_mem(vd_data);
+                    vd_data = NULL;
+                    vd_datalen = 0;
+                    vd_pkt_offset = 0;
+                    return API_FAILURE;
+                }
+                datalen = (UINT16)tmp_len;
+            }
             vd_pkt_offset += vd_pdu_paramlen;
 
             for (i = 0; i < vd_pdu_paramlen; i++)
@@ -996,6 +1065,11 @@ API_RESULT BT_avrcp_al_send_metadata_pdu
     else
     {
         /* ========== PDU ID -> Abort continue respone received ===== */
+        if (vd_data == NULL)
+        {
+            BT_free_mem(data);
+            return API_FAILURE;
+        }
 
         /* Copy the vd packet hdr  */
         BT_mem_copy(&data[AVCTP_HDR_LEN], &vd_data[AVCTP_HDR_LEN], vd_pkt_hdr_len);
@@ -1263,7 +1337,15 @@ API_RESULT BT_avrcp_al_send_browsing_pdu
      * Allocate Memory as required for command.
      * This should also include space for AVCTP protocol header
      */
-    paramlen = AVCTP_HDR_LEN + AVRCP_COMMAND_HDR_LEN + datalen;
+    /* validate before narrowing total length to UINT16. */
+    {
+        uint32_t tmp_len = (uint32_t)AVCTP_HDR_LEN + (uint32_t)AVRCP_COMMAND_HDR_LEN + (uint32_t)datalen;
+        if (tmp_len > UINT16_MAX)
+        {
+            return retval;
+        }
+        paramlen = (UINT16)tmp_len;
+    }
     param    = BT_alloc_mem (paramlen);
     if (NULL == param)
     {
@@ -1359,7 +1441,16 @@ API_RESULT BT_avrcp_al_send_browsing_cmd_rsp
      * Allocate Memory as required for command.
      * This should also include space for AVCTP protocol header
      */
-    paramlen = AVCTP_HDR_LEN + AVRCP_COMMAND_HDR_LEN + brow_rsp_info->param_info_len;
+    /* validate before narrowing total length to UINT16. */
+    {
+        uint32_t tmp_len = (uint32_t)AVCTP_HDR_LEN + (uint32_t)AVRCP_COMMAND_HDR_LEN + (uint32_t)brow_rsp_info->param_info_len;
+        if (tmp_len > UINT16_MAX)
+        {
+            avrcp_al_unlock();
+            return retval;
+        }
+        paramlen = (UINT16)tmp_len;
+    }
     param    = BT_alloc_mem (paramlen);
     if (NULL == param)
     {

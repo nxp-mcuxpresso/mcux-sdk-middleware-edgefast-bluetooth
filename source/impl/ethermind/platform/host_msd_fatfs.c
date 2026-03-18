@@ -244,6 +244,11 @@ static usb_status_t USB_HostEvent(usb_device_handle deviceHandle,
     uint8_t interfaceIndex = 0;
 #endif
     usb_status_t status = kStatus_USB_Success;
+
+    if (eventCode > UINT8_MAX)
+    {
+        return kStatus_USB_Error;
+    }
     usb_host_event_t usb_event = (usb_host_event_t)(uint8_t)((uint8_t)eventCode & 0xFFU);
 
     switch (usb_event)
@@ -731,6 +736,11 @@ usb_status_t USB_HostMsdEvent(usb_device_handle deviceHandle,
     uint32_t vid = 0U;
     uint32_t address = 0U;
     uint8_t id;
+
+    if (eventCode > UINT8_MAX)
+    {
+        return kStatus_USB_Error;
+    }
     usb_host_event_t usb_event = (usb_host_event_t)(uint8_t)((uint8_t)eventCode & 0xFFU);
 
     switch (usb_event)

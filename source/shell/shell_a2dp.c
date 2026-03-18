@@ -959,6 +959,10 @@ static void sink_common_streamer_data(struct bt_a2dp_endpoint *ep, uint8_t *data
     }
 
     temp = (uint32_t)data;
+    if (temp > UINT32_MAX - 3U)
+    {
+        return;
+    }
     temp = ((temp + 3u) & 0xFFFFFFFCu);
     u32data = (uint32_t*)temp;
     temp = ((uint32_t)(data + length) & 0xFFFFFFFCu);
@@ -975,7 +979,17 @@ static void sink_common_streamer_data(struct bt_a2dp_endpoint *ep, uint8_t *data
         shell_print(ctx_shell, "streamer data:%d\r\n", length);
     }
 
-    ep_test->delay_ms = (length / 44u / 4u);
+    {
+        uint32_t delay;
+
+        delay = length / 44U / 4U;
+        /* validate before narrowing to uint8_t. */
+        if (delay > UINT8_MAX)
+        {
+            return;
+        }
+        ep_test->delay_ms = (uint8_t)delay;
+    }
     if (ep_test->media_started) {
         if (ep_test->fisrt_media == 0u) {
             ep_test->fisrt_media = 1u;
@@ -1295,10 +1309,18 @@ static int cmd_send_delay_report(const struct shell *sh, size_t argc, char *argv
     }
 
     if (argc > 1) {
-        delay = strtoul(argv[1], NULL, 10);
+        unsigned long tmp;
+        int err = 0;
+
+        tmp = shell_strtoul(argv[1], 10, &err);
+        if ((err != 0) || (tmp > INT16_MAX)) {
+            shell_print(sh, "wrong parameter");
+            return -EINVAL;
+        }
+        delay = (int16_t)tmp;
     } else {
         shell_print(sh, "wrong parameter");
-        return 0;
+        return -EINVAL;
     }
 
     err = bt_a2dp_send_delay_report(default_ep->ep, delay);
@@ -1312,7 +1334,7 @@ static int cmd_send_delay_report(const struct shell *sh, size_t argc, char *argv
 
 static int cmd_register_sink_ep(const struct shell *sh, size_t argc, char *argv[])
 {
-    int select;
+    uint32_t select;
     int err = -1;
     struct bt_a2dp_endpoint *ep;
 
@@ -1323,13 +1345,19 @@ static int cmd_register_sink_ep(const struct shell *sh, size_t argc, char *argv[
     }
 
     if (argc > 1) {
-        select = strtoul(argv[1], NULL, 10);
+        int err = 0;
+
+        select = shell_strtoul(argv[1], 10, &err);
+        if (err != 0) {
+            shell_print(sh, "wrong parameter");
+            return -EINVAL;
+        }
     } else {
         shell_print(sh, "wrong parameter");
-        return 0;
+        return -EINVAL;
     }
 
-    if ((select <= 0) || (select > 6)) {
+    if ((select == 0) || (select > 6)) {
         shell_print(sh, "wrong parameter");
         return 0;
     }
@@ -1486,7 +1514,7 @@ static int cmd_register_sink_ep(const struct shell *sh, size_t argc, char *argv[
 
 static int cmd_register_source_ep(const struct shell *sh, size_t argc, char *argv[])
 {
-    int select;
+    uint32_t select;
     int err = -1;
     struct bt_a2dp_endpoint *ep;
 
@@ -1497,13 +1525,19 @@ static int cmd_register_source_ep(const struct shell *sh, size_t argc, char *arg
     }
 
     if (argc > 1) {
-        select = strtoul(argv[1], NULL, 10);
+        int err = 0;
+
+        select = shell_strtoul(argv[1], 10, &err);
+        if (err != 0) {
+            shell_print(sh, "wrong parameter");
+            return -EINVAL;
+        }
     } else {
         shell_print(sh, "wrong parameter");
-        return 0;
+        return -EINVAL;
     }
 
-    if ((select <= 0) || (select > 6)) {
+    if ((select == 0) || (select > 6)) {
         shell_print(sh, "wrong parameter");
         return 0;
     }
@@ -1749,17 +1783,23 @@ static int cmd_get_registered_eps(const struct shell *sh, size_t argc, char *arg
 
 static int cmd_set_default_ep(const struct shell *sh, size_t argc, char *argv[])
 {
-    int select;
+    uint32_t select;
 
     shell_a2dp_init();
     if (argc > 1) {
-        select = strtoul(argv[1], NULL, 10);
+        int err = 0;
+
+        select = shell_strtoul(argv[1], 10, &err);
+        if (err != 0) {
+            shell_print(sh, "wrong parameter");
+            return -EINVAL;
+        }
     } else {
         shell_print(sh, "wrong parameter");
-        return 0;
+        return -EINVAL;
     }
 
-    if ((select <= 0) || (select > registered_index)) {
+    if ((select == 0) || (select > registered_index)) {
         shell_print(sh, "wrong parameter");
         return 0;
     }
@@ -1828,13 +1868,19 @@ static int cmd_send_media(const struct shell *sh, size_t argc, char *argv[])
     }
 
     if (argc > 1) {
-        time = strtoul(argv[1], NULL, 10);
+        int err = 0;
+
+        time = shell_strtoul(argv[1], 10, &err);
+        if ((err != 0) || (time > (UINT32_MAX / 1000U))) {
+            shell_print(sh, "wrong parameter");
+            return -EINVAL;
+        }
     } else {
         shell_print(sh, "wrong parameter");
-        return 0;
+        return -EINVAL;
     }
 
-    time *= 1000u;
+    time *= 1000U;
 #if defined(COEX_APP_SUPPORT) && defined(CONFIG_BT_A2DP_SOURCE)
     {
         a2dp_pcm_task_init();

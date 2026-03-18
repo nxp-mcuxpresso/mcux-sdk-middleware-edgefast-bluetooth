@@ -325,7 +325,7 @@ static void bt_hfp_ag_dump_bytes(uint8_t *buffer, uint16_t length)
     for (i = 0; i < length; i++)
     {
         c = buffer[i];
-        sprintf(hex_stream + offset, "%02X ", c);
+        (void)snprintf(hex_stream + offset, sizeof(hex_stream) - offset, "%02X ", c);
 
         if ((c >= 0x20) && (c <= 0x7E))
         {
@@ -559,7 +559,8 @@ static API_RESULT hfp_ag_callback(HFP_AG_HANDLE handle,HFP_AG_EVENTS hfp_ag_even
             bt_hfp_ag_handle_retval_from_hfag(result);
             break;
         case HFP_AG_DISCONNECT_IND:
-            BT_mem_copy(recvd_bd_addr, (uint8_t *)data, data_length);
+            /* recvd_bd_addr is fixed-size; guard copy length. */
+            BT_mem_copy(recvd_bd_addr, (uint8_t *)data, (data_length < BT_BD_ADDR_SIZE) ? data_length : BT_BD_ADDR_SIZE);
             LOG_DBG("BT_HFP_AG HFP_AG_DISCONNECT_IND \n");
 
             LOG_DBG(BT_DEVICE_ADDR_ONLY_FRMT_SPECIFIER, BT_DEVICE_ADDR_ONLY_PRINT_STR(recvd_bd_addr));
@@ -798,8 +799,16 @@ static API_RESULT hfp_ag_callback(HFP_AG_HANDLE handle,HFP_AG_EVENTS hfp_ag_even
                         {
                             uint8_t bt_hfp_ag_vgs;
 
-                            bt_hfp_ag_vgs = (uint8_t)atoi(
-                                    (char const *)&at_response.global_at_str[at_response.param->start_of_value_index]);
+                            int vgs;
+
+                            vgs = atoi((char const *)&at_response.global_at_str[at_response.param->start_of_value_index]);
+                            if ((vgs < 0) || (vgs > UINT8_MAX))
+                            {
+                                /* validate before narrowing to uint8_t. */
+                                bt_hfp_ag_send_at_rsp(hfp_ag, HFAG_ERROR, NULL);
+                                break;
+                            }
+                            bt_hfp_ag_vgs = (uint8_t)vgs;
                             if (hfp_ag->bt_hfp_ag_config)
                             {
                                 hfp_ag->bt_hfp_ag_config->bt_hfp_ag_vgs = bt_hfp_ag_vgs;
@@ -816,8 +825,17 @@ static API_RESULT hfp_ag_callback(HFP_AG_HANDLE handle,HFP_AG_EVENTS hfp_ag_even
 
                         case AT_VGM:
                         {
-                            uint8_t bt_hfp_ag_vgm = (uint8_t)atoi(
-                                    (char const *)&at_response.global_at_str[at_response.param->start_of_value_index]);
+                            uint8_t bt_hfp_ag_vgm;
+                            int vgm;
+
+                            vgm = atoi((char const *)&at_response.global_at_str[at_response.param->start_of_value_index]);
+                            if ((vgm < 0) || (vgm > UINT8_MAX))
+                            {
+                                /* MSG/Coverity CID 22475055: validate before narrowing to uint8_t. */
+                                bt_hfp_ag_send_at_rsp(hfp_ag, HFAG_ERROR, NULL);
+                                break;
+                            }
+                            bt_hfp_ag_vgm = (uint8_t)vgm;
 
                             if (hfp_ag->bt_hfp_ag_config)
                             {
@@ -877,7 +895,16 @@ static API_RESULT hfp_ag_callback(HFP_AG_HANDLE handle,HFP_AG_EVENTS hfp_ag_even
                         case AT_BAC:
                             for (i = 0; i < at_response.number_of_params; i++)
                             {
-                                codecs |= at_response.global_at_str[at_response.param[i].start_of_value_index] - '0';
+                                int digit;
+
+                                digit = (int)at_response.global_at_str[at_response.param[i].start_of_value_index] - (int)'0';
+                                if ((digit < 0) || (digit > 31))
+                                {
+                                    /* validate before shifting into unsigned long bitmask. */
+                                    bt_hfp_ag_send_at_rsp(hfp_ag, HFAG_ERROR, NULL);
+                                    return API_SUCCESS;
+                                }
+                                codecs |= (1UL << (uint32_t)digit);
                             }
 
                             bt_hfp_ag_send_at_rsp(hfp_ag, HFAG_OK, NULL);
@@ -967,9 +994,12 @@ static API_RESULT hfp_ag_callback(HFP_AG_HANDLE handle,HFP_AG_EVENTS hfp_ag_even
                             /* Hold the phone number */
                             if (hfp_ag->bt_hfp_ag_config)
                             {
-                                BT_mem_set(hfp_ag->bt_hfp_ag_config->bt_hfp_ag_phnum, 0x0, sizeof(hfp_ag->bt_hfp_ag_config->bt_hfp_ag_phnum));
-                                BT_str_copy(hfp_ag->bt_hfp_ag_config->bt_hfp_ag_phnum,
-                                            &at_response.global_at_str[at_response.param->start_of_value_index]);
+                                BT_mem_set(hfp_ag->bt_hfp_ag_config->bt_hfp_ag_phnum, 0x0,
+                                           sizeof(hfp_ag->bt_hfp_ag_config->bt_hfp_ag_phnum));
+                                /* prevent bt_hfp_ag_phnum[] overrun. */
+                                BT_str_n_copy(hfp_ag->bt_hfp_ag_config->bt_hfp_ag_phnum,
+                                        (CHAR const *)&at_response.global_at_str[at_response.param->start_of_value_index],
+                                        sizeof(hfp_ag->bt_hfp_ag_config->bt_hfp_ag_phnum) - 1U);
                             }
 
                             if ((bt_hfp_ag_cb) && (bt_hfp_ag_cb->dial))
@@ -1013,8 +1043,20 @@ static API_RESULT hfp_ag_callback(HFP_AG_HANDLE handle,HFP_AG_EVENTS hfp_ag_even
                          case AT_CHLD:
                             option = at_response.global_at_str[at_response.param->start_of_value_index] - '0';
                             index = at_response.global_at_str[at_response.param->start_of_value_index + 1U];
+                            {
+                                int digit;
+
+                                digit = (index == '\r') ? 0 : ((int)index - (int)'0');
+                                if ((digit < 0) || (digit > 9))
+                                {
+                                    /* validate before converting to unsigned. */
+                                    bt_hfp_ag_send_at_rsp(hfp_ag, HFAG_ERROR, NULL);
+                                    break;
+                                }
+                                index = (uint8_t)digit;
+                            }
+
                             bt_hfp_ag_send_at_rsp(hfp_ag, HFAG_OK, NULL);
-                            index = (index == '\r') ? 0U : index - '0';
 
                             if ((bt_hfp_ag_cb) && (bt_hfp_ag_cb->chld))
                             {
@@ -1198,8 +1240,9 @@ static void bt_hfp_ag_send_at_rsp(struct bt_hfp_ag *hfp_ag, uint8_t rsp_code, vo
 
     BT_mem_set(response, 0, sizeof(response));
 
-    BT_str_copy(response, rsp_table[rsp_code]);
-    length = (uint8_t)BT_str_len(rsp_table[rsp_code]);
+    /* prevent response[] overrun. */
+    BT_str_n_copy(response, rsp_table[rsp_code], sizeof(response) - 1U);
+    length = (uint8_t)BT_str_len(response);
 
     switch (rsp_code)
     {
@@ -1215,11 +1258,11 @@ static void bt_hfp_ag_send_at_rsp(struct bt_hfp_ag *hfp_ag, uint8_t rsp_code, vo
             break;
 
         case HFAG_COPS_READ:
-            sprintf((response + length), "%s\r\n", hfp_ag->ag_str_cops);
+            (void)snprintf((response + length), sizeof(response) - length, "%s\r\n", hfp_ag->ag_str_cops);
             break;
 
         case HFAG_CIND_READ:
-            sprintf((response + length), "%d,%d,%d,%d,%d,%d,%d\r\n", hfp_ag->bt_cind_setting.server,
+            (void)snprintf((response + length), sizeof(response) - length, "%d,%d,%d,%d,%d,%d,%d\r\n", hfp_ag->bt_cind_setting.server,
                     hfp_ag->bt_cind_setting.call_state,
                     hfp_ag->bt_cind_setting.call_setup_state,
                     hfp_ag->bt_cind_setting.call_held_state, hfp_ag->bt_cind_setting.signal,
@@ -1227,41 +1270,41 @@ static void bt_hfp_ag_send_at_rsp(struct bt_hfp_ag *hfp_ag, uint8_t rsp_code, vo
             break;
 
         case HFAG_BRSF:
-            sprintf((response + length), "%d\r\n", (int)hfp_ag->ag_features);
+            (void)snprintf((response + length), sizeof(response) - length, "%u\r\n", hfp_ag->ag_features);
             break;
 
         case HFAG_BCS:
             if (hfp_ag->bt_hfp_ag_config)
             {
-                sprintf((response + length), "%d\r\n", hfp_ag->bt_hfp_ag_config->bt_hfp_ag_codec);
+                (void)snprintf((response + length), sizeof(response) - length, "%d\r\n", hfp_ag->bt_hfp_ag_config->bt_hfp_ag_codec);
             }
             break;
 
         case HFAG_BINP:
             if (hfp_ag->bt_hfp_ag_config)
             {
-                sprintf((response + length), "%s\r\n", hfp_ag->bt_hfp_ag_config->bt_hfp_ag_phnum_tag);
+                (void)snprintf((response + length), sizeof(response) - length, "%s\r\n", hfp_ag->bt_hfp_ag_config->bt_hfp_ag_phnum_tag);
             }
             break;
 
         case HFAG_VGS:
             if (hfp_ag->bt_hfp_ag_config)
             {
-                sprintf((response + length), "%d\r\n", hfp_ag->bt_hfp_ag_config->bt_hfp_ag_vgs);
+                (void)snprintf((response + length), sizeof(response) - length, "%d\r\n", hfp_ag->bt_hfp_ag_config->bt_hfp_ag_vgs);
             }
             break;
 
         case HFAG_VGM:
             if (hfp_ag->bt_hfp_ag_config)
             {
-                sprintf((response + length), "%d\r\n", hfp_ag->bt_hfp_ag_config->bt_hfp_ag_vgm);
+                (void)snprintf((response + length), sizeof(response) - length, "%d\r\n", hfp_ag->bt_hfp_ag_config->bt_hfp_ag_vgm);
             }
             break;
 
         case HFAG_BSIR:
             if (hfp_ag->bt_hfp_ag_config)
             {
-                sprintf((response + length), "%d\r\n", hfp_ag->bt_hfp_ag_config->bt_hfp_ag_inband);
+                (void)snprintf((response + length), sizeof(response) - length, "%d\r\n", hfp_ag->bt_hfp_ag_config->bt_hfp_ag_inband);
             }
             break;
 
@@ -1270,10 +1313,10 @@ static void bt_hfp_ag_send_at_rsp(struct bt_hfp_ag *hfp_ag, uint8_t rsp_code, vo
 
         case HFAG_CLIP:
         case HFAG_CCWA:
-            sprintf((response + length), "\"%s\",129\r\n", (CHAR *)value);
+            (void)snprintf((response + length), sizeof(response) - length, "\"%s\",129\r\n", (CHAR *)value);
             break;
         case HFAG_CLCC:
-            sprintf((response + length), "%s\r\n", (CHAR *)value);
+            (void)snprintf((response + length), sizeof(response) - length, "%s\r\n", (CHAR *)value);
             break;
 
         case HFAG_BTRH:
@@ -1284,11 +1327,11 @@ static void bt_hfp_ag_send_at_rsp(struct bt_hfp_ag *hfp_ag, uint8_t rsp_code, vo
         case HFAG_ROAMING:
         case HFAG_CALLHELD:
         case HFAG_BATTERY:
-            sprintf((response + length), "%d\r\n", *((uint8_t *)value));
+            (void)snprintf((response + length), sizeof(response) - length, "%d\r\n", *((uint8_t *)value));
             break;
         case HFAG_BIND_READ:
-            sprintf((response + length), "%d,%d\r\n", (*(uint8_t *)value + 1),
-                    hfp_ag->bt_hfp_ag_bind[*(uint8_t *)value]);
+            (void)snprintf((response + length), sizeof(response) - length, "%d,%d\r\n", (*(uint8_t *)value + 1),
+                         hfp_ag->bt_hfp_ag_bind[*(uint8_t *)value]);
             break;
 
         default:
@@ -1483,7 +1526,7 @@ int bt_hfp_ag_send_enable_voice_recognition(struct bt_hfp_ag *hfp_ag)
 
     (void)bt_hfp_ag_send_rsp(hfp_ag, (uint8_t *)HFP_AG_ENABLE_VOICE_REG, (uint8_t)BT_str_len(HFP_AG_ENABLE_VOICE_REG));
 
-    bt_hfp_ag_open_audio(hfp_ag, hfp_ag->bt_hfp_ag_config ? hfp_ag->bt_hfp_ag_config->bt_hfp_ag_codec - 1 : 0);
+    bt_hfp_ag_open_audio(hfp_ag, ((hfp_ag->bt_hfp_ag_config != NULL) && (hfp_ag->bt_hfp_ag_config->bt_hfp_ag_codec > 0)) ? hfp_ag->bt_hfp_ag_config->bt_hfp_ag_codec - 1 : 0);
 
     return 0;
 }
@@ -1568,7 +1611,7 @@ void bt_hfp_ag_close_audio(struct bt_hfp_ag *hfp_ag)
 int bt_hfp_ag_register_supp_features(struct bt_hfp_ag *hfp_ag, uint32_t supported_features)
 {
     assert(hfp_ag);
-    if (~BT_HFP_AG_SUPPORTED_FEATURES & supported_features)
+    if ((supported_features & (~(uint32_t)BT_HFP_AG_SUPPORTED_FEATURES)) != 0U)
     {
         return -EINVAL;
     }
@@ -1660,14 +1703,20 @@ int bt_hfp_ag_set_volume_control(struct bt_hfp_ag *hfp_ag, hf_ag_volume_type_t t
     {
         return -EINVAL;
     }
+
+    if ((value < 0) || (value > UINT8_MAX))
+    {
+        return -EINVAL;
+    }
+
     if (type == hf_ag_volume_type_speaker)
     {
-        hfp_ag->bt_hfp_ag_config->bt_hfp_ag_vgs = value;
+        hfp_ag->bt_hfp_ag_config->bt_hfp_ag_vgs = (uint8_t)value;
         bt_hfp_ag_send_at_rsp(hfp_ag, HFAG_VGS, NULL);
     }
     else if (type == hf_ag_volume_type_mic)
     {
-        hfp_ag->bt_hfp_ag_config->bt_hfp_ag_vgm = value;
+        hfp_ag->bt_hfp_ag_config->bt_hfp_ag_vgm = (uint8_t)value;
         bt_hfp_ag_send_at_rsp(hfp_ag, HFAG_VGM, NULL);
     }
     return 0;
@@ -1679,7 +1728,12 @@ int bt_hfp_ag_set_inband_ring_tone(struct bt_hfp_ag *hfp_ag, int value)
     {
         return -EINVAL;
     }
-    hfp_ag->bt_hfp_ag_config->bt_hfp_ag_inband = value;
+
+    if ((value < 0) || (value > UINT8_MAX))
+    {
+        return -EINVAL;
+    }
+    hfp_ag->bt_hfp_ag_config->bt_hfp_ag_inband = (uint8_t)value;
     bt_hfp_ag_send_at_rsp(hfp_ag, HFAG_BSIR, NULL);
     return 0;
 }
@@ -1702,7 +1756,7 @@ void bt_hfp_ag_call_status_pl(struct bt_hfp_ag *hfp_ag, hfp_ag_call_status_t sta
             else
             {
                 bt_hfp_ag_open_audio(hfp_ag,
-                                     hfp_ag->bt_hfp_ag_config ? hfp_ag->bt_hfp_ag_config->bt_hfp_ag_codec - 1 : 0);
+                                     ((hfp_ag->bt_hfp_ag_config != NULL) && (hfp_ag->bt_hfp_ag_config->bt_hfp_ag_codec > 0)) ? hfp_ag->bt_hfp_ag_config->bt_hfp_ag_codec - 1 : 0);
             }
             break;
 
@@ -1719,7 +1773,7 @@ void bt_hfp_ag_call_status_pl(struct bt_hfp_ag *hfp_ag, hfp_ag_call_status_t sta
                     if ((!hfp_ag->bt_hfp_ag_config) || (hfp_ag->bt_hfp_ag_config->bt_hfp_ag_inband))
                     {
                         bt_hfp_ag_open_audio(hfp_ag,
-                                             hfp_ag->bt_hfp_ag_config ? hfp_ag->bt_hfp_ag_config->bt_hfp_ag_codec - 1 : 0);
+                                             ((hfp_ag->bt_hfp_ag_config != NULL) && (hfp_ag->bt_hfp_ag_config->bt_hfp_ag_codec > 0)) ? hfp_ag->bt_hfp_ag_config->bt_hfp_ag_codec - 1 : 0);
                     }
                 }
             }
@@ -1734,7 +1788,7 @@ void bt_hfp_ag_call_status_pl(struct bt_hfp_ag *hfp_ag, hfp_ag_call_status_t sta
             else
             {
                 bt_hfp_ag_open_audio(hfp_ag,
-                                     hfp_ag->bt_hfp_ag_config ? hfp_ag->bt_hfp_ag_config->bt_hfp_ag_codec - 1 : 0);
+                                     ((hfp_ag->bt_hfp_ag_config != NULL) && (hfp_ag->bt_hfp_ag_config->bt_hfp_ag_codec > 0)) ? hfp_ag->bt_hfp_ag_config->bt_hfp_ag_codec - 1 : 0);
             }
             break;
     }
@@ -1874,10 +1928,10 @@ int bt_hfp_ag_set_hf_indicator(struct bt_hfp_ag *hfp_ag, uint16_t hf_indicator, 
 
     BT_mem_set(at_data, 0, sizeof(at_data));
     BT_str_n_copy(at_data, rsp_table[HFAG_BIND_READ], (sizeof(at_data) - 1U));
-    length = (uint8_t)BT_str_len(rsp_table[HFAG_BIND_READ]);
+    length = (uint8_t)BT_str_len(at_data);
     hfp_ag->bt_hfp_ag_bind[hf_indicator - 1U] = enable;
-    sprintf((char*)(at_data + length), "%d,%d\r\n", hf_indicator,
-            hfp_ag->bt_hfp_ag_bind[hf_indicator - 1U]);
+    (void)snprintf((char *)(at_data + length), sizeof(at_data) - length, "%d,%d\r\n", hf_indicator,
+                         hfp_ag->bt_hfp_ag_bind[hf_indicator - 1U]);
     length = (uint8_t)BT_str_len(at_data);
 
     return bt_hfp_ag_send_rsp(hfp_ag, at_data, length);

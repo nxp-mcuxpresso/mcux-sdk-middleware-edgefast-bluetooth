@@ -385,7 +385,8 @@ static void a2dp_get_conn(struct bt_conn *conn, void *data)
 {
     uint8_t *addr = (uint8_t *)data;
 
-    if (memcmp(&conn->br.dst, addr, 6u) == 0u)
+    /* don't cast memcmp result; compare explicitly. */
+    if (memcmp(&conn->br.dst, addr, 6u) == 0)
     {
         get_conn = conn;
     }
@@ -824,11 +825,18 @@ static void a2dp_callback_auto_configure(struct bt_a2dp *a2dp)
                 peer_type = (uint16_t)(a2dp->peer_cp_ie[index].codec_ie[0]) | ((uint16_t)a2dp->peer_cp_ie[index].codec_ie[1] << 8U);
                 if (type == peer_type)
                 {
+                    if (self_endpoint->cp_config->len < 2U)
+                    {
+                        /* reject invalid cp_config length. */
+                        a2dp_auto_configure_callback_call(a2dp, ep_state, -EINVAL);
+                        return;
+                    }
+
                     AVDTP_SET_SEP_CP_CAPABILITY
                     (
                         (a2dp->sep_conf.cp_cap[0]),
                         type,
-                        self_endpoint->cp_config->codec_ie,
+                        &self_endpoint->cp_config->codec_ie[2],
                         self_endpoint->cp_config->len - 2
                     );
                     ep_state->cp_config = *((struct bt_a2dp_codec_ie_internal *)self_endpoint->cp_config);
@@ -1424,6 +1432,12 @@ static void edgefast_a2dp_src_write_task (struct bt_a2dp_endpoint_state *ep_stat
             sbc_encoder->a2dp_pcm_datalen : (uint16_t)remaining;
 
 #if 1
+        /* ensure we never copy more than pcm_to_send can hold. It should never happen */
+        if (bytes_to_send > sizeof(sbc_encoder->pcm_to_send))
+        {
+            bytes_to_send = (uint16_t)sizeof(sbc_encoder->pcm_to_send);
+        }
+
         if((rd_ptr + bytes_to_send) > sbc_encoder->a2dp_src_buffer_size)
         {
             bytes_to_copy = sbc_encoder->a2dp_src_buffer_size - rd_ptr;
@@ -1716,7 +1730,8 @@ static API_RESULT ethermind_a2dp_avdtp_notify_cb
         case AVDTP_SET_CONFIGURATION_CNF:
             for (uint8_t index = 0; index < CONFIG_BT_A2DP_MAX_CONN; ++index)
             {
-                if ((0U == memcmp(avdtp_handle->bd_addr, a2dp_instances[index].peer_addr, 6)) &&
+                /* don't cast memcmp result; compare explicitly. */
+                if ((memcmp(avdtp_handle->bd_addr, a2dp_instances[index].peer_addr, 6U) == 0) &&
                     (a2dp_instances[index].allocated == 1U))
                 {
                     a2dp = &a2dp_instances[index];
@@ -1897,19 +1912,21 @@ static API_RESULT ethermind_a2dp_avdtp_notify_cb
                             {
                                 if (sep_cap.cp_cap[cp_index].cp_type != AVDTP_INVALID_CP_TYPE)
                                 {
-                                    a2dp->peer_cp_ie[cp_index].len = sep_cap.cp_cap[cp_index].cp_ie_len + 2;
+                                    uint16_t ie_len = sep_cap.cp_cap[cp_index].cp_ie_len;
+
+                                    if (ie_len > (BT_A2DP_CODEC_IE_LENGTH_MAX - 2))
+                                    {
+                                        ie_len = BT_A2DP_CODEC_IE_LENGTH_MAX - 2;
+                                    }
+
+                                    a2dp->peer_cp_ie[cp_index].len = (uint8_t)((uint8_t)ie_len + 2);
                                     a2dp->peer_cp_ie_count++;
                                     a2dp->peer_cp_ie[cp_index].codec_ie[0] = (uint8_t)sep_cap.cp_cap[cp_index].cp_type;
                                     a2dp->peer_cp_ie[cp_index].codec_ie[1] = (uint8_t)(sep_cap.cp_cap[cp_index].cp_type >> 8U);
-                                    if (sep_cap.cp_cap[cp_index].cp_ie_len > 0)
+                                    if (ie_len > 0)
                                     {
-                                        uint8_t copy_len = sep_cap.cp_cap[cp_index].cp_ie_len;
-                                        if (copy_len > (BT_A2DP_CODEC_IE_LENGTH_MAX - 2))
-                                        {
-                                            copy_len = BT_A2DP_CODEC_IE_LENGTH_MAX - 2;
-                                        }
                                         memcpy(&a2dp->peer_cp_ie[cp_index].codec_ie[2], sep_cap.cp_cap[cp_index].cp_ie,
-                                            copy_len);
+                                            ie_len);
                                     }
                                 }
                             }
@@ -1980,18 +1997,20 @@ static API_RESULT ethermind_a2dp_avdtp_notify_cb
                 {
                     if (sep_cap.cp_cap[cp_index].cp_type != AVDTP_INVALID_CP_TYPE)
                     {
-                        peer_cp_cap[cp_index].len = sep_cap.cp_cap[cp_index].cp_ie_len + 2;
+                        uint16_t ie_len = sep_cap.cp_cap[cp_index].cp_ie_len;
+
+                        if (ie_len > (BT_A2DP_CODEC_IE_LENGTH_MAX - 2))
+                        {
+                            ie_len = BT_A2DP_CODEC_IE_LENGTH_MAX - 2;
+                        }
+
+                        peer_cp_cap[cp_index].len = (uint8_t)((uint8_t)ie_len + 2U);
                         peer_cp_cap[cp_index].codec_ie[0] = (uint8_t)sep_cap.cp_cap[cp_index].cp_type;
                         peer_cp_cap[cp_index].codec_ie[1] = (uint8_t)(sep_cap.cp_cap[cp_index].cp_type >> 8U);
-                        if (sep_cap.cp_cap[cp_index].cp_ie_len > 0)
+                        if (ie_len > 0)
                         {
-                            uint8_t copy_len = sep_cap.cp_cap[cp_index].cp_ie_len;
-                            if (copy_len > (BT_A2DP_CODEC_IE_LENGTH_MAX - 2))
-                            {
-                                copy_len = BT_A2DP_CODEC_IE_LENGTH_MAX - 2;
-                            }
                             memcpy(&peer_cp_cap[cp_index].codec_ie[2], sep_cap.cp_cap[cp_index].cp_ie,
-                                copy_len);
+                                ie_len);
                         }
                         peer_cp_count++;
                     }
@@ -2070,11 +2089,11 @@ static API_RESULT ethermind_a2dp_notify_cb
 
     LOG_DBG("a2dp cb:%x-%x\r\n", event_type, event_result);
     ep_state = bt_a2dp_get_ethermind_endpoint_state(codec_instance);
-    a2dp = ep_state->a2dp;
     if (ep_state == NULL)
     {
         return API_SUCCESS;
     }
+    a2dp = ep_state->a2dp;
 
     ep_state->codec_state = event_type;
 
@@ -2159,7 +2178,8 @@ static API_RESULT ethermind_a2dp_notify_cb
                 a2dp_dev_info = (A2DP_DEVICE_INFO *)event_data;
                 for (uint8_t index = 0; index < CONFIG_BT_A2DP_MAX_CONN; ++index)
                 {
-                    if ((0U == memcmp(a2dp_dev_info->bd_addr, a2dp_instances[index].peer_addr, 6)) &&
+                    /* don't cast memcmp result; compare explicitly. */
+                    if ((memcmp(a2dp_dev_info->bd_addr, a2dp_instances[index].peer_addr, 6U) == 0) &&
                         (a2dp_instances[index].allocated == 1U))
                     {
                         a2dp = &a2dp_instances[index];
@@ -2335,6 +2355,11 @@ static API_RESULT ethermind_a2dp_notify_cb
 #if ((defined(CONFIG_BT_A2DP_CP_SERVICE)) && (CONFIG_BT_A2DP_CP_SERVICE > 0U))
                     if (ep_state->cp_header_len > 0U) {
                         /* todo: the decrypt may be need in furture. */
+                        /* prevent unsigned wrap on offset += cp_header_len. */
+                        if (offset > (UINT8_MAX - ep_state->cp_header_len))
+                        {
+                            break;
+                        }
                         offset += ep_state->cp_header_len;
                     }
 #endif
@@ -2349,7 +2374,8 @@ static API_RESULT ethermind_a2dp_notify_cb
                                 seq_number,
                                 timestamp,
                                 (data + offset),
-                                (event_datalen - offset)
+                                /* ensure event_datalen >= offset before subtract. */
+                                (event_datalen >= offset) ? (event_datalen - offset) : 0U
                             );
                     if (API_SUCCESS != retval)
                     {
@@ -2472,7 +2498,8 @@ static API_RESULT ethermind_a2dp_notify_cb
                 a2dp_dev_info = (A2DP_DEVICE_INFO *)event_data;
                 for (uint8_t index = 0; index < CONFIG_BT_A2DP_MAX_CONN; ++index)
                 {
-                    if ((0U == memcmp(a2dp_dev_info->bd_addr, a2dp_instances[index].peer_addr, 6)) &&
+                    /* don't cast memcmp result; compare explicitly. */
+                    if ((memcmp(a2dp_dev_info->bd_addr, a2dp_instances[index].peer_addr, 6U) == 0) &&
                         (a2dp_instances[index].allocated == 1U))
                     {
                         a2dp = &a2dp_instances[index];
@@ -2508,17 +2535,19 @@ static API_RESULT ethermind_a2dp_notify_cb
 #if ((defined(CONFIG_BT_A2DP_CP_SERVICE)) && (CONFIG_BT_A2DP_CP_SERVICE > 0U))
             if (a2dp_dev_info->cp_conf.cp_type != AVDTP_INVALID_CP_TYPE)
             {
-                ep_state->cp_config.len = a2dp_dev_info->cp_conf.cp_ie_len + 2;
+                uint16_t ie_len = a2dp_dev_info->cp_conf.cp_ie_len;
+
+                if (ie_len > (BT_A2DP_CODEC_IE_LENGTH_MAX - 2))
+                {
+                    ie_len = BT_A2DP_CODEC_IE_LENGTH_MAX - 2;
+                }
+
+                ep_state->cp_config.len = (uint8_t)((uint8_t)ie_len + 2U);
                 ep_state->cp_config.codec_ie[0] = (uint8_t)a2dp_dev_info->cp_conf.cp_type;
                 ep_state->cp_config.codec_ie[1] = (uint8_t)(a2dp_dev_info->cp_conf.cp_type >> 8U);
-                if (a2dp_dev_info->cp_conf.cp_ie_len > 0)
+                if (ie_len > 0)
                 {
-                    uint8_t copy_len = a2dp_dev_info->cp_conf.cp_ie_len;
-                    if (copy_len > (BT_A2DP_CODEC_IE_LENGTH_MAX - 2))
-                    {
-                        copy_len = BT_A2DP_CODEC_IE_LENGTH_MAX - 2;
-                    }
-                    memcpy(&ep_state->cp_config.codec_ie[2], a2dp_dev_info->cp_conf.cp_ie, copy_len);
+                    memcpy(&ep_state->cp_config.codec_ie[2], a2dp_dev_info->cp_conf.cp_ie, ie_len);
                 }
             }
             else
@@ -2687,15 +2716,29 @@ int bt_a2dp_register_endpoint(struct bt_a2dp_endpoint *endpoint, uint8_t media_t
     if ((endpoint->cp_ie_count != 0) && (endpoint->cp_ie != NULL))
     {
         uint16_t type;
+        uint16_t cp_ie_len;
+
+        if (endpoint->cp_ie_count > (sizeof(sep_cap.cp_cap) / sizeof(sep_cap.cp_cap[0])))
+        {
+            return -EINVAL;
+        }
+
         for (index = 0; index < endpoint->cp_ie_count; ++index)
         {
+            /* reject invalid cp_ie length before subtracting. */
+            if (endpoint->cp_ie[index].len < 2U)
+            {
+                return -EINVAL;
+            }
+
             type = (uint16_t)(endpoint->cp_ie[index].codec_ie[0]) | ((uint16_t)endpoint->cp_ie[index].codec_ie[1] << 8U);
+            cp_ie_len = (uint16_t)(endpoint->cp_ie[index].len - 2U);
             AVDTP_SET_SEP_CP_CAPABILITY
             (
-                (sep_cap.cp_cap[0]),
+                (sep_cap.cp_cap[index]),
                 type,
-                endpoint->cp_ie[0].codec_ie,
-                endpoint->cp_ie[0].len - 2
+                &endpoint->cp_ie[index].codec_ie[2],
+                cp_ie_len
             );
         }
     }
@@ -2841,19 +2884,24 @@ struct bt_a2dp *bt_a2dp_connect(struct bt_conn *conn)
     );
 
     (void)memset(&info, 0, sizeof(info));
-    bt_conn_get_info(conn, &info);
-    if (info.type == BT_CONN_TYPE_LE)
+    if (bt_conn_get_info(conn, &info) != 0)
     {
         a2dp_FreeInstance(a2dp);
         return NULL;
     }
+    if ((info.type == BT_CONN_TYPE_LE) || (info.br.dst == NULL))
+    {
+        a2dp_FreeInstance(a2dp);
+        return NULL;
+    }
+
     /* Set AVDTP Remote BD_ADDR */
     AVDTP_SET_HANDLE_BD_ADDR
     (
         a2dp->ethermind_avdtp_handle,
-        (uint8_t*)info.br.dst
+        (uint8_t *)info.br.dst->val
     );
-    memcpy(a2dp->peer_addr, info.br.dst, BT_BD_ADDR_SIZE);
+        memcpy(a2dp->peer_addr, info.br.dst->val, BT_BD_ADDR_SIZE);
     /* AVDTP Connect */
     retval = BT_avdtp_connect_req
             (
@@ -3090,6 +3138,11 @@ static void a2dp_src_enqueue
         else
         {
             memcpy(&sbc_encoder->a2dp_src_buffer[sbc_encoder->a2dp_src_buffer_wr_ptr], data, datalen);
+            /* prevent unsigned wrap on wr_ptr += datalen. */
+            if (datalen > (UINT32_MAX - sbc_encoder->a2dp_src_buffer_wr_ptr))
+            {
+                return;
+            }
             sbc_encoder->a2dp_src_buffer_wr_ptr = (sbc_encoder->a2dp_src_buffer_wr_ptr + datalen) % sbc_encoder->a2dp_src_buffer_size;
         }
 #else
@@ -3132,13 +3185,26 @@ int bt_a2dp_src_write_direct(struct bt_a2dp_endpoint_state *ep_state, uint8_t *d
 #if ((defined(CONFIG_BT_A2DP_CP_SERVICE)) && (CONFIG_BT_A2DP_CP_SERVICE > 0U))
     if (ep_state->cp_header_len > 0U) {
         /* todo: the decrypt may be need in furture. */
+        /* prevent unsigned wrap on offset += cp_header_len. */
+        if (offset > (UINT8_MAX - ep_state->cp_header_len))
+        {
+            return -EINVAL;
+        }
         offset += ep_state->cp_header_len;
     }
 #endif
     /* Write to A2DP */
 #ifndef A2DP_SUPPORT_MULTIPLE_MEDIA_FRAME_WRITE
     uint8_t frame_count = BT_A2DP_SBC_MEDIA_HDR_NUM_FRAMES_GET(data[offset]);
-    uint16_t frame_len = (datalen - offset - 1) / frame_count;
+    uint16_t frame_len;
+
+    /* validate before narrowing to uint16_t (and avoid div-by-zero). */
+    if ((frame_count == 0U) || (datalen <= (uint16_t)(offset + 1U)))
+    {
+        return -EINVAL;
+    }
+
+    frame_len = (datalen - offset - 1U) / frame_count;
 
     data = &data[offset + 1];
     for (uint8_t count = 0; count < frame_count; count++)
@@ -3372,13 +3438,21 @@ int bt_a2dp_configure_endpoint(struct bt_a2dp *a2dp, struct bt_a2dp_endpoint *en
 #if ((defined(CONFIG_BT_A2DP_CP_SERVICE)) && (CONFIG_BT_A2DP_CP_SERVICE > 0U))
     if (config->cp_config != NULL)
     {
-        uint8_t type = (uint16_t)(config->cp_config->codec_ie[0]) | ((uint16_t)config->cp_config->codec_ie[1] << 8U);
+        uint16_t type;
+
+        if (config->cp_config->len < 2U)
+        {
+            /* reject invalid cp_config length. */
+            return -EINVAL;
+        }
+
+        type = (uint16_t)config->cp_config->codec_ie[0] | ((uint16_t)config->cp_config->codec_ie[1] << 8U);
         AVDTP_SET_SEP_CP_CAPABILITY
         (
             (a2dp->sep_conf.cp_cap[0]),
             type,
-            config->cp_config->codec_ie,
-            config->cp_config->len - 2
+            &config->cp_config->codec_ie[2],
+            config->cp_config->len - 2U
         );
         ep_state->cp_config = *((struct bt_a2dp_codec_ie_internal *)config->cp_config);
     }
@@ -3481,13 +3555,21 @@ int bt_a2dp_reconfigure(struct bt_a2dp_endpoint *endpoint,
 #if ((defined(CONFIG_BT_A2DP_CP_SERVICE)) && (CONFIG_BT_A2DP_CP_SERVICE > 0U))
     if (config->cp_config != NULL)
     {
-        uint8_t type = (uint16_t)(config->cp_config->codec_ie[0]) | ((uint16_t)config->cp_config->codec_ie[1] << 8U);
+        uint16_t type;
+
+        if (config->cp_config->len < 2U)
+        {
+            /* reject invalid cp_config length. */
+            return -EINVAL;
+        }
+
+        type = (uint16_t)config->cp_config->codec_ie[0] | ((uint16_t)config->cp_config->codec_ie[1] << 8U);
         AVDTP_SET_SEP_CP_CAPABILITY
         (
             (ep_state->a2dp->sep_conf.cp_cap[0]),
             type,
-            config->cp_config->codec_ie,
-            config->cp_config->len - 2
+            &config->cp_config->codec_ie[2],
+            config->cp_config->len - 2U
         );
         ep_state->cp_config = *((struct bt_a2dp_codec_ie_internal *)config->cp_config);
     }
@@ -3558,6 +3640,13 @@ int bt_a2dp_set_cp_header(struct bt_a2dp_endpoint *endpoint, uint8_t *header, ui
     {
         return -EINVAL;
     }
+
+    /* validate before narrowing header_len (uint16_t) to cp_header_len (uint8_t). */
+    if (header_len > UINT8_MAX)
+    {
+        return -EINVAL;
+    }
+
     retval = BT_a2dp_set_cp_header(ep_state->ethermind_a2dp_codec_index,
                                    header,
                                    header_len);
@@ -3566,7 +3655,7 @@ int bt_a2dp_set_cp_header(struct bt_a2dp_endpoint *endpoint, uint8_t *header, ui
         return -EINVAL;
     }
 
-    ep_state->cp_header_len = header_len;
+    ep_state->cp_header_len = (uint8_t)header_len;
     return 0;
 }
 #endif

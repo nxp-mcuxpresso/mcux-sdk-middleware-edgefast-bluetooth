@@ -2843,12 +2843,22 @@ static int cmd_ct_test_case(const struct shell *sh, size_t argc, char *argv[])
 {
     if (argc == 2)
     {
-        test_step = strtoul(argv[1], NULL, 10);
+        int err = 0;
+        unsigned long tmp;
+
+        tmp = shell_strtoul(argv[1], 10, &err);
+        if ((err != 0) || (tmp > UINT8_MAX))
+        {
+            shell_print(sh, "wrong parameter");
+            return -EINVAL;
+        }
+
+        test_step = (uint8_t)tmp;
     }
     else
     {
         shell_print(sh, "wrong parameter");
-        return 0;
+        return -EINVAL;
     }
 
     test_enable = 1;
@@ -3052,7 +3062,14 @@ void avrcp_cover_art_cmd_received(uint8_t handle, struct bt_avrcp_cover_art_cmd 
 
             rsp.get_prop.data = &img_properties[sent];
             sent += rsp.get_prop.length;
-            remaining -= rsp.get_prop.length;
+            if (remaining >= rsp.get_prop.length)
+            {
+                remaining -= rsp.get_prop.length;
+            }
+            else
+            {
+                remaining = 0U;
+            }
             if (remaining == 0)
             {
                 image_prop_obj_size = 0;
@@ -3100,7 +3117,14 @@ void avrcp_cover_art_cmd_received(uint8_t handle, struct bt_avrcp_cover_art_cmd 
 
             rsp.get_image.data = &image_data[0];
             sent += rsp.get_image.length;
-            remaining -= rsp.get_image.length;
+            if (remaining >= rsp.get_image.length)
+            {
+                remaining -= rsp.get_image.length;
+            }
+            else
+            {
+                remaining = 0U;
+            }
             if (remaining == 0)
             {
                 sent = 0;
@@ -3143,7 +3167,14 @@ void avrcp_cover_art_cmd_received(uint8_t handle, struct bt_avrcp_cover_art_cmd 
 
             rsp.get_thumb.data = &image_data[0];
             sent += rsp.get_thumb.length;
-            remaining -= rsp.get_thumb.length;
+            if (remaining >= rsp.get_thumb.length)
+            {
+                remaining -= rsp.get_thumb.length;
+            }
+            else
+            {
+                remaining = 0U;
+            }
             if (remaining == 0)
             {
                 sent = 0;
@@ -3239,7 +3270,14 @@ void avrcp_cover_art_rsp_received(uint8_t handle, struct bt_avrcp_cover_art_rsp 
 
     if (next == 1)
     {
-        cover_test_step++;
+        if (cover_test_step < UINT8_MAX)
+        {
+            cover_test_step++;
+        }
+        else
+        {
+            cover_test_step = 0U;
+        }
         cover_art_auto_test(0);
     }
     else if (send_request == 1)
@@ -3367,10 +3405,20 @@ static int cmd_ct_reg_ntf(const struct shell *sh, size_t argc, char *argv[])
     struct bt_avrcp_register_ntfy reg;
 
     if (argc == 2) {
-        event = strtoul(argv[1], NULL, 16);
+        int err = 0;
+        unsigned long tmp;
+
+        tmp = shell_strtoul(argv[1], 16, &err);
+        if ((err != 0) || (tmp > UINT8_MAX))
+        {
+            shell_print(sh, "wrong parameter");
+            return -EINVAL;
+        }
+
+        event = (uint8_t)tmp;
     } else {
         shell_print(sh, "wrong parameter");
-        return 0;
+        return -EINVAL;
     }
 
     if (event > 0x0du) {
@@ -3401,10 +3449,20 @@ static int cmd_tg_notify(const struct shell *sh, size_t argc, char *argv[])
     uint16_t rsp_len;
 
     if (argc == 2) {
-        event = strtoul(argv[1], NULL, 16);
+        int err = 0;
+        unsigned long tmp;
+
+        tmp = shell_strtoul(argv[1], 16, &err);
+        if ((err != 0) || (tmp == 0U) || (tmp > 13U)) /* registered_events size is 13 */
+        {
+            shell_print(sh, "wrong parameter");
+            return -EINVAL;
+        }
+
+        event = (uint8_t)tmp;
     } else {
         shell_print(sh, "wrong parameter");
-        return 0;
+        return -EINVAL;
     }
 
     if (event > 0x0du) {
@@ -3412,7 +3470,7 @@ static int cmd_tg_notify(const struct shell *sh, size_t argc, char *argv[])
         return 0;
     }
 
-    if (registered_events[event - 1][0] == 0u){
+    if (registered_events[event - 1U][0] == 0u){
         shell_print(sh, "the event is not registered by CT");
         return 0;
     }
