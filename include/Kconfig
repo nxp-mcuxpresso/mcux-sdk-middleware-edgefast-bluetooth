@@ -186,6 +186,16 @@ config BT_SMP
     help
       This symbol is a config macro.
 
+config BT_SMP_KEYS_UPDATE_ON_REPAIR
+    bool "BT_SMP_KEYS_UPDATE_ON_REPAIR"
+    default n
+    depends on BT_SMP
+    help
+      Support for overwriting the encryption keys info after a remote device re-initiates SMP procedure due to
+      lost bond information. The default behavior is to disable the keys overwrite. if the macro is set to 0,
+      feature is disabled, if 1, feature is enabled.
+      This symbol is a config macro.
+
 if BT_EXT_ADV
 
 config BT_EXT_ADV_LEGACY_SUPPORT

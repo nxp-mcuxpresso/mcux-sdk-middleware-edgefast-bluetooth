@@ -8647,6 +8647,39 @@ static void hci_acl_smp_handler(struct net_buf *buf)
                             {
                                 BT_COPY_BD_ADDR(bt_smp_bd_addr.addr, &p_key_info.id_addr_info[1]);
                                 bt_smp_bd_addr.type = p_key_info.id_addr_info[0];
+#if (defined(CONFIG_BT_SMP_KEYS_UPDATE_ON_REPAIR) && ((CONFIG_BT_SMP_KEYS_UPDATE_ON_REPAIR) > 0U))
+                                SMP_BD_HANDLE bt_smp_old_handle;
+                                /* This condition handles cases where the already paired remote device re-initiates a
+                                 * new SMP procedure due to lost bond information. During this process, a new IRK is
+                                 * generated, which must also be updated in the stack's records. Doing so prevents
+                                 * inconsistencies between the stack and the application and ensures that the latest
+                                 * encryption information is always used after a successful encryption procedure with the
+                                 * remote device.
+                                 */
+
+                                retval = BT_smp_search_identity_addr(&bt_smp_bd_addr, DQ_LE_LINK, &bt_smp_old_handle);
+
+                                if (API_SUCCESS == retval)
+                                {
+                                    if (handle != bt_smp_old_handle)
+                                    {
+                                        LOG_DBG("Device %02X:%02X:%02X:%02X:%02X:%02X already bonded. Updating encryption info",
+                                            bt_smp_bd_addr[0], bt_smp_bd_addr[1], bt_smp_bd_addr[2], bt_smp_bd_addr[3],
+                                            bt_smp_bd_addr[4], bt_smp_bd_addr[5]);
+                                            
+                                        retval = BT_smp_update_security_info(&bt_smp_old_handle, auth, 16U, local_keys, p_keys, &p_key_info);
+                                        if (API_SUCCESS != retval)
+                                        {
+                                            LOG_WRN("Failed to update security info: 0x%04X", retval);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        LOG_DBG("Handle unchanged, no update needed");
+                                    }
+                                }
+#endif /* CONFIG_BT_SMP_KEYS_UPDATE_ON_REPAIR */
+
                             }
 
                             /* Check if the device already has BR LK which is stronger than the CTKD LK */
