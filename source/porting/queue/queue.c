@@ -46,7 +46,7 @@ static void bt_fifo_sem_wait(QueueHandle_t sem, uint32_t millisec)
 {
 	uint32_t timeoutTicks;
 
-	if (millisec == K_FOREVER)
+	if (millisec == (uint32_t)K_FOREVER)
 	{
 		timeoutTicks = portMAX_DELAY;
 	}
@@ -172,6 +172,7 @@ void *bt_fifo_get(bt_fifo_t *fifo, size_t timeout)
 	bt_list_node_t *head = NULL;
 	uint32_t start;
 	uint32_t current;
+	uint32_t tmp;
 
 	bt_fifo_init(fifo);
 
@@ -182,15 +183,14 @@ void *bt_fifo_get(bt_fifo_t *fifo, size_t timeout)
 	else
 	{
 		start = k_uptime_get_32();
-		current = start;
-		while (((current - start) <= timeout) && (NULL == head))
+		while (NULL == head)
 		{
 			head = bt_list_get(&fifo->list);
 			if (NULL == head)
 			{
-				if ((current - start) < timeout)
+				if (timeout > 0)
 				{
-					bt_fifo_sem_wait(fifo->sem, timeout - (current - start));
+					bt_fifo_sem_wait(fifo->sem, timeout);
 				}
 				else
 				{
@@ -200,8 +200,23 @@ void *bt_fifo_get(bt_fifo_t *fifo, size_t timeout)
 			else
 			{
 				LOG_INF("node %p, fifo %p", head, fifo);
+				break;
 			}
+
 			current = k_uptime_get_32();
+			if (current < start) {
+				tmp = UINT32_MAX - start + current + 1U;
+			} else {
+				tmp = current - start;
+			}
+
+			start = current;
+
+			if (tmp <= timeout) {
+				timeout -= tmp;
+			} else {
+				timeout = 0;
+			}
 		}
 	}
 
