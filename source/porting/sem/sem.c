@@ -29,9 +29,9 @@
 int k_sem_init(struct k_sem *sem, unsigned int initial_count,
 			  unsigned int limit)
 {
-	__ASSERT((sem != NULL) || (limit > initial_count) || (limit > 0U), "Invalid parameter!");
+	__ASSERT((sem != NULL) && (limit >= initial_count) && (limit > 0U), "Invalid parameter!");
 
-	if (!((sem != NULL) || (limit > initial_count) || (limit > 0U)))
+	if ((sem == NULL) || (limit < initial_count) || (limit == 0U))
 	{
 		SYS_PORT_TRACING_OBJ_FUNC(k_sem, init, sem, -EINVAL);
 		return -EINVAL;
@@ -241,14 +241,14 @@ unsigned int k_sem_count_get(struct k_sem *sem)
 
 	if (NULL == sem)
 	{
-		return err;
+		return 0;
 	}
 
 	if (sem->sem != (QueueHandle_t)&sem->sem_buffer)
 	{
 		if (sem->limit == 0)
 		{
-			return (unsigned int)-EINVAL;
+			return (unsigned int)0;
 		}
 
 		err = k_sem_init(sem, sem->count, sem->limit);
