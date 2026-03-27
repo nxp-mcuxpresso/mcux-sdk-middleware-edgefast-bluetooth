@@ -39,6 +39,10 @@ k_thread_stack_t *k_thread_stack_alloc(size_t size, int flags)
 {
     struct k_thread_alloc_mem *mem = NULL;
 
+    if (size > (SIZE_MAX - sizeof(*mem))) {
+        return NULL;
+    }
+
     if (size > 0)
     {
         mem = (struct k_thread_alloc_mem *)pvPortMalloc(size + sizeof(*mem));
@@ -46,6 +50,10 @@ k_thread_stack_t *k_thread_stack_alloc(size_t size, int flags)
         {
             memcpy(&mem->header[0], &k_thread_alloc_mem_tag[0], sizeof(mem->header));
         }
+    }
+
+    if (NULL == mem) {
+        return NULL;
     }
 
     return (k_thread_stack_t *)&mem->buffer[0];
@@ -146,6 +154,10 @@ k_tid_t k_thread_create(struct k_thread *new_thread,
     char buffer[configMAX_TASK_NAME_LEN + 1] = "INVALID";
     size_t ret;
 
+    if (prio < 0) {
+        prio = prio * -1;
+    }
+
     ret = bin2hex((const uint8_t *)&add, sizeof(add), buffer, sizeof(buffer) - 1);
     assert(ret > 0);
     (void)ret;
@@ -160,13 +172,13 @@ k_tid_t k_thread_create(struct k_thread *new_thread,
     new_thread->options = options;
 
     vTaskSuspendAll();
-    new_thread->handle = xTaskCreateStatic(_k_thread_function_wrap, buffer, stack_size/sizeof(StackType_t), new_thread, prio, (StackType_t *)stack, &new_thread->task_buffer);
+    new_thread->handle = xTaskCreateStatic(_k_thread_function_wrap, buffer, stack_size/sizeof(StackType_t), new_thread, (UBaseType_t)prio, (StackType_t *)stack, &new_thread->task_buffer);
 
     if (NULL != new_thread->handle)
     {
         sys_slist_append(&threads, &new_thread->node);
 
-        if (K_TIMEOUT_EQ(delay, K_FOREVER))
+        if (K_TIMEOUT_EQ(delay, (k_timeout_t)K_FOREVER))
         {
             vTaskSuspend(new_thread->handle);
         }
@@ -292,6 +304,7 @@ int k_thread_join(struct k_thread *thread, k_timeout_t timeout)
     eTaskState state;
     int ret;
     uint32_t current;
+    uint32_t tmp;
     uint32_t start = k_uptime_get_32();
 
     do
@@ -324,14 +337,30 @@ int k_thread_join(struct k_thread *thread, k_timeout_t timeout)
             ret = 0;
             break;
         }
+
         if (k_is_in_isr())
         {
             ret = -EBUSY;
             break;
         }
+
         vTaskDelay(timeout);
+
         current = k_uptime_get_32();
-        if ((current - start) > timeout)
+        if (current > start) {
+            tmp = current - start;
+        } else {
+            tmp = (UINT32_MAX - start) + current + 1U;
+        }
+        start = current;
+
+        if (timeout > tmp) {
+            timeout = timeout - tmp;
+        } else {
+            timeout = 0;
+        }
+
+        if (timeout == 0)
         {
             ret = -EAGAIN;
             break;
@@ -356,18 +385,25 @@ int k_thread_join(struct k_thread *thread, k_timeout_t timeout)
  */
 int32_t k_sleep(k_timeout_t timeout)
 {
-    uint32_t current;
+    uint32_t tmp;
     uint32_t start = k_uptime_get_32();
 
     vTaskDelay(timeout);
-    current = k_uptime_get_32();
-    if ((current - start) > timeout)
+    tmp = k_uptime_get_32();
+
+    if (tmp >= start) {
+        tmp = tmp - start;
+    } else {
+        tmp = UINT32_MAX + tmp - start + 1;
+    }
+
+    if (tmp >= timeout)
     {
         return 0;
     }
     else
     {
-        return (int32_t)(timeout - (current - start));
+        return (int32_t)(timeout - tmp);
     }
 }
 
@@ -388,7 +424,19 @@ int32_t k_sleep(k_timeout_t timeout)
  */
 int32_t k_usleep(int32_t us)
 {
-    return k_sleep((us+1000)/1000);
+    k_timeout_t ms;
+
+    if (us <= 0) {
+        return 0;
+    }
+
+    ms = (k_timeout_t)(us / 1000);
+
+    if (us % 1000) {
+        ms = ms + 1;
+    }
+
+    return k_sleep(ms);
 }
 
 /**
@@ -409,7 +457,15 @@ int32_t k_usleep(int32_t us)
  */
 void k_busy_wait(uint32_t usec_to_wait)
 {
-    (void)k_usleep(usec_to_wait);
+    uint32_t us;
+
+    while (usec_to_wait > 0) {
+        us = (uint32_t)INT32_MAX;
+        us = MIN(us, usec_to_wait);
+        usec_to_wait -= us;
+
+        (void)k_usleep((int32_t)us);
+    }
 }
 
 /**
@@ -603,7 +659,7 @@ k_ticks_t k_thread_timeout_remaining_ticks(const struct k_thread *t)
  */
 int k_thread_priority_get(k_tid_t thread)
 {
-    BaseType_t priority;
+    UBaseType_t priority;
 
     if (k_is_in_isr())
     {
@@ -643,7 +699,11 @@ int k_thread_priority_get(k_tid_t thread)
  */
 void k_thread_priority_set(k_tid_t thread, int prio)
 {
-    vTaskPrioritySet((NULL == thread) ? NULL : thread->handle, prio);
+    if (prio < 0) {
+        prio = prio * -1;
+    }
+
+    vTaskPrioritySet((NULL == thread) ? NULL : thread->handle, (UBaseType_t)prio);
 }
 
 #ifdef CONFIG_SCHED_DEADLINE
@@ -1065,7 +1125,7 @@ void *k_thread_custom_data_get(void)
  */
 int k_thread_name_set(k_tid_t thread, const char *str)
 {
-    int len;
+    size_t len;
 
     if (NULL == thread)
     {
@@ -1081,7 +1141,7 @@ int k_thread_name_set(k_tid_t thread, const char *str)
     memcpy(&thread->task_name[0], str, len);
     thread->task_name[len] = '\0';
 
-    len = MIN(strlen(str), configMAX_TASK_NAME_LEN - 1);
+    len = MIN(strlen(str), sizeof(thread->task_buffer.ucDummy7) - 1);
     memcpy(thread->task_buffer.ucDummy7, str, len);
     thread->task_buffer.ucDummy7[len] = '\0';
 
@@ -1122,10 +1182,9 @@ const char *k_thread_name_get(k_tid_t thread)
  * @retval -ENOSYS Thread name feature not enabled
  * @retval 0 Success
  */
-int k_thread_name_copy(k_tid_t thread, char *buf,
-				 size_t size)
+int k_thread_name_copy(k_tid_t thread, char *buf, size_t size)
 {
-    int len;
+    size_t len;
 
     if (NULL == buf)
     {
@@ -1140,6 +1199,10 @@ int k_thread_name_copy(k_tid_t thread, char *buf,
     if (NULL == thread)
     {
         return -EFAULT;
+    }
+
+    if (size <= 1) {
+        return -EINVAL;
     }
 
     len = MIN(size - 1, sizeof(thread->task_name) - 1);
@@ -1173,7 +1236,7 @@ const char *k_thread_state_str(k_tid_t thread_id, char *buf, size_t buf_size)
         "invalid",
     };
 
-    int len;
+    size_t len;
     eTaskState state;
 
     if (NULL == buf)
@@ -1188,6 +1251,10 @@ const char *k_thread_state_str(k_tid_t thread_id, char *buf, size_t buf_size)
 
     if (NULL == thread_id)
     {
+        return "";
+    }
+
+    if (buf_size <= 1) {
         return "";
     }
 
