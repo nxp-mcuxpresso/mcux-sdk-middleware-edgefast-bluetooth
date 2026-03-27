@@ -8,8 +8,6 @@
 #ifndef __EDGEFAST_BT_BLE_SPINLOCK_H__
 #define __EDGEFAST_BT_BLE_SPINLOCK_H__
 
-#include <system_c.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -21,7 +19,7 @@ struct k_spinlock
 
 struct k_spinlock_key
 {
-    int key;
+    uint32_t key;
 };
 
 typedef struct k_spinlock_key k_spinlock_key_t;
