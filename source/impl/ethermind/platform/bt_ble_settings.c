@@ -6,7 +6,7 @@
  */
 
 #if ((defined(CONFIG_BT_SETTINGS)) && (CONFIG_BT_SETTINGS))
-#include "fsl_common.h"
+#include <porting.h>
 
 #include "lfs.h"
 #include "littlefs_pl.h"

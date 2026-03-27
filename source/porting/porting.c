@@ -142,12 +142,13 @@ uint8_t u8_to_dec(char *buf, uint8_t buflen, uint8_t value)
 	uint8_t divisor = 100;
 	uint8_t num_digits = 0;
 	uint8_t digit;
-    uint8_t temp;
+	uint8_t temp;
 
 	while (buflen > (uint8_t)0 && divisor > (uint8_t)0) {
-		digit = value / divisor;
+		/* Explicitly cast to uint8_t after ensuring the result is valid */
+		digit = (uint8_t)(value / divisor);
 		if (digit != (uint8_t)0 || divisor == (uint8_t)1 || num_digits != (uint8_t)0) {
-            temp =(digit + (uint8_t)'0');
+			temp =(digit + (uint8_t)'0');
 			*buf = (char)temp;
 			buf++;
 			buflen--;
@@ -199,6 +200,16 @@ int hex2char(uint8_t x, char *c)
 
 size_t bin2hex(const uint8_t *buf, size_t buflen, char *hex, size_t hexlen)
 {
+	/* Check for potential overflow in buflen * 2 */
+	if (buflen > (SIZE_MAX / ((size_t)2))) {
+		return 0;
+	}
+
+	/* Check for potential overflow in hexlen */
+	if (hexlen >= SIZE_MAX) {
+		return 0;
+	}
+
 	if ((hexlen + (size_t)1) < buflen * ((size_t)2)) {
 		return 0;
 	}

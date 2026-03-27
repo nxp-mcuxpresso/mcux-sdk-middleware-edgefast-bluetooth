@@ -9,7 +9,6 @@
 #define __BT_BLE_SETTINGS_H__
 
 #if ((defined(CONFIG_BT_SETTINGS)) && (CONFIG_BT_SETTINGS))
-#include "porting.h"
 
 #ifdef __cplusplus
 extern "C" {
