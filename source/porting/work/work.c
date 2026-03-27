@@ -108,7 +108,7 @@ static inline bool flag_test(const uint32_t *flagp,
 }
 
 static inline bool flag_test_and_clear(uint32_t *flagp,
-				       int bit)
+				       uint32_t bit)
 {
 	bool ret = flag_test(flagp, bit);
 
@@ -319,9 +319,9 @@ static void work_queue_main(void * p1, void *p2, void *p3)
 		bool yield;
 
 		/* Check for and prepare any new work. */
-		node = k_queue_get(&queue->pending, K_FOREVER);
+		node = k_queue_get(&queue->pending, (k_timeout_t)K_FOREVER);
 
-        	key = k_spin_lock(&lock);
+		key = k_spin_lock(&lock);
 		if (node != NULL) {
 			/* Mark that there's some work active that's
 			 * not on the pending list.
@@ -623,7 +623,7 @@ int k_work_schedule_for_queue(struct k_work_q *queue,
 	k_spinlock_key_t key = k_spin_lock(&lock);
 
 	/* Schedule the work item if it's idle or running. */
-	if (((flags_get(&work->flags) & K_WORK_MASK) & ~K_WORK_RUNNING) == 0U) {
+	if (((flags_get(&work->flags) & K_WORK_MASK) & (uint32_t)(~K_WORK_RUNNING)) == 0U) {
 		if (K_TIMEOUT_EQ(delay, K_NO_WAIT))
 		{
 			ret = k_work_submit_to_queue(queue, work);
@@ -772,7 +772,11 @@ k_ticks_t k_work_delayable_timeout_expires(const struct k_work_delayable *dwork)
 	k_spinlock_key_t key = k_spin_lock(&lock);
 
 	if (flag_test(&dwork->work.flags, K_WORK_DELAYED_BIT)) {
-		tick = k_sys_work_delay_q.tick + dwork->timeout.count;
+		if (k_sys_work_delay_q.tick >= (UINT32_MAX - dwork->timeout.count)) {
+			tick = UINT32_MAX;
+		} else {
+			tick = k_sys_work_delay_q.tick + dwork->timeout.count;
+		}
 	}
 
 	k_spin_unlock(&lock, key);
