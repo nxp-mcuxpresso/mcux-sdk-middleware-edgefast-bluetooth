@@ -113,6 +113,7 @@ int k_mem_slab_alloc(struct k_mem_slab *slab, void **mem,
 	k_spinlock_key_t key;
 	uint32_t start = k_uptime_get_32();
 	uint32_t current;
+	uint32_t tmp;
 
 	__ASSERT(!((slab == NULL) || (mem == NULL)), "Invalid memory pointer provided");
 
@@ -164,8 +165,21 @@ int k_mem_slab_alloc(struct k_mem_slab *slab, void **mem,
 				(void)k_sem_take(&slab->sem, timeout);
 				key = k_spin_lock(&slab->lock);
 				current = k_uptime_get_32();
-				if ((current - start) >= timeout)
-				{
+				if (current < start) {
+					tmp = UINT32_MAX - start + current + 1U;
+				} else {
+					tmp = current - start;
+				}
+
+				start = current;
+
+				if (tmp <= timeout) {
+					timeout = timeout - tmp;
+				} else {
+					timeout = 0;
+				}
+
+				if (timeout == 0) {
 					*mem = NULL;
 					ret = -ENOMEM;
 					break;
