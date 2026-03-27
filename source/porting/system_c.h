@@ -240,7 +240,25 @@ static inline uint32_t k_cycle_get_32(void)
 }
 
 #ifndef CYCLE_TO_NSEC_64
-#define CYCLE_TO_NSEC_64(tick) ((uint64_t)((uint64_t)(tick)*1000000000uL / (uint64_t)configTICK_RATE_HZ))
+/* Safe conversion with overflow check */
+#define CYCLE_TO_NSEC_64(tick) \
+	({ \
+		uint64_t _tick = (uint64_t)(tick); \
+		uint64_t _rate = (uint64_t)configTICK_RATE_HZ; \
+		uint64_t _nsec_per_sec = 1000000000ULL; \
+		uint64_t _result; \
+		\
+		/* Check for potential overflow: tick > UINT64_MAX / 1000000000 */ \
+		if (_tick > (UINT64_MAX / _nsec_per_sec)) { \
+			/* Use alternative calculation to avoid overflow */ \
+			uint64_t _sec = _tick / _rate; \
+			uint64_t _rem = _tick % _rate; \
+			_result = (_sec * _nsec_per_sec) + ((_rem * _nsec_per_sec) / _rate); \
+		} else { \
+			_result = (_tick * _nsec_per_sec) / _rate; \
+		} \
+		_result; \
+	})
 #endif /* CYCLE_TO_NSEC_64 */
 
 static inline uint64_t k_cyc_to_ns_floor64(uint64_t t)

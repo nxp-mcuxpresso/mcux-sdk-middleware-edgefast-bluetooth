@@ -66,26 +66,86 @@ typedef struct k_thread *k_tid_t;
 
 #define K_THREAD_STACK_SIZEOF K_KERNEL_STACK_SIZEOF
 
+static inline uint32_t msec_to_tick_safe(uint32_t msec)
+{
+	const uint32_t rate = (uint32_t)configTICK_RATE_HZ;
+
+	/* Fast path for small values (most common case) */
+	if (msec < (UINT32_MAX / rate / 2)) {
+		/* Safe to use direct calculation with rounding */
+		return (msec + (500UL / rate)) * rate / 1000UL;
+	}
+
+	/* Slow path for large values - use 64-bit arithmetic */
+	uint64_t ticks = ((uint64_t)msec * (uint64_t)rate + 500ULL) / 1000ULL;
+
+	/* Clamp to UINT32_MAX if overflow */
+	return (ticks > UINT32_MAX) ? UINT32_MAX : (uint32_t)ticks;
+}
+
 #ifndef MSEC_TO_TICK
-#define MSEC_TO_TICK(msec) \
-    (((uint32_t)(msec) + 500uL / (uint32_t)configTICK_RATE_HZ) * (uint32_t)configTICK_RATE_HZ / 1000uL)
+#define MSEC_TO_TICK(msec) msec_to_tick_safe(msec)
 #endif /* MSEC_TO_TICK */
 
+static inline uint32_t ticks_to_msec_safe(uint64_t tick)
+{
+	const uint64_t rate = (uint64_t)configTICK_RATE_HZ;
+	const uint64_t multiplier = 1000ULL;
+
+	if (tick > (UINT64_MAX / multiplier)) {
+		return (uint32_t)((tick / rate) * multiplier + ((tick % rate) * multiplier) / rate);
+	}
+	return (uint32_t)((tick * multiplier) / rate);
+}
+
+static inline uint64_t ticks_to_msec_64_safe(uint64_t tick)
+{
+	const uint64_t rate = (uint64_t)configTICK_RATE_HZ;
+	const uint64_t multiplier = 1000ULL;
+
+	if (tick > (UINT64_MAX / multiplier)) {
+		return (tick / rate) * multiplier + ((tick % rate) * multiplier) / rate;
+	}
+	return (tick * multiplier) / rate;
+}
+
+static inline uint64_t ticks_to_usec_64_safe(uint64_t tick)
+{
+	const uint64_t rate = (uint64_t)configTICK_RATE_HZ;
+	const uint64_t multiplier = 1000000ULL;
+
+	if (tick > (UINT64_MAX / multiplier)) {
+		return (tick / rate) * multiplier + ((tick % rate) * multiplier) / rate;
+	}
+	return (tick * multiplier) / rate;
+}
+
+static inline uint64_t ticks_to_nsec_64_safe(uint64_t tick)
+{
+	const uint64_t rate = (uint64_t)configTICK_RATE_HZ;
+	const uint64_t multiplier = 1000000000ULL;
+
+	if (tick > (UINT64_MAX / multiplier)) {
+		return (tick / rate) * multiplier + ((tick % rate) * multiplier) / rate;
+	}
+	return (tick * multiplier) / rate;
+}
+
 #ifndef TICKS_TO_MSEC
-#define TICKS_TO_MSEC(tick) ((uint32_t)((uint64_t)(tick)*1000uL / (uint64_t)configTICK_RATE_HZ))
-#endif /* TICKS_TO_MSEC */
+#define TICKS_TO_MSEC(tick) ticks_to_msec_safe(tick)
+#endif
 
 #ifndef TICKS_TO_MSEC_64
-#define TICKS_TO_MSEC_64(tick) ((uint64_t)((uint64_t)(tick)*1000uL / (uint64_t)configTICK_RATE_HZ))
-#endif /* TICKS_TO_MSEC_64 */
+#define TICKS_TO_MSEC_64(tick) ticks_to_msec_64_safe(tick)
+#endif
 
 #ifndef TICKS_TO_USEC_64
-#define TICKS_TO_USEC_64(tick) ((uint64_t)((uint64_t)(tick)*1000000uL / (uint64_t)configTICK_RATE_HZ))
-#endif /* TICKS_TO_USEC_64 */
+#define TICKS_TO_USEC_64(tick) ticks_to_usec_64_safe(tick)
+#endif
 
 #ifndef TICKS_TO_NSEC_64
-#define TICKS_TO_NSEC_64(tick) ((uint64_t)((uint64_t)(tick)*1000000000uL / (uint64_t)configTICK_RATE_HZ))
-#endif /* TICKS_TO_NSEC_64 */
+#define TICKS_TO_NSEC_64(tick) ticks_to_nsec_64_safe(tick)
+#endif
 
 /**
  * @defgroup thread_apis Thread APIs
