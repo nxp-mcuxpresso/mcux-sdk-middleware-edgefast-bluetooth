@@ -70,6 +70,10 @@
 
 #endif
 
+#if SHELL_BUFFER_SIZE > 0xFFFFU
+#error "SHELL_BUFFER_SIZE must be no more than 0xFFFF"
+#endif
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -151,7 +155,7 @@ static shell_status_t SHELL_EchoCommand(shell_handle_t shellHandle, int32_t argc
 
 static int32_t SHELL_ParseLine(const char *cmd, uint32_t len, char *argv[]); /*!< parse line command */
 
-static int32_t SHELL_StringCompare(const char *str1, const char *str2, int32_t count); /*!< compare string command */
+static int32_t SHELL_StringCompare(const char *str1, const char *str2, uint32_t count); /*!< compare string command */
 
 static void SHELL_ProcessCommand(shell_context_handle_t *shellContextHandle, const char *cmd); /*!< process a command */
 
@@ -244,6 +248,10 @@ static void SHELL_WriteBuffer(char *buffer, int32_t *indicator, char val, int le
     shell_context_handle_t *shellContextHandle;
     int i              = 0;
     shellContextHandle = (shell_context_handle_t *)buffer;
+
+    if (*indicator < 0) {
+        return;
+    }
 
     for (i = 0; i < len; i++)
     {
@@ -603,6 +611,10 @@ static shell_status_t SHELL_PrintCmdHelp(shell_context_handle_t *shellContextHan
     shell_command_t *cmdP;
 #endif /* SHELL_ADVANCE */
 
+    if (level >= UINT32_MAX) {
+        return kStatus_SHELL_Success;
+    }
+
     if (NULL == cmd)
     {
         return kStatus_SHELL_Success;
@@ -879,7 +891,7 @@ static void SHELL_ProcessCommand(shell_context_handle_t *shellContextHandle, con
         shell_status_t ret;
         tmpLen = (uint16_t)strlen(cmd);
         /* Compare with last command. Push back to history buffer if different */
-        if (tmpLen != (uint16_t)SHELL_StringCompare(cmd, shellContextHandle->hist_buf[0], (int32_t)strlen(cmd)))
+        if (tmpLen != (uint16_t)SHELL_StringCompare(cmd, shellContextHandle->hist_buf[0], (uint32_t)strlen(cmd)))
         {
             for (i = SHELL_HISTORY_COUNT - 1U; i > 0U; i--)
             {
@@ -1172,7 +1184,7 @@ static void SHELL_AutoComplete(shell_context_handle_t *shellContextHandle)
         else
 #endif /* SHELL_ADVANCE */
         {
-            if (SHELL_StringCompare(shellContextHandle->line, cmdName, (int32_t)strlen(shellContextHandle->line)) == 0)
+            if (SHELL_StringCompare(shellContextHandle->line, cmdName, (uint32_t)strlen(shellContextHandle->line)) == 0)
             {
                 /* Show possible matches */
                 SHELL_Printf(shellContextHandle, "%s\r\n", (char *)cmdName);
@@ -1195,14 +1207,16 @@ static void SHELL_AutoComplete(shell_context_handle_t *shellContextHandle)
     return;
 }
 
-static int32_t SHELL_StringCompare(const char *str1, const char *str2, int32_t count)
+static int32_t SHELL_StringCompare(const char *str1, const char *str2, uint32_t count)
 {
-    while ((bool)(count--))
+    while (count > 0)
     {
         if (*str1++ != *str2++)
         {
             return (int32_t) * (const unsigned char *)(str1 - 1) - *(const unsigned char *)(str2 - 1);
         }
+
+        count--;
     }
     return kStatus_SHELL_Success;
 }
