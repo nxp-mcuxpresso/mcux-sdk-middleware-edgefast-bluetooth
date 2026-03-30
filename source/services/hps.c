@@ -31,36 +31,43 @@ static bool notif_enabled;
 
 static uint8_t https_security_status = HTTPS_CERTIFICATE_INVALID;
 
+#define HPS_BIT_SET(flag, bit) ((flag) |= ((uint8_t)(bit)))
+#define HPS_BIT_CLEAR(flag, bit) ((flag) &= (uint8_t)(~((uint8_t)(bit))))
+
 ssize_t write_http_headers(struct bt_conn *conn, const struct bt_gatt_attr *attr,
              const void *buf, uint16_t len, uint16_t offset, uint8_t flags)
 {
     /* Written by client */
     if (conn != NULL)
     {
+        if (len > MAX_HEADERS_LEN) {
+            return -ENOMEM;
+        }
+
         memset(&service_config.http_headers, 0, MAX_HEADERS_LEN);
         memcpy(&service_config.http_headers, (uint8_t*)buf, len);
 
         service_config.http_headers_len = len;
-        service_config.flags |= HEADERS_SET;
+        HPS_BIT_SET(service_config.flags, HEADERS_SET);
     }
     /* Updated after processing HTTP Request */
     else
     {
-        service_config.flags &= ~HEADERS_SET;
+        HPS_BIT_CLEAR(service_config.flags, HEADERS_SET);
         memset(&service_config.http_headers, 0, MAX_HEADERS_LEN);
-        service_config.status_code.data_status |= HPS_HEADERS_RECEIVED;
+        HPS_BIT_SET(service_config.status_code.data_status, HPS_HEADERS_RECEIVED);
 
         if (len > MAX_HEADERS_LEN)
         {
             memcpy(&service_config.http_headers, buf, MAX_HEADERS_LEN);
             service_config.http_headers_len = MAX_HEADERS_LEN;
-            service_config.status_code.data_status |= HPS_HEADERS_TRUNCATED;
+            HPS_BIT_SET(service_config.status_code.data_status, HPS_HEADERS_TRUNCATED);
         }
         else
         {
             memcpy(&service_config.http_headers, buf, len);
             service_config.http_headers_len = len;
-            service_config.status_code.data_status &= ~HPS_HEADERS_TRUNCATED;
+            HPS_BIT_CLEAR(service_config.status_code.data_status, HPS_HEADERS_TRUNCATED);
         }
     }
     return len;
@@ -72,30 +79,35 @@ ssize_t write_http_entity_body(struct bt_conn *conn, const struct bt_gatt_attr *
     /* Written by client */
     if (conn != NULL)
     {
+        if (len > MAX_BODY_LEN) {
+            return -ENOMEM;
+        }
+
         memset(&service_config.http_body, 0, MAX_BODY_LEN);
         memcpy(&service_config.http_body, (uint8_t*)buf, len);
 
         service_config.http_body_len = len;
-        service_config.flags |= BODY_SET;
+        HPS_BIT_SET(service_config.flags, BODY_SET);
     }
     /* Updated after processing HTTP Request */
     else
     {
-        service_config.flags &= ~BODY_SET;
+        HPS_BIT_CLEAR(service_config.flags, BODY_SET);
         memset(&service_config.http_body, 0, MAX_BODY_LEN);
-        service_config.status_code.data_status |= HPS_BODY_RECEIVED;
+        HPS_BIT_SET(service_config.status_code.data_status, HPS_BODY_RECEIVED);
 
         if (len > MAX_BODY_LEN)
         {
             memcpy(&service_config.http_body, buf, MAX_BODY_LEN);
             service_config.http_body_len = MAX_BODY_LEN;
-            service_config.status_code.data_status |= HPS_BODY_TRUNCATED;
+            HPS_BIT_SET(service_config.status_code.data_status, HPS_BODY_TRUNCATED);
+
         }
         else
         {
             memcpy(&service_config.http_body, buf, len);
             service_config.http_body_len = len;
-            service_config.status_code.data_status &= ~HPS_BODY_TRUNCATED;
+            HPS_BIT_CLEAR(service_config.status_code.data_status, HPS_BODY_TRUNCATED);
         }
     }
     return len;
@@ -135,10 +147,14 @@ static ssize_t read_https_security(struct bt_conn *conn, const struct bt_gatt_at
 static ssize_t write_uri(struct bt_conn *conn, const struct bt_gatt_attr *attr,
              const void *buf, uint16_t len, uint16_t offset, uint8_t flags)
 {
+    if (len > MAX_URI_LEN) {
+        return -BT_ATT_ERR_INVALID_ATTRIBUTE_LEN;
+    }
+
     memset(&service_config.uri, 0, MAX_URI_LEN);
     memcpy(&service_config.uri, (uint8_t*)buf, len);
     service_config.uri_len = len;
-    service_config.flags |= URI_SET;
+    HPS_BIT_SET(service_config.flags, URI_SET);
     return len;
 }
 
@@ -207,7 +223,7 @@ int bt_hps_init(osa_msgq_handle_t queue)
 void bt_hps_set_status_code(uint16_t http_status)
 {
     sys_put_le16(http_status, service_config.status_code.http_status);
-    service_config.flags &= ~URI_SET;
+    HPS_BIT_CLEAR(service_config.flags, URI_SET);
     service_config.state = IDLE_STATE;
 
     bt_hps_notify();

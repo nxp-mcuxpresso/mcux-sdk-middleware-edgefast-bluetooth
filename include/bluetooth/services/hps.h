@@ -42,7 +42,7 @@ enum
     HTTPS_POST_REQ,
     HTTPS_PUT_REQ,
     HTTPS_DELETE_REQ,
-    HTTP_REQ_CANCEL,  
+    HTTP_REQ_CANCEL,
 };
 
 enum
@@ -84,7 +84,7 @@ typedef struct
 
 typedef struct
 {
-    uint8_t                 uri_len;
+    uint16_t                uri_len;
     uint8_t                 uri[MAX_URI_LEN];
     uint16_t                http_headers_len;
     uint8_t                 http_headers[MAX_HEADERS_LEN];
@@ -93,7 +93,7 @@ typedef struct
     hps_status_t            status_code;
     hps_http_command_t      command;
     hps_state_t             state;
-    hps_flags_t             flags;    
+    hps_flags_t             flags;
 } hps_config_t;
 
 #ifdef __cplusplus
