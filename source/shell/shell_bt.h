@@ -1867,6 +1867,7 @@ struct shell {
 	static shell_status_t _CONCAT(func, index)(shell_handle_t sh, int32_t argc, char **argv) \
 	{								\
 		__ASSERT(ctx_shell->sh == sh, "Invalid Shell");		\
+		__ASSERT(argc >= 0, "Invalid argument count");		\
 		int err = func(ctx_shell, argc, argv);			\
 		if (err < 0) {						\
 			return kStatus_SHELL_Error;			\
@@ -1881,6 +1882,7 @@ struct shell {
 	static shell_status_t _CONCAT(func, index)(shell_handle_t sh, int32_t argc, char **argv) \
 	{								\
 		__ASSERT(ctx_shell->sh == sh, "Invalid Shell");		\
+		__ASSERT(argc >= 0, "Invalid argument count");		\
 		int err = func(ctx_shell, argc, argv);			\
 		if (err < 0) {						\
 			return kStatus_SHELL_Error;			\
@@ -1895,6 +1897,7 @@ struct shell {
 	static shell_status_t _CONCAT(func, index)(shell_handle_t sh, int32_t argc, char **argv) \
 	{									\
 		__ASSERT(ctx_shell->sh == sh, "Invalid Shell");			\
+		__ASSERT(argc >= 0, "Invalid argument count");			\
 		if ((cond) && (ctx_shell != NULL)) {				\
 			int err = func(ctx_shell, argc, argv);			\
 			if (err < 0) {						\
@@ -1958,6 +1961,7 @@ struct shell {
 	static shell_status_t _CONCAT(func, line)(shell_handle_t sh, int32_t argc, char **argv)	\
 	{											\
 		__ASSERT(ctx_shell->sh == sh, "Invalid Shell");					\
+		__ASSERT(argc >= 0, "Invalid argument count");					\
 		int err = func(ctx_shell, argc, argv);						\
 		if (err < 0) {									\
 			return kStatus_SHELL_Error;						\

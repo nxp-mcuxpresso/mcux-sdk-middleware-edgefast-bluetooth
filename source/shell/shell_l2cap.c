@@ -98,19 +98,25 @@ static uint32_t l2cap_calculate_data_rate
             uint64_t             time_elapsed
        )
 {
-    uint64_t tmp_data_count;
+	uint64_t tmp_data_count;
 
-    /* Converting the Data Count to Larger Data Type */
-    tmp_data_count = data_count;
-    tmp_data_count *= (1000000);
+	/* Converting the Data Count to Larger Data Type */
+	tmp_data_count = data_count;
+	tmp_data_count *= (1000000);
 
-    /**
-     * TODO: Check if this below code is needed.
-     * Defaults to 1 microsecond.
-     */
-    time_elapsed = (0 == time_elapsed) ? 1 : time_elapsed;
+	/**
+	* TODO: Check if this below code is needed.
+	* Defaults to 1 microsecond.
+	*/
+	time_elapsed = (0 == time_elapsed) ? 1 : time_elapsed;
 
-    return (uint32_t)((tmp_data_count)/(time_elapsed));
+	tmp_data_count = (tmp_data_count)/(time_elapsed);
+
+	if (tmp_data_count > UINT32_MAX) {
+		return UINT32_MAX;
+	}
+
+	return (uint32_t)tmp_data_count;
 }
 
 static uint32_t l2cap_calculate_data_rate_in_kbps
@@ -119,93 +125,106 @@ static uint32_t l2cap_calculate_data_rate_in_kbps
             uint64_t             time_elapsed
        )
 {
-    uint64_t tmp_data_count;
+	uint64_t tmp_data_count;
 
-    /* Converting the Data Count to Larger Data Type */
-    tmp_data_count = data_count;
-    tmp_data_count *= (1000000);
+	/* Converting the Data Count to Larger Data Type */
+	tmp_data_count = data_count;
+	tmp_data_count *= (1000000);
 
-    /**
-     * TODO: Check if this below code is needed.
-     * Defaults to 1 microsecond.
-     */
-    time_elapsed = (0 == time_elapsed) ? 1 : time_elapsed;
+	/**
+	* TODO: Check if this below code is needed.
+	* Defaults to 1 microsecond.
+	*/
+	time_elapsed = (0 == time_elapsed) ? 1 : time_elapsed;
 
-    return (uint32_t)(((((tmp_data_count)/(time_elapsed)) * 8) /1024));
+	tmp_data_count = (tmp_data_count)/(time_elapsed);
+	tmp_data_count = (tmp_data_count * 8) / 1024;
+
+	if (tmp_data_count > UINT32_MAX) {
+		return UINT32_MAX;
+	}
+
+	return (uint32_t)tmp_data_count;
 }
 
 static uint16_t l2cap_display_tx_stat (void)
 {
-    uint64_t           duration;
-    uint32_t           total_byte_count;
+	uint64_t duration;
+	uint32_t total_byte_count;
 
-    if ((L2CAP_RELATIVE_TIME_INIT_VALUE == first_tx_inst) &&
-        (L2CAP_RELATIVE_TIME_INIT_VALUE == last_tx_inst))
-    {
-        /* Do Nothing */
-    }
-    else
-    {
-        duration = (last_tx_inst - first_tx_inst);
-        total_byte_count = (req_data_tx_chunk_len * req_data_tx_count);
-        shell_print (ctx_shell,
-        "\n---------------------------- TX Session ----------------------------\n");
-        shell_print (ctx_shell,
-        "  First Packet Transmit at: %lld microseconds\n", first_tx_inst);
-        shell_print (ctx_shell,
-        "  Last Packet Transmit at : %lld microseconds\n", last_tx_inst);
-        shell_print (ctx_shell,
-        "  Session Duration        : %lld microseconds\n", duration);
-        shell_print (ctx_shell,
-        "  Total Bytes Transmitted : %d bytes (%d * %d)\n", total_byte_count,
-        req_data_tx_chunk_len, req_data_tx_count);
-        shell_print (ctx_shell,
-        "  Data Rate               : %d bytes per second (%d kbps)\n",
-        l2cap_calculate_data_rate (total_byte_count, duration),
-        l2cap_calculate_data_rate_in_kbps (total_byte_count, duration));
+	if ((L2CAP_RELATIVE_TIME_INIT_VALUE == first_tx_inst) &&
+		(L2CAP_RELATIVE_TIME_INIT_VALUE == last_tx_inst))
+	{
+		/* Do Nothing */
+		return 0;
+	}
 
-        shell_print (ctx_shell,
-        "\n---------------------------------------------------------------------\n");
-    }
+	if (last_tx_inst < first_tx_inst) {
+		return 0;
+	}
 
-    return 0;
+	duration = (last_tx_inst - first_tx_inst);
+	total_byte_count = (req_data_tx_chunk_len * req_data_tx_count);
+	shell_print (ctx_shell,
+	"\n---------------------------- TX Session ----------------------------\n");
+	shell_print (ctx_shell,
+	"  First Packet Transmit at: %llu microseconds\n", first_tx_inst);
+	shell_print (ctx_shell,
+	"  Last Packet Transmit at : %llu microseconds\n", last_tx_inst);
+	shell_print (ctx_shell,
+	"  Session Duration        : %llu microseconds\n", duration);
+	shell_print (ctx_shell,
+	"  Total Bytes Transmitted : %u bytes (%u * %u)\n", total_byte_count,
+	req_data_tx_chunk_len, req_data_tx_count);
+	shell_print (ctx_shell,
+	"  Data Rate               : %u bytes per second (%u kbps)\n",
+	l2cap_calculate_data_rate (total_byte_count, duration),
+	l2cap_calculate_data_rate_in_kbps (total_byte_count, duration));
+
+	shell_print (ctx_shell,
+	"\n---------------------------------------------------------------------\n");
+
+	return 0;
 }
 
 static uint16_t l2cap_display_rx_stat (void)
 {
-    uint64_t 			 duration;
-    uint32_t             total_byte_count;
+	uint64_t duration;
+	uint32_t total_byte_count;
 
-    if ((L2CAP_RELATIVE_TIME_INIT_VALUE == first_rx_inst) &&
-        (L2CAP_RELATIVE_TIME_INIT_VALUE == last_rx_inst))
-    {
-        /* Do Nothing */
-    }
-    else
-    {
-        duration = (last_rx_inst - first_rx_inst);
-        total_byte_count = (exp_data_rx_chunk_len * exp_data_rx_count);
-        shell_print (ctx_shell,
-        "\n---------------------------- RX Session ----------------------------\n");
-        shell_print (ctx_shell,
-        "  First Packet Received at: %lld microseconds\n", first_rx_inst);
-        shell_print (ctx_shell,
-        "  Last Packet Received at : %lld microseconds\n", last_rx_inst);
-        shell_print (ctx_shell,
-        "  Session Duration        : %lld microseconds\n", duration);
-        shell_print (ctx_shell,
-        "  Total Bytes Received    : %d bytes (%d * %d)\n", total_byte_count,
-        exp_data_rx_chunk_len, exp_data_rx_count);
-        shell_print (ctx_shell,
-        "  Data Rate               : %d bytes per second (%d kbps)\n",
-        l2cap_calculate_data_rate (total_byte_count, duration),
-        l2cap_calculate_data_rate_in_kbps (total_byte_count, duration));
+	if ((L2CAP_RELATIVE_TIME_INIT_VALUE == first_rx_inst) &&
+		(L2CAP_RELATIVE_TIME_INIT_VALUE == last_rx_inst))
+	{
+		/* Do Nothing */
+		return 0;
+	}
 
-        shell_print (ctx_shell,
-        "\n---------------------------------------------------------------------\n");
-    }
+	if (last_rx_inst < first_rx_inst) {
+		return 0;
+	}
 
-    return 0;
+	duration = (last_rx_inst - first_rx_inst);
+	total_byte_count = (exp_data_rx_chunk_len * exp_data_rx_count);
+	shell_print (ctx_shell,
+	"\n---------------------------- RX Session ----------------------------\n");
+	shell_print (ctx_shell,
+	"  First Packet Received at: %llu microseconds\n", first_rx_inst);
+	shell_print (ctx_shell,
+	"  Last Packet Received at : %llu microseconds\n", last_rx_inst);
+	shell_print (ctx_shell,
+	"  Session Duration        : %llu microseconds\n", duration);
+	shell_print (ctx_shell,
+	"  Total Bytes Received    : %u bytes (%u * %u)\n", total_byte_count,
+	exp_data_rx_chunk_len, exp_data_rx_count);
+	shell_print (ctx_shell,
+	"  Data Rate               : %u bytes per second (%u kbps)\n",
+	l2cap_calculate_data_rate (total_byte_count, duration),
+	l2cap_calculate_data_rate_in_kbps (total_byte_count, duration));
+
+	shell_print (ctx_shell,
+	"\n---------------------------------------------------------------------\n");
+
+	return 0;
 }
 #endif
 
@@ -214,9 +233,22 @@ static int l2cap_recv_metrics(struct bt_l2cap_chan *chan, struct net_buf *buf)
 	static uint32_t len;
 	static uint32_t cycle_stamp;
 	uint32_t delta;
+	uint32_t current;
+	uint64_t tmp;
 
-	delta = k_cycle_get_32() - cycle_stamp;
-	delta = (uint32_t)k_cyc_to_ns_floor64(delta);
+	current = k_cycle_get_32();
+	if (current >= cycle_stamp) {
+		delta = current - cycle_stamp;
+	} else {
+		delta = (UINT32_MAX - cycle_stamp) + current + 1U;
+	}
+
+	tmp = k_cyc_to_ns_floor64(delta);
+	if (tmp > UINT32_MAX) {
+		delta = UINT32_MAX;
+	} else {
+		delta = (uint32_t)tmp;
+	}
 
 	/* if last data rx-ed was greater than 1 second in the past,
 	 * reset the metrics.
@@ -224,10 +256,16 @@ static int l2cap_recv_metrics(struct bt_l2cap_chan *chan, struct net_buf *buf)
 	if (delta > 1000000000) {
 		len = 0U;
 		l2cap_rate = 0U;
-		cycle_stamp = k_cycle_get_32();
+		cycle_stamp = current;
 	} else {
-		len += buf->len;
-		l2cap_rate = ((uint64_t)len << 3) * 1000000000U / delta;
+		if (len > (UINT32_MAX - buf->len)) {
+			len = UINT32_MAX;
+		} else {
+			len += buf->len;
+		}
+
+		tmp = ((uint64_t)len << 3) * 1000000000ULL / delta;
+		l2cap_rate = (tmp > UINT32_MAX) ? UINT32_MAX : (uint32_t)tmp;
 	}
 
 	return 0;
@@ -316,7 +354,7 @@ static void l2cap_sent(struct bt_l2cap_chan *chan)
 
 static void l2cap_status(struct bt_l2cap_chan *chan, atomic_t *status)
 {
-	shell_print(ctx_shell, "Channel %p status %u", chan, (uint32_t)*status);
+	shell_print(ctx_shell, "Channel %p status %d", chan, *status);
 }
 
 static void l2cap_connected(struct bt_l2cap_chan *chan)
@@ -662,7 +700,9 @@ static void unblock_send_timer_cb(struct k_work *work)
 			unblock_send_start_flag = true;
 		}
 		if (ret >= 0) {
-			unblock_send_count--;
+			if (unblock_send_count > 0) {
+				unblock_send_count--;
+			}
 		} else {
 			net_buf_unref(buf);
 		}
