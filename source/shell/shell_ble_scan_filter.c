@@ -43,10 +43,6 @@ static uint8_t shell_le_peer_adv_report_list_full;
         (((type_a) == (type_b))?true:false)
 #define SHELL_BLE_COMPARE_ADDR(addr_a,addr_b)\
         ((0 == memcmp((addr_a), (addr_b), 6))?true:false)
-#define SHELL_BLE_BD_ADDR_IS_NON_ZERO(addr)\
-        ((0x00U == ((addr)[0U] | (addr)[1U] | (addr)[2U] | (addr)[3U] | (addr)[4U] | (addr)[5U]))?\
-        false:true)
-
 
 static int shell_le_is_dev_in_adv_list(bt_addr_le_t *dev_addr, uint8_t event_type)
 {
@@ -94,7 +90,7 @@ static int shell_le_find_free_adv_list_inst(uint32_t *free_index)
             t_addr = &SHELL_BLE_GET_PEER_ADV_ADDR(index);
 
             /* Check if the BD Address is Non Zero */
-            if (true != SHELL_BLE_BD_ADDR_IS_NON_ZERO(t_addr->a.val))
+            if (bt_addr_le_eq(t_addr, BT_ADDR_LE_ANY))
             {
                 retval = 0;
                 break;
