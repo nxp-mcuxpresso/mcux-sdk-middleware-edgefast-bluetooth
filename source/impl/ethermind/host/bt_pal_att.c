@@ -977,13 +977,23 @@ static int bt_att_chan_send_find_type_req(struct bt_att_chan *chan, struct net_b
 	struct bt_att_find_type_req *findTypeReq;
 	ATT_FIND_BY_TYPE_VAL_REQ_PARAM findTypeValReqParam;
 	API_RESULT retval;
+	size_t payload_len;
+
+	if (buf->len < (sizeof(struct bt_att_hdr) + sizeof(struct bt_att_find_type_req))) {
+		return -EINVAL;
+	}
+
+	payload_len = buf->len - sizeof(struct bt_att_hdr) - sizeof(struct bt_att_find_type_req);
+	if (payload_len > UINT16_MAX) {
+		return -EINVAL;
+	}
 
 	findTypeReq = (struct bt_att_find_type_req *)&buf->data[sizeof(struct bt_att_hdr)];
 
 	findTypeValReqParam.range.start_handle = findTypeReq->start_handle;
 	findTypeValReqParam.range.end_handle = findTypeReq->end_handle;
 	findTypeValReqParam.uuid = findTypeReq->type;
-	findTypeValReqParam.value.len = buf->len - sizeof(struct bt_att_find_type_req) - sizeof(struct bt_att_hdr);
+	findTypeValReqParam.value.len = (UINT16)payload_len;
 	findTypeValReqParam.value.val = &findTypeReq->value[0];
 
 	retval = BT_att_send_find_by_type_val_req
@@ -1006,6 +1016,10 @@ static int bt_att_chan_send_read_type_req(struct bt_att_chan *chan, struct net_b
 	struct bt_att_read_type_req *readTypeReq;
 	ATT_READ_BY_TYPE_REQ_PARAM readByTypeReq;
 	API_RESULT retval;
+
+	if (buf->len < (sizeof(struct bt_att_hdr) + sizeof(struct bt_att_read_type_req))) {
+		return -EINVAL;
+	}
 
 	readTypeReq = (struct bt_att_read_type_req *)&buf->data[sizeof(struct bt_att_hdr)];
 
@@ -1093,6 +1107,10 @@ static int bt_att_chan_send_read_mult_req(struct bt_att_chan *chan, struct net_b
 	ATT_READ_MULTIPLE_REQ_PARAM readMultipleReqParam;
 	API_RESULT retval;
 
+	if (buf->len < sizeof(struct bt_att_hdr)) {
+		return -EINVAL;
+	}
+
 	readMultipleReqParam.list_count = (buf->len - sizeof(struct bt_att_hdr))/sizeof(uint16_t);
 	readMultipleReqParam.handle_list = (uint16_t *)&buf->data[sizeof(struct bt_att_hdr)];
 
@@ -1116,6 +1134,10 @@ static int bt_att_chan_send_read_group_req(struct bt_att_chan *chan, struct net_
 	struct bt_att_read_group_req *readGroupReq;
 	ATT_READ_BY_GROUP_TYPE_REQ_PARAM readByGroupParam;
 	API_RESULT retval;
+
+	if (buf->len < (sizeof(struct bt_att_hdr) + sizeof(struct bt_att_read_group_req))) {
+		return -EINVAL;
+	}
 
 	readGroupReq = (struct bt_att_read_group_req *)&buf->data[sizeof(struct bt_att_hdr)];
 
@@ -1153,6 +1175,10 @@ static int bt_att_chan_send_read_mult_vl_req(struct bt_att_chan *chan, struct ne
 	ATT_READ_MULTIPLE_VARIABLE_LENGTH_REQ_PARAM readMultipleVlReqParam;
 	API_RESULT retval;
 
+	if (buf->len < sizeof(struct bt_att_hdr)) {
+		return -EINVAL;
+	}
+
 	readMultipleVlReqParam.list_count = (buf->len - sizeof(struct bt_att_hdr))/sizeof(uint16_t);
 	readMultipleVlReqParam.handle_list = (uint16_t *)&buf->data[sizeof(struct bt_att_hdr)];
 
@@ -1177,6 +1203,10 @@ static int bt_att_chan_send_write_req(struct bt_att_chan *chan, struct net_buf *
 	struct bt_att_write_req *writeReq;
 	ATT_WRITE_REQ_PARAM writeReqParam;
 	API_RESULT retval;
+
+	if (buf->len < (sizeof(struct bt_att_hdr) + sizeof(struct bt_att_write_req))) {
+		return -EINVAL;
+	}
 
 	writeReq = (struct bt_att_write_req *)&buf->data[sizeof(struct bt_att_hdr)];
 
@@ -1204,6 +1234,10 @@ static int bt_att_chan_send_prepare_write_req(struct bt_att_chan *chan, struct n
 	struct bt_att_prepare_write_req *prepareWriteReq;
 	ATT_PREPARE_WRITE_REQ_PARAM prepareWriteReqParam;
 	API_RESULT retval;
+
+	if (buf->len < (sizeof(struct bt_att_hdr) + sizeof(struct bt_att_prepare_write_req))) {
+		return -EINVAL;
+	}
 
 	prepareWriteReq = (struct bt_att_prepare_write_req *)&buf->data[sizeof(struct bt_att_hdr)];
 
@@ -1258,6 +1292,10 @@ static int bt_att_chan_send_write_cmd(struct bt_att_chan *chan, struct net_buf *
 	ATT_WRITE_CMD_PARAM writeCmdParam;
 	API_RESULT retval;
 
+	if (buf->len < (sizeof(struct bt_att_hdr) + sizeof(struct bt_att_write_cmd))) {
+		return -EINVAL;
+	}
+
 	writeCmd = (struct bt_att_write_cmd *)&buf->data[sizeof(struct bt_att_hdr)];
 
 	writeCmdParam.handle = (ATT_ATTR_HANDLE) writeCmd->handle;
@@ -1286,14 +1324,23 @@ static int bt_att_chan_send_signed_write_cmd(struct bt_att_chan *chan, struct ne
 	struct bt_att_signed_write_cmd *signedWriteReq;
 	ATT_SIGNED_WRITE_CMD_PARAM signWriteReqParam;
 	API_RESULT retval;
+	uint16_t min_len;
+
+	min_len = sizeof(struct bt_att_hdr) + sizeof(struct bt_att_signed_write_cmd) +
+		  sizeof(signWriteReqParam.auth_signature);
+	if (buf->len < min_len) {
+		return -EINVAL;
+	}
 
 	signedWriteReq = (struct bt_att_signed_write_cmd *)&buf->data[sizeof(struct bt_att_hdr)];
 
 	signWriteReqParam.handle_value.handle = signedWriteReq->handle;
-	signWriteReqParam.handle_value.value.len = buf->len - sizeof(struct bt_att_hdr) - sizeof(struct bt_att_signed_write_cmd) - sizeof(signWriteReqParam.auth_signature);
+	signWriteReqParam.handle_value.value.len = (UINT16)buf->len - min_len;
 	signWriteReqParam.handle_value.value.val = signedWriteReq->value;
 
-	memcpy(&signWriteReqParam.auth_signature[0], &signedWriteReq->value[signWriteReqParam.handle_value.value.len], sizeof(signWriteReqParam.auth_signature));
+	memcpy(&signWriteReqParam.auth_signature[0],
+	       &signedWriteReq->value[signWriteReqParam.handle_value.value.len],
+	       sizeof(signWriteReqParam.auth_signature));
 
 	retval = BT_att_send_signed_write_cmd
 				(
@@ -1319,6 +1366,10 @@ static int bt_att_chan_send_notify(struct bt_att_chan *chan, struct net_buf *buf
 	struct bt_att_notify *notify;
 	ATT_HANDLE_VALUE_PAIR hndlValParam;
 	API_RESULT retval;
+
+	if (buf->len < (sizeof(struct bt_att_hdr) + sizeof(struct bt_att_notify))) {
+		return -EINVAL;
+	}
 
 	notify = (struct bt_att_notify *)&buf->data[sizeof(struct bt_att_hdr)];
 
@@ -1346,6 +1397,10 @@ static int bt_att_chan_send_indicate(struct bt_att_chan *chan, struct net_buf *b
 	struct bt_att_indicate *indicate;
 	ATT_HANDLE_VALUE_PAIR hndlValParam;
 	API_RESULT retval;
+
+	if (buf->len < (sizeof(struct bt_att_hdr) + sizeof(struct bt_att_indicate))) {
+		return -EINVAL;
+	}
 
 	indicate = (struct bt_att_indicate *)&buf->data[sizeof(struct bt_att_hdr)];
 
@@ -1765,7 +1820,7 @@ static uint8_t find_type_cb(const struct bt_gatt_attr *attr, uint16_t handle,
 	LOG_DBG("handle 0x%04x", handle);
 
 	/* stop if there is no space left */
-	if ((data->len - data->sofar) < sizeof(*data->group)) {
+	if ((data->sofar > data->len) || ((data->len - data->sofar) < sizeof(*data->group))) {
 		return BT_GATT_ITER_STOP;
 	}
 
@@ -2060,6 +2115,10 @@ static uint8_t read_type_cb(const struct bt_gatt_attr *attr, uint16_t handle,
 	data->err = 0x00;
 
 	/* Fast forward to next item position */
+	if ((data->sofar > data->len) || ((data->len - data->sofar) < sizeof(*data->item))) {
+		return BT_GATT_ITER_STOP;
+	}
+
 	data->item = (struct bt_att_data *)&data->buffer[data->sofar];
 	data->item->handle = sys_cpu_to_le16(handle);
 	data->sofar += sizeof(*data->item);
@@ -2067,6 +2126,9 @@ static uint8_t read_type_cb(const struct bt_gatt_attr *attr, uint16_t handle,
 #if 0
 	read = att_chan_read(chan, attr, data->buf, 0, attr_read_type_cb, data);
 #else
+	if (data->sofar > data->len) {
+		return BT_GATT_ITER_STOP;
+	}
 	read = attr->read(conn, attr, &data->buffer[data->sofar],
 			  data->len - data->sofar, 0);
 #endif
@@ -2146,7 +2208,13 @@ static uint8_t att_read_type_req(struct bt_att_chan *chan, struct net_buf *buf)
 		struct bt_uuid_16 u16;
 		struct bt_uuid_128 u128;
 	} u;
-	uint8_t uuid_len = buf->len - sizeof(*req);
+	uint8_t uuid_len;
+
+	if (buf->len < sizeof(*req)) {
+		return BT_ATT_ERR_INVALID_PDU;
+	}
+
+	uuid_len = (uint8_t)(buf->len - sizeof(*req));
 
 	/* Type can only be UUID16 or UUID128 */
 	if (uuid_len != 2 && uuid_len != 16) {
@@ -2405,6 +2473,10 @@ static uint8_t read_vl_cb(const struct bt_gatt_attr *attr, uint16_t handle,
 
 	LOG_DBG("handle 0x%04x", handle);
 
+	if ((data->sofar > data->len) || ((data->len - data->sofar) < sizeof(*rsp))) {
+		return BT_GATT_ITER_STOP;
+	}
+
 	data->rspParam.val = &data->buffer[data->sofar + sizeof(*rsp)];
 
 	/*
@@ -2427,11 +2499,18 @@ static uint8_t read_vl_cb(const struct bt_gatt_attr *attr, uint16_t handle,
 	/* The Length Value Tuple List may be truncated within the first two
 	 * octets of a tuple due to the size limits of the current ATT_MTU.
 	 */
-	if (bt_att_mtu(chan) - data->sofar < 2) {
+	if ((data->sofar > bt_att_mtu(chan)) || ((bt_att_mtu(chan) - data->sofar) < 2)) {
 		return BT_GATT_ITER_STOP;
 	}
 
-	read = attr->read(conn, attr, &data->buffer[data->sofar + sizeof(*rsp)], data->len - data->sofar - sizeof(*rsp), 0);
+	if ((data->sofar > data->len) || ((data->len - data->sofar) < sizeof(*rsp))) {
+		return BT_GATT_ITER_STOP;
+	}
+
+	read = attr->read(conn, attr,
+			 &data->buffer[data->sofar + sizeof(*rsp)],
+			 data->len - data->sofar - sizeof(*rsp),
+			 0);
 	if (read < 0) {
 		data->err = err_to_att(read);
 		return BT_GATT_ITER_STOP;
@@ -3910,8 +3989,13 @@ static void att_timeout(struct k_work *work)
 	struct bt_att_chan *chan = CONTAINER_OF(dwork, struct bt_att_chan,
 						timeout_work);
 
-	bt_addr_le_to_str(bt_conn_get_dst(chan->att->conn), addr, sizeof(addr));
-	LOG_ERR("ATT Timeout for device %s", addr);
+	if ((chan == NULL) || (chan->att == NULL) || (chan->att->conn == NULL) ||
+	    (bt_conn_get_dst(chan->att->conn) == NULL)) {
+		LOG_ERR("ATT Timeout (no conn/dst)");
+	} else {
+		bt_addr_le_to_str(bt_conn_get_dst(chan->att->conn), addr, sizeof(addr));
+		LOG_ERR("ATT Timeout for device %s", addr);
+	}
 
 	/* BLUETOOTH SPECIFICATION Version 4.2 [Vol 3, Part F] page 480:
 	 *

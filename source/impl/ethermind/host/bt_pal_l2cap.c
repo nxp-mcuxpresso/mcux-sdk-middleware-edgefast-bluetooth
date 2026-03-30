@@ -151,10 +151,17 @@ static uint8_t get_ident(void)
 {
 	static uint8_t ident;
 
-	ident++;
-	/* handle integer overflow (0 is not valid) */
-	if (!ident) {
+	/*
+	 * Coverity: handle rollover explicitly.
+	 * 0 is not a valid identifier, so wrap 0xFF -> 0x01.
+	 */
+	if (ident == UINT8_MAX) {
+		ident = 1U;
+	} else {
 		ident++;
+		if (ident == 0U) {
+			ident = 1U;
+		}
 	}
 
 	return ident;
@@ -391,7 +398,9 @@ void bt_l2cap_chan_del(struct bt_l2cap_chan *chan)
 destroy:
 #if (defined(CONFIG_BT_L2CAP_DYNAMIC_CHANNEL) && ((CONFIG_BT_L2CAP_DYNAMIC_CHANNEL) > 0U))
 	/* Reset internal members of common channel */
-	bt_l2cap_chan_set_state(chan, BT_L2CAP_DISCONNECTED);
+	if (chan->conn != NULL) {
+		bt_l2cap_chan_set_state(chan, BT_L2CAP_DISCONNECTED);
+	}
 #if 1
 	/* Attention: below code block need to be kept during code rebase. */
 	SET_CHAN_MEMBER(chan, psm, 0U);
@@ -968,9 +977,17 @@ struct net_buf *bt_l2cap_create_pdu_timeout(struct net_buf_pool *pool,
 					    size_t reserve,
 					    size_t timeout)
 {
-	return bt_conn_create_pdu_timeout(pool,
-					  sizeof(struct bt_l2cap_hdr) + reserve,
-					  timeout);
+	size_t total_reserve;
+
+	/* Coverity: prevent wrap in sizeof(struct bt_l2cap_hdr) + reserve */
+	if (reserve > (SIZE_MAX - sizeof(struct bt_l2cap_hdr))) {
+		LOG_ERR("reserve overflow");
+		return NULL;
+	}
+
+	total_reserve = sizeof(struct bt_l2cap_hdr) + reserve;
+
+	return bt_conn_create_pdu_timeout(pool, total_reserve, timeout);
 }
 
 #if (defined(CONFIG_BT_L2CAP_DYNAMIC_CHANNEL) && (CONFIG_BT_L2CAP_DYNAMIC_CHANNEL > 0))
@@ -1098,7 +1115,16 @@ static struct bt_l2cap_le_chan *get_ready_chan(struct bt_conn *conn)
 static void l2cap_chan_sdu_sent(struct bt_conn *conn, void *user_data, int err)
 {
 	struct bt_l2cap_chan *chan;
-	uint16_t cid = POINTER_TO_UINT(user_data);
+	uintptr_t cid_u = (uintptr_t)user_data;
+	uint16_t cid;
+
+	/* Coverity: validate pointer->integer conversion fits in uint16_t */
+	if (cid_u > UINT16_MAX) {
+		LOG_ERR("Invalid CID in user_data: 0x%lx", (unsigned long)cid_u);
+		return;
+	}
+
+	cid = (uint16_t)cid_u;
 
 	LOG_DBG("conn %p CID 0x%04x err %d", conn, cid, err);
 
@@ -2465,10 +2491,17 @@ static void le_disconn_req(struct bt_l2cap *l2cap, uint8_t ident,
 			   struct net_buf *buf)
 {
 	struct bt_conn *conn = l2cap->chan.chan.conn;
-	struct bt_l2cap_le_chan *chan;
+	struct bt_l2cap_chan *chan;
+	struct bt_l2cap_le_chan *le_chan;
 	struct bt_l2cap_disconn_req *req = (void *)buf->data;
 	struct bt_l2cap_disconn_rsp *rsp;
 	uint16_t dcid;
+
+	/* Coverity: guard against NULL conn */
+	if (conn == NULL) {
+		LOG_ERR("le_disconn_req: NULL conn");
+		return;
+	}
 
 	if (buf->len < sizeof(*req)) {
 		LOG_ERR("Too small LE conn req packet size");
@@ -2479,10 +2512,7 @@ static void le_disconn_req(struct bt_l2cap *l2cap, uint8_t ident,
 
 	LOG_DBG("dcid 0x%04x scid 0x%04x", dcid, sys_le16_to_cpu(req->scid));
 
-	chan = l2cap_remove_rx_cid(conn, dcid);
-#if (defined(CONFIG_BT_L2CAP_ECRED) && (CONFIG_BT_L2CAP_ECRED > 0U))
-#if 0
-#endif
+        chan = bt_l2cap_le_lookup_rx_cid(conn, dcid);
 	if (!chan) {
 		struct bt_l2cap_cmd_reject_cid_data data;
 
@@ -2500,22 +2530,16 @@ static void le_disconn_req(struct bt_l2cap *l2cap, uint8_t ident,
 		return;
 	}
 
+        le_chan = l2cap_remove_rx_cid(conn, dcid);
+        if (le_chan == NULL || &le_chan->chan != chan) {
+                return;
+        }
 	rsp = net_buf_add(buf, sizeof(*rsp));
-	rsp->dcid = sys_cpu_to_le16(chan->rx.cid);
-	rsp->scid = sys_cpu_to_le16(chan->tx.cid);
-#if (defined(CONFIG_BT_L2CAP_ECRED) && (CONFIG_BT_L2CAP_ECRED > 0U))
-#endif
-#endif
-	bt_l2cap_chan_del(&chan->chan);
-#if (defined(CONFIG_BT_L2CAP_ECRED) && (CONFIG_BT_L2CAP_ECRED > 0U))
-#if 0
-#endif
-	l2cap_send(conn, BT_L2CAP_CID_LE_SIG, buf);
-#if (defined(CONFIG_BT_L2CAP_ECRED) && (CONFIG_BT_L2CAP_ECRED > 0U))
-#endif
-#endif
+	rsp->dcid = sys_cpu_to_le16(le_chan->rx.cid);
+	rsp->scid = sys_cpu_to_le16(le_chan->tx.cid);
 
-    (void)rsp;  /* Unused variable */
+	bt_l2cap_chan_del(&le_chan->chan);
+        l2cap_send(conn, BT_L2CAP_CID_LE_SIG, buf);
 }
 
 static int l2cap_change_security(struct bt_l2cap_le_chan *chan, uint16_t err)
@@ -3818,13 +3842,21 @@ static void l2cap_chan_le_recv(struct bt_l2cap_le_chan *chan,
 #endif
 
 	/* Store received segments in user_data */
-    /**
-     * Calculate possible number of LE L2CAP Frames.
-     *
-     * Maximum size of each frame shall not exceed local MPS.
-     * Account for the 2 octet of SDU length.
-     */
-	credit = ceiling_fraction((buf->len + 2), chan->rx.mps);
+	   /**
+	    * Calculate possible number of LE L2CAP Frames.
+	    *
+	    * Maximum size of each frame shall not exceed local MPS.
+	    * Account for the 2 octet of SDU length.
+	    */
+
+	if (buf->len > (UINT16_MAX - 2U)) {
+		LOG_ERR("RX length overflow");
+		bt_l2cap_chan_disconnect(&chan->chan);
+		return;
+	}
+
+	credit = ceiling_fraction((buf->len + 2U), chan->rx.mps);
+
 	memcpy(net_buf_user_data(buf), &credit, sizeof(credit));
 
 	err = chan->chan.ops->recv(&chan->chan, buf);

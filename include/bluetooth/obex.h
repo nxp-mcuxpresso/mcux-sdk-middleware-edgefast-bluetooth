@@ -12,6 +12,19 @@
 #ifndef ZEPHYR_INCLUDE_BLUETOOTH_OBEX_H_
 #define ZEPHYR_INCLUDE_BLUETOOTH_OBEX_H_
 
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#include <sys/byteorder.h>
+#include <toolchain.h>
+#include <errno.h>
+#include <bluetooth/bluetooth.h>
+
+/* Avoid adding new standard library include dependencies in this header.
+ * Use a local constant for 16-bit max.
+ */
+
 /**
  * @brief IrDA Object Exchange Protocol (OBEX)
  * @defgroup bt_obex IrDA Object Exchange Protocol (OBEX)
@@ -135,8 +148,14 @@ enum bt_obex_req_flags
 
 static inline void bt_obex_add_hdr(struct net_buf *buf, uint8_t hi, uint8_t *value, uint16_t length)
 {
+    /* Prevent narrowing/wrap when encoding the 16-bit OBEX header length field. */
+    if (length > (uint16_t)(UINT16_MAX - (uint16_t)sizeof(struct bt_obex_hdr_bytes)))
+    {
+        return;
+    }
+
     (void)net_buf_add_u8(buf, hi);
-    (void)net_buf_add_be16(buf, length + sizeof(struct bt_obex_hdr_bytes));
+    (void)net_buf_add_be16(buf, (uint16_t)(length + (uint16_t)sizeof(struct bt_obex_hdr_bytes)));
     (void)net_buf_add_mem(buf, value, length);
 }
 
@@ -172,16 +191,23 @@ static inline int bt_obex_get_hdr(struct net_buf *buf, uint8_t hi, uint8_t **val
             hdr.length = sys_cpu_to_be16(((struct bt_obex_hdr_bytes *)buf_data)->length);
         }
 
-        if (hdr.hi == hi)
-        {
-            *value = &((struct bt_obex_hdr_bytes *)buf_data)->hv[0];
-            *length = hdr.length - sizeof(struct bt_obex_hdr_bytes);
-            return 0;
-        }
         if (buf_length < hdr.length)
         {
             return -EINVAL;
         }
+
+        if (hdr.hi == hi)
+        {
+            if (hdr.length < (uint16_t)sizeof(struct bt_obex_hdr_bytes))
+            {
+                return -EINVAL;
+            }
+
+            *value  = &((struct bt_obex_hdr_bytes *)buf_data)->hv[0];
+            *length = (uint16_t)(hdr.length - (uint16_t)sizeof(struct bt_obex_hdr_bytes));
+            return 0;
+        }
+
         buf_length -= hdr.length;
         buf_data   += hdr.length;
     }
@@ -192,18 +218,25 @@ static inline int bt_obex_get_hdr(struct net_buf *buf, uint8_t hi, uint8_t **val
 static inline void bt_obex_add_app_param(struct net_buf *buf, uint8_t tag_id, uint8_t *value, uint8_t length)
 {
     struct bt_obex_hdr_bytes *hdr;
-    uint16_t total_len;
+    uint32_t total_len;
 
     hdr = (struct bt_obex_hdr_bytes *)buf->data;
     if (buf->len == 0U)
     {
         (void)net_buf_add(buf, sizeof(struct bt_obex_hdr_bytes));
-        hdr->hi = BT_OBEX_HDR_APP_PARAM;
+        hdr->hi     = BT_OBEX_HDR_APP_PARAM;
         hdr->length = sys_cpu_to_be16(sizeof(struct bt_obex_hdr_bytes));
     }
-    total_len = sys_be16_to_cpu(hdr->length);
-    total_len += length + sizeof(struct bt_obex_tag_bytes);  /* Tag ID(1-byte), Length(1-byte) */
-    hdr->length = sys_cpu_to_be16(total_len);
+
+    total_len = (uint32_t)sys_be16_to_cpu(hdr->length) + (uint32_t)length + (uint32_t)sizeof(struct bt_obex_tag_bytes);
+
+    /* Prevent unsigned wrap of the 16-bit OBEX header length field. */
+    if (total_len > UINT16_MAX)
+    {
+        return;
+    }
+
+    hdr->length = sys_cpu_to_be16((uint16_t)total_len);
 
     (void)net_buf_add_u8(buf, tag_id);
     (void)net_buf_add_u8(buf, length);
@@ -265,22 +298,30 @@ static inline void bt_obex_app_param_parse(struct net_buf *buf,
     while (hdr_length > 0U)
     {
         struct bt_data data;
+        uint16_t tag_total_len;
 
-        data.type = ((struct bt_obex_tag_bytes *)hdr_value)->id;
-        data.data_len = ((struct bt_obex_tag_bytes *)hdr_value)->length;
-        data.data = &((struct bt_obex_tag_bytes *)hdr_value)->value[0];
-
-        if (!func(&data, user_data)) {
-            return;
-        }
-
-        data.data_len += sizeof(struct bt_obex_tag_bytes);
-        if (hdr_length < data.data_len)
+        if (hdr_length < (uint16_t)sizeof(struct bt_obex_tag_bytes))
         {
             return;
         }
-        hdr_length -= data.data_len;
-        hdr_value  += data.data_len;
+
+        data.type     = ((struct bt_obex_tag_bytes *)hdr_value)->id;
+        data.data_len = ((struct bt_obex_tag_bytes *)hdr_value)->length;
+        data.data     = &((struct bt_obex_tag_bytes *)hdr_value)->value[0];
+
+        tag_total_len = (uint16_t)data.data_len + (uint16_t)sizeof(struct bt_obex_tag_bytes);
+        if (hdr_length < tag_total_len)
+        {
+            return;
+        }
+
+        if (!func(&data, user_data))
+        {
+            return;
+        }
+
+        hdr_length = (uint16_t)(hdr_length - tag_total_len);
+        hdr_value  += tag_total_len;
     }
 }
 

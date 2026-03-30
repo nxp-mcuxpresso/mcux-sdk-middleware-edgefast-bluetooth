@@ -315,16 +315,36 @@ static int bt_map_copy_appl_param_from_buf_to_stack(struct net_buf *buf, MAP_APP
         return err;
     }
 
+    /* Validate header length against available buffer length before parsing. */
+    if ((hdr_value == NULL) || (hdr_length > buf->len))
+    {
+        return -EINVAL;
+    }
+
+    if ((uint32_t)*pkt_len + (uint32_t)hdr_length + (uint32_t)sizeof(struct bt_obex_hdr_bytes) > UINT16_MAX)
+    {
+        return -EINVAL;
+    }
+
     *pkt_len += hdr_length + (uint16_t)sizeof(struct bt_obex_hdr_bytes);
 
     while (hdr_length > 0U)
     {
+        const struct bt_obex_tag_bytes *tag_bytes = (const struct bt_obex_tag_bytes *)(const void *)hdr_value;
+
+        /* Need at least tag header bytes. */
+        if (hdr_length < (uint16_t)sizeof(struct bt_obex_tag_bytes))
+        {
+            return -EINVAL;
+        }
+
         err = bt_map_copy_tag_from_buf_to_stack((struct bt_obex_tag_bytes *)(void *)hdr_value, appl_param);
         if (err < 0)
         {
             return err;
         }
-        tag.id = ((struct bt_obex_tag_bytes *)(void *)hdr_value)->id - 1U;
+
+        tag.id = tag_bytes->id - 1U;
 #ifndef MAP_1_3
         MAP_SET_APPL_PARAM_FLAG
         (
@@ -339,11 +359,14 @@ static int bt_map_copy_appl_param_from_buf_to_stack(struct net_buf *buf, MAP_APP
             tag.id / (sizeof(appl_param->appl_param_flag[0]) * 8U)
         );
 #endif /* MAP_1_3 */
-        tag.length = ((struct bt_obex_tag_bytes *)(void *)hdr_value)->length + (uint16_t)sizeof(struct bt_obex_tag_bytes);
+
+        /* tag_bytes->length is uint8_t; compute in uint16_t to avoid narrowing. */
+        tag.length = (uint16_t)tag_bytes->length + (uint16_t)sizeof(struct bt_obex_tag_bytes);
         if (hdr_length < tag.length)
         {
             return -EINVAL;
         }
+
         hdr_length -= tag.length;
         hdr_value  += tag.length;
     }
@@ -367,18 +390,34 @@ static int bt_map_copy_tag_from_stack_to_buf(uint8_t tag_id, MAP_APPL_PARAMS *ap
             BT_MAP_ADD_FILTER_MESSAGE_TYPE(buf, appl_param->filter_message_type);
             break;
         case BT_MAP_TAG_ID_FILTER_PERIOD_BEGIN:
+            if (appl_param->filter_period_begin.length > UINT8_MAX)
+            {
+                return -EINVAL;
+            }
             BT_MAP_ADD_FILTER_PERIOD_BEGIN(buf, appl_param->filter_period_begin.value, (uint8_t)appl_param->filter_period_begin.length);
             break;
         case BT_MAP_TAG_ID_FILTER_PERIOD_END:
+            if (appl_param->filter_period_end.length > UINT8_MAX)
+            {
+                return -EINVAL;
+            }
             BT_MAP_ADD_FILTER_PERIOD_END(buf, appl_param->filter_period_end.value, (uint8_t)appl_param->filter_period_end.length);
             break;
         case BT_MAP_TAG_ID_FILTER_READ_STATUS:
             BT_MAP_ADD_FILTER_READ_STATUS(buf, appl_param->filter_read_status);
             break;
         case BT_MAP_TAG_ID_FILTER_RECIPIENT:
+            if (appl_param->filter_recipient.length > UINT8_MAX)
+            {
+                return -EINVAL;
+            }
             BT_MAP_ADD_FILTER_RECIPIENT(buf, appl_param->filter_recipient.value, (uint8_t)appl_param->filter_recipient.length);
             break;
         case BT_MAP_TAG_ID_FILTER_ORIGINATOR:
+            if (appl_param->filter_originator.length > UINT8_MAX)
+            {
+                return -EINVAL;
+            }
             BT_MAP_ADD_FILTER_ORIGINATOR(buf, appl_param->filter_originator.value, (uint8_t)appl_param->filter_originator.length);
             break;
         case BT_MAP_TAG_ID_FILTER_PRIORITY:
@@ -439,27 +478,51 @@ static int bt_map_copy_tag_from_stack_to_buf(uint8_t tag_id, MAP_APPL_PARAMS *ap
             BT_MAP_ADD_PRESENCE_AVAILABILITY(buf, appl_param->presence_availability);
             break;
         case BT_MAP_TAG_ID_PRESENCE_TEXT:
+            if (appl_param->presence_text.length > UINT8_MAX)
+            {
+                return -EINVAL;
+            }
             BT_MAP_ADD_PRESENCE_TEXT(buf, appl_param->presence_text.value, (uint8_t)appl_param->presence_text.length);
             break;
         case BT_MAP_TAG_ID_LAST_ACTIVITY:
+            if (appl_param->last_activity.length > UINT8_MAX)
+            {
+                return -EINVAL;
+            }
             BT_MAP_ADD_LAST_ACTIVITY(buf, appl_param->last_activity.value, (uint8_t)appl_param->last_activity.length);
             break;
         case BT_MAP_TAG_ID_FILTER_LAST_ACTIVITY_BEGIN:
+            if (appl_param->filter_last_activity_begin.length > UINT8_MAX)
+            {
+                return -EINVAL;
+            }
             BT_MAP_ADD_FILTER_LAST_ACTIVITY_BEGIN(buf, appl_param->filter_last_activity_begin.value, (uint8_t)appl_param->filter_last_activity_begin.length);
             break;
         case BT_MAP_TAG_ID_FILTER_LAST_ACTIVITY_END:
+            if (appl_param->filter_last_activity_end.length > UINT8_MAX)
+            {
+                return -EINVAL;
+            }
             BT_MAP_ADD_FILTER_LAST_ACTIVITY_END(buf, appl_param->filter_last_activity_end.value, (uint8_t)appl_param->filter_last_activity_end.length);
             break;
         case BT_MAP_TAG_ID_CHAT_STATE:
             BT_MAP_ADD_CHAT_STATE(buf, appl_param->chat_state);
             break;
         case BT_MAP_TAG_ID_CONVERSATION_ID:
+            if (appl_param->conversation_id.length > UINT8_MAX)
+            {
+                return -EINVAL;
+            }
             BT_MAP_ADD_CONVERSATION_ID(buf, appl_param->conversation_id.value, (uint8_t)appl_param->conversation_id.length);
             break;
         case BT_MAP_TAG_ID_FOLDER_VER_CNTR:
             err = -EINVAL;
             break;
         case BT_MAP_TAG_ID_FILTER_MSG_HANDLE:
+            if (appl_param->filter_msg_handle.length > UINT8_MAX)
+            {
+                return -EINVAL;
+            }
             BT_MAP_ADD_FILTER_MSG_HANDLE(buf, appl_param->filter_msg_handle.value, (uint8_t)appl_param->filter_msg_handle.length);
             break;
         case BT_MAP_TAG_ID_NOTIFICATION_FILTER_MASK:
@@ -472,6 +535,10 @@ static int bt_map_copy_tag_from_stack_to_buf(uint8_t tag_id, MAP_APPL_PARAMS *ap
             err = -EINVAL;
             break;
         case BT_MAP_TAG_ID_EXTENDED_DATA:
+            if (appl_param->extended_data.length > UINT8_MAX)
+            {
+                return -EINVAL;
+            }
             BT_MAP_ADD_EXTENDED_DATA(buf, appl_param->extended_data.value, (uint8_t)appl_param->extended_data.length);
             break;
         case BT_MAP_TAG_ID_MAP_SUPPORTED_FEATURES:
@@ -480,6 +547,10 @@ static int bt_map_copy_tag_from_stack_to_buf(uint8_t tag_id, MAP_APPL_PARAMS *ap
 #endif /* MAP_1_3 */
 #ifdef MAP_1_4
         case BT_MAP_TAG_ID_MESSAGE_HANDLE:
+            if (appl_param->msg_handle.length > UINT8_MAX)
+            {
+                return -EINVAL;
+            }
             BT_MAP_ADD_MESSAGE_HANDLE(buf, appl_param->msg_handle.value, (uint8_t)appl_param->msg_handle.length);
             break;
         case BT_MAP_TAG_ID_MODIFY_TEXT:
@@ -709,6 +780,12 @@ static int bt_map_mse_mns_connect(struct bt_conn *conn, uint16_t psm, uint8_t sc
         return -EINVAL;
     }
 
+    if (info.br.dst == NULL)
+    {
+        map_mse_mns_free_instance(_mse_mns);
+        return -EINVAL;
+    }
+
     (void)memcpy(&bd_addr, info.br.dst, sizeof(bd_addr));
     connect_info.bd_addr = (UCHAR *)(void *)&bd_addr;
     connect_info.psm = psm;
@@ -824,15 +901,22 @@ static int bt_map_mse_send_response(struct bt_map_mse_mas *mse_mas, struct net_b
     }
     if (name != NULL)
     {
+        size_t name_len = strlen(name);
+
+        if (name_len >= UINT16_MAX)
+        {
+            return -EINVAL;
+        }
+
         name_req.value = (uint8_t *)name;
-        name_req.length = (uint16_t)strlen(name) + 1U;
+        name_req.length = (uint16_t)(name_len + 1U);
         rsp_info.name = &name_req;
     }
     if (bt_map_mse_get_body(buf, &body_req.value, &body_req.length) == 0)
     {
         rsp_info.body = &body_req;
     }
-    rsp_info.wait = (uint8_t)wait;
+    rsp_info.wait = wait ? 1U : 0U;
     map_header.map_resp_info = &rsp_info;
 
 #ifdef MAP_USE_NET_BUF
@@ -1059,7 +1143,7 @@ int bt_map_mse_mns_get_max_pkt_len(struct bt_map_mse_mns *mse_mns, uint16_t *max
 
 static uint8_t bt_map_convert_result(uint16_t event_result)
 {
-    uint8_t result = (uint8_t)event_result;
+    uint8_t result;
 
     switch (event_result)
     {
@@ -1074,6 +1158,7 @@ static uint8_t bt_map_convert_result(uint16_t event_result)
         case BT_MAP_RSP_SERVICE_UNAVBL:
         case BT_MAP_RSP_FORBIDDEN:
         case BT_MAP_RSP_INT_SERVER_ERR:
+            result = (uint8_t)event_result;
             break;
         case API_SUCCESS:
             result = BT_MAP_RSP_SUCCESS;
@@ -1157,6 +1242,10 @@ static API_RESULT map_mse_callback
             break;
         }
         buf = net_buf_alloc(&mse_mas_rx_pool, osaWaitForever_c);
+        if (buf == NULL)
+        {
+            break;
+        }
         switch(event_header->map_req_info->setpath_flag)
         {
             case 0x02U:
@@ -1667,9 +1756,15 @@ static API_RESULT map_mse_callback
                 UINT32 sdp_record_handle;
                 uint16_t psm = 0;
                 uint8_t scn = 0;
+                uint32_t max_len;
 
                 mse_mas->handle = handle;
-                mse_mas->max_pkt_len = event_header->map_connect_info->max_recv_size + 3U + 17U; /* Subtract 20 in stack and add 20 back here. */
+                max_len = (uint32_t)event_header->map_connect_info->max_recv_size + 3U + 17U; /* Subtract 20 in stack and add 20 back here. */
+                if (max_len > UINT16_MAX)
+                {
+                    max_len = UINT16_MAX;
+                }
+                mse_mas->max_pkt_len = (uint16_t)max_len;
                 mse_mas->flag = BT_OBEX_REQ_UNSEG;
                 BT_dbase_get_record_handle(DB_RECORD_MAP_MSE, handle, &sdp_record_handle);
                 BT_dbase_get_server_channel(sdp_record_handle, PROTOCOL_DESC_LIST, &scn);
@@ -1790,7 +1885,14 @@ static API_RESULT map_mse_callback
             }
             else
             {
-                mse_mns->max_pkt_len = event_header->map_connect_info->max_recv_size + 3U + 5U + 4U; /* Subtract 12 in stack and add 12 back here. */
+                uint32_t max_len;
+
+                max_len = (uint32_t)event_header->map_connect_info->max_recv_size + 3U + 5U + 4U; /* Subtract 12 in stack and add 12 back here. */
+                if (max_len > UINT16_MAX)
+                {
+                    max_len = UINT16_MAX;
+                }
+                mse_mns->max_pkt_len = (uint16_t)max_len;
                 if ((mse_mns_cb != NULL) && (mse_mns_cb->connected != NULL))
                 {
                     mse_mns_cb->connected(mse_mns);

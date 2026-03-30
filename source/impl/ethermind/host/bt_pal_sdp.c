@@ -151,7 +151,11 @@ static uint32_t lookfor_uuid_16(struct bt_sdp_data_elem *elem, uint16_t *uuid_16
     if ((elem->type & BT_SDP_TYPE_DESC_MASK) == BT_SDP_UUID_UNSPEC) {
         if (seq_size == 2U) {
             *uuid_16 = *((uint16_t *)cur_elem);
-            *count = *count + 1;
+            if (*count < UINT8_MAX) {
+                *count = (uint8_t)(*count + 1U);
+            } else {
+                return 0;
+            }
             uuid_16++;
         } else {
             LOG_WRN("Invalid UUID size in local database");
@@ -167,6 +171,9 @@ static uint32_t lookfor_uuid_16(struct bt_sdp_data_elem *elem, uint16_t *uuid_16
             size = lookfor_uuid_16((struct bt_sdp_data_elem *)cur_elem,
                        uuid_16 + *count, count, nest_level + 1);
             cur_elem += sizeof(struct bt_sdp_data_elem);
+            if (seq_size < size) {
+                break;
+            }
             seq_size -= size;
         } while (seq_size);
     }
@@ -193,12 +200,20 @@ static uint32_t lookfor_service_uuids(struct bt_sdp_data_elem *elem, DB_SERVICE_
         if (seq_size == 2U) {
             service_uuids[*count].uuid_len = 2U;
             service_uuids[*count].uuid_16 = *((uint16_t *)cur_elem);
-            *count = *count + 1;
+            if (*count < UINT8_MAX) {
+                *count = (uint8_t)(*count + 1U);
+            } else {
+                return 0;
+            }
         } else if (seq_size == 16U) {
             /* For BT_SDP_UUID128 case */
             service_uuids[*count].uuid_len = 16U;
             memcpy(&service_uuids[*count].uuid_128[0], cur_elem, 16U);
-            *count = *count + 1;
+            if (*count < UINT8_MAX) {
+                *count = (uint8_t)(*count + 1U);
+            } else {
+                return 0;
+            }
         } else {
             LOG_WRN("Invalid UUID size in local database");
             assert(0);
@@ -213,6 +228,9 @@ static uint32_t lookfor_service_uuids(struct bt_sdp_data_elem *elem, DB_SERVICE_
             size = lookfor_service_uuids((struct bt_sdp_data_elem *)cur_elem,
                        service_uuids, count, nest_level + 1);
             cur_elem += sizeof(struct bt_sdp_data_elem);
+            if (seq_size < size) {
+                break;
+            }
             seq_size -= size;
         } while (seq_size);
     }
@@ -244,7 +262,11 @@ static uint32_t lookfor_languagebase_attr_id(struct bt_sdp_data_elem *elem, uint
             }else if (*count == 2) {
                 *base_id = *((uint16_t *)cur_elem);
             }
-            *count = *count +1;
+            if (*count < UINT8_MAX) {
+                *count = (uint8_t)(*count + 1U);
+            } else {
+                return 0;
+            }
         } else {
             LOG_WRN("Invalid UUID size in local database");
             assert(0);
@@ -258,6 +280,9 @@ static uint32_t lookfor_languagebase_attr_id(struct bt_sdp_data_elem *elem, uint
             size = lookfor_languagebase_attr_id((struct bt_sdp_data_elem *)cur_elem,
                        language, char_enc, base_id, count, nest_level + 1);
             cur_elem += sizeof(struct bt_sdp_data_elem);
+            if (seq_size < size) {
+                break;
+            }
             seq_size -= size;
         } while (seq_size);
     }
@@ -286,7 +311,11 @@ static uint32_t lookfor_profile_descriptor_list(struct bt_sdp_data_elem *elem, u
             }else if (*count == 1){
                 *version = *((uint16_t *)cur_elem);
             }
-            *count = *count +1;
+            if (*count < UINT8_MAX) {
+                *count = (uint8_t)(*count + 1U);
+            } else {
+                return 0;
+            }
         } else {
             LOG_WRN("Invalid UUID size in local database");
             assert(0);
@@ -300,8 +329,15 @@ static uint32_t lookfor_profile_descriptor_list(struct bt_sdp_data_elem *elem, u
             size = lookfor_profile_descriptor_list((struct bt_sdp_data_elem *)cur_elem,
                        profile_uuid, version, count, nest_level + 1);
             cur_elem += sizeof(struct bt_sdp_data_elem);
+            if (seq_size < size) {
+                break;
+            }
             seq_size -= size;
         } while (seq_size);
+
+        if (seq_size != 0U) {
+            LOG_WRN("Local SDP parse: seq_size underflow/invalid element size");
+        }
     }
 
     return elem->total_size;
@@ -329,13 +365,21 @@ static uint32_t lookfor_profile_descriptor_list_ex(struct bt_sdp_data_elem *elem
             } else if (*count == 1){  
                 *version = *((uint16_t *)cur_elem); 
             }
-            *count = *count +1;
+            if (*count < UINT8_MAX) {
+                *count = (uint8_t)(*count + 1U);
+            } else {
+                return 0;
+            }
         } else if (seq_size == 16U) {
             if (*count == 0) {
                 profile_uuid->uuid_type = UUID_128;
                  memcpy(&profile_uuid->uuid_union.uuid_128, cur_elem, 16U);
             }
-            *count = *count +1;
+            if (*count < UINT8_MAX) {
+                *count = (uint8_t)(*count + 1U);
+            } else {
+                return 0;
+            }
         } else { 
             LOG_WRN("Invalid UUID size in local database");
             assert(0);
@@ -349,6 +393,9 @@ static uint32_t lookfor_profile_descriptor_list_ex(struct bt_sdp_data_elem *elem
             size = lookfor_profile_descriptor_list_ex((struct bt_sdp_data_elem *)cur_elem,
                        profile_uuid, version, count, nest_level + 1);
             cur_elem += sizeof(struct bt_sdp_data_elem);
+            if (seq_size < size) {
+                break;
+            }
             seq_size -= size;
         } while (seq_size);
     }
@@ -367,8 +414,11 @@ static uint32_t lookfor_service_name(struct bt_sdp_data_elem *elem,
 
     if (elem->type == BT_SDP_TEXT_STR8) {
         if (seq_size > 0U) {
-           memcpy(name, cur_elem, seq_size + 1);
-           *count = seq_size + 1;
+           if (seq_size >= UINT8_MAX) {
+               return 0;
+           }
+           memcpy(name, cur_elem, seq_size + 1U);
+           *count = (uint8_t)(seq_size + 1U);
         } else {
             LOG_WRN("Invalid UUID size in local database");
             assert(0);
@@ -486,14 +536,21 @@ static uint32_t lookfor_add_proto_desc_list(struct bt_sdp_data_elem *elem,
         db_pro_elem = db_pro_elem + *count;
         if (seq_size == 2U) {
             db_pro_elem->protocol_uuid = *((uint16_t *)cur_elem);
-            *count = *count + 1;
+            if (*count < UINT8_MAX) {
+                *count = (uint8_t)(*count + 1U);
+            } else {
+                return 0;
+            }
          } else {
             LOG_WRN("Invalid UUID size in local database");
             assert(0);
         }
     }
     if (elem->type == BT_SDP_UINT16) {
-        db_pro_elem = db_pro_elem + (*count -1);
+        if (*count < 1U) {
+            return 0;
+        }
+        db_pro_elem = db_pro_elem + (*count - 1U);
         if (seq_size == 2U) {
             db_pro_elem->params[db_pro_elem->num_params] = *((uint16_t *)cur_elem);
             db_pro_elem->num_params += 1;
@@ -503,7 +560,10 @@ static uint32_t lookfor_add_proto_desc_list(struct bt_sdp_data_elem *elem,
         }
     }
     if (elem->type == BT_SDP_UINT8) {
-        db_pro_elem = db_pro_elem + (*count -1);
+        if (*count < 1U) {
+            return 0;
+        }
+        db_pro_elem = db_pro_elem + (*count - 1U);
         if (seq_size == 1U) {
             db_pro_elem->params[db_pro_elem->num_params] = *((uint8_t *)cur_elem);
             db_pro_elem->num_params += 1;
@@ -519,6 +579,9 @@ static uint32_t lookfor_add_proto_desc_list(struct bt_sdp_data_elem *elem,
             size = lookfor_add_proto_desc_list((struct bt_sdp_data_elem *)cur_elem,
                                                db_pro_elem, count, nest_level + 1);
             cur_elem += sizeof(struct bt_sdp_data_elem);
+            if (seq_size < size) {
+                break;
+            }
             seq_size -= size;
         } while (seq_size);
     }
@@ -550,7 +613,13 @@ static uint32_t lookfor_additional_proto_list_elems(struct bt_sdp_data_elem *ele
         }
     }
     if (elem->type == BT_SDP_UINT16) {
+        if (db_pro_list_elem->num_elems == 0U) {
+            return 0;
+        }
         if (seq_size == 2U) {
+            if (db_pro_list_elem->num_elems < 1U) {
+                return 0;
+            }
             db_pro_list_elem->elem[db_pro_list_elem->num_elems - 1].params[db_pro_list_elem->elem[db_pro_list_elem->num_elems - 1].num_params] = *((uint16_t *)cur_elem);
             db_pro_list_elem->elem[db_pro_list_elem->num_elems - 1].num_params += 1;
         } else {
@@ -560,6 +629,9 @@ static uint32_t lookfor_additional_proto_list_elems(struct bt_sdp_data_elem *ele
     }
     if (elem->type == BT_SDP_UINT8) {
         if (seq_size == 1U) {
+            if (db_pro_list_elem->num_elems < 1U) {
+                return 0;
+            }
             db_pro_list_elem->elem[db_pro_list_elem->num_elems - 1].params[db_pro_list_elem->elem[db_pro_list_elem->num_elems - 1].num_params] = *((uint16_t *)cur_elem);
             db_pro_list_elem->elem[db_pro_list_elem->num_elems - 1].num_params += 1;
         } else {
@@ -574,6 +646,9 @@ static uint32_t lookfor_additional_proto_list_elems(struct bt_sdp_data_elem *ele
             size = lookfor_additional_proto_list_elems((struct bt_sdp_data_elem *)cur_elem,
                                                db_pro_list_elem, nest_level + 1);
             cur_elem += sizeof(struct bt_sdp_data_elem);
+            if (seq_size < size) {
+                break;
+            }
             seq_size -= size;
         } while (seq_size);
     }
@@ -668,8 +743,8 @@ int bt_sdp_register_service(struct bt_sdp_record *service)
     uint16_t browse_group_uuids[5] = {0};
     uint8_t count;
     uint16_t language;
-    uint16_t char_enc;
-    uint16_t base_id;
+    uint16_t char_enc = 0U;
+    uint16_t base_id = 0U;
 #ifndef SDP_DB_ADD_PROFILE_DESC_LIST_UUID_128_BIT_SUPPORT 
     uint16_t profile_uuid;
 #else
@@ -1274,7 +1349,12 @@ static int sdp_client_ssa_search(struct bt_sdp_client *session)
 	num_uuids = 0x01;
 	net_buf_reset(session->buf);
 	net_buf_reserve(session->buf, SDP_BUFF_RESERVE_FOR_HEAD_LEN);
-	appl_sdp_attrib_datalen = net_buf_tailroom(session->buf);
+        size_t tailroom = net_buf_tailroom(session->buf);
+        if (tailroom > UINT16_MAX) {
+                LOG_ERR("SDP tailroom too large %u", (uint32_t)tailroom);
+                return -EMSGSIZE;
+        }
+        appl_sdp_attrib_datalen = (uint16_t)tailroom;
 	/* Do Service Search Request */
 	retval = BT_sdp_servicesearchattributerequest
 				(
@@ -1403,10 +1483,16 @@ static uint16_t get_record_len(struct net_buf *buf)
 static void sdp_client_notify_result(struct bt_sdp_client *session,
 					 enum uuid_state state)
 {
-	struct bt_conn *conn = session->conn;
+	struct bt_conn *conn;
 	struct bt_sdp_client_result result;
 	uint16_t rec_len;
 	uint8_t user_ret;
+
+	if ((session == NULL) || (session->param == NULL) || (session->param->func == NULL)) {
+		return;
+	}
+
+	conn = session->conn;
 
 	result.uuid = session->param->uuid;
 
@@ -1543,7 +1629,14 @@ static int sdp_client_receive(struct bt_sdp_client *session, struct net_buf *buf
 		}
 
 		/* Get total value of all attributes to be collected */
-		frame_len -= sdp_client_get_total(session, buf, &total);
+		{
+			uint16_t pulled = sdp_client_get_total(session, buf, &total);
+			if (frame_len < pulled) {
+				LOG_ERR("Invalid frame length");
+				goto iterate;
+			}
+			frame_len = (uint16_t)(frame_len - pulled);
+		}
 
 		if (total > net_buf_tailroom(session->rec_buf)) {
 			LOG_WRN("Not enough room for getting records data");
@@ -1839,6 +1932,7 @@ static inline ssize_t sdp_get_uuid_len(const uint8_t *data, size_t len)
 static inline ssize_t sdp_get_str_len(const uint8_t *data, size_t len)
 {
 	const uint8_t *pnext;
+        size_t need;
 
 	assert(data);
 
@@ -1852,23 +1946,22 @@ static inline ssize_t sdp_get_str_len(const uint8_t *data, size_t len)
 	switch (data[0]) {
 	case BT_SDP_TEXT_STR8:
 	case BT_SDP_URL_STR8:
-		if (len < (2 + pnext[0])) {
+		need = 2U + (size_t)pnext[0];
+		if (len < need) {
 			break;
 		}
 
-		return 2 + pnext[0];
+		return (ssize_t)need;
 	case BT_SDP_TEXT_STR16:
 	case BT_SDP_URL_STR16:
 		/* validate len for pnext safe use to read 16bit value */
-		if (len < 3) {
+                need = 3U + sys_get_be16(pnext);
+
+		if (len < need) {
 			break;
 		}
 
-		if (len < (3 + sys_get_be16(pnext))) {
-			break;
-		}
-
-		return 3 + sys_get_be16(pnext);
+		return (ssize_t)need;
 	case BT_SDP_TEXT_STR32:
 	case BT_SDP_URL_STR32:
 	default:
@@ -1884,6 +1977,7 @@ err:
 static inline ssize_t sdp_get_seq_len(const uint8_t *data, size_t len)
 {
 	const uint8_t *pnext;
+        size_t need;
 
 	assert(data);
 
@@ -1897,23 +1991,22 @@ static inline ssize_t sdp_get_seq_len(const uint8_t *data, size_t len)
 	switch (data[0]) {
 	case BT_SDP_SEQ8:
 	case BT_SDP_ALT8:
-		if (len < (2 + pnext[0])) {
+		need = 2U + (size_t)pnext[0];
+		if (len < need) {
 			break;
 		}
 
-		return 2 + pnext[0];
+		return (ssize_t)need;
 	case BT_SDP_SEQ16:
 	case BT_SDP_ALT16:
 		/* validate len for pnext safe use to read 16bit value */
-		if (len < 3) {
+                need = 3 + sys_get_be16(pnext);
+
+		if (len < need) {
 			break;
 		}
 
-		if (len < (3 + sys_get_be16(pnext))) {
-			break;
-		}
-
-		return 3 + sys_get_be16(pnext);
+		return (ssize_t)need;
 	case BT_SDP_SEQ32:
 	case BT_SDP_ALT32:
 	default:
@@ -2055,38 +2148,46 @@ static ssize_t sdp_get_seq_len_item(uint8_t **data, size_t len)
 
 	pnext = *data + sizeof(uint8_t);
 
-	switch (*data[0]) {
-	case BT_SDP_SEQ8:
-		if (len < (2 + pnext[0])) {
+	switch ((*data)[0]) {
+	case BT_SDP_SEQ8:{
+		size_t need = 2U + (size_t)pnext[0];
+		if (len < need) {
 			break;
 		}
 
 		*data += 2;
-		return pnext[0];
-	case BT_SDP_SEQ16:
+		return (ssize_t)pnext[0];
+        }
+	case BT_SDP_SEQ16:{
+		uint16_t v16;
 		/* validate len for pnext safe use to read 16bit value */
 		if (len < 3) {
 			break;
 		}
 
-		if (len < (3 + sys_get_be16(pnext))) {
+		v16 = sys_get_be16(pnext);
+		if (len < (3U + (size_t)v16)) {
 			break;
 		}
 
 		*data += 3;
-		return sys_get_be16(pnext);
-	case BT_SDP_SEQ32:
+		return (ssize_t)v16;
+        }
+	case BT_SDP_SEQ32:{
+		uint32_t v32;
 		/* validate len for pnext safe use to read 32bit value */
 		if (len < 5) {
 			break;
 		}
 
-		if (len < (5 + sys_get_be32(pnext))) {
+		v32 = sys_get_be32(pnext);
+		if (len < (5U + (size_t)v32)) {
 			break;
 		}
 
 		*data += 5;
-		return sys_get_be32(pnext);
+		return (ssize_t)v32;
+        }
 	default:
 		LOG_ERR("Invalid/unhandled DTD 0x%02x", *data[0]);
 		return -EINVAL;
@@ -2644,9 +2745,16 @@ static void ethermind_sdp_callback(struct bt_sdp_client *session, uint8_t comman
 		}
 		else
 		{
+			uint32_t pdu_len32 = (uint32_t)length + 3U;
+			if (pdu_len32 > UINT16_MAX) {
+				LOG_ERR("SDP response too large %u", pdu_len32);
+				BT_SDP(session->buf)->status = (uint16_t)API_FAILURE;
+				k_work_submit(&session->recv);
+				break;
+			}
 			net_buf_add(session->buf, length);
 			net_buf_push_be16(session->buf, length);
-			net_buf_push_be16(session->buf, length + 3);
+			net_buf_push_be16(session->buf, (uint16_t)pdu_len32);
 			net_buf_push_be16(session->buf, 0);
 			net_buf_push_u8(session->buf, BT_SDP_SVC_SEARCH_ATTR_RSP);
 			if (net_buf_tailroom(session->buf) > 0) {

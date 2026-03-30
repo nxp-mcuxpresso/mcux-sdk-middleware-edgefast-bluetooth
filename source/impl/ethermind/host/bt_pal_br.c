@@ -483,7 +483,7 @@ static struct bt_br_discovery_result *get_result_slot(const bt_addr_t *addr, int
 	}
 
 	/* ignore if invalid RSSI */
-	if (rssi == (int8_t)0xff) {
+	if (rssi == (int8_t)-1) {
 		return NULL;
 	}
 
@@ -521,7 +521,8 @@ void bt_hci_inquiry_result_with_rssi(struct net_buf *buf)
 
 	LOG_DBG("number of results: %u", num_reports);
 
-	while (num_reports--) {
+	while (num_reports > 0U) {
+		num_reports--;
 		struct bt_hci_evt_inquiry_result_with_rssi *evt;
 		struct bt_br_discovery_result *result;
 		struct discovery_priv *priv;
@@ -600,7 +601,7 @@ void bt_hci_remote_name_request_complete(struct net_buf *buf)
 	uint8_t *eir;
 	struct bt_br_discovery_cb *listener, *next;
 
-	result = get_result_slot(&evt->bdaddr, 0xff);
+	result = get_result_slot(&evt->bdaddr, (int8_t)-1);
 	if (!result) {
 		return;
 	}
@@ -622,21 +623,28 @@ void bt_hci_remote_name_request_complete(struct net_buf *buf)
 		/* Look for early termination */
 		if (!eir[0]) {
 			size_t name_len;
+			size_t field_len;
 
 			eir_len -= 2;
 
 			/* name is null terminated */
 			name_len = strlen((const char *)evt->name);
 
-			if (name_len > eir_len) {
-				eir[0] = eir_len + 1;
-				eir[1] = EIR_SHORT_NAME;
-			} else {
-				eir[0] = name_len + 1;
-				eir[1] = EIR_SHORT_NAME;
+			/*
+			 * EIR length byte is 1..255, and includes the type byte.
+			 * We have eir_len bytes available for payload after the 2-byte header.
+			 */
+			field_len = (name_len > (size_t)eir_len) ? (size_t)eir_len + 1U : name_len + 1U;
+			if (field_len > UINT8_MAX) {
+				field_len = UINT8_MAX;
 			}
 
-			memcpy(&eir[2], evt->name, eir[0] - 1);
+			eir[0] = (uint8_t)field_len;
+			eir[1] = EIR_SHORT_NAME;
+
+			if (eir[0] > 0U) {
+				memcpy(&eir[2], evt->name, (size_t)eir[0] - 1U);
+			}
 
 			break;
 		}

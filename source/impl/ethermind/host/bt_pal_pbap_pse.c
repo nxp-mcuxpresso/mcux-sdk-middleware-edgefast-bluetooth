@@ -141,9 +141,19 @@ static void bt_pabp_set_appl_params_hdr_value(uint8_t tag_id, PBAP_APPL_PARAMS *
             BT_PBAP_ADD_PARAMS_ORDER(buf, appl_params->order);
             break;
         case BT_PBAP_TAG_ID_SEARCH_VALUE:
-            BT_PBAP_ADD_PARAMS_SEARCH_VALUE(buf, appl_params->search_value.value,
-                                            (uint8_t)strlen((char *)appl_params->search_value.value));
+        {
+            size_t search_len = 0U;
+            if (appl_params->search_value.value == NULL) {
+                return;
+            }
+            search_len = strlen((char *)appl_params->search_value.value);
+            if (search_len > UINT8_MAX)
+            {
+                return;
+            }
+            BT_PBAP_ADD_PARAMS_SEARCH_VALUE(buf, appl_params->search_value.value, (uint8_t)search_len);
             break;
+        }
         case BT_PBAP_TAG_ID_SEARCH_PROPERTY:
             BT_PBAP_ADD_PARAMS_SEARCH_PROPERTY(buf, appl_params->search_attr);
             break;
@@ -290,19 +300,54 @@ static int bt_pbap_form_stack_param(struct net_buf *buf, PBAP_APPL_PARAMS *app_p
 
     if (bt_obex_get_hdr(buf, OBEX_HDR_APP_PARAM, &hdr_value, &hdr_length) == 0)
     {
-        appl_param_len = (uint16_t)sizeof(struct bt_obex_hdr_bytes) + hdr_length;
-        while (hdr_length > 0U) 
+        /* Validate hdr_length before using it as a loop bound and before narrowing. */
+        if ((hdr_value == NULL) || (hdr_length < (uint16_t)sizeof(struct bt_obex_tag_bytes)))
         {
+            return -EINVAL;
+        }
+
+        if ((uint32_t)sizeof(struct bt_obex_hdr_bytes) + (uint32_t)hdr_length > UINT16_MAX)
+        {
+            return -EINVAL;
+        }
+        appl_param_len = (uint16_t)((uint32_t)sizeof(struct bt_obex_hdr_bytes) + (uint32_t)hdr_length);
+
+        while (hdr_length > 0U)
+        {
+            /* Need at least tag header bytes to read id/length. */
+            if (hdr_length < (uint16_t)sizeof(struct bt_obex_tag_bytes))
+            {
+                return -EINVAL;
+            }
+
             (void)bt_pbap_get_appl_param_hdr_value((struct bt_obex_tag_bytes *)(void *)hdr_value, app_par);
-            tag.id = (((struct bt_obex_tag_bytes *)(void *)hdr_value)->id - 1U);
+
+            /* id is 1..16 in PBAP; guard against underflow. */
+            if (((struct bt_obex_tag_bytes *)(void *)hdr_value)->id == 0U)
+            {
+                return -EINVAL;
+            }
+            tag.id = (uint8_t)(((struct bt_obex_tag_bytes *)(void *)hdr_value)->id - 1U);
+
             PBAP_SET_APPL_PARAM_FLAG(app_par->appl_param_flag,
-                                    ((uint16_t)1U << tag.id % BT_PBAP_APPL_PARAM_HDR_COUNT));
-            tag.length = (((struct bt_obex_tag_bytes *)(void *)hdr_value)->length + (uint8_t)sizeof(struct bt_obex_tag_bytes));
+                                    (uint16_t)((uint16_t)1U << (tag.id % BT_PBAP_APPL_PARAM_HDR_COUNT)));
+
+            /* tag.length = tag.value_length + sizeof(tag header) */
+            {
+                uint16_t value_len = ((struct bt_obex_tag_bytes *)(void *)hdr_value)->length;
+                uint32_t total_len = (uint32_t)value_len + (uint32_t)sizeof(struct bt_obex_tag_bytes);
+                if (total_len > UINT16_MAX)
+                {
+                    return -EINVAL;
+                }
+                tag.length = (uint16_t)total_len;
+            }
+
             if (hdr_length < tag.length)
             {
                 return -EINVAL;
             }
-            hdr_length -= tag.length;
+            hdr_length = (uint16_t)(hdr_length - tag.length);
             hdr_value += tag.length;
         }
     }
@@ -423,17 +468,30 @@ static int8_t bt_pal_pull_phonebook_param(PBAP_HEADERS *pbap_headers)
     uint16_t suffix_index = 0;
     char *name;
     char phonebook_name[10] = {0};
-    if ((char *)pbap_headers->pbap_req_info->name == NULL || pbap_headers->pbap_req_info->name->value == NULL)
+    uint16_t start, raw_len, copy_len;
+
+    if ((pbap_headers == NULL) || (pbap_headers->pbap_req_info == NULL) ||
+        (pbap_headers->pbap_req_info->name == NULL) || (pbap_headers->pbap_req_info->name->value == NULL))
     {
         return -EINVAL;
     }
+
+    if (pbap_headers->pbap_req_info->name->length == 0U)
+    {
+        return -EINVAL;
+    }
+
     name = (char *)pbap_headers->pbap_req_info->name->value;
-    index = (int16_t)(pbap_headers->pbap_req_info->name->length -1U);
+
+    /* Coverity: avoid unsigned wrap and narrow explicitly. */
+    index = (int16_t)((short)(pbap_headers->pbap_req_info->name->length - 1U));
+
     if (endwith(name, (char *)".vcf") == 0)
     {
         return -EINVAL;
     }
-    while(index >= 0)
+
+    while (index >= 0)
     {
         if (name[index] == '.')
         {
@@ -445,16 +503,36 @@ static int8_t bt_pal_pull_phonebook_param(PBAP_HEADERS *pbap_headers)
         }
         index--;
     }
-    (void)memcpy(phonebook_name, name + index + 1U, suffix_index - index -1U);
-    phonebook_name[suffix_index - index -1U] = 0;
-    for (index = 0U; index < child_floader_count; index++)
+
+    start = (uint16_t)((uint16_t)index + 1U);
+    if ((suffix_index <= start) || (suffix_index > pbap_headers->pbap_req_info->name->length))
+    {
+        return -EINVAL;
+    }
+
+    raw_len = (uint16_t)(suffix_index - start);
+    copy_len = raw_len;
+    if (copy_len >= (uint16_t)sizeof(phonebook_name))
+    {
+        copy_len = (uint16_t)sizeof(phonebook_name) - 1U;
+    }
+
+    (void)memcpy(phonebook_name, name + start, (unsigned int)copy_len);
+    phonebook_name[copy_len] = '\0';
+
+    /* If truncation happened, reject to avoid accepting ambiguous names. */
+    if (copy_len != raw_len)
+    {
+        return -EINVAL;
+    }
+    for (index = 0; index < (int16_t)child_floader_count; index++)
     {
         if (strcmp((char *)phonebook_name, child_floader[index]) == 0)
         {
             break;
         }
     }
-    if (index == child_floader_count)
+    if (index == (int16_t)child_floader_count)
     {
         return -EINVAL;
     }
@@ -505,6 +583,35 @@ static int8_t bt_pal_pull_vcard_entry_param(PBAP_HEADERS *pbap_headers)
     }
     return 0;
 }
+
+static uint8_t bt_pbap_convert_result(uint16_t event_result)
+{
+    uint8_t result = (uint8_t)event_result;
+
+    switch (event_result)
+    {
+        case BT_PBAP_CONTINUE_RSP:
+        case BT_PBAP_SUCCESS_RSP:
+        case BT_PBAP_BAD_REQ_RSP:
+        case BT_PBAP_NOT_IMPLEMENTED_RSP:
+        case BT_PBAP_UNAUTH_RSP:
+        case BT_PBAP_PRECOND_FAILED_RSP:
+        case BT_PBAP_NOT_FOUND_RSP:
+        case BT_PBAP_NOT_ACCEPTABLE_RSP:
+        case BT_PBAP_NO_SERVICE_RSP:
+        case BT_PBAP_FORBIDDEN_RSP:
+            break;
+        case API_SUCCESS:
+            result = BT_PBAP_SUCCESS_RSP;
+            break;
+        default:
+            result = BT_PBAP_BAD_REQ_RSP;
+            break;
+    }
+
+    return result;
+}
+
 static API_RESULT ethermind_pbap_pse_event_callback(
     /* IN */ uint8_t event_type,
     /* IN */ uint16_t event_result,
@@ -551,8 +658,20 @@ static API_RESULT ethermind_pbap_pse_event_callback(
     switch (event_type)
     {
         case PBAP_PSE_CONNECT_IND:
-            pbap_pse->max_pkt_len = pbap_headers->pbap_connect_info->max_recv_size +
-                                    (3U + 17U); /* Subtract 20 in stack and add 20 back here. */
+        {
+            /* Coverity: avoid narrowing/wrap on max_recv_size + 20U. */
+            uint32_t max_pkt_len32 = 0U;
+            if ((pbap_headers == NULL) || (pbap_headers->pbap_connect_info == NULL))
+            {
+                break;
+            }
+            max_pkt_len32 = (uint32_t)pbap_headers->pbap_connect_info->max_recv_size + (3U + 17U);
+            if (max_pkt_len32 > UINT16_MAX)
+            {
+                return API_FAILURE;
+            }
+            pbap_pse->max_pkt_len = (uint16_t)max_pkt_len32;
+
             pbap_pse->peer_feature  = pbap_headers->pbap_connect_info->pbap_supported_features == 0x0U ?
                                           BT_PBAP_SUPPORTED_FEATURES_V11 :
                                           pbap_headers->pbap_connect_info->pbap_supported_features;
@@ -589,10 +708,22 @@ static API_RESULT ethermind_pbap_pse_event_callback(
                 if (pbap_pse->auth != NULL && pbap_pse->auth->pin_code != NULL &&
                     strlen(pbap_pse->auth->pin_code) > 0U)
                 {
+                    size_t pin_len = strlen(pbap_pse->auth->pin_code);
+                    size_t uid_len = (pbap_pse->auth->user_id != NULL) ? strlen(pbap_pse->auth->user_id) : 0U;
+
+                    if (pin_len > UINT16_MAX)
+                    {
+                        return API_FAILURE;
+                    }
+                    if (uid_len > UINT16_MAX)
+                    {
+                        return API_FAILURE;
+                    }
+
                     password.value  = (UCHAR *)pbap_pse->auth->pin_code;
-                    password.length = (uint16_t)strlen(pbap_pse->auth->pin_code);
+                    password.length = (uint16_t)pin_len;
                     uid.value       = (UCHAR *)pbap_pse->auth->user_id;
-                    uid.length      = (uint16_t)strlen(pbap_pse->auth->user_id);
+                    uid.length      = (uint16_t)uid_len;
                     event_result    = PBAP_SUCCESS_RSP;
                     if (pbap_pse->local_auth)
                     {
@@ -617,10 +748,22 @@ static API_RESULT ethermind_pbap_pse_event_callback(
                 if (pbap_pse->auth != NULL && pbap_pse->auth->pin_code != NULL &&
                     strlen(pbap_pse->auth->pin_code) > 0)
                 {
+                    size_t pin_len = strlen(pbap_pse->auth->pin_code);
+                    size_t uid_len = (pbap_pse->auth->user_id != NULL) ? strlen(pbap_pse->auth->user_id) : 0U;
+
+                    if (pin_len > UINT16_MAX)
+                    {
+                        return API_FAILURE;
+                    }
+                    if (uid_len > UINT16_MAX)
+                    {
+                        return API_FAILURE;
+                    }
+
                     password.value            = (UCHAR *)pbap_pse->auth->pin_code;
-                    password.length           = strlen(pbap_pse->auth->pin_code);
+                    password.length           = (uint16_t)pin_len;
                     uid.value                 = (UCHAR *)pbap_pse->auth->user_id;
-                    uid.length                = (uint16_t)strlen(pbap_pse->auth->user_id);
+                    uid.length                = (uint16_t)uid_len;
                     event_result              = PBAP_SUCCESS_RSP;
                     connect_req_send.pin_info = &password;
                 }
@@ -644,6 +787,7 @@ static API_RESULT ethermind_pbap_pse_event_callback(
                 }
             }
             break;
+        }
 
         case PBAP_PSE_DISCONNECT_IND:
             /* Transport close has been sent in the underlying layer so don't need call BT_pbap_pse_trans_disconnect. */
@@ -656,7 +800,7 @@ static API_RESULT ethermind_pbap_pse_event_callback(
         case PBAP_PSE_ABORT_IND:
             if (pbap_pse_cb != NULL && pbap_pse_cb->abort != NULL && pbap_pse != NULL)
             {
-                pbap_pse_cb->abort(pbap_pse, event_result);
+                pbap_pse_cb->abort(pbap_pse, bt_pbap_convert_result(event_result));
             }
             break;
 

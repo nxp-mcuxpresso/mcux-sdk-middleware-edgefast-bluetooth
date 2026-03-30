@@ -81,13 +81,27 @@ int settings_load_subtree_direct(
     struct lfs_info info;
     lfs_dir_t dir;
     char name[SETTINGS_KEY_MAX + 1];
+    size_t subtree_len;
+    int data_len;
 
     if (NULL == cb)
     {
         return -EINVAL;
     }
 
+    if (NULL == subtree)
+    {
+        return -EINVAL;
+    }
+
+    subtree_len = strlen(subtree);
+    if (subtree_len >= SETTINGS_KEY_MAX)
+    {
+        return -ENAMETOOLONG;
+    }
+
     memset((void *)&dir, 0, sizeof(dir));
+    memset((void *)&info, 0, sizeof(info));
     err = lfs_stat(lfs, subtree, &info);
     if (err < 0)
     {
@@ -108,18 +122,34 @@ int settings_load_subtree_direct(
             {
                 continue;
             }
+
+            if (subtree_len + 1 + strlen(info.name) >= sizeof(name))
+            {
+                lfs_dir_close(lfs, &dir);
+                return -ENAMETOOLONG;
+            }
             memcpy(name, subtree, strlen(subtree));
             name[strlen(subtree)] = SETTINGS_NAME_SEPARATOR;
-            memcpy(&name[strlen(subtree) + 1], info.name, sizeof(name) - strlen(subtree) - 1);
-            name[sizeof(name) - 1] = '\0';
-            err = cb(info.name, settings_load_one(name, NULL, 0), settings_read_data, name, param);
+            memcpy(&name[strlen(subtree) + 1], info.name, strlen(info.name));
+            name[subtree_len + 1 + strlen(info.name)] = '\0';
+            data_len = settings_load_one(name, NULL, 0);
+            if (data_len < 0)
+            {
+                return data_len;
+            }
+            err = cb(info.name, data_len, settings_read_data, name, param);
         }
 
         err = lfs_dir_close(lfs, &dir);
     }
     else
     {
-        err = cb(NULL, settings_load_one(subtree, NULL, 0), settings_read_data, (void*)subtree, param);
+        data_len = settings_load_one(subtree, NULL, 0);
+        if (data_len < 0)
+        {
+            return data_len;
+        }
+        err = cb(NULL, data_len, settings_read_data, (void*)subtree, param);
     }
 
     return err;
@@ -132,8 +162,21 @@ static int settings_load_subtree_scan(struct settings_handler_static *set, const
     char name[SETTINGS_KEY_MAX + 1];
     const char *next;
     int err = -EINVAL;
+    int data_len;
+    size_t key_len;
+
+    if (key == NULL) {
+        return -EINVAL;
+    }
+
+    key_len = strlen(key);
+    if (key_len >= SETTINGS_KEY_MAX) {
+        return -ENAMETOOLONG;
+    }
 
     memset((void *)&dir, 0, sizeof(dir));
+    memset((void *)&info, 0, sizeof(info));
+
     err = lfs_stat(lfs, key, &info);
     if (err < 0)
     {
@@ -159,10 +202,16 @@ static int settings_load_subtree_scan(struct settings_handler_static *set, const
             {
                 continue;
             }
-            memcpy(name, key, strlen(key));
-            name[strlen(key)] = SETTINGS_NAME_SEPARATOR;
-            memcpy(&name[strlen(key) + 1], info.name, MIN(strlen(info.name) + 1, (sizeof(name) - strlen(key) - 1)));
-            name[sizeof(name) - 1] = '\0';
+
+            if (key_len + 1 + strlen(info.name) >= sizeof(name))
+            {
+                lfs_dir_close(lfs, &dir);
+                return -ENAMETOOLONG;
+            }
+            memcpy(name, key, key_len);
+            name[key_len] = SETTINGS_NAME_SEPARATOR;
+            memcpy(&name[key_len + 1], info.name, strlen(info.name));
+            name[key_len + 1 + strlen(info.name)] = '\0';
             err = settings_load_subtree_scan(set, name, level + 1);
         }
 
@@ -173,7 +222,12 @@ static int settings_load_subtree_scan(struct settings_handler_static *set, const
         err = settings_name_steq(key, set->name, &next);
         if (0 != err)
         {
-            err = set->h_set(next, settings_load_one(key, NULL, 0), settings_read_data, (void*)key);
+            data_len = settings_load_one(key, NULL, 0);
+            if (data_len < 0)
+            {
+               return data_len;
+            }
+            err = set->h_set(next, data_len, settings_read_data, (void*)key);
         }
     }
     return err;
@@ -208,11 +262,19 @@ int settings_load(void)
 static int settings_has_spacer(const char *name, const char spacer, int count)
 {
     int times = 0;
-    for (size_t index = 0;index < strlen(name);index++)
+    for (size_t index = 0; index < strlen(name); index++)
     {
         if (spacer == name[index])
         {
-            times++;
+            if (times < INT_MAX)
+            {
+                times++;
+            }
+            else
+            {
+                return -1;
+            }
+
             if (times == count)
             {
                 return (int)index;
@@ -230,11 +292,25 @@ static int settings_check_create_path(const char *name)
     int err;
     int times = 1;
 
+    if (name == NULL)
+    {
+        return -EINVAL;
+    }
+
+    if (times == INT_MAX)
+    {
+        return -EOVERFLOW;
+    }
     index = settings_has_spacer(name, SETTINGS_NAME_SEPARATOR, times++);
 
     while (index > 0)
     {
-        memcpy(dname, name, index);
+        if ((size_t)index >= sizeof(dname))
+        {
+            return -ENAMETOOLONG;
+        }
+
+        (void)strncpy(dname, name, (size_t)index);
         dname[index] = '\0';
 
         err = lfs_stat(lfs, dname, &info);
@@ -247,6 +323,10 @@ static int settings_check_create_path(const char *name)
             }
         }
 
+        if (times == INT_MAX)
+        {
+            return -EOVERFLOW;
+        }
         index = settings_has_spacer(name, SETTINGS_NAME_SEPARATOR, times++);
     }
     return 0;
@@ -340,6 +420,10 @@ int settings_name_next(const char *name, const char **next)
 	 * limited to what can be read
 	 */
 	while ((*name != '\0') && (*name != SETTINGS_NAME_SEPARATOR)) {
+		if (rc == INT_MAX)
+		{
+			return -EOVERFLOW;
+		}
 		rc++;
 		name++;
 	}

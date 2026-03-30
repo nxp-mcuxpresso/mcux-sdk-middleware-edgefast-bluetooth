@@ -661,10 +661,19 @@ static void spp_sdp_cb
                              sdp_query_result,
                              (uint8_t *)&remote_server_channel[remote_server_channel_count - 1U]
                          );
-
+ 
                 if (API_SUCCESS == err)
                 {
-                    remote_server_channel_count++;
+                    /* Guard against wrap-around (Coverity: remote_server_channel_count++ may wrap). */
+                    if (remote_server_channel_count < UINT8_MAX)
+                    {
+                        remote_server_channel_count++;
+                    }
+                    else
+                    {
+                        /* Stop parsing further results if count cannot be represented. */
+                        break;
+                    }
                 }
             }
 
@@ -1205,7 +1214,7 @@ int bt_spp_request_port_setting(struct bt_conn *conn, uint8_t channel, bt_spp_ro
     }
     else
     {
-        LOG_ERR("[SPP] SPP get remote port setting failed, reason is 0x%04X.\n",err);
+        LOG_ERR("[SPP] SPP get remote port setting failed, reason is %d.\n",err);
         if(SPP_CONTROL_CONFIG == spp_control[ctl_hdl].state)
         {
             spp_entity[index].state = SPP_IDLE;
@@ -1258,7 +1267,7 @@ int bt_spp_negotiate_port_setting(struct bt_conn * conn, uint8_t channel, bt_spp
     }
     else
     {
-        LOG_ERR("[SPP] SPP get remote port setting failed, reason is 0x%04X.\n",err);
+        LOG_ERR("[SPP] SPP get remote port setting failed, reason is %d.\n",err);
         if(SPP_CONTROL_CONFIG == spp_control[ctl_hdl].state)
         {
             spp_entity[index].state = SPP_IDLE;

@@ -443,22 +443,47 @@ static int bt_map_copy_tag_from_stack_to_buf(uint8_t tag_id, MAP_APPL_PARAMS *ap
             err = -EINVAL;
             break;
         case BT_MAP_TAG_ID_MSE_TIME:
+            if (appl_param->mse_time.length > UINT8_MAX)
+            {
+                err = -EINVAL;
+                break;
+            }
             BT_MAP_ADD_MSE_TIME(buf, appl_param->mse_time.value, (uint8_t)appl_param->mse_time.length);
             break;
 #ifdef MAP_1_3
         case BT_MAP_TAG_ID_DATABASE_IDENTIFIER:
+            if (appl_param->database_identifier.length > UINT8_MAX)
+            {
+                err = -EINVAL;
+                break;
+            }
             BT_MAP_ADD_DATABASE_IDENTIFIER(buf, appl_param->database_identifier.value, (uint8_t)appl_param->database_identifier.length);
             break;
         case BT_MAP_TAG_ID_CONV_LIST_VER_CNTR:
+            if (appl_param->conv_listing_ver_cntr.length > UINT8_MAX)
+            {
+                err = -EINVAL;
+                break;
+            }
             BT_MAP_ADD_CONV_LIST_VER_CNTR(buf, appl_param->conv_listing_ver_cntr.value, (uint8_t)appl_param->conv_listing_ver_cntr.length);
             break;
         case BT_MAP_TAG_ID_PRESENCE_AVAILABILITY:
             BT_MAP_ADD_PRESENCE_AVAILABILITY(buf, appl_param->presence_availability);
             break;
         case BT_MAP_TAG_ID_PRESENCE_TEXT:
+            if (appl_param->presence_text.length > UINT8_MAX)
+            {
+                err = -EINVAL;
+                break;
+            }
             BT_MAP_ADD_PRESENCE_TEXT(buf, appl_param->presence_text.value, (uint8_t)appl_param->presence_text.length);
             break;
         case BT_MAP_TAG_ID_LAST_ACTIVITY:
+            if (appl_param->last_activity.length > UINT8_MAX)
+            {
+                err = -EINVAL;
+                break;
+            }
             BT_MAP_ADD_LAST_ACTIVITY(buf, appl_param->last_activity.value, (uint8_t)appl_param->last_activity.length);
             break;
         case BT_MAP_TAG_ID_FILTER_LAST_ACTIVITY_BEGIN:
@@ -472,6 +497,11 @@ static int bt_map_copy_tag_from_stack_to_buf(uint8_t tag_id, MAP_APPL_PARAMS *ap
             err = -EINVAL;
             break;
         case BT_MAP_TAG_ID_FOLDER_VER_CNTR:
+            if (appl_param->folder_ver_cntr.length > UINT8_MAX)
+            {
+                err = -EINVAL;
+                break;
+            }
             BT_MAP_ADD_FOLDER_VER_CNTR(buf, appl_param->folder_ver_cntr.value, (uint8_t)appl_param->folder_ver_cntr.length);
             break;
         case BT_MAP_TAG_ID_FILTER_MSG_HANDLE:
@@ -480,6 +510,11 @@ static int bt_map_copy_tag_from_stack_to_buf(uint8_t tag_id, MAP_APPL_PARAMS *ap
             err = -EINVAL;
             break;
         case BT_MAP_TAG_ID_OWNER_UCI:
+            if (appl_param->owner_uci.length > UINT8_MAX)
+            {
+                err = -EINVAL;
+                break;
+            }
             BT_MAP_ADD_OWNER_UCI(buf, appl_param->owner_uci.value, (uint8_t)appl_param->owner_uci.length);
             break;
         case BT_MAP_TAG_ID_EXTENDED_DATA:
@@ -738,6 +773,11 @@ static int bt_map_mce_connect(struct bt_conn *conn, uint16_t psm, uint8_t scn, u
         return -EINVAL;
     }
 
+    if (info.br.dst == NULL)
+    {
+        map_mce_mas_free_instance(_mce_mas);
+        return -EINVAL;
+    }
     (void)memcpy(&bd_addr, info.br.dst, sizeof(bd_addr));
     connect_info.bd_addr = (UCHAR *)(void *)&bd_addr;
     connect_info.psm = psm;
@@ -857,7 +897,7 @@ int bt_map_mce_get_folder_listing(struct bt_map_mce_mas *mce_mas, struct net_buf
     }
 
     BT_mem_set(&get_info, 0, sizeof(MAP_REQUEST_STRUCT));
-    get_info.wait = (uint8_t)wait;
+    get_info.wait = (uint8_t)(wait ? 1U : 0U);
     MAP_RESET_APPL_PARAM_FLAG(appl_param.appl_param_flag);
     err = bt_map_copy_appl_param_from_buf_to_stack(buf, &appl_param, &pkt_len);
     if (err == 0)
@@ -954,12 +994,26 @@ int bt_map_mce_set_folder(struct bt_map_mce_mas *mce_mas, char *name)
         if (name[2] == '/')
         {
             name_req.value = (uint8_t *)&name[3];
-            name_req.length = (strlen(&name[3]) == 0U) ? 0U : (uint16_t)strlen(&name[3]) + 1U;
+            {
+                size_t name_len = strlen(&name[3]);
+                if (name_len > (size_t)(UINT16_MAX - 1U))
+                {
+                    return -EINVAL;
+                }
+                name_req.length = (name_len == 0U) ? 0U : (uint16_t)name_len + 1U;
+            }
         }
         else if (name[2] != '\0')
         {
             name_req.value = (uint8_t *)&name[2];
-            name_req.length = (uint16_t)strlen(&name[2]) + 1U;
+            {
+                size_t name_len = strlen(&name[2]);
+                if (name_len > (size_t)(UINT16_MAX - 1U))
+                {
+                    return -EINVAL;
+                }
+                name_req.length = (uint16_t)name_len + 1U;
+            }
         }
         else
         {
@@ -979,13 +1033,27 @@ int bt_map_mce_set_folder(struct bt_map_mce_mas *mce_mas, char *name)
             else
             {
                 name_req.value = (uint8_t *)&name[2];
-                name_req.length = (uint16_t)strlen(&name[2]) + 1U;
+                {
+                    size_t name_len = strlen(&name[2]);
+                    if (name_len > (size_t)(UINT16_MAX - 1U))
+                    {
+                        return -EINVAL;
+                    }
+                    name_req.length = (uint16_t)name_len + 1U;
+                }
             }
         }
         else if (name[0] != '\0')
         {
             name_req.value = (uint8_t *)name;
-            name_req.length = (uint16_t)strlen(name) + 1U;
+            {
+                size_t name_len = strlen(name);
+                if (name_len > (size_t)(UINT16_MAX - 1U))
+                {
+                    return -EINVAL;
+                }
+                name_req.length = (uint16_t)name_len + 1U;
+            }
         }
         else
         {
@@ -1051,14 +1119,21 @@ int bt_map_mce_get_msg_listing(struct bt_map_mce_mas *mce_mas, struct net_buf *b
     }
 
     BT_mem_set(&get_info, 0, sizeof(get_info));
-    get_info.wait = (uint8_t)wait;
+    get_info.wait = (uint8_t)(wait ? 1U : 0U);
 
     if (((uint8_t)flags & (uint8_t)BT_OBEX_REQ_START) != 0U)
     {
         if (name != NULL)
         {
             name_req.value = (uint8_t *)name;
-            name_req.length = (strlen(name) == 0U) ? 0U : (uint16_t)strlen(name) + 1U;
+            {
+                size_t name_len = strlen(name);
+                if (name_len > (size_t)(UINT16_MAX - 1U))
+                {
+                    return -EINVAL;
+                }
+                name_req.length = (name_len == 0U) ? 0U : (uint16_t)name_len + 1U;
+            }
         }
         else
         {
@@ -1172,7 +1247,7 @@ int bt_map_mce_get_msg(struct bt_map_mce_mas *mce_mas, struct net_buf *buf, char
     }
 
     BT_mem_set(&get_info, 0, sizeof(MAP_REQUEST_STRUCT));
-    get_info.wait = (uint8_t)wait;
+    get_info.wait = (uint8_t)(wait ? 1U : 0U);
     if (((uint8_t)flags & (uint8_t)BT_OBEX_REQ_START) != 0U)
     {
         if (name == NULL)
@@ -1180,7 +1255,14 @@ int bt_map_mce_get_msg(struct bt_map_mce_mas *mce_mas, struct net_buf *buf, char
             LOG_ERR("The name is not present or empty.");
             return -EINVAL;
         }
-        name_req.length = (strlen(name) == 0U) ? 0U : (uint16_t)strlen(name) + 1U;
+        {
+            size_t name_len = strlen(name);
+            if (name_len > (size_t)(UINT16_MAX - 1U))
+            {
+                return -EINVAL;
+            }
+            name_req.length = (name_len == 0U) ? 0U : (uint16_t)name_len + 1U;
+        }
         name_req.value = (uint8_t *)name;
         get_info.name = &name_req;
         if (name_req.length > BT_MAP_MSG_HANDLE_SIZE / 2U)
@@ -1295,7 +1377,14 @@ int bt_map_mce_set_msg_status(struct bt_map_mce_mas *mce_mas, struct net_buf *bu
             return -EINVAL;
         }
         name_req.value = (uint8_t *)name;
-        name_req.length = (strlen(name) == 0U) ? 0U : (uint16_t)strlen(name) + 1U;
+        {
+            size_t name_len = strlen(name);
+            if (name_len > (size_t)(UINT16_MAX - 1U))
+            {
+                return -EINVAL;
+            }
+            name_req.length = (name_len == 0U) ? 0U : (uint16_t)name_len + 1U;
+        }
         set_info.name = &name_req;
         if (name_req.length > BT_MAP_MSG_HANDLE_SIZE / 2U)
         {
@@ -1404,7 +1493,14 @@ int bt_map_mce_push_msg(struct bt_map_mce_mas *mce_mas, struct net_buf *buf, cha
         }
         else
         {
-            name_req.length = (strlen(name) == 0U) ? 0U : (uint16_t)strlen(name) + 1U;
+            {
+                size_t name_len = strlen(name);
+                if (name_len > (size_t)(UINT16_MAX - 1U))
+                {
+                    return -EINVAL;
+                }
+                name_req.length = (name_len == 0U) ? 0U : (uint16_t)name_len + 1U;
+            }
             name_req.value = (uint8_t *)name;
         }
         set_info.name = &name_req;
@@ -1577,7 +1673,7 @@ int bt_map_mce_get_mas_inst_info(struct bt_map_mce_mas *mce_mas, struct net_buf 
     }
 
     BT_mem_set(&get_info, 0, sizeof(MAP_REQUEST_STRUCT));
-    get_info.wait = (uint8_t)wait;
+    get_info.wait = (uint8_t)(wait ? 1U : 0U);
     MAP_RESET_APPL_PARAM_FLAG(appl_param.appl_param_flag);
     err = bt_map_copy_appl_param_from_buf_to_stack(buf, &appl_param, &pkt_len);
     if (err == 0)
@@ -1737,7 +1833,7 @@ int bt_map_mce_get_owner_status(struct bt_map_mce_mas *mce_mas, struct net_buf *
     }
 
     BT_mem_set(&get_info, 0, sizeof(MAP_REQUEST_STRUCT));
-    get_info.wait = (uint8_t)wait;
+    get_info.wait = (uint8_t)(wait ? 1U : 0U);
     MAP_RESET_APPL_PARAM_FLAG(appl_param.appl_param_flag);
     err = bt_map_copy_appl_param_from_buf_to_stack(buf, &appl_param, &pkt_len);
     if (err == 0)
@@ -1824,7 +1920,7 @@ int bt_map_mce_get_convo_listing(struct bt_map_mce_mas *mce_mas, struct net_buf 
     }
 
     BT_mem_set(&get_info, 0, sizeof(MAP_REQUEST_STRUCT));
-    get_info.wait = (uint8_t)wait;
+    get_info.wait = (uint8_t)(wait ? 1U : 0U);
     MAP_RESET_APPL_PARAM_FLAG(appl_param.appl_param_flag);
     err = bt_map_copy_appl_param_from_buf_to_stack(buf, &appl_param, &pkt_len);
     if (err == 0)
@@ -1972,7 +2068,7 @@ int bt_map_mce_send_event_response(struct bt_map_mce_mns *mce_mns, uint8_t resul
 
     BT_mem_set(&rsp_info, 0, sizeof(MAP_REQUEST_STRUCT));
     BT_mem_set(&map_header, 0, sizeof(map_header));
-    rsp_info.wait = (uint8_t)wait;
+    rsp_info.wait = (uint8_t)(wait ? 1U : 0U);
     map_header.map_resp_info = &rsp_info;
     if (BT_map_mce_ns_send_response(&mce_mns->handle, MAP_MCE_NS_EVENT_REPORT_IND, result, &map_header) != API_SUCCESS)
     {
@@ -2583,6 +2679,10 @@ static API_RESULT map_mce_callback
             break;
         }
         buf = net_buf_alloc(&mce_mns_rx_pool, osaWaitForever_c);
+        if (buf == NULL)
+        {
+            break;
+        }
         bt_map_copy_appl_param_from_stack_to_buf(buf, event_header->map_resp_info->appl_params);
         if (event_result == BT_MAP_RSP_CONTINUE)
         {

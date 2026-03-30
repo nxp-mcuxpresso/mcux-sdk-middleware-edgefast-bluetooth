@@ -116,10 +116,18 @@ static int pin_code_reply(struct bt_conn *conn, const char *pin, uint8_t len)
 #else
 	UCHAR pinCode[16];
 	API_RESULT retval;
+	uint8_t copy_len;
 
-	memcpy(pinCode, pin, len);
+	/*
+	 * Coverity: bound copy to local buffer size.
+	 * PIN is not required to be NUL-terminated for the controller API, but we
+	 * still NUL-terminate the local buffer for safety.
+	 */
+	copy_len = (len < (sizeof(pinCode) - 1U)) ? len : (uint8_t)(sizeof(pinCode) - 1U);
+	memcpy(pinCode, pin, copy_len);
+	pinCode[copy_len] = '\0';
 
-	retval = BT_sm_pin_code_request_reply (conn->br.dst.val, (UCHAR *)pinCode, len);
+	retval = BT_sm_pin_code_request_reply(conn->br.dst.val, (UCHAR *)pinCode, copy_len);
 
 	if (API_SUCCESS == retval)
 	{
