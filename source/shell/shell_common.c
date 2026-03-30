@@ -63,6 +63,10 @@ unsigned long shell_strtoul(const char *str, int base, int *err)
 	}
 
 	val = strtoul(str, &endptr, base);
+	if (endptr == str || *endptr) {
+		*err = -EINVAL;
+		return 0;
+	}
 
 	return val;
 }

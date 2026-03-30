@@ -425,16 +425,41 @@ static struct bt_l2cap_server server = {
 static int cmd_register(const struct shell *sh, size_t argc, char *argv[])
 {
 	const char *policy;
+	unsigned long psm;
+	unsigned long sec_level;
+	int err = 0;
 
 	if (server.psm) {
 		shell_error(sh, "Already registered");
 		return -ENOEXEC;
 	}
 
-	server.psm = strtoul(argv[1], NULL, 16);
+	psm = shell_strtoul(argv[1], 16, &err);
+	if (err != 0) {
+		shell_error(sh, "Invalid PSM");
+		return err;
+	}
+
+	if (psm > UINT16_MAX) {
+		shell_error(sh, "PSM out of range");
+		return -EINVAL;
+	}
 
 	if (argc > 2) {
-		server.sec_level = (bt_security_t)strtoul(argv[2], NULL, 10);
+		sec_level = shell_strtoul(argv[2], 10, &err);
+		if (err != 0) {
+			shell_error(sh, "Invalid security level");
+			return err;
+		}
+
+		if (sec_level > UINT8_MAX) {
+			shell_error(sh, "Security level out of range");
+			return -EINVAL;
+		}
+
+		server.sec_level = (bt_security_t)sec_level;
+	} else {
+		server.sec_level = BT_SECURITY_L1;
 	}
 
 	if (argc > 3) {
@@ -448,6 +473,8 @@ static int cmd_register(const struct shell *sh, size_t argc, char *argv[])
 			return -EINVAL;
 		}
 	}
+
+	server.psm = (uint16_t)psm;
 
 	if (bt_l2cap_server_register(&server) < 0) {
 		shell_error(sh, "Unable to register psm");
@@ -548,8 +575,8 @@ static int cmd_ecred_connect(const struct shell *sh, size_t argc, char *argv[])
 
 static int cmd_connect(const struct shell *sh, size_t argc, char *argv[])
 {
-	uint16_t psm;
-	int err;
+	unsigned long psm;
+	int err = 0;
 
 	if (!default_conn) {
 		shell_error(sh, "Not connected");
@@ -561,14 +588,34 @@ static int cmd_connect(const struct shell *sh, size_t argc, char *argv[])
 		return -ENOEXEC;
 	}
 
-	psm = strtoul(argv[1], NULL, 16);
+	psm = shell_strtoul(argv[1], 16, &err);
+	if (err != 0) {
+		shell_error(sh, "Invalid PSM");
+		return err;
+	}
+
+	if (psm > UINT16_MAX) {
+		shell_error(sh, "PSM out of range");
+		return -EINVAL;
+	}
 
 	if (argc > 2) {
-		int sec;
+		unsigned long sec;
 
-		sec = *argv[2] - '0';
+		sec = shell_strtoul(argv[2], 10, &err);
+		if (err != 0) {
+			shell_error(sh, "Invalid security level");
+			return err;
+		}
+
+		if (sec > UINT8_MAX) {
+			shell_error(sh, "Security level out of range");
+			return -EINVAL;
+		}
 
 		l2ch_chan.ch.required_sec_level = (bt_security_t)sec;
+	} else {
+		l2ch_chan.ch.required_sec_level = BT_SECURITY_L1;
 	}
 
 	err = bt_l2cap_chan_connect(default_conn, &l2ch_chan.ch.chan, psm);
@@ -641,9 +688,19 @@ static void unblock_send_timer_cb(struct k_work *work)
 
 static int cmd_unblock_send(const struct shell *sh, size_t argc, char *argv[])
 {
+	int err = 0;
+	unsigned long val;
+
 	if (argc > 1) {
-		unblock_send_count = strtoul(argv[1], NULL, 10);
-		if (unblock_send_count <= 0) {
+		val = shell_strtoul(argv[1], 10, &err);
+		if (err != 0) {
+			shell_error(sh, "Invalid number");
+			return err;
+		}
+
+		unblock_send_count = (uint32_t)val;
+
+		if (unblock_send_count == 0) {
 			shell_print(sh,
 			"Number should be greater than 0");
 			return -EINVAL;
@@ -652,17 +709,39 @@ static int cmd_unblock_send(const struct shell *sh, size_t argc, char *argv[])
 	}
 
 	if (argc > 2) {
-		unblock_send_length = strtoul(argv[2], NULL, 10);
-		req_data_tx_chunk_len = unblock_send_length;
+		val = shell_strtoul(argv[2], 10, &err);
+		if (err != 0) {
+			shell_error(sh, "Invalid length");
+			return err;
+		}
+
+		if (val > UINT8_MAX) {
+			shell_error(sh, "Value out of range");
+			return -EINVAL;
+		}
+
+		unblock_send_length = (uint8_t)val;
 		if (unblock_send_length > DATA_MTU) {
 			shell_print(sh,
 			"Length exceeds TX MTU for the channel");
 			return -EINVAL;
 		}
+		req_data_tx_chunk_len = unblock_send_length;
 	}
 
 	if (argc > 3) {
-		tx_throughput_print_flag = strtoul(argv[3], NULL, 10);
+		val = shell_strtoul(argv[3], 10, &err);
+		if (err != 0) {
+			shell_error(sh, "Invalid flag");
+			return err;
+		}
+
+		if (val > 1) {
+			shell_error(sh, "Value out of range");
+			return -EINVAL;
+		}
+
+		tx_throughput_print_flag = val > 0 ? true : false;
 	}
 
 	if(!unblock_send_timer_initialized)
@@ -677,9 +756,23 @@ static int cmd_unblock_send(const struct shell *sh, size_t argc, char *argv[])
 
 static int cmd_rx_calculate_tput(const struct shell *sh, size_t argc, char *argv[])
 {
+	int err = 0;
+	unsigned long val;
+
 	if (argc > 1) {
-		exp_data_rx_count = strtoul(argv[1], NULL, 10);
-		if (exp_data_rx_count <= 0) {
+		val = shell_strtoul(argv[1], 10, &err);
+		if (err != 0) {
+			shell_error(sh, "Invalid number");
+			return err;
+		}
+
+		if (val > UINT16_MAX) {
+			shell_error(sh, "Value out of range");
+			return -EINVAL;
+		}
+
+		exp_data_rx_count = (uint16_t)val;
+		if (exp_data_rx_count == 0) {
 			shell_print(sh,
 			"Number should be greater than 0");
 			return -EINVAL;
@@ -687,7 +780,18 @@ static int cmd_rx_calculate_tput(const struct shell *sh, size_t argc, char *argv
 	}
 
 	if (argc > 2) {
-		exp_data_rx_chunk_len = strtoul(argv[2], NULL, 10);
+		val = shell_strtoul(argv[2], 10, &err);
+		if (err != 0) {
+			shell_error(sh, "Invalid length");
+			return err;
+		}
+
+		if (val > UINT16_MAX) {
+			shell_error(sh, "Value out of range");
+			return -EINVAL;
+		}
+
+		exp_data_rx_chunk_len = (uint16_t)val;
 		if (exp_data_rx_chunk_len > DATA_MTU) {
 			shell_print(sh,
 			"Length exceeds TX MTU for the channel");
@@ -696,7 +800,18 @@ static int cmd_rx_calculate_tput(const struct shell *sh, size_t argc, char *argv
 	}
 
 	if (argc > 3) {
-		rx_throughput_print_flag = strtoul(argv[3], NULL, 10);
+		val = shell_strtoul(argv[3], 10, &err);
+		if (err != 0) {
+			shell_error(sh, "Invalid flag");
+			return err;
+		}
+
+		if (val > 1) {
+			shell_error(sh, "Value out of range");
+			return -EINVAL;
+		}
+
+		rx_throughput_print_flag = val > 0 ? true : false;
 	}
 
 	return 0;
@@ -708,18 +823,43 @@ static int cmd_send(const struct shell *sh, size_t argc, char *argv[])
 	static uint8_t buf_data[DATA_MTU] = { [0 ... (DATA_MTU - 1)] = 0xff };
 	int ret, len = DATA_MTU, count = 1;
 	struct net_buf *buf;
+	int err = 0;
+	unsigned long val;
 
 	if (argc > 1) {
-		count = strtoul(argv[1], NULL, 10);
+		val = shell_strtoul(argv[1], 10, &err);
+		if (err != 0) {
+			shell_error(sh, "Invalid number");
+			return err;
+		}
+
+		if (val > INT_MAX) {
+			shell_error(sh, "Value out of range");
+			return -EINVAL;
+		}
+
+		count = (int)val;
 	}
 
 	if (argc > 2) {
-		len = strtoul(argv[2], NULL, 10);
-		if (len > DATA_MTU) {
+		val = shell_strtoul(argv[2], 10, &err);
+		if (err != 0) {
+			shell_error(sh, "Invalid length");
+			return err;
+		}
+
+		if (val > INT_MAX) {
+			shell_error(sh, "Value out of range");
+			return -EINVAL;
+		}
+
+		if (val > DATA_MTU) {
 			shell_print(sh,
 				    "Length exceeds TX MTU for the channel");
 			return -ENOEXEC;
 		}
+
+		len = (int)val;
 	}
 
 	len = MIN(l2ch_chan.ch.tx.mtu, len);
@@ -753,8 +893,17 @@ static int cmd_send(const struct shell *sh, size_t argc, char *argv[])
 
 static int cmd_recv(const struct shell *sh, size_t argc, char *argv[])
 {
+	int err = 0;
+	unsigned long val;
+
 	if (argc > 1) {
-		l2cap_recv_delay_ms = strtoul(argv[1], NULL, 10);
+		val = shell_strtoul(argv[1], 10, &err);
+		if (err != 0) {
+			shell_error(sh, "Invalid delay");
+			return err;
+		}
+
+		l2cap_recv_delay_ms = (uint32_t)val;
 	} else {
 		shell_print(sh, "l2cap receive delay: %u ms",
 			    l2cap_recv_delay_ms);
