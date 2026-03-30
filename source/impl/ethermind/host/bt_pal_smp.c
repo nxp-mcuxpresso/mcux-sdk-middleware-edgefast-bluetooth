@@ -1327,7 +1327,7 @@ static void smp_br_auth_starting(struct bt_smp_br *smp)
 		}
 		else
 		{
-			ret = -1;
+			ret = BT_SMP_ERR_UNSPECIFIED;
 		}
 	}
 
@@ -3400,35 +3400,38 @@ void bt_le_oob_set_legacy_flag(bool enable)
 	legacy_oobd_present = enable;
 }
 
+#define SET_BIT_U8_SAFE(var, bit)    ((var) |= (uint8_t)(bit))
+#define CLEAR_BIT_U8_SAFE(var, bit)  ((var) &= (uint8_t)(~((uint8_t)(bit))))
+
 #if (defined(CONFIG_BT_PERIPHERAL) && ((CONFIG_BT_PERIPHERAL) > 0U))
 static uint8_t get_auth(struct bt_smp *smp, uint8_t auth)
 {
 	struct bt_conn *conn = smp->chan.chan.conn;
 
 	if (sc_supported) {
-		auth &= BT_SMP_AUTH_MASK_SC;
+		auth &= (uint8_t)BT_SMP_AUTH_MASK_SC;
 	} else {
-		auth &= BT_SMP_AUTH_MASK;
+		auth &= (uint8_t)BT_SMP_AUTH_MASK;
 	}
 
 	if ((get_io_capa(smp) == BT_SMP_IO_NO_INPUT_OUTPUT) ||
 	    (!IS_ENABLED(CONFIG_BT_SMP_ENFORCE_MITM) &&
 	    (conn->required_sec_level < BT_SECURITY_L3))) {
-		auth &= ~(BT_SMP_AUTH_MITM);
+		CLEAR_BIT_U8_SAFE(auth, BT_SMP_AUTH_MITM);
 	} else {
-		auth |= BT_SMP_AUTH_MITM;
+		SET_BIT_U8_SAFE(auth, BT_SMP_AUTH_MITM);
 	}
 
 	if (bondable) {
-		auth |= BT_SMP_AUTH_BONDING;
+		SET_BIT_U8_SAFE(auth, BT_SMP_AUTH_BONDING);
 	} else {
-		auth &= ~BT_SMP_AUTH_BONDING;
+		CLEAR_BIT_U8_SAFE(auth, BT_SMP_AUTH_BONDING);
 	}
 
 	if (IS_ENABLED(CONFIG_BT_PASSKEY_KEYPRESS)) {
-		auth |= BT_SMP_AUTH_KEYPRESS;
+		SET_BIT_U8_SAFE(auth, BT_SMP_AUTH_KEYPRESS);
 	} else {
-		auth &= ~BT_SMP_AUTH_KEYPRESS;
+		CLEAR_BIT_U8_SAFE(auth, BT_SMP_AUTH_KEYPRESS);
 	}
 
 	return auth;
@@ -3775,8 +3778,8 @@ static uint8_t smp_pairing_req(struct bt_smp *smp, struct bt_smp_pairing *req, S
 #endif
 
 #if !(defined(CONFIG_BT_CLASSIC) && ((CONFIG_BT_CLASSIC) > 0U))
-	rsp->resp_key_dist &= ~BT_SMP_DIST_LINK_KEY;
-	rsp->init_key_dist &= ~BT_SMP_DIST_LINK_KEY;
+	CLEAR_BIT_U8_SAFE(rsp->resp_key_dist, BT_SMP_DIST_LINK_KEY);
+	CLEAR_BIT_U8_SAFE(rsp->init_key_dist, BT_SMP_DIST_LINK_KEY);
 #ifdef SMP_LESC_CROSS_TXP_KEY_GEN
 	auth->xtx_info &= ~SMP_XTX_KEYGEN_MASK;
 #endif
@@ -5555,8 +5558,8 @@ static void bt_smp_encrypt_change(struct bt_l2cap_chan *chan,
 		smp->remote_dist &= ~BT_SMP_DIST_LINK_KEY;
 	}
 #else
-	smp->local_dist &= ~BT_SMP_DIST_LINK_KEY;
-	smp->remote_dist &= ~BT_SMP_DIST_LINK_KEY;
+	CLEAR_BIT_U8_SAFE(smp->local_dist, BT_SMP_DIST_LINK_KEY);
+	CLEAR_BIT_U8_SAFE(smp->remote_dist, BT_SMP_DIST_LINK_KEY);
 #endif
 
 	if (smp->remote_dist & BT_SMP_DIST_ENC_KEY) {
@@ -5652,6 +5655,11 @@ int bt_smp_sign_verify(struct bt_conn *conn, struct net_buf *buf)
 	uint32_t tempCnt;
 	int err;
 
+	if (buf->len < sizeof(sig)) {
+		LOG_ERR("Buffer too short for signature");
+		return -EINVAL;
+	}
+
 	/* Store signature incl. count */
 	memcpy(sig, net_buf_tail(buf) - sizeof(sig), sizeof(sig));
 
@@ -5712,12 +5720,9 @@ int bt_smp_sign(struct bt_conn *conn, struct net_buf *buf)
 		return -ENOENT;
 	}
 
-	/* Reserve space for data signature */
-	net_buf_add(buf, 12);
-
 	/* Copy signing count */
 	cnt = sys_cpu_to_le32(keys->local_csrk.cnt);
-	memcpy(net_buf_tail(buf) - 12, &cnt, sizeof(cnt));
+	memcpy(net_buf_add(buf, 12), &cnt, sizeof(cnt));
 
 	LOG_DBG("Sign data len %u key %s count %u", buf->len,
 	       bt_hex(keys->local_csrk.val, 16), keys->local_csrk.cnt);
@@ -7039,8 +7044,8 @@ int bt_smp_start_security(struct bt_conn *conn)
 	/* Only secure connection support CTKD */
 	if (auth.pair_mode != SMP_LESC_MODE)
 	{
-		keyDistribution &= ~BT_SMP_DIST_LINK_KEY;
-		keyDistribution &= ~(BT_SMP_DIST_LINK_KEY << 4);
+		CLEAR_BIT_U8_SAFE(keyDistribution, BT_SMP_DIST_LINK_KEY);
+		CLEAR_BIT_U8_SAFE(keyDistribution, (BT_SMP_DIST_LINK_KEY << 4));
 	}
 	(void)BT_smp_set_key_distribution_flag_pl(keyDistribution);
 
@@ -7258,6 +7263,11 @@ static void bt_smp_get_auth_info(struct bt_conn *conn)
 
     smp = smp_chan_get(conn);
 
+	if (smp == NULL) {
+		LOG_ERR("No SMP context for conn %p", conn);
+		return;
+	}
+
 	LOG_DBG("update auth info smp %p", smp);
 
 	retval = BT_smp_get_device_security_info (&conn->deviceId, &le_auth_info);
@@ -7267,55 +7277,55 @@ static void bt_smp_get_auth_info(struct bt_conn *conn)
 		{
 			if (SMP_SEC_LEVEL_2 == (le_auth_info.security & 0x0F))
 			{
-				conn->le.keys->flags |= BT_KEYS_AUTHENTICATED;
+				SET_BIT_U8_SAFE(conn->le.keys->flags, BT_KEYS_AUTHENTICATED);
 			}
 			conn->le.keys->enc_size = le_auth_info.ekey_size;
 			if (SMP_LESC_MODE == le_auth_info.pair_mode)
 			{
-				conn->le.keys->flags |= BT_KEYS_SC;
-                atomic_set_bit(smp->flags, SMP_FLAG_SC);
+				SET_BIT_U8_SAFE(conn->le.keys->flags, BT_KEYS_SC);
+				atomic_set_bit(smp->flags, SMP_FLAG_SC);
 			}
 			else
 			{
-                atomic_clear_bit(smp->flags, SMP_FLAG_SC);
-				conn->le.keys->flags &= ~BT_KEYS_SC;
+				atomic_clear_bit(smp->flags, SMP_FLAG_SC);
+				CLEAR_BIT_U8_SAFE(conn->le.keys->flags, BT_KEYS_SC);
 			}
 
-            if (SMP_TRUE == le_auth_info.bonding)
-            {
-                atomic_set_bit(smp->flags, SMP_FLAG_BOND);
-            }
+			if (SMP_TRUE == le_auth_info.bonding)
+			{
+				atomic_set_bit(smp->flags, SMP_FLAG_BOND);
+			}
 
 			/* Check if the link is authenticated */
 			if ((SMP_ENTITY_AUTH_ON == le_auth_info.param) &&
 				(SMP_TRUE == le_auth_info.bonding))
 			{
-                retval = BT_smp_get_device_keys
-                            (
-                                &conn->deviceId,
-                                &p_keys,
-                                &p_key_info
-                            );
+				retval = BT_smp_get_device_keys
+					(
+						&conn->deviceId,
+						&p_keys,
+						&p_key_info
+					);
 
-                if (API_SUCCESS == retval)
-                {
-                    const bt_addr_le_t *dst;
-                    bt_addr_le_t id_addr;
+				if (API_SUCCESS == retval)
+				{
+					const bt_addr_le_t *dst;
+					bt_addr_le_t id_addr;
 #if (defined(CONFIG_BT_SIGNING) && (CONFIG_BT_SIGNING> 0))
-                    SMP_KEY_DIST * local_key_info;
+					SMP_KEY_DIST * local_key_info;
 #endif
-                    if (BT_SMP_MAX_ENC_KEY_SIZE == le_auth_info.ekey_size)
-                    {
-                        /* SC pairing */
-                        bt_keys_add_type(conn->le.keys, BT_KEYS_LTK_P256);
-                        LOG_DBG("SC pairing");
-                    }
-                    else
-                    {
-                        /* Legacy pairing */
-                        bt_keys_add_type(conn->le.keys, BT_KEYS_LTK);
-                        LOG_DBG("Legacy pairing");
-                    }
+					if (BT_SMP_MAX_ENC_KEY_SIZE == le_auth_info.ekey_size)
+					{
+						/* SC pairing */
+						bt_keys_add_type(conn->le.keys, BT_KEYS_LTK_P256);
+						LOG_DBG("SC pairing");
+					}
+					else
+					{
+						/* Legacy pairing */
+						bt_keys_add_type(conn->le.keys, BT_KEYS_LTK);
+						LOG_DBG("Legacy pairing");
+					}
 #if 0
 					if (BT_SMP_KEYS_REMOTE_ENCKEY & p_keys)
 #endif
@@ -7327,8 +7337,8 @@ static void bt_smp_get_auth_info(struct bt_conn *conn)
 								sizeof(conn->le.keys->ltk.rand));
 						memcpy(conn->le.keys->ltk.ediv, &p_key_info.mid_info[0],
 								sizeof(conn->le.keys->ltk.ediv));
-						smp->local_dist &= ~BT_SMP_DIST_ENC_KEY;
-						smp->remote_dist &= ~BT_SMP_DIST_ENC_KEY;
+						CLEAR_BIT_U8_SAFE(smp->local_dist, BT_SMP_DIST_ENC_KEY);
+						CLEAR_BIT_U8_SAFE(smp->remote_dist, BT_SMP_DIST_ENC_KEY);
 					}
 					if (BT_SMP_KEYS_REMOTE_IDKEY & p_keys)
 					{
@@ -7341,19 +7351,19 @@ static void bt_smp_get_auth_info(struct bt_conn *conn)
 								sizeof(conn->le.keys->irk.rpa.val));
 						memcpy(&id_addr.a.val[0], &p_key_info.id_addr_info[1],
 								sizeof(id_addr.a.val));
-						smp->local_dist &= ~BT_SMP_DIST_ID_KEY;
-						smp->remote_dist &= ~BT_SMP_DIST_ID_KEY;
+						CLEAR_BIT_U8_SAFE(smp->local_dist, BT_SMP_DIST_ID_KEY);
+						CLEAR_BIT_U8_SAFE(smp->remote_dist, BT_SMP_DIST_ID_KEY);
 					}
 #if (defined(CONFIG_BT_SIGNING) && (CONFIG_BT_SIGNING> 0))
-                    if (API_SUCCESS == BT_smp_get_key_exchange_info_pl(&local_key_info))
-                    {
-						LOG_DBG("Add Local CSRK");
-                        bt_keys_add_type(conn->le.keys, BT_KEYS_LOCAL_CSRK);
-                        memcpy(conn->le.keys->local_csrk.val, &local_key_info->sign_info[0],
-                                sizeof(conn->le.keys->local_csrk.val));
-                        conn->le.keys->local_csrk.cnt = 0;
-						smp->local_dist &= ~BT_SMP_DIST_SIGN;
-                    }
+					if (API_SUCCESS == BT_smp_get_key_exchange_info_pl(&local_key_info))
+					{
+									LOG_DBG("Add Local CSRK");
+						bt_keys_add_type(conn->le.keys, BT_KEYS_LOCAL_CSRK);
+						memcpy(conn->le.keys->local_csrk.val, &local_key_info->sign_info[0],
+							sizeof(conn->le.keys->local_csrk.val));
+						conn->le.keys->local_csrk.cnt = 0;
+						CLEAR_BIT_U8_SAFE(smp->local_dist, BT_SMP_DIST_SIGN);
+					}
 					if (BT_SMP_KEYS_REMOTE_SIGNKEY & p_keys)
 					{
 						LOG_DBG("Add Remote CSRK");
@@ -7361,7 +7371,7 @@ static void bt_smp_get_auth_info(struct bt_conn *conn)
 						memcpy(conn->le.keys->remote_csrk.val, &p_key_info.sign_info[0],
 								sizeof(conn->le.keys->remote_csrk.val));
 						conn->le.keys->remote_csrk.cnt = 0;
-						smp->remote_dist &= ~BT_SMP_DIST_SIGN;
+						CLEAR_BIT_U8_SAFE(smp->remote_dist, BT_SMP_DIST_SIGN);
 					}
 #endif
 					/*
@@ -7433,7 +7443,8 @@ static void smp_auth_starting(struct bt_smp *smp)
 		}
 		else
 		{
-			ret = -1;
+			ret = BT_SMP_ERR_UNSPECIFIED;
+			LOG_ERR("Failed to get pairing req pdu");
 		}
 	}
 
@@ -7586,9 +7597,9 @@ void appl_smp_rpa_search_complete(SMP_RPA_RESOLV_INFO* rpa_info, UINT16 status)
 	memcpy(keys->ltk.val, peer_key_info.enc_info, sizeof(keys->ltk.val));
 
 	if (lkey_type == HCI_LINK_KEY_AUTHENTICATED_P_256) {
-		keys->flags |= BT_KEYS_AUTHENTICATED;
+		SET_BIT_U8_SAFE(keys->flags, BT_KEYS_AUTHENTICATED);
 	} else {
-		keys->flags &= ~BT_KEYS_AUTHENTICATED;
+		CLEAR_BIT_U8_SAFE(keys->flags, BT_KEYS_AUTHENTICATED);
 	}
 
 	k_work_cancel_delayable(&smp->auth_timeout);
@@ -7777,15 +7788,15 @@ void appl_smp_lesc_xtxp_lk_complete(SMP_LESC_LK_LTK_GEN_PL * xtxp)
     memcpy(link_key->val, xtxp->lk, SMP_LK_SIZE);
     if (API_SUCCESS == retval) {
         if (SMP_LESC_MODE == auth.pair_mode) {
-            link_key->flags |= BT_LINK_KEY_SC;
+            SET_BIT_U8_SAFE(link_key->flags, BT_LINK_KEY_SC);
         } else {
-            link_key->flags &= ~BT_LINK_KEY_SC;
+            CLEAR_BIT_U8_SAFE(link_key->flags, BT_LINK_KEY_SC);
         }
 
         if (SMP_SEC_LEVEL_2 == auth.security) {
-            link_key->flags |= BT_LINK_KEY_AUTHENTICATED;
+            SET_BIT_U8_SAFE(link_key->flags, BT_LINK_KEY_AUTHENTICATED);
         } else {
-            link_key->flags &= ~BT_LINK_KEY_AUTHENTICATED;
+            CLEAR_BIT_U8_SAFE(link_key->flags, BT_LINK_KEY_AUTHENTICATED);
         }
 
         if (auth.bonding) {
@@ -8169,6 +8180,13 @@ static void hci_acl_smp_br_handler(struct net_buf *buf)
         LOG_DBG("Local keys negotiated - 0x%02X", kx_param->keys);
         LOG_DBG("Encryption Key Size negotiated - 0x%02X",
                 kx_param->ekey_size);
+
+        if (kx_param->ekey_size > SMP_LTK_SIZE)
+        {
+            LOG_WRN("Invalid key size received - %d. Setting to max supported - %d",
+                    kx_param->ekey_size, SMP_LTK_SIZE);
+            kx_param->ekey_size = SMP_LTK_SIZE;
+        }
 
 #ifdef SMP_LESC_CROSS_TXP_KEY_GEN
         /* Save the local key distribution information */
@@ -8570,6 +8588,12 @@ static void hci_acl_smp_handler(struct net_buf *buf)
             }
         }
     }
+
+	if (smp == NULL) {
+		bt_conn_unref(conn);
+		return;
+	}
+
     retval = API_SUCCESS;
 
     switch(hdr->pdu.event)
@@ -8816,7 +8840,7 @@ static void hci_acl_smp_handler(struct net_buf *buf)
 				smp_auth_cb->cancel(conn);
 			}
 		}
-		smp_pairing_complete(smp, smp->status);
+		smp_pairing_complete(smp, (uint8_t)(smp->status & 0xFFU));
 		break;
 
 	case SMP_AUTHENTICATION_RESPONSE:
@@ -9008,6 +9032,13 @@ static void hci_acl_smp_handler(struct net_buf *buf)
         LOG_DBG("Local keys negotiated - 0x%02X", kx_param->keys);
         LOG_DBG("Encryption Key Size negotiated - 0x%02X",
                 kx_param->ekey_size);
+
+        if (kx_param->ekey_size > SMP_LTK_SIZE)
+        {
+            LOG_WRN("Invalid key size received - %d. Setting to max supported - %d",
+                    kx_param->ekey_size, SMP_LTK_SIZE);
+            kx_param->ekey_size = SMP_LTK_SIZE;
+        }
 
         /* Get platform data of key informations */
         BT_smp_get_key_exchange_info_pl (&key_info);
@@ -9540,19 +9571,19 @@ static void bt_smp_le_update_io_cap(const struct bt_conn_auth_cb *auth)
 	else
 	{
 		if ((NULL != auth->passkey_display)
-		&& (NULL != auth->passkey_entry)
-        && ((NULL != auth->passkey_confirm) || (0U == sc_supported)))
+			&& (NULL != auth->passkey_entry)
+			&& ((NULL != auth->passkey_confirm) || (!sc_supported)))
 		{
 			ioCap = SMP_IO_CAPABILITY_KEYBOARD_DISPLAY;
 		}
 		else if ((NULL != auth->passkey_display)
-        && (NULL != auth->passkey_confirm)
-        && (1U == sc_supported))
+			&& (NULL != auth->passkey_confirm)
+			&& (sc_supported))
 		{
-            ioCap = SMP_IO_CAPABILITY_DISPLAY_YESNO;
-        }
-        else if ((NULL != auth->passkey_entry))
-        {
+			ioCap = SMP_IO_CAPABILITY_DISPLAY_YESNO;
+		}
+		else if ((NULL != auth->passkey_entry))
+		{
 			if (IS_ENABLED(CONFIG_BT_FIXED_PASSKEY) &&
 				fixed_passkey != BT_PASSKEY_INVALID)
 			{
