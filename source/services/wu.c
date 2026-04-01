@@ -36,7 +36,7 @@ typedef struct _bt_gatt_wu_peer_state
     struct bt_gatt_discover_params discoverParams;
     //struct bt_gatt_subscribe_params subscribeParams;
     struct bt_gatt_write_params writeParams;
-    volatile uint8_t discoverWriteHandle;
+    volatile uint16_t discoverWriteHandle;
     volatile uint8_t discoverPermission;
 } bt_gatt_wu_peer_state_t;
 
@@ -118,9 +118,9 @@ static int bt_gatt_wu_read_response_for_notify(void *param, uint8_t* buffer, ssi
     uint16_t len = 0;
     int sent = 0;
 
-    while (length > 0U)
+    while (length > 0)
     {
-        len = length > (mtu-3)? mtu-3 : length;
+        len = (uint16_t)(length > (mtu-3)? mtu-3 : length);
         length = length - len;
         ret = bt_gatt_notify(state->conn, &wirelessUart.attrs[3], &buffer[sent], len);
         if (ret >= 0)
@@ -143,9 +143,9 @@ static int bt_gatt_wu_read_response_for_write(void *param, uint8_t* buffer, ssiz
     uint16_t len = 0;
     int sent = 0;
 
-    while (length > 0U)
+    while (length > 0)
     {
-        len = length > (mtu-3)? mtu-3 : length;
+        len = (uint16_t)(length > (mtu-3)? mtu-3 : length);
         length = length - len;
         if (state->discoverPermission & BT_GATT_CHRC_WRITE_WITHOUT_RESP)
         {
@@ -363,9 +363,13 @@ static int bt_gatt_wu_read_response_for_read(void *param, uint8_t* buffer, ssize
     uint16_t len = 0;
     int sent = 0;
 
+    if (mtu <= 3) {
+        return -1;
+    }
+
     while (length > 0)
     {
-        len = length > (mtu-3)? mtu-3 : length;
+        len = (uint16_t)(length > (mtu-3)? mtu-3 : length);
         length = length - len;
 
         ret = bt_gatt_attr_read(read->state->conn, read->attr, read->buf, read->len, read->offset, &buffer[sent], len);
@@ -442,14 +446,14 @@ static ssize_t bt_gatt_wu_info(struct bt_conn *conn, const struct bt_gatt_attr *
          void *buf, uint16_t len, uint16_t offset)
 {
     return bt_gatt_attr_read(conn, attr, buf, len, offset, s_WuState.name,
-                 strlen(s_WuState.name));
+                (uint16_t)strlen(s_WuState.name));
 }
 
 static ssize_t bt_gatt_wu_serial_no(struct bt_conn *conn, const struct bt_gatt_attr *attr,
          void *buf, uint16_t len, uint16_t offset)
 {
     return bt_gatt_attr_read(conn, attr, buf, len, offset, s_WuState.serialNo,
-                 strlen(s_WuState.serialNo));
+                (uint16_t)strlen(s_WuState.serialNo));
 }
 
 

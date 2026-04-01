@@ -599,7 +599,7 @@ int bt_aes_128_cmac_update(bt_aes_128_cmac_state_t *state, const uint8_t * data,
 		len -= sizeof(state->data) - state->len;
 		input = &data[sizeof(state->data) - state->len];
 		state->len = sizeof(state->data);
-		n = (uint8_t) ((len) / sizeof(state->data)); /* n is number of rounds */
+		n = (uint32_t) ((len) / sizeof(state->data)); /* n is number of rounds */
 		if (sizeof(state->data) == len)
 		{
 			n = 0;

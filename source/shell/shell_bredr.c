@@ -120,6 +120,10 @@ static int cmd_disconnect(const struct shell *sh, size_t argc, char *argv[])
 
 	if (default_br_conn && argc < 3) {
 		conn = bt_conn_ref(default_br_conn);
+		if (!conn) {
+			shell_error(sh, "Connection reference failed");
+			return -EINVAL;
+		}
 	} else {
 		shell_error(sh, "No default connection");
 		return 0;
@@ -242,7 +246,14 @@ static int cmd_discovery(const struct shell *sh, size_t argc, char *argv[])
 		param.length = 8U;
 
 		if (argc > 2) {
-			param.length = atoi(argv[2]);
+			int len = atoi(argv[2]);
+			if (len < 0 || len > 255)
+			{
+				shell_error(sh, "Invalid length value");
+				return -EINVAL;
+			}
+
+			param.length = (uint8_t)len;
 		}
 
 		if (argc > 3 && !strcmp(argv[3], "limited")) {
@@ -389,12 +400,21 @@ static struct bt_l2cap_server br_server = {
 static int cmd_l2cap_register(const struct shell *sh,
 			      size_t argc, char *argv[])
 {
+	unsigned long psm;
+	int err = 0;
+
 	if (br_server.psm) {
 		shell_print(sh, "Already registered");
 		return 0;
 	}
 
-	br_server.psm = strtoul(argv[1], NULL, 16);
+	psm = shell_strtoul(argv[1], 16, &err);
+	if (err || psm > UINT16_MAX) {
+			shell_error(sh, "Invalid PSM value");
+			return -EINVAL;
+	}
+
+	br_server.psm = (uint16_t)psm;
 #if (defined(CONFIG_BT_L2CAP_IFRAME_SUPPORT) && (CONFIG_BT_L2CAP_IFRAME_SUPPORT > 0U))
         select_l2cap_mode = 0u;
 #endif
@@ -563,20 +583,29 @@ static struct bt_l2cap_server br_mode_server = {
 static int cmd_l2cap_register_modes(const struct shell *sh,
 			      size_t argc, char *argv[])
 {
-        uint8_t mode;
+	int err = 0;
+	unsigned long psm;
+	unsigned long mode;
 
 	if (br_mode_server.psm) {
-		shell_print(sh, "Already registered");
-		return 0;
+			shell_print(sh, "Already registered");
+			return 0;
 	}
 
-	br_mode_server.psm = strtoul(argv[1], NULL, 16);
-        mode = strtoul(argv[2], NULL, 16);
-        if ((mode != 3u) && (mode != 4u)) {
-            shell_error(sh, "mode is not right");
-            return -EINVAL;
-        }
-        select_l2cap_mode = mode;
+	psm = shell_strtoul(argv[1], 16, &err);
+	if (err || psm == 0 || psm > UINT16_MAX) {
+			shell_error(sh, "Invalid PSM");
+			return -EINVAL;
+	}
+
+	mode = shell_strtoul(argv[2], 16, &err);
+	if (err || ((mode != 3u) && (mode != 4u))) {
+			shell_error(sh, "mode is not right");
+			return -EINVAL;
+	}
+
+	br_mode_server.psm = (uint16_t)psm;
+	select_l2cap_mode = (uint8_t)mode;
 
 	if (bt_l2cap_br_server_register(&br_mode_server) < 0) {
 		shell_error(sh, "Unable to register psm");
@@ -892,6 +921,8 @@ static int cmd_l2cap_connect(const struct shell *sh, size_t argc, char *argv[])
 	struct br_l2ch *br_l2cap_channel;
 	uint16_t psm;
 	int err;
+	int err_val = 0;
+	unsigned long val;
 
 	if (!default_br_conn) {
 		shell_error(sh, "Not connected");
@@ -904,12 +935,23 @@ static int cmd_l2cap_connect(const struct shell *sh, size_t argc, char *argv[])
 		return -EINVAL;
 	}
 
-	psm = strtoul(argv[1], NULL, 16);
+	val = shell_strtoul(argv[1], 16, &err_val);
+	if (err_val != 0 || val > UINT16_MAX) {
+			shell_error(sh, "Invalid PSM value");
+			l2cap_channel_free(br_l2cap_channel);
+			return -EINVAL;
+	}
+	psm = (uint16_t)val;
 
 	if (argc > 2) {
 		int sec;
 
 		sec = *argv[2] - '0';
+		if ((sec < BT_SECURITY_L0) || (sec > BT_SECURITY_L4)) {
+			shell_error(sh, "Invalid security level %d", sec);
+			l2cap_channel_free(br_l2cap_channel);
+			return -EINVAL;
+		}
 #if (defined(CONFIG_BT_L2CAP_DYNAMIC_CHANNEL) && (CONFIG_BT_L2CAP_DYNAMIC_CHANNEL > 0))
 		br_l2cap_channel->ch.required_sec_level = (bt_security_t)sec;
 #endif
@@ -1076,7 +1118,14 @@ static int cmd_l2cap_send(const struct shell *sh, size_t argc, char *argv[])
 	struct net_buf *buf;
 
 	if (argc > 1) {
-		count = strtoul(argv[1], NULL, 10);
+		unsigned long val;
+		int err = 0;
+		val = shell_strtoul(argv[1], 10, &err);
+		if (err || val > INT_MAX || val == 0) {
+			shell_error(sh, "Invalid count value");
+			return -EINVAL;
+		}
+		count = (int)val;
 	}
 
 	br_l2cap_channel = l2cap_channel_lookup_conn(default_br_conn);
@@ -1089,6 +1138,10 @@ static int cmd_l2cap_send(const struct shell *sh, size_t argc, char *argv[])
 
 	while (count--) {
 		buf = net_buf_alloc(&data_pool, osaWaitForever_c);
+		if (buf == NULL) {
+			shell_error(sh, "Failed to allocate buffer");
+			return -ENOMEM;
+		}
 		net_buf_reserve(buf, BT_L2CAP_CHAN_SEND_RESERVE);
 
 		net_buf_add_mem(buf, buf_data, len);
@@ -1120,7 +1173,7 @@ void discovery_recv_cb(const struct bt_br_discovery_result *result)
 		switch (eir[1]) {
 		case BT_DATA_NAME_SHORTENED:
 		case BT_DATA_NAME_COMPLETE:
-			memcpy(temp, &eir[2], eir[0] - 1);
+			memcpy(temp, &eir[2], (size_t)(eir[0] - 1));
 			temp[eir[0] - 1] = '\0'; /* Set end flag */
 			PRINTF(", name %s", temp);
 			break;
@@ -1150,7 +1203,7 @@ void discovery_timeout_cb(const struct bt_br_discovery_result *results,
 			switch (eir[1]) {
 			case BT_DATA_NAME_SHORTENED:
 			case BT_DATA_NAME_COMPLETE:
-				memcpy(temp, &eir[2], eir[0] - 1);
+				memcpy(temp, &eir[2], (size_t)(eir[0] - 1));
 				temp[eir[0] - 1] = '\0'; /* Set end flag */
 				PRINTF(", name %s", temp);
 				break;

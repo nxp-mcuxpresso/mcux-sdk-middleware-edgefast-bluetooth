@@ -40,7 +40,8 @@ static void shell_print_response(const struct shell *sh, const uint8_t *data, si
 {
     shell_dump(sh, " HCI Command Response : ");
 
-    while (len--) {
+    while (len > 0) {
+        len--;
         shell_dump(sh, "%02X ", *data++);
     }
 	shell_dump(sh, "\r\n");
@@ -73,6 +74,8 @@ static int bt_enter_test_mode(const struct shell *sh, size_t argc, char **argv)
 static int bt_tx_test(const struct shell *sh, size_t argc, char **argv)
 {
     int err;
+    int parse_err = 0;
+    long val;
     struct net_buf *buf = NULL;
     struct net_buf *rsp = NULL;
 
@@ -87,9 +90,15 @@ static int bt_tx_test(const struct shell *sh, size_t argc, char **argv)
         shell_print(sh, "Usage: bt_test.tx_test test_scenario[1] hopping_mode[1] tx_channel[1] rx_channel[1] tx_test_interval[1] pkt_type[1] data_length[2] whitening[1] num_pkt[4] tx_pwr[1]\n");
         return -EINVAL;
     }
-    if((strtol(argv[5],NULL,16)) > 0x0E)
+
+    val = shell_strtol(argv[5], 16, &parse_err);
+    if (parse_err) {
+        shell_print(sh, "Invalid tx_test_interval parameter\n");
+        return -EINVAL;
+    }
+    if (val > 0x0E)
     {
-        shell_print(sh,"tx_test_interval= %x\n", strtol(argv[6],NULL,16));
+        shell_print(sh, "tx_test_interval= %lx\n", val);
         shell_print(sh,"invalid argument parameter for tx_test_interval. The value should be less than or equal to 0x0E\n");
         return -EINVAL;
     }
@@ -112,38 +121,126 @@ static int bt_tx_test(const struct shell *sh, size_t argc, char **argv)
         cp->phd_off_start = 0x80;
         shell_print(sh, "phd_off_start default set to=%x\n",cp->phd_off_start);
 
-        cp->test_scenario = strtol(argv[1],NULL,16);
+        val = shell_strtol(argv[1], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid test_scenario parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->test_scenario = (uint8_t)val;
         shell_print(sh, "test_scenario= %x\n", cp->test_scenario);
 
-        cp->hopping_mode = strtol(argv[2],NULL,16);
+        val = shell_strtol(argv[2], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid hopping_mode parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->hopping_mode = (uint8_t)val;
         shell_print(sh, "hopping_mode= %x\n", cp->hopping_mode);
 
-        cp->tx_channel = strtol(argv[3],NULL,16);
+        val = shell_strtol(argv[3], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid tx_channel parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->tx_channel = (uint8_t)val;
         shell_print(sh, "tx_channel= %x\n", cp->tx_channel);
 
-        cp->rx_channel = strtol(argv[4],NULL,16);
+        val = shell_strtol(argv[4], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid rx_channel parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->rx_channel = (uint8_t)val;
         shell_print(sh, "rx_channel= %x\n", cp->rx_channel);
 
-        cp->tx_test_interval = strtol(argv[5],NULL,16);
+        val = shell_strtol(argv[5], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid tx_test_interval parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->tx_test_interval = (uint8_t)val;
         shell_print(sh, "tx_test_interval= %x\n", cp->tx_test_interval);
 
-        cp->pkt_type = strtol(argv[6],NULL,16);
+        val = shell_strtol(argv[6], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid pkt_type parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->pkt_type = (uint8_t)val;
         shell_print(sh, "pkt_type= %x\n", cp->pkt_type);
 
-        cp->data_length[0] = strtol(argv[7],NULL,16);
-        cp->data_length[1] = strtol(argv[8],NULL,16);
+        val = shell_strtol(argv[7], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid data_length[0] parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->data_length[0] = (uint8_t)val;
+
+        val = shell_strtol(argv[8], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid data_length[1] parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->data_length[1] = (uint8_t)val;
         shell_print(sh, "data_length= %x %x\n", cp->data_length[0],cp->data_length[1]);
 
-        cp->whitening = strtol(argv[9],NULL,16);
+        val = shell_strtol(argv[9], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid whitening parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->whitening = (uint8_t)val;
         shell_print(sh, "whitening= %x\n", cp->whitening);
 
-        cp->num_pkt[0] = strtol(argv[10],NULL,16);
-        cp->num_pkt[1] = strtol(argv[11],NULL,16);
-        cp->num_pkt[2] = strtol(argv[12],NULL,16);
-        cp->num_pkt[3] = strtol(argv[13],NULL,16);
+        val = shell_strtol(argv[10], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid num_pkt[0] parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->num_pkt[0] = (uint8_t)val;
+
+        val = shell_strtol(argv[11], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid num_pkt[1] parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->num_pkt[1] = (uint8_t)val;
+
+        val = shell_strtol(argv[12], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid num_pkt[2] parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->num_pkt[2] = (uint8_t)val;
+
+        val = shell_strtol(argv[13], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid num_pkt[3] parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->num_pkt[3] = (uint8_t)val;
         shell_print(sh, "num_pkt= %x %x %x %x\n", cp->num_pkt[0],cp->num_pkt[1],cp->num_pkt[2],cp->num_pkt[3]);
 
-        cp->tx_pwr = strtol(argv[14],NULL,16);
+        val = shell_strtol(argv[14], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid tx_pwr parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->tx_pwr = (uint8_t)val;
         shell_print(sh, "tx_pwr= %x\n", cp->tx_pwr);
 
         err = bt_hci_cmd_send_sync(BT_HCI_OP_TX_TEST, buf, &rsp);
@@ -157,7 +254,9 @@ static int bt_tx_test(const struct shell *sh, size_t argc, char **argv)
     if (err)
     {
         shell_print(sh, "BR/EDR transmitter test command failed (err %d)\n", err);
-        net_buf_unref(rsp);
+        if (rsp) {
+            net_buf_unref(rsp);
+        }
         return -EINVAL;
     }
     else
@@ -168,10 +267,11 @@ static int bt_tx_test(const struct shell *sh, size_t argc, char **argv)
     }
 }
 
-
 static int bt_rx_test(const struct shell *sh, size_t argc, char **argv)
 {
     int err;
+    int parse_err = 0;
+    long val;
     struct net_buf *buf = NULL;
     struct net_buf *rsp = NULL;
 
@@ -179,7 +279,6 @@ static int bt_rx_test(const struct shell *sh, size_t argc, char **argv)
     {
         shell_print(sh, "the parameter count is wrong\r\n");
     }
-
 
     if (argc < 18)
     {
@@ -195,27 +294,91 @@ static int bt_rx_test(const struct shell *sh, size_t argc, char **argv)
     {
         cp = net_buf_add(buf, sizeof(*cp));
 
-        cp->test_scenario = strtol(argv[1],NULL,16);
+        val = shell_strtol(argv[1], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid test_scenario parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->test_scenario = (uint8_t)val;
         shell_print(sh, "test_scenario= %x\n", cp->test_scenario);
 
-        cp->tx_channel = strtol(argv[2],NULL,16);
+        val = shell_strtol(argv[2], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid tx_channel parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->tx_channel = (uint8_t)val;
         shell_print(sh, "tx_channel= %x\n", cp->tx_channel);
 
-        cp->rx_channel = strtol(argv[3],NULL,16);
+        val = shell_strtol(argv[3], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid rx_channel parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->rx_channel = (uint8_t)val;
         shell_print(sh, "rx_channel= %x\n", cp->rx_channel);
 
-        cp->pkt_type = strtol(argv[4],NULL,16);
+        val = shell_strtol(argv[4], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid pkt_type parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->pkt_type = (uint8_t)val;
         shell_print(sh, "pkt_type= %x\n", cp->pkt_type);
 
-        cp->num_pkt[0] = strtol(argv[5],NULL,16);
-        cp->num_pkt[1] = strtol(argv[6],NULL,16);
-        cp->num_pkt[2] = strtol(argv[7],NULL,16);
-        cp->num_pkt[3] = strtol(argv[8],NULL,16);
-        shell_print(sh, "num_pkt= %x %x %x %x\n", cp->num_pkt[0],cp->num_pkt[1],cp->num_pkt[2],cp->num_pkt[3]);
+        val = shell_strtol(argv[5], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid num_pkt[0] parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->num_pkt[0] = (uint8_t)val;
 
-        cp->data_length[0] = strtol(argv[9],NULL,16);
-        cp->data_length[1] = strtol(argv[10],NULL,16);
-        shell_print(sh, "data_length= %x %x\n", cp->data_length[0],cp->data_length[1]);
+        val = shell_strtol(argv[6], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid num_pkt[1] parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->num_pkt[1] = (uint8_t)val;
+
+        val = shell_strtol(argv[7], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid num_pkt[2] parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->num_pkt[2] = (uint8_t)val;
+
+        val = shell_strtol(argv[8], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid num_pkt[3] parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->num_pkt[3] = (uint8_t)val;
+        shell_print(sh, "num_pkt= %x %x %x %x\n", cp->num_pkt[0], cp->num_pkt[1], cp->num_pkt[2], cp->num_pkt[3]);
+
+        val = shell_strtol(argv[9], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid data_length[0] parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->data_length[0] = (uint8_t)val;
+
+        val = shell_strtol(argv[10], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid data_length[1] parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->data_length[1] = (uint8_t)val;
+        shell_print(sh, "data_length= %x %x\n", cp->data_length[0], cp->data_length[1]);
 
         /*Set to default*/
         cp->tx_am_addr = 0x01;
@@ -223,19 +386,29 @@ static int bt_rx_test(const struct shell *sh, size_t argc, char **argv)
 
         for (index = 0; index < BT_BD_ADDR_SIZE; index++)
         {
-            cp->tx_addr[index]=strtol(argv[11+index], NULL,16);
+            val = shell_strtol(argv[11 + index], 16, &parse_err);
+            if (parse_err) {
+                shell_print(sh, "Invalid tx_addr[%d] parameter\n", index);
+                net_buf_unref(buf);
+                return -EINVAL;
+            }
+            cp->tx_addr[index] = (uint8_t)val;
         }
 
         shell_print(sh, "tx_addr: ");
-
-        for (index = 0;index < BT_BD_ADDR_SIZE; index++)
+        for (index = 0; index < BT_BD_ADDR_SIZE; index++)
         {
-            shell_print(sh, "%x ",cp->tx_addr[index]);
+            shell_print(sh, "%x ", cp->tx_addr[index]);
         }
-
         shell_print(sh, "\n");
 
-        cp->report_err_pkt = strtol(argv[17], NULL, 16);
+        val = shell_strtol(argv[17], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid report_err_pkt parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->report_err_pkt = (uint8_t)val;
         shell_print(sh, "report_err_pkt= %x\n", cp->report_err_pkt);
 
         err = bt_hci_cmd_send_sync(BT_HCI_OP_RX_TEST, buf, &rsp);
@@ -249,12 +422,14 @@ static int bt_rx_test(const struct shell *sh, size_t argc, char **argv)
     if (err)
     {
         shell_print(sh, "BR/EDR receiver test command failed (err %d)\n", err);
-        net_buf_unref(rsp);
+        if (rsp) {
+            net_buf_unref(rsp);
+        }
         return -EINVAL;
     }
     else
     {
-        shell_print_response(sh,rsp->data,rsp->len);
+        shell_print_response(sh, rsp->data, rsp->len);
         net_buf_unref(rsp);
         return 0;
     }
@@ -287,34 +462,62 @@ static int bt_reset(const struct shell *sh, size_t argc, char **argv)
 static int hci_cmd_interface(const struct shell *sh, size_t argc, char **argv)
 {
     int err;
+    int parse_err = 0;
+    long val;
     struct net_buf *buf = NULL;
     struct net_buf *rsp = NULL;
     struct bt_hci_command command_buffer;
 
-
     if (argc < 3)
     {
-    	shell_print(sh, "the parameter count is wrong\r\n");
-        shell_print(sh, "Usage: le_test.set_tx_power tx_power[1]\n");
+        shell_print(sh, "the parameter count is wrong\r\n");
+        shell_print(sh, "Usage: hci.generic_command ogf[1] ocf[1] params....\n");
         return -EINVAL;
     }
 
-    command_buffer.ogf = strtol(argv[1],NULL,16);
-    command_buffer.ocf = strtol(argv[2],NULL,16);
+    /* Check param_len overflow before casting to uint8_t */
+    if ((argc - 3U) > 255)
+    {
+        shell_print(sh, "Too many parameters\r\n");
+        return -EINVAL;
+    }
 
-    command_buffer.opcode = ((command_buffer.ocf & 0x3ff) | (command_buffer.ogf << 10));
-    command_buffer.param_len = argc - 3 ;
+    val = shell_strtol(argv[1], 16, &parse_err);
+    if (parse_err || val < 0 || val > 0x3F)
+    {
+        shell_print(sh, "Invalid ogf parameter (must be 0x00-0x3F)\n");
+        return -EINVAL;
+    }
+    command_buffer.ogf = (uint8_t)val;
+
+    val = shell_strtol(argv[2], 16, &parse_err);
+    if (parse_err || val < 0 || val > 0x3FF)
+    {
+        shell_print(sh, "Invalid ocf parameter (must be 0x000-0x3FF)\n");
+        return -EINVAL;
+    }
+    command_buffer.ocf = (uint16_t)val;
+
+    command_buffer.opcode = (uint16_t)((command_buffer.ocf & 0x3FFU) | ((uint16_t)command_buffer.ogf << 10U));
+    command_buffer.param_len = (uint8_t)(argc - 3U);
 
     uint8_t *bt_hci_cmd_params = NULL;
 
     buf = bt_hci_cmd_create(command_buffer.opcode, command_buffer.param_len);
     if (buf != NULL)
     {
-    	bt_hci_cmd_params = net_buf_add(buf, command_buffer.param_len);
+        bt_hci_cmd_params = net_buf_add(buf, command_buffer.param_len);
 
-        for(int i= 0 ; i < command_buffer.param_len ; i++)
+        for (int i = 0; i < command_buffer.param_len; i++)
         {
-        	bt_hci_cmd_params[i] = strtol(argv[i+3],NULL, 16);
+            val = shell_strtol(argv[i + 3], 16, &parse_err);
+            if (parse_err || val < 0 || val > UINT8_MAX)
+            {
+                shell_print(sh, "Invalid parameter[%d] (must be 0x00-0xFF)\n", i);
+                net_buf_unref(buf);
+                return -EINVAL;
+            }
+            bt_hci_cmd_params[i] = (uint8_t)val;
         }
 
         err = bt_hci_cmd_send_sync(command_buffer.opcode, buf, &rsp);
@@ -325,35 +528,37 @@ static int hci_cmd_interface(const struct shell *sh, size_t argc, char **argv)
     }
     else
     {
-    	err = -ENOBUFS;
-    	shell_print(sh, "No buffer space available\r\n");
+        err = -ENOBUFS;
+        shell_print(sh, "No buffer space available\r\n");
     }
 
     if (err)
     {
         shell_print(sh, "HCI command failed (err %d)\n", err);
-        if(rsp)
+        if (rsp)
         {
-          net_buf_unref(rsp);
+            net_buf_unref(rsp);
         }
         return -EINVAL;
     }
     else
     {
-    	shell_print_response(sh,rsp->data,rsp->len);
-    	net_buf_unref(rsp);
-    	return 0;
+        shell_print_response(sh, rsp->data, rsp->len);
+        net_buf_unref(rsp);
+        return 0;
     }
 }
 
 static int le_set_tx_power(const struct shell *sh, size_t argc, char **argv)
 {
     int err;
+    int parse_err = 0;
+    long val;
     struct net_buf *buf = NULL, *rsp=NULL;
 
     if (argc < 3)
     {
-    	shell_print(sh, "the parameter count is wrong\r\n");
+        shell_print(sh, "the parameter count is wrong\r\n");
         shell_print(sh, "Usage: le_test.set_tx_power tx_power[1] feloss[2]\n");
         return -EINVAL;
     }
@@ -362,30 +567,45 @@ static int le_set_tx_power(const struct shell *sh, size_t argc, char **argv)
     buf = bt_hci_cmd_create(BT_HCI_OP_LE_SET_TX_POWER, sizeof(*cp));
     if (buf != NULL)
     {
-    	cp = net_buf_add(buf, sizeof(*cp));
+        cp = net_buf_add(buf, sizeof(*cp));
 
-    	cp->tx_power = strtol(argv[1],NULL,16);
-        cp->feloss= strtol(argv[2],NULL,16);
+        val = shell_strtol(argv[1], 16, &parse_err);
+        if (parse_err) {
+            shell_print(sh, "Invalid tx_power parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->tx_power = (uint8_t)val;
+
+        val = shell_strtol(argv[2], 16, &parse_err);
+        if (parse_err || val < 0 || val > UINT8_MAX) {
+            shell_print(sh, "Invalid feloss parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->feloss = (uint8_t)val;
         if(cp->feloss >= 1)
         {
             cp->feloss = 1;
         }
 
-    	shell_print(sh, "tx_power= %x\n", cp->tx_power);
+        shell_print(sh, "tx_power= %x\n", cp->tx_power);
         shell_print(sh, "feloss= %x\n", cp->feloss);
 
-    	err = bt_hci_cmd_send_sync(BT_HCI_OP_LE_SET_TX_POWER, buf, &rsp);
+        err = bt_hci_cmd_send_sync(BT_HCI_OP_LE_SET_TX_POWER, buf, &rsp);
     }
     else
     {
-    	err = -ENOBUFS;
-    	shell_print(sh, "No buffer space available\r\n");
+        err = -ENOBUFS;
+        shell_print(sh, "No buffer space available\r\n");
     }
 
     if (err)
     {
         shell_print(sh, "LE Set TX Power command failed (err %d)\n", err);
-        net_buf_unref(rsp);
+        if (rsp) {
+            net_buf_unref(rsp);
+        }
         return -EINVAL;
     }
     else
@@ -399,6 +619,8 @@ static int le_set_tx_power(const struct shell *sh, size_t argc, char **argv)
 static int le_tx_test(const struct shell *sh, size_t argc, char **argv)
 {
     int err;
+    int parse_err = 0;
+    long val;
     struct net_buf *buf = NULL;
     struct net_buf *rsp = NULL;
 
@@ -420,17 +642,43 @@ static int le_tx_test(const struct shell *sh, size_t argc, char **argv)
     if (buf != NULL)
     {
         cp = net_buf_add(buf, sizeof(*cp));
-        cp->tx_ch = strtol(argv[1],NULL,16);
+
+        val = shell_strtol(argv[1], 16, &parse_err);
+        if (parse_err || val < 0 || val > UINT8_MAX) {
+            shell_print(sh, "Invalid tx_channel parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->tx_ch = (uint8_t)val;
         shell_print(sh, "tx_channel= %x\n", cp->tx_ch);
 
-        cp->test_data_len = strtol(argv[2],NULL,16);
+        val = shell_strtol(argv[2], 16, &parse_err);
+        if (parse_err || val < 0 || val > UINT8_MAX) {
+            shell_print(sh, "Invalid test_data_len parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->test_data_len = (uint8_t)val;
         shell_print(sh, "test_data_len= %x\n", cp->test_data_len);
 
-        cp->pkt_payload = strtol(argv[3],NULL,16);
+        val = shell_strtol(argv[3], 16, &parse_err);
+        if (parse_err || val < 0 || val > UINT8_MAX) {
+            shell_print(sh, "Invalid pkt_payload parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->pkt_payload = (uint8_t)val;
         shell_print(sh, "pkt_payload= %x\n", cp->pkt_payload);
 
-        cp->phy = strtol(argv[4],NULL,16);
+        val = shell_strtol(argv[4], 16, &parse_err);
+        if (parse_err || val < 0 || val > UINT8_MAX) {
+            shell_print(sh, "Invalid phy parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->phy = (uint8_t)val;
         shell_print(sh, "phy= %x\n", cp->phy);
+
         err = bt_hci_cmd_send_sync(BT_HCI_OP_LE_ENH_TX_TEST, buf, &rsp);
     }
     else
@@ -442,7 +690,9 @@ static int le_tx_test(const struct shell *sh, size_t argc, char **argv)
     if (err)
     {
         shell_print(sh, "LE enhanced transmitter test command failed (err %d)\n", err);
-        net_buf_unref(rsp);
+        if (rsp) {
+            net_buf_unref(rsp);
+        }
         return -EINVAL;
     }
     else
@@ -453,10 +703,11 @@ static int le_tx_test(const struct shell *sh, size_t argc, char **argv)
     }
 }
 
-
 static int le_rx_test(const struct shell *sh, size_t argc, char **argv)
 {
     int err;
+    int parse_err = 0;
+    long val;
     struct net_buf *buf = NULL;
     struct net_buf *rsp = NULL;
 
@@ -478,13 +729,32 @@ static int le_rx_test(const struct shell *sh, size_t argc, char **argv)
     if (buf != NULL)
     {
         cp = net_buf_add(buf, sizeof(*cp));
-        cp->rx_ch =  strtol(argv[1],NULL,16);
+
+        val = shell_strtol(argv[1], 16, &parse_err);
+        if (parse_err || val < 0 || val > UINT8_MAX) {
+            shell_print(sh, "Invalid rx_channel parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->rx_ch = (uint8_t)val;
         shell_print(sh, "rx_channel= %x\n", cp->rx_ch);
 
-        cp->phy = strtol(argv[2],NULL,16);
+        val = shell_strtol(argv[2], 16, &parse_err);
+        if (parse_err || val < 0 || val > UINT8_MAX) {
+            shell_print(sh, "Invalid phy parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->phy = (uint8_t)val;
         shell_print(sh, "phy= %x\n", cp->phy);
 
-        cp->mod_index = strtol(argv[3],NULL,16);
+        val = shell_strtol(argv[3], 16, &parse_err);
+        if (parse_err || val < 0 || val > UINT8_MAX) {
+            shell_print(sh, "Invalid modulation_index parameter\n");
+            net_buf_unref(buf);
+            return -EINVAL;
+        }
+        cp->mod_index = (uint8_t)val;
         shell_print(sh, "modulation_index= %x\n", cp->mod_index);
 
         err = bt_hci_cmd_send_sync(BT_HCI_OP_LE_ENH_RX_TEST, buf, &rsp);
@@ -498,7 +768,9 @@ static int le_rx_test(const struct shell *sh, size_t argc, char **argv)
     if (err)
     {
         shell_print(sh, "LE enhanced receiver test command failed (err %d)\n", err);
-        net_buf_unref(rsp);
+        if (rsp) {
+            net_buf_unref(rsp);
+        }
         return -EINVAL;
     }
     else

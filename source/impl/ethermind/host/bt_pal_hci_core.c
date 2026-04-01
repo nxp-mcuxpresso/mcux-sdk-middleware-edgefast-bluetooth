@@ -285,7 +285,7 @@ struct net_buf *bt_hci_cmd_create(uint16_t opcode, uint8_t param_len)
 	LOG_DBG("opcode 0x%04x param_len %u", opcode, param_len);
 
 	/* net_buf_alloc(K_FOREVER) can fail when run from the syswq */
-	buf = net_buf_alloc(&hci_cmd_pool, K_FOREVER);
+	buf = net_buf_alloc(&hci_cmd_pool, (k_timeout_t)K_FOREVER);
 	if (!buf) {
 		LOG_DBG("Unable to allocate a command buffer");
 		return NULL;
@@ -416,6 +416,7 @@ int bt_hci_cmd_send_sync(uint16_t opcode, struct net_buf *buf,
 		(void)atomic_ptr_clear((atomic_ptr_t *)&bt_dev.sent_cmd);
 		key = k_spin_lock(&lock);
 		cmd(buf)->sync = NULL;
+		cmd(buf)->state = NULL;
 		cmd(buf)->status = BT_HCI_ERR_UNSPECIFIED;
 		k_spin_unlock(&lock, key);
 	}
@@ -839,6 +840,9 @@ int bt_le_create_conn_cancel(void)
 	struct bt_hci_cmd_state_set state;
 
 	buf = bt_hci_cmd_create(BT_HCI_OP_LE_CREATE_CONN_CANCEL, 0);
+	if (!buf) {
+		return -ENOBUFS;
+	}
 
 	bt_hci_cmd_state_set_init(buf, &state, bt_dev.flags,
 				  BT_DEV_INITIATING, false);
@@ -879,7 +883,7 @@ static void conn_handle_disconnected(uint16_t handle, uint8_t disconnect_reason)
 			/* Use invalid connection handle bits so that connection
 			 * handle 0 can be used as a valid non-zero handle.
 			 */
-			disconnected_handles[i] = ~BT_ACL_HANDLE_MASK | handle;
+			disconnected_handles[i] = (uint16_t)(~BT_ACL_HANDLE_MASK | handle);
 			disconnected_handles_reason[i] = disconnect_reason;
 		}
 	}
@@ -888,7 +892,7 @@ static void conn_handle_disconnected(uint16_t handle, uint8_t disconnect_reason)
 /** @returns the disconnect reason. */
 static uint8_t conn_handle_is_disconnected(uint16_t handle)
 {
-	handle |= ~BT_ACL_HANDLE_MASK;
+	handle = (uint16_t)(handle | (~BT_ACL_HANDLE_MASK));
 
 	for (int i = 0; i < ARRAY_SIZE(disconnected_handles); i++) {
 		if (disconnected_handles[i] == handle) {
@@ -1337,7 +1341,8 @@ static void translate_addrs(bt_addr_le_t *peer_addr, bt_addr_le_t *id_addr,
 		bt_addr_copy(&peer_addr->a, &evt->peer_rpa);
 		peer_addr->type = BT_ADDR_LE_RANDOM;
 	} else {
-		bt_addr_le_copy(id_addr, bt_lookup_id_addr(id, &evt->peer_addr));
+        const bt_addr_le_t *addr = bt_lookup_id_addr(id, &evt->peer_addr);
+        bt_addr_le_copy(id_addr, addr != NULL ? addr : &evt->peer_addr);
 		bt_addr_le_copy(peer_addr, &evt->peer_addr);
 	}
 }
@@ -2137,8 +2142,8 @@ static void unpair(uint8_t id, const bt_addr_le_t *addr)
 	} else if (addr->type == BT_HCI_PEER_ADDR_ANONYMOUS) {
 		bt_addr_le_copy(&id_addr, BT_ADDR_LE_ANY);
 	} else {
-		bt_addr_le_copy(&id_addr,
-			bt_lookup_id_addr(id, addr));
+		const bt_addr_le_t *lookup_addr = bt_lookup_id_addr(id, addr);
+		bt_addr_le_copy(&id_addr, lookup_addr ? lookup_addr : addr);
 	}
 
 	/* There may be two connections (one br and one ble) that use the same public address,
@@ -4232,7 +4237,7 @@ int bt_send(struct net_buf *buf)
 		else
 #endif
 		{
-			ret = BT_hci_send_command(BT_OGF(hdr->opcode), BT_OCF(hdr->opcode), &(((uint8_t *)buf->data)[sizeof(*hdr)]), buf->len - sizeof(*hdr));
+			ret = BT_hci_send_command(BT_OGF(hdr->opcode), BT_OCF(hdr->opcode), &(((uint8_t *)buf->data)[sizeof(*hdr)]), (UCHAR)(buf->len - sizeof(*hdr)));
 		}
 
 		if (API_SUCCESS == ret) {
@@ -4559,7 +4564,7 @@ uint16_t ethermind_hci_event_callback(uint8_t  event_type, uint8_t *event_data, 
 			opcode = cmdComplete->opcode;
 			if (cmd(bt_dev.sent_cmd)->opcode == opcode)
 			{
-				buf = bt_buf_get_evt(event_type, false, K_FOREVER);
+				buf = bt_buf_get_evt(event_type, false, (k_timeout_t)K_FOREVER);
 			}
 		}
 
@@ -4570,7 +4575,7 @@ uint16_t ethermind_hci_event_callback(uint8_t  event_type, uint8_t *event_data, 
 
 		if (NULL == buf)
 		{
-			buf = bt_buf_get_evt(event_type, false, K_FOREVER);
+			buf = bt_buf_get_evt(event_type, false, (k_timeout_t)K_FOREVER);
 		}
 	}
 	else
@@ -4620,13 +4625,16 @@ API_RESULT ethermind_hci_error_indication_callback(UINT16 opcode, UINT16 error_c
 API_RESULT ethermind_iso_data_in_callback(UCHAR *header, UCHAR *data, UINT16 datalen)
 {
 	struct net_buf *buf = bt_buf_get_rx(BT_BUF_ISO_IN, osaWaitForever_c);
+    if (buf == NULL) {
+        return API_FAILURE;
+    }
 
 	/* Copy ISO data to buf. */
 	struct bt_hci_iso_hdr *hdr = (struct bt_hci_iso_hdr *)header;
 	uint16_t handle = sys_le16_to_cpu(hdr->handle);
 	uint8_t flags = bt_iso_flags(handle);
 	uint8_t ts = bt_iso_flags_ts(flags);
-	uint16_t len = datalen + (8U + (4U * ts));
+	size_t len = datalen + (8U + (4U * ts));
 	net_buf_add_mem(buf, header, len);
 
 	if(0 != bt_recv(buf))
@@ -4761,7 +4769,7 @@ int bt_enable(bt_ready_cb_t cb)
 #endif
 
 	if (!cb) {
-		err = k_sem_take(&bt_dev.init_done, K_FOREVER);
+		err = k_sem_take(&bt_dev.init_done, (k_timeout_t)K_FOREVER);
 	}
 
 	(void)retval;
@@ -5161,8 +5169,7 @@ int bt_configure_data_path(uint8_t dir, uint8_t id, uint8_t vs_config_len,
 	struct net_buf *buf;
 	int err;
 
-	buf = bt_hci_cmd_create(BT_HCI_OP_CONFIGURE_DATA_PATH, sizeof(*cp) +
-				vs_config_len);
+	buf = bt_hci_cmd_create(BT_HCI_OP_CONFIGURE_DATA_PATH, (uint8_t)(sizeof(*cp) + vs_config_len));
 	if (!buf) {
 		return -ENOBUFS;
 	}

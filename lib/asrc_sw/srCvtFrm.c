@@ -195,6 +195,7 @@ void initDownCvtFrm(SrCvtFrm_t *srCvt, SrCvtFrmCfg_t *cfg, double freqOffset)
 	}
 	else {
 		printf ("Invalid output sampling rate: %d\n", cfg->sfOut);
+		return;
 	}
 	srCvt->shift -= 2;
 	srCvt->rnd = 1 << (srCvt->shift - 1);
@@ -330,7 +331,7 @@ int upCvtFrm (SrCvtFrm_t *srCvt, short *smplsIn, short *smplsOut) {
 	}
 	srCvt->smplsToRead = pSmpl - procBuffer;
 	srCvt->smplsInHistBuf = totalSmpls - srCvt->smplsToRead;
-	memcpy (srCvt->histBuf, pSmpl, srCvt->smplsInHistBuf << 1);
+	memcpy (srCvt->histBuf, pSmpl, (size_t)(srCvt->smplsInHistBuf << 1));
 
 	return (outputSmplCnt);
 }
@@ -417,7 +418,7 @@ int downCvtFrm(SrCvtFrm_t *srCvt, short *smplsIn, short *smplsOut) {
 	int totalSmpls;
 
 	memcpy (procBuffer, srCvt->histBuf, srCvt->smplsInHistBuf << 1);
-	memcpy (&procBuffer[srCvt->smplsInHistBuf], smplsIn, srCvt->smplsToRead << 1);
+	memcpy (&procBuffer[srCvt->smplsInHistBuf], smplsIn, (size_t)(srCvt->smplsToRead << 1));
 	totalSmpls = srCvt->smplsInHistBuf + srCvt->smplsToRead;
 	 
 	pSmpl = procBuffer;
