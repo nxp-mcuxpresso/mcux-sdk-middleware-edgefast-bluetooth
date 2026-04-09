@@ -1508,9 +1508,6 @@ if (CONFIG_MCUX_COMPONENT_middleware.edgefast_bluetooth.wifi_nxp.controller.wifi
     )
 endif ()
 
-if (CONFIG_MCUX_COMPONENT_middleware.edgefast_bluetooth.le_audio.config.template)
-endif ()
-
 if (CONFIG_MCUX_COMPONENT_middleware.edgefast_bluetooth.le_audio.cap)
     mcux_add_include(
         INCLUDES include/bluetooth/audio
@@ -2322,17 +2319,6 @@ if (CONFIG_MCUX_COMPONENT_middleware.edgefast_bluetooth.porting.work_queue)
 endif ()
 
 if (CONFIG_MCUX_PRJSEG_middleware.edgefast_bluetooth.sdio.template)
-endif ()
-
-if (CONFIG_MCUX_COMPONENT_middleware.edgefast_bluetooth.template)
-    mcux_add_include(
-        INCLUDES source/impl/ethermind/controller/configs/mbedtls
-        TARGET_FILES mbedtls_config_client.h
-    )
-    mcux_add_source(
-        SOURCES source/impl/ethermind/controller/configs/mbedtls/mbedtls_config_client.h
-        CONFIG TRUE
-    )
 endif ()
 
 if (CONFIG_MCUX_COMPONENT_middleware.edgefast_bluetooth.porting)
