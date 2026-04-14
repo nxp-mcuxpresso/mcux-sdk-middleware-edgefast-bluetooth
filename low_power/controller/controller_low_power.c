@@ -208,37 +208,52 @@ static void controller_wakeup_pin_init(void)
     HAL_GpioInstallCallback(c2h_wakeup_handle, controller_c2h_callback, NULL);
 }
 
-static uint8_t controller_lowpower_config_cmd()
+static uint8_t controller_lowpower_config_cmd(void)
 {
-    uint8_t             err;
+    /*
+     * Use a signed temporary for APIs returning int.
+     * Avoid assigning negative values (e.g. -1) into uint8_t which would wrap.
+     */
+    int err_i = 0;
+    uint8_t err_u = 0U;
     struct net_buf *buf;
+
     /* Send vendor specific HCI command to configure controller low power feature. */
-    for(uint8_t idx = 0U; idx < CONTROLLER_LOW_POWER_CONFIG_CMD_CNT; idx++)
+    for (uint8_t idx = 0U; idx < CONTROLLER_LOW_POWER_CONFIG_CMD_CNT; idx++)
     {
         buf = bt_hci_cmd_create(lp_mode_cfg_cmd[idx].opcode, lp_mode_cfg_cmd[idx].cmd_len);
-        if (NULL == buf)
+        if (buf == NULL)
         {
             PRINTF("No buffer space available\r\n");
-            err = -1;
+            err_i = -1;
             break;
         }
 
         net_buf_add_mem(buf, lp_mode_cfg_cmd[idx].cmd, lp_mode_cfg_cmd[idx].cmd_len);
-        err = bt_hci_cmd_send_sync(lp_mode_cfg_cmd[idx].opcode, buf, NULL);
-        if (0 != err)
+        err_i = bt_hci_cmd_send_sync(lp_mode_cfg_cmd[idx].opcode, buf, NULL);
+        if (err_i != 0)
         {
-            PRINTF("Send hci command 0x%x failed (err %d)\n", lp_mode_cfg_cmd[idx].opcode, err);
+            PRINTF("Send hci command 0x%x failed (err %d)\n", lp_mode_cfg_cmd[idx].opcode, err_i);
             break;
         }
-        else
-        {
-            OSA_TimeDelay(WAIT_CMD_COMPLETE);
-            err = 0;
-        }
+
+        OSA_TimeDelay(WAIT_CMD_COMPLETE);
     }
 
-    PRINTF("Low power configuration successful.\r\n");
-    return err;
+    if (err_i != 0)
+    {
+        /* Preserve existing behaviour: non-zero return indicates failure.
+         * Clamp to 0xFF to avoid implementation-defined narrowing.
+         */
+        err_u = 0xFFU;
+    }
+
+    if (err_u == 0U)
+    {
+        PRINTF("Low power configuration successful.\r\n");
+    }
+
+    return err_u;
 }
 
 static void controller_enable_wakeup_host_irq()

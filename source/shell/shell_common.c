@@ -46,44 +46,66 @@ void shell_hexdump(const struct shell *sh, const uint8_t *data, size_t len)
 {
     shell_dump(sh, " Data: ");
 
-    while (len--) {
-        shell_dump(sh, "%02X ", *data++);
+    while (len > 0U) {
+        shell_dump(sh, "%02X ", *data);
+        data++;
+        len--;
     }
-	shell_dump(sh, "\r\n");
+    shell_dump(sh, "\r\n");
 }
 
 unsigned long shell_strtoul(const char *str, int base, int *err)
 {
-	unsigned long val;
-	char *endptr = NULL;
+    unsigned long val;
+    char *endptr = NULL;
 
-	if (*str == '-') {
-		*err = -EINVAL;
-		return 0;
-	}
+    if ((str == NULL) || (err == NULL)) {
+        return 0UL;
+    }
 
-	val = strtoul(str, &endptr, base);
-	if (endptr == str || *endptr) {
-		*err = -EINVAL;
-		return 0;
-	}
+    *err = 0;
 
-	return val;
+    if (*str == '-') {
+        *err = -EINVAL;
+        return 0UL;
+    }
+
+    val = strtoul(str, &endptr, base);
+
+    /* Validate conversion succeeded and consumed the whole string */
+    if ((endptr == str) || (*endptr != '\0')) {
+        *err = -EINVAL;
+        return 0UL;
+    }
+
+    return val;
 }
 
 unsigned long long shell_strtoull(const char *str, int base, int *err)
 {
-	unsigned long long val;
-	char *endptr = NULL;
+    unsigned long long val;
+    char *endptr = NULL;
 
-	if (*str == '-') {
-		*err = -EINVAL;
-		return 0;
-	}
+    if ((str == NULL) || (err == NULL)) {
+        return 0ULL;
+    }
 
-	val = strtoull(str, &endptr, base);
+    *err = 0;
 
-	return val;
+    if (*str == '-') {
+        *err = -EINVAL;
+        return 0ULL;
+    }
+
+    val = strtoull(str, &endptr, base);
+
+    /* Validate conversion succeeded and consumed the whole string */
+    if ((endptr == str) || (*endptr != '\0')) {
+        *err = -EINVAL;
+        return 0ULL;
+    }
+
+    return val;
 }
 
 long shell_strtol(const char *str, int base, int *err)
@@ -91,8 +113,14 @@ long shell_strtol(const char *str, int base, int *err)
 	long val;
 	char *endptr = NULL;
 
+    if ((str == NULL) || (err == NULL)) {
+        return 0L;
+    }
+
+    *err = 0;
+
 	val = strtol(str, &endptr, base);
-	if (endptr == str || *endptr) {
+	if ((endptr == str) || (*endptr != '\0')) {
 		*err = -EINVAL;
 		return 0;
 	}

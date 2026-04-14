@@ -1988,7 +1988,7 @@ static void hfp_hf_init(void)
         LOG_INF("> BT HFP HF Init Successful\n");
     }
 
-    sprintf((char *)bt_hfp_hf_local_supported_features, "%u", BT_HFP_HF_SUPPORTED_FEATURES);
+    (void)sprintf((char *)bt_hfp_hf_local_supported_features, "%u", BT_HFP_HF_SUPPORTED_FEATURES);
 
     bt_hfp_hf_local_supported_features[HFP_UNIT_MAX_SUPP_FEATURE_LEN - 1] = '\0';
 
@@ -2045,7 +2045,7 @@ static void hfp_hf_disconnected(struct bt_hfp_hf_em *hfp_hf)
     hfp_hf_DeActiveInstance(hfp_hf);
 }
 
-static struct bt_hfp_hf_em* hfp_hf_connected(struct bt_conn *conn, int err)
+static struct bt_hfp_hf_em *hfp_hf_connected(struct bt_conn *conn, int err)
 {
     struct bt_hfp_hf_em *hfp_hf = NULL;
 
@@ -2054,22 +2054,35 @@ static struct bt_hfp_hf_em* hfp_hf_connected(struct bt_conn *conn, int err)
     if (!err)
     {
         hfp_hf = hfp_hf_GetNoneActiveInstance();
-        if (conn->type != BT_CONN_TYPE_BR)
+        if (hfp_hf == NULL)
+        {
+            /* No free instance available */
+            err = -ENOMEM;
+        }
+        else if (conn->type != BT_CONN_TYPE_BR)
         {
             hfp_hf_FreeInstance(hfp_hf);
-            return NULL;
+            hfp_hf = NULL;
+            err    = -EINVAL;
         }
+        else
+        {
+            memcpy(hfp_hf->peerAddr, conn->br.dst.val, BT_BD_ADDR_SIZE);
+            hfp_hf->actived     = 1U;
+            hfp_hf->bt_conn     = conn;
+            hfp_hf->hf_features = BT_HFP_HF_SUPPORTED_FEATURES;
 
-        memcpy(hfp_hf->peerAddr, conn->br.dst.val, BT_BD_ADDR_SIZE);
-        hfp_hf->actived     = 1U;
-        hfp_hf->bt_conn     = conn;
-        hfp_hf->hf_features = BT_HFP_HF_SUPPORTED_FEATURES;
+            /*
+             * Notify application only after the internal HF instance has been
+             * successfully initialized. On failure, hfp_hf is NULL and the
+             * callback is not invoked.
+             */
+            if (bt_hf_cb->connected)
+            {
+                bt_hf_cb->connected(conn, err);
+            }
+        }
     }
-
-    if (bt_hf_cb->connected)
-    {
-        bt_hf_cb->connected(conn, err);
-	}
 
     return hfp_hf;
 }
@@ -2087,7 +2100,7 @@ int bt_hfp_hf_register(struct bt_hfp_hf_cb *cb)
 {
     hfp_hf_get_config *bt_hfp_hf_config = NULL;
     struct bt_hfp_hf_em *hfp_hf;
-    
+
     if (!cb)
     {
         return -EINVAL;
@@ -2107,12 +2120,12 @@ int bt_hfp_hf_register(struct bt_hfp_hf_cb *cb)
 
     bt_hf_cb = cb;
     hfp_hf_init();
-    
+
     if ((bt_hf_cb) && (bt_hf_cb->get_config))
     {
       bt_hf_cb->get_config(&bt_hfp_hf_config);
     }
-    
+
     for (uint8_t index = 0; index < HFP_UNIT_MAX_CONNECTIONS; ++index)
     {
         hfp_hf = hfp_hf_GetInstance();
@@ -2120,13 +2133,19 @@ int bt_hfp_hf_register(struct bt_hfp_hf_cb *cb)
         {
             return -ENOBUFS;
         }
-        
+
         hfp_hf->actived = 0;
-        memset((char *)&hfp_hf->bt_hfp_hp_speaker_volume[0], 0x0, 3);
-        memset((char *)&hfp_hf->bt_hfp_hp_microphone_gain[0], 0x0, 3);
+        memset((char *)&hfp_hf->bt_hfp_hp_speaker_volume[0], 0x0, sizeof(hfp_hf->bt_hfp_hp_speaker_volume));
+        memset((char *)&hfp_hf->bt_hfp_hp_microphone_gain[0], 0x0, sizeof(hfp_hf->bt_hfp_hp_microphone_gain));
         if (bt_hfp_hf_config != NULL) {
-            sprintf((char *)&hfp_hf->bt_hfp_hp_speaker_volume[0], "%d", bt_hfp_hf_config->bt_hfp_hf_vgs);
-            sprintf((char *)&hfp_hf->bt_hfp_hp_microphone_gain[0], "%d", bt_hfp_hf_config->bt_hfp_hf_vgm);
+            (void)snprintf((char *)&hfp_hf->bt_hfp_hp_speaker_volume[0],
+                           sizeof(hfp_hf->bt_hfp_hp_speaker_volume),
+                           "%d",
+                           bt_hfp_hf_config->bt_hfp_hf_vgs);
+            (void)snprintf((char *)&hfp_hf->bt_hfp_hp_microphone_gain[0],
+                           sizeof(hfp_hf->bt_hfp_hp_microphone_gain),
+                           "%d",
+                           bt_hfp_hf_config->bt_hfp_hf_vgm);
         }
         k_work_init_delayable(&hfp_hf->hf_at_cmd_retry_delayed_work, bt_work_hf_retry_at_cmd_handling);
     }
@@ -2275,6 +2294,7 @@ int bt_hfp_hf_dial(struct bt_conn *conn, const char *number)
     struct bt_hfp_hf_em *hf;
     int api_retval;
     int status                                 = 0;
+    size_t number_len;
 
     if (!conn)
     {
@@ -2288,12 +2308,17 @@ int bt_hfp_hf_dial(struct bt_conn *conn, const char *number)
         LOG_ERR("No HF connection found");
         return -ENOTCONN;
     }
+    number_len = BT_str_len(number);
+    if (number_len > 0xFFU)
+    {
+        number_len = 0xFFU;
+    }
 
     api_retval = BT_hfp_unit_dial
                (
                    hf->handle,
                    (void *)number,
-                   (UCHAR)BT_str_len(number)
+                   (UCHAR)number_len
                );
 
     if (api_retval < 0)
@@ -2324,7 +2349,7 @@ int bt_hfp_hf_dial_memory(struct bt_conn *conn, int location)
         return -ENOTCONN;
     }
 
-    sprintf(memid,"%d", location);
+    (void)snprintf(memid, sizeof(memid), "%d", location);
 
     /* Remove the terminal '\n', if any */
     if ('\n' == memid[sizeof(memid) - 1U])
@@ -2577,7 +2602,7 @@ int bt_hfp_hf_volume_update(struct bt_conn *conn, hf_volume_type_t type, int vol
     if (type == hf_volume_type_speaker)
     {
         memset((char *)&hf->bt_hfp_hp_speaker_volume[0], 0x0, 3);
-        sprintf((char *)&hf->bt_hfp_hp_speaker_volume[0], "%d", volume);
+        (void)sprintf((char *)&hf->bt_hfp_hp_speaker_volume[0], "%d", volume);
 
         api_retval = BT_hfp_unit_set_gain
                  (
@@ -2590,7 +2615,7 @@ int bt_hfp_hf_volume_update(struct bt_conn *conn, hf_volume_type_t type, int vol
     else
     {
         memset((char *)&hf->bt_hfp_hp_microphone_gain[0], 0x0, 3);
-        sprintf((char *)&hf->bt_hfp_hp_microphone_gain[0], "%d", volume);
+        (void)sprintf((char *)&hf->bt_hfp_hp_microphone_gain[0], "%d", volume);
 
         api_retval = BT_hfp_unit_set_gain
                  (

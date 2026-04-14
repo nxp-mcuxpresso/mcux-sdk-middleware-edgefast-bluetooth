@@ -18,6 +18,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 //#include <strings.h>
 
 #include <sys/byteorder.h>
@@ -1447,13 +1448,19 @@ static int cmd_id_reset(const struct shell *sh, size_t argc, char *argv[])
 	bt_addr_le_t addr;
 	uint8_t id;
 	int err;
+	unsigned long id_ul;
 
 	if (argc < 2) {
 		shell_error(sh, "Identity identifier not specified");
 		return -ENOEXEC;
 	}
 
-	id = strtol(argv[1], NULL, 10);
+	id_ul = shell_strtoul(argv[1], 10, &err);
+	if ((err != 0) || (id_ul > UINT8_MAX)) {
+		shell_error(sh, "Invalid identity");
+		return -EINVAL;
+	}
+	id = (uint8_t)id_ul;
 
 	if (argc > 2) {
 		err = bt_addr_le_from_str(argv[2], "random", &addr);
@@ -1481,13 +1488,19 @@ static int cmd_id_delete(const struct shell *sh, size_t argc, char *argv[])
 {
 	uint8_t id;
 	int err;
+	unsigned long id_ul;
 
 	if (argc < 2) {
 		shell_error(sh, "Identity identifier not specified");
 		return -ENOEXEC;
 	}
 
-	id = strtol(argv[1], NULL, 10);
+	id_ul = shell_strtoul(argv[1], 10, &err);
+	if ((err != 0) || (id_ul > UINT8_MAX)) {
+		shell_error(sh, "Invalid identity");
+		return -EINVAL;
+	}
+	id = (uint8_t)id_ul;
 
 	err = bt_id_delete(id);
 	if (err < 0) {
@@ -1524,8 +1537,15 @@ static int cmd_id_select(const struct shell *sh, size_t argc, char *argv[])
 	bt_addr_le_t addrs[CONFIG_BT_ID_MAX];
 	size_t count = CONFIG_BT_ID_MAX;
 	uint8_t id;
+	int err;
+	unsigned long id_ul;
 
-	id = strtol(argv[1], NULL, 10);
+	id_ul = shell_strtoul(argv[1], 10, &err);
+	if ((err != 0) || (id_ul > UINT8_MAX)) {
+		shell_error(sh, "Invalid identity");
+		return -EINVAL;
+	}
+	id = (uint8_t)id_ul;
 
 	bt_id_get(addrs, &count);
 	if (count <= id) {
@@ -1623,6 +1643,7 @@ static int cmd_scan(const struct shell *sh, size_t argc, char *argv[])
 	const char *action;
 	uint32_t options = 0;
 	uint16_t timeout = 0;
+	int err = 0;
 
 	/* Parse duplicate filtering data */
 	for (size_t argn = 2; argn < argc; argn++) {
@@ -1631,7 +1652,7 @@ static int cmd_scan(const struct shell *sh, size_t argc, char *argv[])
 		if (!strcmp(arg, "dups")) {
 			options |= BT_LE_SCAN_OPT_FILTER_DUPLICATE;
 		} else if (!strcmp(arg, "nodups")) {
-			options &= ~BT_LE_SCAN_OPT_FILTER_DUPLICATE;
+			options &= ~(uint32_t)BT_LE_SCAN_OPT_FILTER_DUPLICATE;
 		} else if (!strcmp(arg, "fal")) {
 			options |= BT_LE_SCAN_OPT_FILTER_ACCEPT_LIST;
 		} else if (!strcmp(arg, "coded")) {
@@ -1639,12 +1660,19 @@ static int cmd_scan(const struct shell *sh, size_t argc, char *argv[])
 		} else if (!strcmp(arg, "no-1m")) {
 			options |= BT_LE_SCAN_OPT_NO_1M;
 		} else if (!strcmp(arg, "timeout")) {
+			unsigned long timeout_ul;
+
 			if (++argn == argc) {
 				shell_help(sh);
 				return SHELL_CMD_HELP_PRINTED;
 			}
 
-			timeout = strtoul(argv[argn], NULL, 16);
+			timeout_ul = shell_strtoul(argv[argn], 16, &err);
+			if ((err != 0) || (timeout_ul > UINT16_MAX)) {
+				shell_error(sh, "Invalid timeout");
+				return -EINVAL;
+			}
+			timeout = (uint16_t)timeout_ul;
 		} else {
 			shell_help(sh);
 			return SHELL_CMD_HELP_PRINTED;
@@ -1698,7 +1726,9 @@ static int cmd_scan_filter_set_name(const struct shell *sh, size_t argc,
 		return -ENOEXEC;
 	}
 
-	strcpy(scan_filter.name, name_arg);
+	/* Use strncpy with explicit null termination */
+	strncpy(scan_filter.name, name_arg, sizeof(scan_filter.name) - 1);
+	scan_filter.name[sizeof(scan_filter.name) - 1] = '\0';
 	scan_filter.name_set = true;
 
 	return 0;
@@ -1835,7 +1865,7 @@ static ssize_t ad_init(struct bt_data *data_array, const size_t data_array_size,
 	size_t ad_len = 0;
 
 	/* Set BR/EDR Not Supported if LE-only device */
-	ad_flags = IS_ENABLED(CONFIG_BT_CLASSIC) ? 0 : BT_LE_AD_NO_BREDR;
+	ad_flags = IS_ENABLED(CONFIG_BT_CLASSIC) ? (uint8_t)0U : (uint8_t)BT_LE_AD_NO_BREDR;
 
 	if (discoverable) {
 		/* A privacy-enabled Set Member should advertise RSI values only when in
@@ -3462,6 +3492,7 @@ done:
 static int cmd_conn_update(const struct shell *sh, size_t argc, char *argv[])
 {
 	struct bt_le_conn_param param;
+	unsigned long value_ul;
 	int err;
 
 	if (default_conn == NULL) {
@@ -3471,10 +3502,33 @@ static int cmd_conn_update(const struct shell *sh, size_t argc, char *argv[])
 		return -ENOEXEC;
 	}
 
-	param.interval_min = strtoul(argv[1], NULL, 16);
-	param.interval_max = strtoul(argv[2], NULL, 16);
-	param.latency = strtoul(argv[3], NULL, 16);
-	param.timeout = strtoul(argv[4], NULL, 16);
+	value_ul = shell_strtoul(argv[1], 16, &err);
+	if ((err != 0) || (value_ul > UINT16_MAX)) {
+		shell_error(sh, "Invalid interval_min");
+		return -EINVAL;
+	}
+	param.interval_min = (uint16_t)value_ul;
+
+	value_ul = shell_strtoul(argv[2], 16, &err);
+	if ((err != 0) || (value_ul > UINT16_MAX)) {
+		shell_error(sh, "Invalid interval_max");
+		return -EINVAL;
+	}
+	param.interval_max = (uint16_t)value_ul;
+
+	value_ul = shell_strtoul(argv[3], 16, &err);
+	if ((err != 0) || (value_ul > UINT16_MAX)) {
+		shell_error(sh, "Invalid latency");
+		return -EINVAL;
+	}
+	param.latency = (uint16_t)value_ul;
+
+	value_ul = shell_strtoul(argv[4], 16, &err);
+	if ((err != 0) || (value_ul > UINT16_MAX)) {
+		shell_error(sh, "Invalid timeout");
+		return -EINVAL;
+	}
+	param.timeout = (uint16_t)value_ul;
 
 	err = bt_conn_le_param_update(default_conn, &param);
 	if (err) {
@@ -3490,7 +3544,7 @@ static int cmd_conn_update(const struct shell *sh, size_t argc, char *argv[])
 static uint16_t tx_time_calc(uint8_t phy, uint16_t max_len)
 {
 	/* Access address + header + payload + MIC + CRC */
-	uint16_t total_len = 4 + 2 + max_len + 4 + 3;
+	uint16_t total_len = 4U + 2U + max_len + 4U + 3U;
 
 	switch (phy) {
 	case BT_GAP_LE_PHY_1M:
@@ -3512,6 +3566,8 @@ static int cmd_conn_data_len_update(const struct shell *sh, size_t argc,
 {
 	struct bt_conn_le_data_len_param param;
 	int err;
+	char *endptr;
+	unsigned long temp;
 
 	if (default_conn == NULL) {
 		shell_error(sh,
@@ -3520,10 +3576,20 @@ static int cmd_conn_data_len_update(const struct shell *sh, size_t argc,
 		return -ENOEXEC;
 	}
 
-	param.tx_max_len = strtoul(argv[1], NULL, 10);
+	temp = strtoul(argv[1], &endptr, 10);
+	if ((endptr == argv[1]) || (*endptr != '\0')) {
+		shell_error(sh, "Invalid tx_max_len value");
+		return -EINVAL;
+	}
+	param.tx_max_len = (uint16_t)temp;
 
 	if (argc > 2) {
-		param.tx_max_time = strtoul(argv[2], NULL, 10);
+		temp = strtoul(argv[2], &endptr, 10);
+		if ((endptr == argv[2]) || (*endptr != '\0')) {
+			shell_error(sh, "Invalid tx_max_time value");
+			return -EINVAL;
+		}
+		param.tx_max_time = (uint16_t)temp;
 	} else {
 		/* Assume 1M if not able to retrieve PHY */
 		uint8_t phy = BT_GAP_LE_PHY_1M;
@@ -3559,6 +3625,8 @@ static int cmd_conn_phy_update(const struct shell *sh, size_t argc,
 {
 	struct bt_conn_le_phy_param param;
 	int err;
+	char *endptr;
+	unsigned long temp;
 
 	if (default_conn == NULL) {
 		shell_error(sh,
@@ -3567,7 +3635,13 @@ static int cmd_conn_phy_update(const struct shell *sh, size_t argc,
 		return -ENOEXEC;
 	}
 
-	param.pref_tx_phy = strtoul(argv[1], NULL, 16);
+	temp = strtoul(argv[1], &endptr, 16);
+	if ((endptr == argv[1]) || (*endptr != '\0') || (temp > UINT8_MAX)) {
+		shell_error(sh, "Invalid pref_tx_phy value");
+		return -EINVAL;
+	}
+	param.pref_tx_phy = (uint8_t)temp;
+
 	param.pref_rx_phy = param.pref_tx_phy;
 	param.options = BT_CONN_LE_PHY_OPT_NONE;
 
@@ -3579,7 +3653,12 @@ static int cmd_conn_phy_update(const struct shell *sh, size_t argc,
 		} else if (!strcmp(arg, "s8")) {
 			param.options |= BT_CONN_LE_PHY_OPT_CODED_S8;
 		} else {
-			param.pref_rx_phy = strtoul(arg, NULL, 16);
+			temp = strtoul(arg, &endptr, 16);
+			if ((endptr == arg) || (*endptr != '\0') || (temp > UINT8_MAX)) {
+				shell_error(sh, "Invalid pref_rx_phy value");
+				return -EINVAL;
+			}
+			param.pref_rx_phy = (uint8_t)temp;
 		}
 	}
 
@@ -3737,7 +3816,14 @@ static int cmd_security(const struct shell *sh, size_t argc, char *argv[])
 		return 0;
 	}
 
-	sec = *argv[1] - '0';
+	{
+		const char c = argv[1][0];
+		if ((c < '0') || (c > '9') || (argv[1][1] != '\0')) {
+			shell_error(sh, "Invalid security level: %s", argv[1]);
+			return -EINVAL;
+		}
+		sec = (int)(c - '0');
+	}
 
 	if ((info.type == BT_CONN_TYPE_BR &&
 	    (sec < BT_SECURITY_L0 || sec > BT_SECURITY_L3))) {
@@ -3760,7 +3846,7 @@ static int cmd_security(const struct shell *sh, size_t argc, char *argv[])
 		}
 	}
 
-	err = bt_conn_set_security(conn, (bt_security_t)sec);
+	err = bt_conn_set_security(conn, (bt_security_t)(uint8_t)sec);
 	if (err) {
 		shell_error(sh, "Setting security failed (err %d)", err);
 	}
@@ -3870,10 +3956,22 @@ static void auth_passkey_display(struct bt_conn *conn, unsigned int passkey)
 {
 	char addr[BT_ADDR_LE_STR_LEN];
 	char passkey_str[7];
+	const bt_addr_le_t *dst;
+	int ret;
 
-	bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
+	dst = bt_conn_get_dst(conn);
+	if (dst == NULL) {
+		shell_error(ctx_shell, "Failed to get connection destination address");
+		return;
+	}
 
-	snprintk(passkey_str, 7, "%06u", passkey);
+	bt_addr_le_to_str(dst, addr, sizeof(addr));
+
+	ret = snprintk(passkey_str, 7, "%06u", passkey);
+	if ((ret < 0) || (ret >= 7)) {
+		shell_error(ctx_shell, "Failed to format passkey");
+		return;
+	}
 
 	shell_print(ctx_shell, "Passkey for %s: %s", addr, passkey_str);
 }
@@ -3895,10 +3993,22 @@ static void auth_passkey_confirm(struct bt_conn *conn, unsigned int passkey)
 {
 	char addr[BT_ADDR_LE_STR_LEN];
 	char passkey_str[7];
+	const bt_addr_le_t *dst;
+	int ret;
 
-	bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
+	dst = bt_conn_get_dst(conn);
+	if (dst == NULL) {
+		shell_error(ctx_shell, "Failed to get connection destination address");
+		return;
+	}
 
-	snprintk(passkey_str, 7, "%06u", passkey);
+	bt_addr_le_to_str(dst, addr, sizeof(addr));
+
+	ret = snprintk(passkey_str, 7, "%06u", passkey);
+	if ((ret < 0) || (ret >= 7)) {
+		shell_error(ctx_shell, "Failed to format passkey");
+		return;
+	}
 
 	shell_print(ctx_shell, "Confirm passkey for %s: %s", addr, passkey_str);
 }
@@ -4026,8 +4136,15 @@ static void auth_pairing_complete(struct bt_conn *conn, bool bonded)
 static void auth_pairing_failed(struct bt_conn *conn, enum bt_security_err err)
 {
 	char addr[BT_ADDR_LE_STR_LEN];
+	const bt_addr_le_t *dst;
 
-	bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
+	dst = bt_conn_get_dst(conn);
+	if (dst == NULL) {
+		shell_error(ctx_shell, "Failed to get connection destination address");
+		return;
+	}
+
+	bt_addr_le_to_str(dst, addr, sizeof(addr));
 
 	shell_print(ctx_shell, "Pairing failed with %s reason: %s (%d)", addr,
 		    security_err_str(err), err);
@@ -4348,7 +4465,7 @@ static int cmd_fal_connect(const struct shell *sh, size_t argc, char *argv[])
 static int cmd_fixed_passkey(const struct shell *sh,
 			     size_t argc, char *argv[])
 {
-	unsigned int passkey;
+	unsigned long passkey_ul;
 	int err;
 
 	if (argc < 2) {
@@ -4357,13 +4474,13 @@ static int cmd_fixed_passkey(const struct shell *sh,
 		return 0;
 	}
 
-	passkey = atoi(argv[1]);
-	if (passkey > 999999) {
+	passkey_ul = shell_strtoul(argv[1], 10, &err);
+	if ((err != 0) || (passkey_ul > 999999UL)) {
 		shell_print(sh, "Passkey should be between 0-999999");
 		return -ENOEXEC;
 	}
 
-	err = bt_passkey_set(passkey);
+	err = bt_passkey_set((unsigned int)passkey_ul);
 	if (err) {
 		shell_print(sh, "Setting fixed passkey failed (err %d)",
 			    err);
@@ -4376,7 +4493,7 @@ static int cmd_fixed_passkey(const struct shell *sh,
 static int cmd_auth_passkey(const struct shell *sh,
 			    size_t argc, char *argv[])
 {
-	unsigned int passkey;
+	unsigned long passkey_ul;
 	int err;
 
 	if (!shell_bt_default_conn()) {
@@ -4384,13 +4501,13 @@ static int cmd_auth_passkey(const struct shell *sh,
 		return -ENOEXEC;
 	}
 
-	passkey = atoi(argv[1]);
-	if (passkey > 999999) {
+	passkey_ul = shell_strtoul(argv[1], 10, &err);
+	if ((err != 0) || (passkey_ul > 999999UL)) {
 		shell_print(sh, "Passkey should be between 0-999999");
 		return -EINVAL;
 	}
 
-	err = bt_conn_auth_passkey_entry(shell_bt_default_conn(), passkey);
+	err = bt_conn_auth_passkey_entry(shell_bt_default_conn(), (unsigned int)passkey_ul);
 	if (err) {
 		shell_error(sh, "Failed to set passkey (%d)", err);
 		return err;
