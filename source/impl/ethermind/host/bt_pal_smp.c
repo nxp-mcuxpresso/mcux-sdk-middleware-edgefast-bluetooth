@@ -7072,6 +7072,8 @@ int bt_smp_start_security(struct bt_conn *conn)
 void bt_smp_update_keys(struct bt_conn *conn)
 {
 	struct bt_smp *smp;
+	struct bt_keys *keys;
+	uint32_t avoid_loop;
 
 	smp = smp_chan_get(conn);
 	if (!smp) {
@@ -7090,6 +7092,31 @@ void bt_smp_update_keys(struct bt_conn *conn)
 		bt_keys_clear(conn->le.keys);
 	}
 
+	/*
+	 * If the SMP is successful we also cleanup the stale state of the keys. The logic
+	 * ensures that updated keys are correctly added to the controller resolving list
+	 * when a remote device has lost its bond information and initiates the SMP procedure
+	 * again.
+	 */
+	do
+	{
+		avoid_loop++;
+		keys = bt_keys_find_addr(conn->id, &conn->le.dst);
+		if (keys != NULL)
+		{
+			bt_keys_clear(keys);
+		}
+		else
+		{
+			break;
+		}
+
+		if (avoid_loop >= CONFIG_BT_MAX_PAIRED)
+		{
+			break;
+		}
+	} while (true);
+	
 	conn->le.keys = bt_keys_get_addr(conn->id, &conn->le.dst);
 	if (!conn->le.keys) {
 		LOG_ERR("Unable to get keys for %s",
