@@ -532,6 +532,24 @@ int bt_avrcp_register_callback(struct bt_avrcp_cb *cb)
                 LOG_ERR("fail to start avrcp");
                 return -EIO;
             }
+
+            if (index == 0)
+            {
+                if (BT_L2CAP_RX_MTU > UINT16_MAX)
+                {
+                    AVRCP_UNLOCK;
+                    LOG_ERR("BT_L2CAP_RX_MTU is too large");
+                    return -EINVAL;
+                }
+
+                ret = BT_avrcp_set_mtu(BT_L2CAP_RX_MTU);
+                if (ret != API_SUCCESS)
+                {
+                    AVRCP_UNLOCK;
+                    LOG_ERR("fail to set avrcp mtu");
+                    return -EIO;
+                }
+            }
         }
     }
 
