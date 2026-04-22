@@ -1541,7 +1541,7 @@ static int cmd_id_select(const struct shell *sh, size_t argc, char *argv[])
 	unsigned long id_ul;
 
 	id_ul = shell_strtoul(argv[1], 10, &err);
-	if ((err != 0) || (id_ul > UINT8_MAX)) {
+	if ((err != 0) || (id_ul > UINT8_MAX) || (id_ul >= CONFIG_BT_ID_MAX)) {
 		shell_error(sh, "Invalid identity");
 		return -EINVAL;
 	}

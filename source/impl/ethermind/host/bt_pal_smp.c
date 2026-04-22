@@ -7073,7 +7073,7 @@ void bt_smp_update_keys(struct bt_conn *conn)
 {
 	struct bt_smp *smp;
 	struct bt_keys *keys;
-	uint32_t avoid_loop;
+	uint32_t avoid_loop = 0;
 
 	smp = smp_chan_get(conn);
 	if (!smp) {
@@ -8245,13 +8245,20 @@ static void hci_acl_smp_br_handler(struct net_buf *buf)
 #else
         BT_mem_set(local_key_info.id_info, 0x00,sizeof(local_key_info.id_info));
 #endif /* CONFIG_BT_PRIVACY */
-        /* Mask the to be exchanged LTK according to the negotiated key size */
-        BT_mem_set
-        (
-            (&local_key_info.enc_info[0] + kx_param->ekey_size),
-            0x00,
-            (SMP_LTK_SIZE - kx_param->ekey_size)
-        );
+        /* Mask the to be exchanged LTK according to the negotiated key size.
+         * Guard with an explicit range check so that the pointer arithmetic
+         * (&enc_info[0] + ekey_size) is only evaluated when ekey_size is
+         * strictly less than SMP_LTK_SIZE (16), keeping the pointer inside
+         * the array and eliminating the Coverity OVERRUN defect. */
+        if (kx_param->ekey_size < SMP_LTK_SIZE)
+        {
+            BT_mem_set
+            (
+                (&local_key_info.enc_info[0] + kx_param->ekey_size),
+                0x00,
+                (SMP_LTK_SIZE - kx_param->ekey_size)
+            );
+        }
 
         BT_smp_key_exchange_info_request_reply (&hdr->pdu.bd_handle, &local_key_info);
         break;
@@ -9079,13 +9086,20 @@ static void hci_acl_smp_handler(struct net_buf *buf)
 #else
         BT_mem_set(local_key_info.id_info, 0x00,sizeof(local_key_info.id_info));
 #endif /* CONFIG_BT_PRIVACY */
-        /* Mask the to be exchanged LTK according to the negotiated key size */
-        BT_mem_set
-        (
-            (&local_key_info.enc_info[0] + kx_param->ekey_size),
-            0x00,
-            (SMP_LTK_SIZE - kx_param->ekey_size)
-        );
+        /* Mask the to be exchanged LTK according to the negotiated key size.
+         * Guard with an explicit range check so that the pointer arithmetic
+         * (&enc_info[0] + ekey_size) is only evaluated when ekey_size is
+         * strictly less than SMP_LTK_SIZE (16), keeping the pointer inside
+         * the array and eliminating the Coverity OVERRUN defect. */
+        if (kx_param->ekey_size < SMP_LTK_SIZE)
+        {
+            BT_mem_set
+            (
+                (&local_key_info.enc_info[0] + kx_param->ekey_size),
+                0x00,
+                (SMP_LTK_SIZE - kx_param->ekey_size)
+            );
+        }
 
         BT_smp_key_exchange_info_request_reply (&hdr->pdu.bd_handle, &local_key_info);
         break;
