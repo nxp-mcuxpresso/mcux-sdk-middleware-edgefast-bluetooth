@@ -60,7 +60,6 @@ static int bt_enter_test_mode(const struct shell *sh, size_t argc, char **argv)
     if (err)
     {
         shell_print(sh, "Enable device under test mode command failed (err %d)\n", err);
-        net_buf_unref(rsp);
         return -EINVAL;
     }
     else
