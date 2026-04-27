@@ -1321,8 +1321,17 @@ static int cmd_hci_cmd(const struct shell *sh, size_t argc, char *argv[])
 	int hex_data_len;
 
 	hex_data_len = 0;
-	ogf = strtoul(argv[1], NULL, 16);
-	ocf = strtoul(argv[2], NULL, 16);
+	ogf = (uint8_t)shell_strtoul(argv[1], 16, &err);
+	if (err != 0) {
+		shell_error(sh, "Invalid ogf value");
+		return -EINVAL;
+	}
+
+	ocf = (uint16_t)shell_strtoul(argv[2], 16, &err);
+	if (err != 0) {
+		shell_error(sh, "Invalid ocf value");
+		return -EINVAL;
+	}
 
 	if (argc > 3) {
 		size_t len;
@@ -1456,7 +1465,7 @@ static int cmd_id_reset(const struct shell *sh, size_t argc, char *argv[])
 	}
 
 	id_ul = shell_strtoul(argv[1], 10, &err);
-	if ((err != 0) || (id_ul > UINT8_MAX)) {
+	if ((err != 0) || (id_ul > UINT8_MAX) || (id_ul >= CONFIG_BT_ID_MAX)) {
 		shell_error(sh, "Invalid identity");
 		return -EINVAL;
 	}
@@ -1496,7 +1505,7 @@ static int cmd_id_delete(const struct shell *sh, size_t argc, char *argv[])
 	}
 
 	id_ul = shell_strtoul(argv[1], 10, &err);
-	if ((err != 0) || (id_ul > UINT8_MAX)) {
+	if ((err != 0) || (id_ul > UINT8_MAX) || (id_ul >= CONFIG_BT_ID_MAX)) {
 		shell_error(sh, "Invalid identity");
 		return -EINVAL;
 	}
@@ -2414,19 +2423,33 @@ static int cmd_adv_start(const struct shell *sh, size_t argc, char *argv[])
 		const char *arg = argv[argn];
 
 		if (!strcmp(arg, "timeout")) {
+			unsigned long timeout_ul;
+
 			if (++argn == argc) {
 				goto fail_show_help;
 			}
 
-			timeout = strtoul(argv[argn], NULL, 16);
+			timeout_ul = shell_strtoul(argv[argn], 16, &err);
+			if ((err != 0) || (timeout_ul > INT32_MAX)) {
+				shell_error(sh, "Invalid timeout");
+				return -EINVAL;
+			}
+			timeout = (int32_t)timeout_ul;
 		}
 
 		if (!strcmp(arg, "num-events")) {
+			unsigned long num_events_ul;
+
 			if (++argn == argc) {
 				goto fail_show_help;
 			}
 
-			num_events = strtoul(argv[argn], NULL, 16);
+			num_events_ul = shell_strtoul(argv[argn], 16, &err);
+			if ((err != 0) || (num_events_ul > UINT8_MAX)) {
+				shell_error(sh, "Invalid num-events");
+				return -EINVAL;
+			}
+			num_events = (uint8_t)num_events_ul;
 		}
 	}
 
@@ -2765,19 +2788,33 @@ static int cmd_per_adv_sync_create(const struct shell *sh, size_t argc,
 			options |=
 				BT_LE_PER_ADV_SYNC_OPT_SYNC_ONLY_CONST_TONE_EXT;
 		} else if (!strcmp(argv[j], "timeout")) {
+			unsigned long val;
+
 			if (++j == argc) {
 				shell_help(sh);
 				return SHELL_CMD_HELP_PRINTED;
 			}
 
-			create_params.timeout = strtoul(argv[j], NULL, 16);
+			val = shell_strtoul(argv[j], 16, &err);
+			if ((err != 0) || (val > UINT16_MAX)) {
+				shell_error(sh, "Invalid timeout");
+				return -EINVAL;
+			}
+			create_params.timeout = (uint16_t)val;
 		} else if (!strcmp(argv[j], "skip")) {
+			unsigned long val;
+
 			if (++j == argc) {
 				shell_help(sh);
 				return SHELL_CMD_HELP_PRINTED;
 			}
 
-			create_params.skip = strtoul(argv[j], NULL, 16);
+			val = shell_strtoul(argv[j], 16, &err);
+			if ((err != 0) || (val > UINT16_MAX)) {
+				shell_error(sh, "Invalid skip");
+				return -EINVAL;
+			}
+			create_params.skip = (uint16_t)val;
 		} else {
 			shell_help(sh);
 			return SHELL_CMD_HELP_PRINTED;
@@ -2884,19 +2921,33 @@ static int cmd_past_subscribe(const struct shell *sh, size_t argc,
 			param.options |=
 				BT_LE_PER_ADV_SYNC_TRANSFER_OPT_SYNC_ONLY_CTE;
 		} else if (!strcmp(argv[j], "timeout")) {
+			unsigned long val;
+
 			if (++j == argc) {
 				shell_help(sh);
 				return SHELL_CMD_HELP_PRINTED;
 			}
 
-			param.timeout = strtoul(argv[j], NULL, 16);
+			val = shell_strtoul(argv[j], 16, &err);
+			if ((err != 0) || (val > UINT16_MAX)) {
+				shell_error(sh, "Invalid timeout");
+				return -EINVAL;
+			}
+			param.timeout = (uint16_t)val;
 		} else if (!strcmp(argv[j], "skip")) {
+			unsigned long val;
+
 			if (++j == argc) {
 				shell_help(sh);
 				return SHELL_CMD_HELP_PRINTED;
 			}
 
-			param.skip = strtoul(argv[j], NULL, 16);
+			val = shell_strtoul(argv[j], 16, &err);
+			if ((err != 0) || (val > UINT16_MAX)) {
+				shell_error(sh, "Invalid skip");
+				return -EINVAL;
+			}
+			param.skip = (uint16_t)val;
 		} else if (!strcmp(argv[j], "conn")) {
 			if (!default_conn) {
 				shell_print(sh, "Not connected");
@@ -3016,7 +3067,14 @@ static int cmd_read_remote_tx_power(const struct shell *sh, size_t argc, char *a
 {
 	if (argc < 3) {
 		int err = 0;
-		enum bt_conn_le_tx_power_phy phy = (enum bt_conn_le_tx_power_phy)strtoul((const char *)argv[1], NULL, 16);
+		unsigned long phy_ul = shell_strtoul(argv[1], 16, &err);
+
+		if (err != 0) {
+			shell_error(sh, "Invalid PHY value");
+			return -EINVAL;
+		}
+
+		enum bt_conn_le_tx_power_phy phy = (enum bt_conn_le_tx_power_phy)phy_ul;
 
 		err = bt_conn_le_get_remote_tx_power_level(default_conn, phy);
 
@@ -3039,8 +3097,14 @@ static int cmd_read_local_tx_power(const struct shell *sh, size_t argc, char *ar
 
 	if (argc < 3) {
 		struct bt_conn_le_tx_power tx_power_level;
+		unsigned long phy_ul;
 
-		tx_power_level.phy = strtoul(argv[1], NULL, 16);
+		phy_ul = shell_strtoul(argv[1], 16, &err);
+		if (err != 0) {
+			shell_error(sh, "Invalid PHY value");
+			return -EINVAL;
+		}
+		tx_power_level.phy = (uint8_t)phy_ul;
 
 		int8_t unachievable_current_level = -100;
 		/* Arbitrary, these are output parameters.*/
@@ -3565,8 +3629,7 @@ static int cmd_conn_data_len_update(const struct shell *sh, size_t argc,
 				    char *argv[])
 {
 	struct bt_conn_le_data_len_param param;
-	int err;
-	char *endptr;
+	int err = 0;
 	unsigned long temp;
 
 	if (default_conn == NULL) {
@@ -3576,16 +3639,17 @@ static int cmd_conn_data_len_update(const struct shell *sh, size_t argc,
 		return -ENOEXEC;
 	}
 
-	temp = strtoul(argv[1], &endptr, 10);
-	if ((endptr == argv[1]) || (*endptr != '\0')) {
+	temp = shell_strtoul(argv[1], 10, &err);
+	if ((err != 0) || (temp > UINT16_MAX)) {
 		shell_error(sh, "Invalid tx_max_len value");
 		return -EINVAL;
 	}
 	param.tx_max_len = (uint16_t)temp;
 
 	if (argc > 2) {
-		temp = strtoul(argv[2], &endptr, 10);
-		if ((endptr == argv[2]) || (*endptr != '\0')) {
+		err = 0;
+		temp = shell_strtoul(argv[2], 10, &err);
+		if ((err != 0) || (temp > UINT16_MAX)) {
 			shell_error(sh, "Invalid tx_max_time value");
 			return -EINVAL;
 		}
@@ -3625,7 +3689,6 @@ static int cmd_conn_phy_update(const struct shell *sh, size_t argc,
 {
 	struct bt_conn_le_phy_param param;
 	int err;
-	char *endptr;
 	unsigned long temp;
 
 	if (default_conn == NULL) {
@@ -3635,8 +3698,8 @@ static int cmd_conn_phy_update(const struct shell *sh, size_t argc,
 		return -ENOEXEC;
 	}
 
-	temp = strtoul(argv[1], &endptr, 16);
-	if ((endptr == argv[1]) || (*endptr != '\0') || (temp > UINT8_MAX)) {
+	temp = shell_strtoul(argv[1], 16, &err);
+	if ((err != 0) || (temp > UINT8_MAX)) {
 		shell_error(sh, "Invalid pref_tx_phy value");
 		return -EINVAL;
 	}
@@ -3653,8 +3716,8 @@ static int cmd_conn_phy_update(const struct shell *sh, size_t argc,
 		} else if (!strcmp(arg, "s8")) {
 			param.options |= BT_CONN_LE_PHY_OPT_CODED_S8;
 		} else {
-			temp = strtoul(arg, &endptr, 16);
-			if ((endptr == arg) || (*endptr != '\0') || (temp > UINT8_MAX)) {
+			temp = shell_strtoul(arg, 16, &err);
+			if ((err != 0) || (temp > UINT8_MAX)) {
 				shell_error(sh, "Invalid pref_rx_phy value");
 				return -EINVAL;
 			}
