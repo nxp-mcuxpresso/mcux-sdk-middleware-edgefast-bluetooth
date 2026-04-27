@@ -761,6 +761,8 @@ static API_RESULT bt_hfp_hp_extract_result(AT_PARSER_RESPONSE *parser_response,
 
         case AT_PL_CLCC_CL_: /* <CRLF>+CLCC: */
         {
+            size_t number_len;
+
             /*
              * +CLCC:<idx>,<dir>,<status>,<mode>,
              * <mprty>,<number>,<type>[,<alpha>]
@@ -799,9 +801,11 @@ static API_RESULT bt_hfp_hp_extract_result(AT_PARSER_RESPONSE *parser_response,
                 break;
             }
 
+            number_len = sizeof(parse_result->result_param.clcc_resp_result.number);
+            number_len = MIN(number_len, parser_response->param[index].value_length);
             BT_mem_copy(parse_result->result_param.clcc_resp_result.number,
                         &buffer[parser_response->param[index].start_of_value_index],
-                        parser_response->param[index].value_length);
+                        number_len);
 
             parse_result->result_param.clcc_resp_result.number[parser_response->param[index++].value_length] = '\0';
 
@@ -2598,7 +2602,7 @@ int bt_hfp_hf_volume_update(struct bt_conn *conn, hf_volume_type_t type, int vol
         return -ENOTCONN;
     }
 
-    sprintf((char *)&volumeStr[0U],"%d", volume);
+    (void)sprintf((char *)&volumeStr[0U],"%d", volume);
     if (type == hf_volume_type_speaker)
     {
         memset((char *)&hf->bt_hfp_hp_speaker_volume[0], 0x0, 3);
