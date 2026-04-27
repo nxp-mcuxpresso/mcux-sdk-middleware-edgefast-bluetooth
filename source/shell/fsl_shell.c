@@ -1201,6 +1201,7 @@ static void SHELL_AutoComplete(shell_context_handle_t *shellContextHandle)
     if (namePtr != NULL)
     {
         (void)memcpy(shellContextHandle->line, namePtr, (uint32_t)minLen);
+        shellContextHandle->line[minLen] = '\0';
     }
     (void)SHELL_Write(shellContextHandle, shellContextHandle->prompt, strlen(shellContextHandle->prompt));
     (void)SHELL_Write(shellContextHandle, shellContextHandle->line, strlen(shellContextHandle->line));
@@ -1228,6 +1229,11 @@ static int32_t SHELL_ParseLine(const char *cmd, uint32_t len, char *argv[])
     uint32_t position;
 
     /* Init params */
+    /* Clamp len to prevent overrunning the fixed-size s_paramBuffer (Coverity BUFFER_SIZE) */
+    if (len >= SHELL_BUFFER_SIZE)
+    {
+        len = SHELL_BUFFER_SIZE - 1U;
+    }
     (void)memset(s_paramBuffer, '\0', len + 1U);
     (void)memcpy(s_paramBuffer, cmd, len);
 

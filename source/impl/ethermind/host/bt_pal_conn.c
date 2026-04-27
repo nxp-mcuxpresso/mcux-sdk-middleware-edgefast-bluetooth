@@ -678,7 +678,7 @@ static int send_buf(struct bt_conn *conn, struct net_buf *buf,
 	tx->cb = (bt_conn_tx_cb_t)cb;
 	tx->user_data = ud;
 
-	uint16_t frag_len = MIN(conn_mtu(conn), len);
+	uint16_t frag_len = (uint16_t)MIN(conn_mtu(conn), len);
 
 	__ASSERT_NO_MSG(buf->ref == 1);
 

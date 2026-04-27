@@ -1333,7 +1333,7 @@ static void smp_br_auth_starting(struct bt_smp_br *smp)
 
 	if (0 != ret)
 	{
-		smp->auth.param = ret;
+		smp->auth.param = (ret > 0) ? (UCHAR)ret : (UCHAR)BT_SMP_ERR_UNSPECIFIED;
 		retval = BT_smp_authentication_request_reply
 		(
 			(SMP_BD_HANDLE *)&conn->deviceId,

@@ -883,7 +883,7 @@ static void conn_handle_disconnected(uint16_t handle, uint8_t disconnect_reason)
 			/* Use invalid connection handle bits so that connection
 			 * handle 0 can be used as a valid non-zero handle.
 			 */
-			disconnected_handles[i] = (uint16_t)(~BT_ACL_HANDLE_MASK | handle);
+			disconnected_handles[i] = (uint16_t)((~BT_ACL_HANDLE_MASK | handle) & 0xFFFFU);
 			disconnected_handles_reason[i] = disconnect_reason;
 		}
 	}
@@ -892,7 +892,7 @@ static void conn_handle_disconnected(uint16_t handle, uint8_t disconnect_reason)
 /** @returns the disconnect reason. */
 static uint8_t conn_handle_is_disconnected(uint16_t handle)
 {
-	handle = (uint16_t)(handle | (~BT_ACL_HANDLE_MASK));
+	handle = (uint16_t)((handle | (~BT_ACL_HANDLE_MASK)) & 0xFFFFU);
 
 	for (int i = 0; i < ARRAY_SIZE(disconnected_handles); i++) {
 		if (disconnected_handles[i] == handle) {

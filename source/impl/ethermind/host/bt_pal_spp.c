@@ -1211,6 +1211,7 @@ int bt_spp_request_port_setting(struct bt_conn *conn, uint8_t channel, bt_spp_ro
     if (API_SUCCESS == err)
     {
         LOG_INF("[SPP] SPP get remote port setting successfully, waitting for BT_RFCOMM_RPN_REQUEST event.\n");
+        return 0;
     }
     else
     {
@@ -1221,9 +1222,8 @@ int bt_spp_request_port_setting(struct bt_conn *conn, uint8_t channel, bt_spp_ro
             spp_entity[index].cb    = NULL;
         }
         init_spp_control(&spp_control[ctl_hdl]);
+        return -EIO;
     }
-
-    return err;
 }
 
 int bt_spp_negotiate_port_setting(struct bt_conn * conn, uint8_t channel, bt_spp_role_t role, bt_spp_callback *cb, struct bt_spp_port *port)
@@ -1264,6 +1264,7 @@ int bt_spp_negotiate_port_setting(struct bt_conn * conn, uint8_t channel, bt_spp
     if (API_SUCCESS == err)
     {
         LOG_INF("[SPP] SPP get remote port setting successfully, waitting for control_message callback.\n");
+        return 0;
     }
     else
     {
@@ -1274,9 +1275,8 @@ int bt_spp_negotiate_port_setting(struct bt_conn * conn, uint8_t channel, bt_spp
             spp_entity[index].cb    = NULL;
         }
         init_spp_control(&spp_control[ctl_hdl]);
+        return -EIO;
     }
-
-    return err;
 }
 
 int bt_spp_send_pn(struct bt_conn * conn, uint8_t channel, bt_spp_role_t role, bt_spp_callback *cb, struct bt_spp_pn *pn)
