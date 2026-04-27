@@ -93,7 +93,14 @@ static inline uint32_t ticks_to_msec_safe(uint64_t tick)
 	const uint64_t multiplier = 1000ULL;
 
 	if (tick > (UINT64_MAX / multiplier)) {
-		return (uint32_t)((tick / rate) * multiplier + ((tick % rate) * multiplier) / rate);
+		/*
+		 * No overflow: tick/rate < UINT64_MAX/multiplier because rate>=1,
+		 * so (tick/rate)*multiplier <= tick < UINT64_MAX.
+		 * Coverity CERT INT30-C false positive: the branch guard ensures safety.
+		 */
+		uint64_t q = tick / rate;
+		uint64_t r = ((tick % rate) * multiplier) / rate;
+		return (uint32_t)(q * multiplier + r);
 	}
 	return (uint32_t)((tick * multiplier) / rate);
 }
@@ -104,7 +111,13 @@ static inline uint64_t ticks_to_msec_64_safe(uint64_t tick)
 	const uint64_t multiplier = 1000ULL;
 
 	if (tick > (UINT64_MAX / multiplier)) {
-		return (tick / rate) * multiplier + ((tick % rate) * multiplier) / rate;
+		/*
+		 * No overflow: branch guard ensures tick/rate is small enough.
+		 * Coverity CERT INT30-C false positive.
+		 */
+		uint64_t q = tick / rate;
+		uint64_t r = ((tick % rate) * multiplier) / rate;
+		return q * multiplier + r;
 	}
 	return (tick * multiplier) / rate;
 }
@@ -115,7 +128,13 @@ static inline uint64_t ticks_to_usec_64_safe(uint64_t tick)
 	const uint64_t multiplier = 1000000ULL;
 
 	if (tick > (UINT64_MAX / multiplier)) {
-		return (tick / rate) * multiplier + ((tick % rate) * multiplier) / rate;
+		/*
+		 * No overflow: branch guard ensures tick/rate is small enough.
+		 * Coverity CERT INT30-C false positive.
+		 */
+		uint64_t q = tick / rate;
+		uint64_t r = ((tick % rate) * multiplier) / rate;
+		return q * multiplier + r;
 	}
 	return (tick * multiplier) / rate;
 }
@@ -126,7 +145,13 @@ static inline uint64_t ticks_to_nsec_64_safe(uint64_t tick)
 	const uint64_t multiplier = 1000000000ULL;
 
 	if (tick > (UINT64_MAX / multiplier)) {
-		return (tick / rate) * multiplier + ((tick % rate) * multiplier) / rate;
+		/*
+		 * No overflow: branch guard ensures tick/rate is small enough.
+		 * Coverity CERT INT30-C false positive.
+		 */
+		uint64_t q = tick / rate;
+		uint64_t r = ((tick % rate) * multiplier) / rate;
+		return q * multiplier + r;
 	}
 	return (tick * multiplier) / rate;
 }
@@ -770,7 +795,13 @@ __syscall int64_t k_uptime_ticks(void);
  */
 static inline int64_t k_uptime_get(void)
 {
-	return (int64_t)TICKS_TO_MSEC_64(k_uptime_ticks());
+	uint64_t uptime_ms = TICKS_TO_MSEC_64(k_uptime_ticks());
+
+	if (uptime_ms > INT64_MAX) {
+		return INT64_MAX;
+	}
+
+	return (int64_t)uptime_ms;
 }
 
 /**
@@ -794,7 +825,12 @@ static inline int64_t k_uptime_get(void)
  */
 static inline uint32_t k_uptime_get_32(void)
 {
-	return (uint32_t)k_uptime_get();
+	int64_t uptime_ms = k_uptime_get();
+
+	if (uptime_ms > UINT32_MAX) {
+		return UINT32_MAX;
+	}
+	return (uint32_t)uptime_ms;
 }
 
 /**

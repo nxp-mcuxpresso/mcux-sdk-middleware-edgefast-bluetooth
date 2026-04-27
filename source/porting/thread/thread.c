@@ -669,6 +669,11 @@ int k_thread_priority_get(k_tid_t thread)
     {
         priority = uxTaskPriorityGet((NULL == thread) ? NULL : thread->handle);
     }
+
+    if (priority >= INT32_MAX) {
+        return -EINVAL;
+    }
+
     return (int)priority;
 }
 
