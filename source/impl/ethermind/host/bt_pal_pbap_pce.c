@@ -504,10 +504,18 @@ static int bt_pbap_form_stack_param(struct net_buf *buf, PBAP_APPL_PARAMS *app_p
 
     if (bt_obex_get_hdr(buf, OBEX_HDR_APP_PARAM, &hdr_value, &hdr_length) == 0)
     {
-        appl_param_len = sizeof(struct bt_obex_hdr_bytes) + hdr_length;
+        if (((uint32_t)sizeof(struct bt_obex_hdr_bytes) + (uint32_t)hdr_length) > (uint32_t)UINT16_MAX)
+        {
+            return -EINVAL;
+        }
+        appl_param_len = (uint16_t)((uint32_t)sizeof(struct bt_obex_hdr_bytes) + (uint32_t)hdr_length);
         while (hdr_length > 0U)
         {
             (void)bt_pbap_get_appl_param_hdr_value((struct bt_obex_tag_bytes *)(void*)hdr_value, app_par);
+            if (((struct bt_obex_tag_bytes *)(void*)hdr_value)->id == 0)
+            {
+                return -EINVAL;
+            }
             tag.id = ((struct bt_obex_tag_bytes *)(void*)hdr_value)->id - 1U;
             PBAP_SET_APPL_PARAM_FLAG(app_par->appl_param_flag, ((uint16_t)1U << tag.id % BT_PBAP_APPL_PARAM_HDR_COUNT));
             tag.length = ((struct bt_obex_tag_bytes *)(void*)hdr_value)->length + (uint8_t)sizeof(struct bt_obex_tag_bytes);
@@ -558,7 +566,12 @@ static int8_t bt_pal_pull_phonebook_param(char *name)
         }
         index--;
     }
-    (void)memcpy(phonebook_name, name + index + 1, suffix_index - index - 1);
+
+    if ((suffix_index - index - 1) >= (int8_t)sizeof(phonebook_name))
+    {
+        return -EINVAL;
+    }
+    (void)memcpy(phonebook_name, name + index + 1, (size_t)(suffix_index - index - 1));
     phonebook_name[suffix_index - index - 1] = 0;
     for (index = 0U; index < child_floader_count; index++)
     {
@@ -1291,7 +1304,7 @@ static API_RESULT ethermind_pbap_pce_event_callback(
             }
             if (pbap_pce_cb != NULL && pbap_pce_cb->pull_vcard_listing != NULL)
             {
-                pbap_pce_cb->pull_vcard_listing(pbap_pce, event_result, buf);
+                pbap_pce_cb->pull_vcard_listing(pbap_pce, bt_pbap_convert_result(event_result), buf);
             }
             else
             {
@@ -1327,7 +1340,7 @@ static API_RESULT ethermind_pbap_pce_event_callback(
             }
             if (pbap_pce_cb != NULL && pbap_pce_cb->pull_vcard_entry != NULL && pbap_pce != NULL)
             {
-                pbap_pce_cb->pull_vcard_entry(pbap_pce, event_result, buf);
+                pbap_pce_cb->pull_vcard_entry(pbap_pce, bt_pbap_convert_result(event_result), buf);
             }
             else
             {
@@ -1345,7 +1358,7 @@ static API_RESULT ethermind_pbap_pce_event_callback(
         case PBAP_PCE_ABORT_CFM:
             if (pbap_pce_cb != NULL && pbap_pce_cb->abort != NULL && pbap_pce != NULL)
             {
-                pbap_pce_cb->abort(pbap_pce, event_result);
+                pbap_pce_cb->abort(pbap_pce, bt_pbap_convert_result(event_result));
             }
             break;
         case PBAP_PCE_TRANSPORT_CLOSE_CFM:
@@ -1354,7 +1367,7 @@ static API_RESULT ethermind_pbap_pce_event_callback(
             pbap_pce_free_instance(pbap_pce);
             if (pbap_pce_cb != NULL && pbap_pce_cb->disconnected != NULL && pbap_pce != NULL)
             {
-                pbap_pce_cb->disconnected(pbap_pce, event_result);
+                pbap_pce_cb->disconnected(pbap_pce, bt_pbap_convert_result(event_result));
             }
             break;
         default:

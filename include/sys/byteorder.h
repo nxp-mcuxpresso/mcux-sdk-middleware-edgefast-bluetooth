@@ -540,7 +540,7 @@ static inline uint64_t sys_get_be64(const uint8_t src[8])
  */
 static inline uint16_t sys_get_le16(const uint8_t src[2])
 {
-	return ((uint16_t)src[1] << 8) | src[0];
+	return (uint16_t)(((uint16_t)src[1] << 8) | src[0]);
 }
 
 /**

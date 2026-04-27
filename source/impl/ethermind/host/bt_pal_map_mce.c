@@ -347,6 +347,7 @@ static int bt_map_copy_appl_param_from_buf_to_stack(struct net_buf *buf, MAP_APP
 {
     int err;
     struct bt_obex_tag_bytes tag;
+    uint32_t total_len;
     uint16_t hdr_length;
     uint8_t *hdr_value;
 
@@ -356,7 +357,12 @@ static int bt_map_copy_appl_param_from_buf_to_stack(struct net_buf *buf, MAP_APP
         return err;
     }
 
-    *pkt_len += hdr_length + (uint16_t)sizeof(struct bt_obex_hdr_bytes);
+    total_len = (uint32_t)*pkt_len + (uint32_t)hdr_length + (uint32_t)sizeof(struct bt_obex_hdr_bytes);
+    if (total_len > (uint32_t)UINT16_MAX)
+    {
+        return -EINVAL;
+    }
+    *pkt_len = (uint16_t)total_len;
 
     while (hdr_length > 0U)
     {
@@ -380,7 +386,7 @@ static int bt_map_copy_appl_param_from_buf_to_stack(struct net_buf *buf, MAP_APP
             tag.id / (sizeof(appl_param->appl_param_flag[0]) * 8U)
         );
 #endif /* MAP_1_3 */
-        tag.length = ((struct bt_obex_tag_bytes *)(void *)hdr_value)->length + (uint16_t)sizeof(struct bt_obex_tag_bytes);
+        tag.length = (uint16_t)((struct bt_obex_tag_bytes *)(void *)hdr_value)->length + (uint16_t)sizeof(struct bt_obex_tag_bytes);
         if (hdr_length < tag.length)
         {
             return -EINVAL;
@@ -2107,7 +2113,7 @@ int bt_map_mce_mns_get_max_pkt_len(struct bt_map_mce_mns *mce_mns, uint16_t *max
 
 static uint8_t bt_map_convert_result(uint16_t event_result)
 {
-    uint8_t result = (uint8_t)event_result;
+    uint8_t result;
 
     switch (event_result)
     {
@@ -2122,6 +2128,7 @@ static uint8_t bt_map_convert_result(uint16_t event_result)
         case BT_MAP_RSP_SERVICE_UNAVBL:
         case BT_MAP_RSP_FORBIDDEN:
         case BT_MAP_RSP_INT_SERVER_ERR:
+            result = (uint8_t)event_result;
             break;
         case API_SUCCESS:
             result = BT_MAP_RSP_SUCCESS;

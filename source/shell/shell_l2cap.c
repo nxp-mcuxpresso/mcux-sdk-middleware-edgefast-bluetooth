@@ -138,7 +138,8 @@ static uint32_t l2cap_calculate_data_rate_in_kbps
 	time_elapsed = (0 == time_elapsed) ? 1 : time_elapsed;
 
 	tmp_data_count = (tmp_data_count)/(time_elapsed);
-	tmp_data_count = (tmp_data_count * 8) / 1024;
+    /** (tmp_data_count * 8) / 1024 */
+	tmp_data_count = tmp_data_count / 128;
 
 	if (tmp_data_count > UINT32_MAX) {
 		return UINT32_MAX;
@@ -164,7 +165,7 @@ static uint16_t l2cap_display_tx_stat (void)
 	}
 
 	duration = (last_tx_inst - first_tx_inst);
-	total_byte_count = (req_data_tx_chunk_len * req_data_tx_count);
+	total_byte_count = ((uint32_t)req_data_tx_chunk_len * (uint32_t)req_data_tx_count);
 	shell_print (ctx_shell,
 	"\n---------------------------- TX Session ----------------------------\n");
 	shell_print (ctx_shell,
@@ -204,7 +205,7 @@ static uint16_t l2cap_display_rx_stat (void)
 	}
 
 	duration = (last_rx_inst - first_rx_inst);
-	total_byte_count = (exp_data_rx_chunk_len * exp_data_rx_count);
+	total_byte_count = ((uint32_t)exp_data_rx_chunk_len * (uint32_t)exp_data_rx_count);
 	shell_print (ctx_shell,
 	"\n---------------------------- RX Session ----------------------------\n");
 	shell_print (ctx_shell,

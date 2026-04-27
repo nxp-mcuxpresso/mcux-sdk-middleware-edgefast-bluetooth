@@ -255,7 +255,7 @@ static void SHELL_WriteBuffer(char *buffer, int32_t *indicator, char val, int le
 
     for (i = 0; i < len; i++)
     {
-        if ((uint32_t)(*indicator + 1) >= SHELL_SPRINTF_BUFFER_SIZE)
+        if (((uint32_t)(*indicator) + 1) >= SHELL_SPRINTF_BUFFER_SIZE)
         {
 #if (!defined(SDK_DEBUGCONSOLE_UART) && (defined(SDK_DEBUGCONSOLE) && (SDK_DEBUGCONSOLE != 1)))
             if (NULL == shellContextHandle->serialHandle)

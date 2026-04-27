@@ -484,7 +484,7 @@ static int8_t bt_pal_pull_phonebook_param(PBAP_HEADERS *pbap_headers)
     name = (char *)pbap_headers->pbap_req_info->name->value;
 
     /* Coverity: avoid unsigned wrap and narrow explicitly. */
-    index = (int16_t)((short)(pbap_headers->pbap_req_info->name->length - 1U));
+    index = (int16_t)(pbap_headers->pbap_req_info->name->length - 1U);
 
     if (endwith(name, (char *)".vcf") == 0)
     {
@@ -511,15 +511,15 @@ static int8_t bt_pal_pull_phonebook_param(PBAP_HEADERS *pbap_headers)
     }
 
     raw_len = (uint16_t)(suffix_index - start);
-    copy_len = raw_len;
-    if (copy_len >= (uint16_t)sizeof(phonebook_name))
+
+    /* Reject names that would not fit in phonebook_name (including NUL terminator). */
+    if (raw_len >= (uint16_t)sizeof(phonebook_name))
     {
-        copy_len = (uint16_t)sizeof(phonebook_name) - 1U;
+        return -EINVAL;
     }
+    copy_len = raw_len;
 
-    (void)memcpy(phonebook_name, name + start, (unsigned int)copy_len);
-    phonebook_name[copy_len] = '\0';
-
+    (void)memcpy(phonebook_name, name + start, (size_t)copy_len);
     /* If truncation happened, reject to avoid accepting ambiguous names. */
     if (copy_len != raw_len)
     {
@@ -586,7 +586,7 @@ static int8_t bt_pal_pull_vcard_entry_param(PBAP_HEADERS *pbap_headers)
 
 static uint8_t bt_pbap_convert_result(uint16_t event_result)
 {
-    uint8_t result = (uint8_t)event_result;
+    uint8_t result;
 
     switch (event_result)
     {
@@ -600,6 +600,7 @@ static uint8_t bt_pbap_convert_result(uint16_t event_result)
         case BT_PBAP_NOT_ACCEPTABLE_RSP:
         case BT_PBAP_NO_SERVICE_RSP:
         case BT_PBAP_FORBIDDEN_RSP:
+            result = (uint8_t)event_result;
             break;
         case API_SUCCESS:
             result = BT_PBAP_SUCCESS_RSP;
@@ -934,7 +935,7 @@ static API_RESULT ethermind_pbap_pse_event_callback(
             pbap_pse_free_instance(pbap_pse);
             if (pbap_pse_cb != NULL && pbap_pse_cb->disconnected != NULL)
             {
-                pbap_pse_cb->disconnected(pbap_pse, event_result);
+                pbap_pse_cb->disconnected(pbap_pse, bt_pbap_convert_result(event_result));
             }
             break;
 

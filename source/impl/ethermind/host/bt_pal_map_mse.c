@@ -344,7 +344,10 @@ static int bt_map_copy_appl_param_from_buf_to_stack(struct net_buf *buf, MAP_APP
             return err;
         }
 
-        tag.id = tag_bytes->id - 1U;
+        if (tag_bytes->id == 0U) {
+                return -EINVAL;
+        }
+        tag.id = (uint8_t)(tag_bytes->id - 1U);
 #ifndef MAP_1_3
         MAP_SET_APPL_PARAM_FLAG
         (
