@@ -871,23 +871,31 @@ static API_RESULT hfp_ag_callback(HFP_AG_HANDLE handle,HFP_AG_EVENTS hfp_ag_even
                             bt_hfp_ag_send_at_rsp(hfp_ag, HFAG_OK, NULL);
                             break;
                         case AT_BCS:
-                            bt_hfp_ag_send_at_rsp(hfp_ag, HFAG_OK, NULL);
-                            if ((bt_hfp_ag_cb) && (bt_hfp_ag_cb->codec_negotiate))
                             {
-                                bt_hfp_ag_cb->codec_negotiate(
-                                    hfp_ag,
-                                    at_response.global_at_str[at_response.param->start_of_value_index] - '0' );
-                            }
+                                uint8_t codec_id = at_response.global_at_str[at_response.param->start_of_value_index];
 
-                            if (hfp_ag->bt_hfp_ag_config)
-                            {
-                                hfp_ag->bt_hfp_ag_config->bt_hfp_ag_codec_negotiate = 0;
-                                /* Trigger codec connection */
-                                if (at_response.global_at_str[at_response.param->start_of_value_index] == hfp_ag->bt_hfp_ag_config->bt_hfp_ag_codec)
+                                if ((codec_id < '1') || (codec_id > '9')) {
+                                    bt_hfp_ag_send_at_rsp(hfp_ag, HFAG_ERROR, NULL);
+                                    break;
+                                }
+
+                                codec_id = codec_id - '0';
+
+                                bt_hfp_ag_send_at_rsp(hfp_ag, HFAG_OK, NULL);
+                                if ((bt_hfp_ag_cb) && (bt_hfp_ag_cb->codec_negotiate))
                                 {
-                                    bt_hfp_ag_open_audio(
-                                        hfp_ag,
-                                        (at_response.global_at_str[at_response.param->start_of_value_index] - '0') - 1);
+                                    bt_hfp_ag_cb->codec_negotiate(
+                                        hfp_ag, codec_id);
+                                }
+
+                                if (hfp_ag->bt_hfp_ag_config)
+                                {
+                                    hfp_ag->bt_hfp_ag_config->bt_hfp_ag_codec_negotiate = 0;
+                                    /* Trigger codec connection */
+                                    if (codec_id == hfp_ag->bt_hfp_ag_config->bt_hfp_ag_codec)
+                                    {
+                                        bt_hfp_ag_open_audio(hfp_ag, codec_id - 1);
+                                    }
                                 }
                             }
                             break;
@@ -932,7 +940,7 @@ static API_RESULT hfp_ag_callback(HFP_AG_HANDLE handle,HFP_AG_EVENTS hfp_ag_even
 
                         case AT_BIND:
                         {
-                            uint16_t anum;
+                            int anum;
 
                             if (at_response.number_of_params > 0U)
                             {
