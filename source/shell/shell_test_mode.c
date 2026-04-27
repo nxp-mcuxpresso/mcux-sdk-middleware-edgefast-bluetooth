@@ -73,8 +73,7 @@ static int bt_enter_test_mode(const struct shell *sh, size_t argc, char **argv)
 
 static int bt_tx_test(const struct shell *sh, size_t argc, char **argv)
 {
-    int err;
-    int parse_err = 0;
+    int err = 0;
     long val;
     struct net_buf *buf = NULL;
     struct net_buf *rsp = NULL;
@@ -91,8 +90,8 @@ static int bt_tx_test(const struct shell *sh, size_t argc, char **argv)
         return -EINVAL;
     }
 
-    val = shell_strtol(argv[5], 16, &parse_err);
-    if (parse_err) {
+    val = shell_strtol(argv[5], 16, &err);
+    if (err) {
         shell_print(sh, "Invalid tx_test_interval parameter\n");
         return -EINVAL;
     }
@@ -121,8 +120,8 @@ static int bt_tx_test(const struct shell *sh, size_t argc, char **argv)
         cp->phd_off_start = 0x80;
         shell_print(sh, "phd_off_start default set to=%x\n",cp->phd_off_start);
 
-        val = shell_strtol(argv[1], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[1], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid test_scenario parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
@@ -130,8 +129,8 @@ static int bt_tx_test(const struct shell *sh, size_t argc, char **argv)
         cp->test_scenario = (uint8_t)val;
         shell_print(sh, "test_scenario= %x\n", cp->test_scenario);
 
-        val = shell_strtol(argv[2], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[2], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid hopping_mode parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
@@ -139,8 +138,8 @@ static int bt_tx_test(const struct shell *sh, size_t argc, char **argv)
         cp->hopping_mode = (uint8_t)val;
         shell_print(sh, "hopping_mode= %x\n", cp->hopping_mode);
 
-        val = shell_strtol(argv[3], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[3], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid tx_channel parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
@@ -148,8 +147,8 @@ static int bt_tx_test(const struct shell *sh, size_t argc, char **argv)
         cp->tx_channel = (uint8_t)val;
         shell_print(sh, "tx_channel= %x\n", cp->tx_channel);
 
-        val = shell_strtol(argv[4], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[4], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid rx_channel parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
@@ -157,8 +156,8 @@ static int bt_tx_test(const struct shell *sh, size_t argc, char **argv)
         cp->rx_channel = (uint8_t)val;
         shell_print(sh, "rx_channel= %x\n", cp->rx_channel);
 
-        val = shell_strtol(argv[5], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[5], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid tx_test_interval parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
@@ -166,8 +165,8 @@ static int bt_tx_test(const struct shell *sh, size_t argc, char **argv)
         cp->tx_test_interval = (uint8_t)val;
         shell_print(sh, "tx_test_interval= %x\n", cp->tx_test_interval);
 
-        val = shell_strtol(argv[6], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[6], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid pkt_type parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
@@ -175,16 +174,16 @@ static int bt_tx_test(const struct shell *sh, size_t argc, char **argv)
         cp->pkt_type = (uint8_t)val;
         shell_print(sh, "pkt_type= %x\n", cp->pkt_type);
 
-        val = shell_strtol(argv[7], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[7], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid data_length[0] parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
         }
         cp->data_length[0] = (uint8_t)val;
 
-        val = shell_strtol(argv[8], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[8], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid data_length[1] parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
@@ -192,8 +191,8 @@ static int bt_tx_test(const struct shell *sh, size_t argc, char **argv)
         cp->data_length[1] = (uint8_t)val;
         shell_print(sh, "data_length= %x %x\n", cp->data_length[0],cp->data_length[1]);
 
-        val = shell_strtol(argv[9], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[9], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid whitening parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
@@ -201,32 +200,32 @@ static int bt_tx_test(const struct shell *sh, size_t argc, char **argv)
         cp->whitening = (uint8_t)val;
         shell_print(sh, "whitening= %x\n", cp->whitening);
 
-        val = shell_strtol(argv[10], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[10], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid num_pkt[0] parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
         }
         cp->num_pkt[0] = (uint8_t)val;
 
-        val = shell_strtol(argv[11], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[11], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid num_pkt[1] parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
         }
         cp->num_pkt[1] = (uint8_t)val;
 
-        val = shell_strtol(argv[12], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[12], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid num_pkt[2] parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
         }
         cp->num_pkt[2] = (uint8_t)val;
 
-        val = shell_strtol(argv[13], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[13], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid num_pkt[3] parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
@@ -234,8 +233,8 @@ static int bt_tx_test(const struct shell *sh, size_t argc, char **argv)
         cp->num_pkt[3] = (uint8_t)val;
         shell_print(sh, "num_pkt= %x %x %x %x\n", cp->num_pkt[0],cp->num_pkt[1],cp->num_pkt[2],cp->num_pkt[3]);
 
-        val = shell_strtol(argv[14], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[14], 16, &err);
+        if (err || val < INT8_MIN || val > INT8_MAX) {
             shell_print(sh, "Invalid tx_pwr parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
@@ -269,8 +268,7 @@ static int bt_tx_test(const struct shell *sh, size_t argc, char **argv)
 
 static int bt_rx_test(const struct shell *sh, size_t argc, char **argv)
 {
-    int err;
-    int parse_err = 0;
+    int err = 0;
     long val;
     struct net_buf *buf = NULL;
     struct net_buf *rsp = NULL;
@@ -294,8 +292,8 @@ static int bt_rx_test(const struct shell *sh, size_t argc, char **argv)
     {
         cp = net_buf_add(buf, sizeof(*cp));
 
-        val = shell_strtol(argv[1], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[1], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid test_scenario parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
@@ -303,8 +301,8 @@ static int bt_rx_test(const struct shell *sh, size_t argc, char **argv)
         cp->test_scenario = (uint8_t)val;
         shell_print(sh, "test_scenario= %x\n", cp->test_scenario);
 
-        val = shell_strtol(argv[2], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[2], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid tx_channel parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
@@ -312,8 +310,8 @@ static int bt_rx_test(const struct shell *sh, size_t argc, char **argv)
         cp->tx_channel = (uint8_t)val;
         shell_print(sh, "tx_channel= %x\n", cp->tx_channel);
 
-        val = shell_strtol(argv[3], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[3], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid rx_channel parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
@@ -321,8 +319,8 @@ static int bt_rx_test(const struct shell *sh, size_t argc, char **argv)
         cp->rx_channel = (uint8_t)val;
         shell_print(sh, "rx_channel= %x\n", cp->rx_channel);
 
-        val = shell_strtol(argv[4], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[4], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid pkt_type parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
@@ -330,32 +328,32 @@ static int bt_rx_test(const struct shell *sh, size_t argc, char **argv)
         cp->pkt_type = (uint8_t)val;
         shell_print(sh, "pkt_type= %x\n", cp->pkt_type);
 
-        val = shell_strtol(argv[5], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[5], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid num_pkt[0] parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
         }
         cp->num_pkt[0] = (uint8_t)val;
 
-        val = shell_strtol(argv[6], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[6], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid num_pkt[1] parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
         }
         cp->num_pkt[1] = (uint8_t)val;
 
-        val = shell_strtol(argv[7], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[7], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid num_pkt[2] parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
         }
         cp->num_pkt[2] = (uint8_t)val;
 
-        val = shell_strtol(argv[8], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[8], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid num_pkt[3] parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
@@ -363,16 +361,16 @@ static int bt_rx_test(const struct shell *sh, size_t argc, char **argv)
         cp->num_pkt[3] = (uint8_t)val;
         shell_print(sh, "num_pkt= %x %x %x %x\n", cp->num_pkt[0], cp->num_pkt[1], cp->num_pkt[2], cp->num_pkt[3]);
 
-        val = shell_strtol(argv[9], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[9], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid data_length[0] parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
         }
         cp->data_length[0] = (uint8_t)val;
 
-        val = shell_strtol(argv[10], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[10], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid data_length[1] parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
@@ -386,8 +384,8 @@ static int bt_rx_test(const struct shell *sh, size_t argc, char **argv)
 
         for (index = 0; index < BT_BD_ADDR_SIZE; index++)
         {
-            val = shell_strtol(argv[11 + index], 16, &parse_err);
-            if (parse_err) {
+            val = shell_strtol(argv[11 + index], 16, &err);
+            if (err || val < 0 || val > UINT8_MAX) {
                 shell_print(sh, "Invalid tx_addr[%d] parameter\n", index);
                 net_buf_unref(buf);
                 return -EINVAL;
@@ -402,8 +400,8 @@ static int bt_rx_test(const struct shell *sh, size_t argc, char **argv)
         }
         shell_print(sh, "\n");
 
-        val = shell_strtol(argv[17], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[17], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid report_err_pkt parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
@@ -551,8 +549,7 @@ static int hci_cmd_interface(const struct shell *sh, size_t argc, char **argv)
 
 static int le_set_tx_power(const struct shell *sh, size_t argc, char **argv)
 {
-    int err;
-    int parse_err = 0;
+    int err = 0;
     long val;
     struct net_buf *buf = NULL, *rsp=NULL;
 
@@ -569,20 +566,22 @@ static int le_set_tx_power(const struct shell *sh, size_t argc, char **argv)
     {
         cp = net_buf_add(buf, sizeof(*cp));
 
-        val = shell_strtol(argv[1], 16, &parse_err);
-        if (parse_err) {
+        val = shell_strtol(argv[1], 16, &err);
+        if (err || val > INT8_MAX || val < INT8_MIN) {
             shell_print(sh, "Invalid tx_power parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
         }
+
         cp->tx_power = (uint8_t)val;
 
-        val = shell_strtol(argv[2], 16, &parse_err);
-        if (parse_err || val < 0 || val > UINT8_MAX) {
+        val = shell_strtol(argv[2], 16, &err);
+        if (err || val < 0 || val > UINT8_MAX) {
             shell_print(sh, "Invalid feloss parameter\n");
             net_buf_unref(buf);
             return -EINVAL;
         }
+
         cp->feloss = (uint8_t)val;
         if(cp->feloss >= 1)
         {
