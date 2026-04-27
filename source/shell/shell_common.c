@@ -15,6 +15,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <sys/byteorder.h>
 #include <porting.h>
 
@@ -63,17 +64,21 @@ unsigned long shell_strtoul(const char *str, int base, int *err)
         return 0UL;
     }
 
-    *err = 0;
-
     if (*str == '-') {
         *err = -EINVAL;
         return 0UL;
     }
 
+    errno = 0;
     val = strtoul(str, &endptr, base);
 
+    if (errno == ERANGE) {
+        *err = -ERANGE;
+        return 0UL;
+    }
+
     /* Validate conversion succeeded and consumed the whole string */
-    if ((endptr == str) || (*endptr != '\0')) {
+    if ((errno != 0) || (endptr == str) || (*endptr != '\0')) {
         *err = -EINVAL;
         return 0UL;
     }
@@ -90,17 +95,21 @@ unsigned long long shell_strtoull(const char *str, int base, int *err)
         return 0ULL;
     }
 
-    *err = 0;
-
     if (*str == '-') {
         *err = -EINVAL;
         return 0ULL;
     }
 
+    errno = 0;
     val = strtoull(str, &endptr, base);
 
+    if (errno == ERANGE) {
+        *err = -ERANGE;
+        return 0ULL;
+    }
+
     /* Validate conversion succeeded and consumed the whole string */
-    if ((endptr == str) || (*endptr != '\0')) {
+    if ((errno != 0) || (endptr == str) || (*endptr != '\0')) {
         *err = -EINVAL;
         return 0ULL;
     }
@@ -110,22 +119,28 @@ unsigned long long shell_strtoull(const char *str, int base, int *err)
 
 long shell_strtol(const char *str, int base, int *err)
 {
-	long val;
-	char *endptr = NULL;
+    long val;
+    char *endptr = NULL;
 
     if ((str == NULL) || (err == NULL)) {
         return 0L;
     }
 
-    *err = 0;
+    errno = 0;
 
-	val = strtol(str, &endptr, base);
-	if ((endptr == str) || (*endptr != '\0')) {
-		*err = -EINVAL;
-		return 0;
-	}
+    val = strtol(str, &endptr, base);
 
-	return val;
+    if (errno == ERANGE) {
+        *err = -ERANGE;
+        return 0L;
+    }
+
+    if ((errno != 0) || (endptr == str) || (*endptr != '\0')) {
+        *err = -EINVAL;
+        return 0L;
+    }
+
+    return val;
 }
 
 bool shell_strtobool(const char *str, int base, int *err)
