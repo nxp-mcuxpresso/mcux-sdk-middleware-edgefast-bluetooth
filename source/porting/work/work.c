@@ -623,7 +623,7 @@ int k_work_schedule_for_queue(struct k_work_q *queue,
 	k_spinlock_key_t key = k_spin_lock(&lock);
 
 	/* Schedule the work item if it's idle or running. */
-	if (((flags_get(&work->flags) & K_WORK_MASK) & (uint32_t)(~K_WORK_RUNNING)) == 0U) {
+	if (((flags_get(&work->flags) & K_WORK_MASK) & (uint32_t)(~((uint32_t)K_WORK_RUNNING))) == 0U) {
 		if (K_TIMEOUT_EQ(delay, K_NO_WAIT))
 		{
 			ret = k_work_submit_to_queue(queue, work);
