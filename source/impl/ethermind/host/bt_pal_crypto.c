@@ -587,28 +587,53 @@ int bt_aes_128_cmac_init(bt_aes_128_cmac_state_t *state)
 
 int bt_aes_128_cmac_update(bt_aes_128_cmac_state_t *state, const uint8_t * data, size_t len)
 {
-	uint32_t n;
-	uint32_t i;
+	size_t n;
+	size_t i;
 	const uint8_t * input;
+	const size_t block_size = sizeof(state->data);
+	size_t state_len;
 
-	n = 0;
-
-	if ((state->len + len) > sizeof(state->data))
+	if ((NULL == state) || (NULL == data))
 	{
-		memcpy(&state->data[state->len], data, sizeof(state->data) - state->len);
-		len -= sizeof(state->data) - state->len;
-		input = &data[sizeof(state->data) - state->len];
-		state->len = sizeof(state->data);
-		n = (uint32_t) ((len) / sizeof(state->data)); /* n is number of rounds */
-		if (sizeof(state->data) == len)
+		return -EINVAL;
+	}
+
+	input = data;
+	state_len = (size_t)state->len;
+
+	/* Defensive check: state->len must never exceed the CMAC block size. */
+	if (state_len > block_size)
+	{
+		return -EINVAL;
+	}
+
+	n = 0u;
+
+	/* Avoid unsigned wrap in (state->len + len) by rewriting the condition. */
+	if (len > (block_size - state_len))
+	{
+		size_t to_fill = block_size - state_len;
+
+		memcpy(&state->data[state_len], data, to_fill);
+		len -= to_fill;
+		input = &data[to_fill];
+		state->len = (uint8_t)block_size;
+
+		/* n is number of full blocks in the remaining input */
+		n = len / block_size;
+		if (block_size == len)
 		{
-			n = 0;
+			/* Keep the last block buffered for bt_aes_128_cmac_final() */
+			n = 0u;
 		}
 	}
 	else
 	{
-		memcpy(&state->data[state->len], data, len);
-		state->len += len;
+		/* len fits in the remaining buffer space */
+		memcpy(&state->data[state_len], data, len);
+		state_len += len;
+		/* state_len is guaranteed <= block_size (<= 16) here */
+		state->len = (uint8_t)state_len;
 		return 0;
 	}
 
@@ -616,27 +641,38 @@ int bt_aes_128_cmac_update(bt_aes_128_cmac_state_t *state, const uint8_t * data,
 	{
 		bt_crypto_xor128(state->x, &state->data[0u], state->y); /* Y := Mi (+) X  */
 		bt_aes_128_encrypt(state->y, state->key, state->x); /* X := AES-128(KEY, Y) */
-		state->len = 0;
+		state->len = 0u;
 	}
 
-	if (n > 0)
+	if (n > 0u)
 	{
-		if (0 == (len - n * sizeof(state->data)))
+		/* If input is an exact multiple of block size, keep the last block buffered */
+		if (0u == (len - (n * block_size)))
 		{
-			n = n - 1;
+			n = n - 1u;
 		}
 	}
 
 	for (i = 0u; i < n; i++)
 	{
-		bt_crypto_xor128(state->x, &input[sizeof(state->data) * i], state->y); /* Y := Mi (+) X  */
+		bt_crypto_xor128(state->x, &input[block_size * i], state->y); /* Y := Mi (+) X  */
 		bt_aes_128_encrypt(state->y, state->key, state->x); /* X := AES-128(KEY, Y) */
 	}
 
-	state->len = len - n * sizeof(state->data);
-	if (state->len > 0)
 	{
-		memcpy(state->data, &input[n * sizeof(state->data)], state->len);
+		size_t rem = len - (n * block_size);
+
+		/* rem must be <= block_size to avoid copying past state->data */
+		if (rem > block_size)
+		{
+			return -EINVAL;
+		}
+
+		state->len = (uint8_t)rem;
+		if (rem > 0u)
+		{
+			memcpy(state->data, &input[n * block_size], rem);
+		}
 	}
 
 	return 0;

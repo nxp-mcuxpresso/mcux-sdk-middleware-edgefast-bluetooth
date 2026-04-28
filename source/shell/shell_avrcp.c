@@ -3030,7 +3030,7 @@ void avrcp_cover_art_cmd_received(uint8_t handle, struct bt_avrcp_cover_art_cmd 
                     rsp.response = BT_AVRCP_CA_BAD_REQ_RSP;
                 }
                 memset(&img_properties[0], 0, sizeof(img_properties));
-                snprintf((char *)img_properties, sizeof(img_properties) - 1,
+                (void)snprintf((char *)img_properties, sizeof(img_properties) - 1,
                         "<image-properties version=\"1.0\" handle="
                         "\"%s\"> \n"
                         "<native encoding=\"JPEG\" pixel=\"640*480\" size=\"10240\"/>\n"
@@ -3188,6 +3188,7 @@ void avrcp_cover_art_cmd_received(uint8_t handle, struct bt_avrcp_cover_art_cmd 
             break;
 
         default:
+            send_response = 0;
             break;
     }
 

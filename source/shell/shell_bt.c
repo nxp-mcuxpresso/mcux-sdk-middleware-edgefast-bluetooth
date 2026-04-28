@@ -4079,8 +4079,15 @@ static void auth_passkey_confirm(struct bt_conn *conn, unsigned int passkey)
 static void auth_passkey_entry(struct bt_conn *conn)
 {
 	char addr[BT_ADDR_LE_STR_LEN];
+	const bt_addr_le_t *dst;
 
-	bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
+	dst = bt_conn_get_dst(conn);
+	if (dst == NULL) {
+		shell_error(ctx_shell, "Failed to get connection destination address");
+		return;
+	}
+
+	bt_addr_le_to_str(dst, addr, sizeof(addr));
 
 	shell_print(ctx_shell, "Enter passkey for %s", addr);
 }

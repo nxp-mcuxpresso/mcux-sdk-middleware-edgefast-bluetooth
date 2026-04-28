@@ -400,13 +400,14 @@ destroy:
 	/* Reset internal members of common channel */
 	if (chan->conn != NULL) {
 		bt_l2cap_chan_set_state(chan, BT_L2CAP_DISCONNECTED);
-	}
+
 #if 1
-	/* Attention: below code block need to be kept during code rebase. */
-	SET_CHAN_MEMBER(chan, psm, 0U);
+		/* Attention: below code block need to be kept during code rebase. */
+		SET_CHAN_MEMBER(chan, psm, 0U);
 #else
-	BT_L2CAP_LE_CHAN(chan)->psm = 0U;
+		BT_L2CAP_LE_CHAN(chan)->psm = 0U;
 #endif
+	}
 #endif
 	chan->conn = NULL;
 	if (chan->destroy) {
@@ -1612,7 +1613,7 @@ static void l2cap_chan_rx_init(struct bt_l2cap_le_chan *chan)
 	if (!chan->chan.ops->alloc_buf &&
 	    (chan->rx.mps < chan->rx.mtu + BT_L2CAP_SDU_HDR_SIZE)) {
 		LOG_WRN("Segmentation disabled but MTU > MPS, truncating MTU");
-		chan->rx.mtu = chan->rx.mps - BT_L2CAP_SDU_HDR_SIZE;
+		chan->rx.mtu = chan->rx.mps > BT_L2CAP_SDU_HDR_SIZE ? chan->rx.mps - BT_L2CAP_SDU_HDR_SIZE : 0;
 	}
 
 	/* EDGEFAST: For EtherMind, the mps should not be more than mtu. */

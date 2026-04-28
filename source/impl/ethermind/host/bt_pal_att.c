@@ -752,7 +752,8 @@ static struct net_buf *bt_att_chan_create_pdu(struct bt_att_chan *chan, uint8_t 
 	struct bt_att_tx_meta_data *data;
 	k_timeout_t timeout;
 
-	if (len + sizeof(op) > bt_att_mtu(chan)) {
+	/* if (len + sizeof(op) > bt_att_mtu(chan)) avoid possible wrap in (len + sizeof(op)). */
+	if ((bt_att_mtu(chan) < sizeof(op)) || (len > (bt_att_mtu(chan) - sizeof(op)))) {
 		LOG_WRN("ATT MTU exceeded, max %u, wanted %zu", bt_att_mtu(chan),
 			len + sizeof(op));
 		return NULL;
@@ -885,6 +886,10 @@ static uint8_t att_mtu_req(struct bt_att_chan *chan, struct net_buf *buf)
 		return BT_ATT_ERR_INVALID_PDU;
 	}
 
+	if (BT_LOCAL_ATT_MTU_UATT > UINT16_MAX)
+	{
+		return BT_ATT_ERR_UNLIKELY;
+	}
 	mtu_server = BT_LOCAL_ATT_MTU_UATT;
 
 	LOG_DBG("Server MTU %u", mtu_server);
@@ -1616,6 +1621,11 @@ static uint8_t att_mtu_rsp(struct bt_att_chan *chan, struct net_buf *buf)
 	/* The following must equal the value we sent in the req. We assume this
 	 * is a rsp to `gatt_exchange_mtu_encode`.
 	 */
+	if (BT_LOCAL_ATT_MTU_UATT > UINT16_MAX)
+	{
+		return att_handle_rsp(chan, NULL, 0, BT_ATT_ERR_INVALID_PDU);
+	}
+
 	chan->chan.rx.mtu = BT_LOCAL_ATT_MTU_UATT;
 	/* The ATT_EXCHANGE_MTU_REQ/RSP is just an alternative way of
 	 * communicating the L2CAP MTU.
@@ -1686,7 +1696,8 @@ static uint8_t find_info_cb(const struct bt_gatt_attr *attr, uint16_t handle,
 
 		/* Check the sending length */
 		len = sizeof(handle) + sizeof(data->param.handle_value_list.list[data->param.handle_value_list.list_count].uuid.uuid_16);
-		if (bt_att_mtu(chan) < (data->sofar + len))
+		/* if (bt_att_mtu(chan) < (data->sofar + len)) avoid possible wrap in (data->sofar + len). */
+		if ((data->sofar > bt_att_mtu(chan)) || (len > (bt_att_mtu(chan) - data->sofar)))
 		{
 			return BT_GATT_ITER_STOP;
 		}
@@ -1709,7 +1720,8 @@ static uint8_t find_info_cb(const struct bt_gatt_attr *attr, uint16_t handle,
 
 		/* Check the sending length */
 		len = sizeof(handle) + sizeof(data->param.handle_value_list.list[data->param.handle_value_list.list_count].uuid.uuid_128.value);
-		if (bt_att_mtu(chan) < (data->sofar + len))
+		/* if (bt_att_mtu(chan) < (data->sofar + len)) avoid possible wrap in (data->sofar + len). */
+		if ((data->sofar > bt_att_mtu(chan)) || (len > (bt_att_mtu(chan) - data->sofar)))
 		{
 			return BT_GATT_ITER_STOP;
 		}
@@ -1947,8 +1959,12 @@ static uint8_t att_find_type_req(struct bt_att_chan *chan, struct net_buf *buf)
 		return 0;
 	}
 
+	/* buf->len is size_t/uint16_t-ish, ensure it fits in uint8_t. */
+	if (buf->len > UINT8_MAX) {
+		return BT_ATT_ERR_INVALID_PDU;
+	}
 	return att_find_type_rsp(chan, start_handle, end_handle, value,
-				 buf->len);
+				 (uint8_t)buf->len);
 }
 
 static uint8_t err_to_att(int err)
@@ -2139,6 +2155,11 @@ static uint8_t read_type_cb(const struct bt_gatt_attr *attr, uint16_t handle,
 
 	if (!data->rsp->len) {
 		/* Set len to be the first item found */
+		if ((read + sizeof(*data->item)) > UINT8_MAX) {
+			data->sofar -= sizeof(*data->item);
+			return BT_GATT_ITER_STOP;
+		}
+
 		data->rsp->len = read + sizeof(*data->item);
 	} else if (data->rsp->len != (read + sizeof(*data->item))) {
 		/* All items should have the same size */
@@ -2214,6 +2235,10 @@ static uint8_t att_read_type_req(struct bt_att_chan *chan, struct net_buf *buf)
 		return BT_ATT_ERR_INVALID_PDU;
 	}
 
+	/* avoid narrowing cast of (buf->len - sizeof(*req)). */
+	if ((buf->len - sizeof(*req)) > UINT8_MAX) {
+		return BT_ATT_ERR_INVALID_PDU;
+	}
 	uuid_len = (uint8_t)(buf->len - sizeof(*req));
 
 	/* Type can only be UUID16 or UUID128 */
@@ -2301,8 +2326,13 @@ static uint8_t read_cb(const struct bt_gatt_attr *attr, uint16_t handle,
 #if 0
 	ret = att_chan_read(chan, attr, data->buf, data->offset, NULL, NULL);
 #else
+	/* ensure (data->len - data->sofar) fits in uint16_t for read API. */
+	if ((data->len - data->sofar) > UINT16_MAX) {
+		data->err = BT_ATT_ERR_INVALID_PDU;
+		return BT_GATT_ITER_STOP;
+	}
 	ret = attr->read(conn, attr, &data->buffer[data->sofar],
-			  data->len - data->sofar, data->offset);
+			  (uint16_t)(data->len - data->sofar), data->offset);
 #endif
 	if (ret < 0) {
 		data->err = err_to_att(ret);
@@ -2507,9 +2537,14 @@ static uint8_t read_vl_cb(const struct bt_gatt_attr *attr, uint16_t handle,
 		return BT_GATT_ITER_STOP;
 	}
 
+	/* ensure (data->len - data->sofar - sizeof(*rsp)) fits in uint16_t for read API. */
+	if ((data->len - data->sofar - sizeof(*rsp)) > UINT16_MAX) {
+		data->err = BT_ATT_ERR_INVALID_PDU;
+		return BT_GATT_ITER_STOP;
+	}
 	read = attr->read(conn, attr,
 			 &data->buffer[data->sofar + sizeof(*rsp)],
-			 data->len - data->sofar - sizeof(*rsp),
+			 (uint16_t)(data->len - data->sofar - sizeof(*rsp)),
 			 0);
 	if (read < 0) {
 		data->err = err_to_att(read);
@@ -2666,8 +2701,12 @@ static uint8_t read_group_cb(const struct bt_gatt_attr *attr, uint16_t handle,
 	read = att_chan_read(chan, attr, data->buf, 0, attr_read_group_cb,
 				 data);
 #else
+	/* ensure (data->len - data->sofar) fits in uint16_t for read API. */
+	if ((data->len - data->sofar) > UINT16_MAX) {
+		return BT_GATT_ITER_STOP;
+	}
 	read = attr->read(chan->chan.chan.conn, attr, &data->buffer[data->sofar],
-			  data->len - data->sofar, 0);
+			  (uint16_t)(data->len - data->sofar), 0);
 #endif
 	if (read < 0) {
 		/* TODO: Handle read errors */
@@ -2676,6 +2715,11 @@ static uint8_t read_group_cb(const struct bt_gatt_attr *attr, uint16_t handle,
 
 	if (!data->rsp->len) {
 		/* Set len to be the first group found */
+		if ((read + sizeof(*data->group)) > UINT8_MAX) {
+			data->sofar -= sizeof(*data->group);
+			return BT_GATT_ITER_STOP;
+		}
+
 		data->rsp->len = read + sizeof(*data->group);
 		data->list.length = read;
 	} else if (data->rsp->len != (read + sizeof(*data->group))) {
@@ -2739,7 +2783,13 @@ static uint8_t att_read_group_req(struct bt_att_chan *chan, struct net_buf *buf)
 		struct bt_uuid_16 u16;
 		struct bt_uuid_128 u128;
 	} u;
-	uint8_t uuid_len = buf->len - sizeof(*req);
+	uint8_t uuid_len;
+
+	/* avoid narrowing cast of (buf->len - sizeof(*req)). */
+	if (buf->len - sizeof(*req) > UINT8_MAX) {
+		return BT_ATT_ERR_INVALID_PDU;
+	}
+	uuid_len = buf->len - sizeof(*req);
 
 	/* Type can only be UUID16 or UUID128 */
 	if (uuid_len != 2 && uuid_len != 16) {
@@ -3052,7 +3102,11 @@ static uint8_t att_prepare_write_req(struct bt_att_chan *chan, struct net_buf *b
 
 	LOG_DBG("handle 0x%04x offset %u", handle, offset);
 
-	return att_prep_write_rsp(chan, handle, offset, buf->data, buf->len);
+	/* buf->len is size_t/uint16_t-ish, ensure it fits in uint8_t. */
+	if (buf->len > UINT8_MAX) {
+		return BT_ATT_ERR_INVALID_PDU;
+	}
+	return att_prep_write_rsp(chan, handle, offset, buf->data, (uint8_t)buf->len);
 #endif /* CONFIG_BT_ATT_PREPARE_COUNT */
 }
 
@@ -3840,7 +3894,8 @@ struct net_buf *bt_att_create_pdu(struct bt_conn *conn, uint8_t op, size_t len)
 
 	/* This allocator should _not_ be used for RSPs. */
 	SYS_SLIST_FOR_EACH_CONTAINER_SAFE(&att->chans, chan, tmp, node) {
-		if (len + sizeof(op) > bt_att_mtu(chan)) {
+		/* if (len + sizeof(op) > bt_att_mtu(chan)) avoid possible wrap in (len + sizeof(op)). */
+		if ((bt_att_mtu(chan) < sizeof(op)) || (len > (bt_att_mtu(chan) - sizeof(op)))) {
 			continue;
 		}
 
@@ -5176,7 +5231,12 @@ void bt_att_increment_tx_meta_data_attr_count(struct net_buf *buf, uint16_t attr
 {
 	struct bt_att_tx_meta_data *data = bt_att_get_tx_meta_data(buf);
 
-	data->attr_count += attr_count;
+	/* guard against uint16_t wrap in attr_count accumulation. */
+	if ((UINT16_MAX - data->attr_count) < attr_count) {
+		data->attr_count = UINT16_MAX;
+	} else {
+		data->attr_count = (uint16_t)(data->attr_count + attr_count);
+	}
 }
 
 bool bt_att_tx_meta_data_match(const struct net_buf *buf, bt_gatt_complete_func_t func,
