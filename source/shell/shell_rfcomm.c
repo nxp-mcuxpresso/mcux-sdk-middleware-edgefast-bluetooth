@@ -36,6 +36,13 @@
 
 #if (defined(CONFIG_BT_RFCOMM) && (CONFIG_BT_RFCOMM > 0))
 
+/** RFCOMM write operation synchronization semaphore - ensures sequential write operations
+ *  by blocking subsequent writes until the current write completes via RFCOMM_WRITE callback.
+ */
+static osa_semaphore_handle_t rfcomm_tx_sync_handle;
+static OSA_SEMAPHORE_HANDLE_DEFINE(rfcomm_tx_sync);
+
+
 NET_BUF_POOL_FIXED_DEFINE(pool, 1, DATA_MTU, CONFIG_NET_BUF_USER_DATA_SIZE, NULL);
 
 static struct bt_sdp_attribute spp_attrs[] = {
@@ -105,11 +112,13 @@ static struct bt_sdp_record spp_rec = BT_SDP_RECORD(spp_attrs);
 static void rfcomm_recv(struct bt_rfcomm_dlc *dlci, struct net_buf *buf);
 static void rfcomm_connected(struct bt_rfcomm_dlc *dlci);
 static void rfcomm_disconnected(struct bt_rfcomm_dlc *dlci);
+static void rfcomm_sent(struct bt_rfcomm_dlc *dlci, struct net_buf *buf);
 
 static struct bt_rfcomm_dlc_ops rfcomm_ops = {
 	.recv		= rfcomm_recv,
 	.connected	= rfcomm_connected,
 	.disconnected	= rfcomm_disconnected,
+	.sent 		= rfcomm_sent,
 };
 
 static struct bt_rfcomm_dlc rfcomm_dlc = {
@@ -122,6 +131,13 @@ static void rfcomm_recv(struct bt_rfcomm_dlc *dlci, struct net_buf *buf)
 	shell_print(ctx_shell, "Incoming data dlc %p len %u", dlci, buf->len);
 }
 
+static void rfcomm_sent(struct bt_rfcomm_dlc *dlci, struct net_buf *buf)
+{
+	/* Release transmit semaphore to allow next transmission */
+    OSA_SemaphorePost(rfcomm_tx_sync);
+	shell_print(ctx_shell, "Data sent dlc %p len %u", dlci, buf->len);
+}
+
 static void rfcomm_connected(struct bt_rfcomm_dlc *dlci)
 {
 	shell_print(ctx_shell, "Dlc %p connected", dlci);
@@ -131,6 +147,8 @@ static void rfcomm_disconnected(struct bt_rfcomm_dlc *dlci)
 {
 	shell_print(ctx_shell, "Dlc %p disconnected", dlci);
     rfcomm_dlc.session = NULL;
+	// Cleanup: reset semaphore on disconnect
+    OSA_SemaphorePost(rfcomm_tx_sync);
 }
 
 static int rfcomm_accept(struct bt_conn *conn, struct bt_rfcomm_dlc **dlc)
@@ -215,10 +233,15 @@ static int cmd_send(const struct shell *sh, size_t argc, char *argv[])
 		len = MIN(rfcomm_dlc.mtu, net_buf_tailroom(buf) - 1);
 
 		net_buf_add_mem(buf, buf_data, len);
+		/* Wait for any pending transmission to complete before sending new data */
+		OSA_SemaphoreWait(rfcomm_tx_sync, osaWaitForever_c);
+
 		ret = bt_rfcomm_dlc_send(&rfcomm_dlc, buf);
         net_buf_unref(buf);
 		if (ret < 0) {
 			shell_error(sh, "Unable to send: %d", -ret);
+			/* Release transmit semaphore to allow next transmission */
+			OSA_SemaphorePost(rfcomm_tx_sync);
 			return -ENOEXEC;
 		}
 	}
@@ -274,6 +297,18 @@ void bt_ShellRfcommInit(shell_handle_t shell)
     {
         shell_print(shell, "Shell register command %s failed!", g_shellCommandrfcomm.pcCommand);
     }
+
+	if (NULL == rfcomm_tx_sync_handle)
+	{
+		osa_status_t ret = OSA_SemaphoreCreate((osa_semaphore_handle_t)rfcomm_tx_sync, 1);
+		assert(KOSA_StatusSuccess == ret);
+
+		if(KOSA_StatusSuccess == ret)
+		{
+			rfcomm_tx_sync_handle = (osa_semaphore_handle_t)rfcomm_tx_sync;
+		}
+	}
+
 #endif /* CONFIG_BT_RFCOMM */
 }
 
