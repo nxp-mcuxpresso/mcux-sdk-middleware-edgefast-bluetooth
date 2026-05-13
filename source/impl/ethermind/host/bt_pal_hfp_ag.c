@@ -1604,6 +1604,12 @@ int bt_hfp_ag_unknown_at_response(struct bt_hfp_ag *hfp_ag, uint8_t *unknow_at_r
 void bt_hfp_ag_open_audio(struct bt_hfp_ag *hfp_ag, uint8_t codec)
 {
     struct bt_conn *bt_so_conn;
+
+    if (codec >= ARRAY_SIZE(bt_hfp_ag_esco_params)) {
+        LOG_ERR("Invalid codec index\n");
+        return;
+    }
+
     /* Update the eSCO channel paramters for Codec */
     bt_hfp_ag_set_esco_channel_parameters(BT_TRUE, bt_hfp_ag_esco_params[codec]);
     LOG_DBG("> bt_hfp_ag_set_esco_channel_parameters \n");
