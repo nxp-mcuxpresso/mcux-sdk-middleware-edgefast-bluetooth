@@ -8,8 +8,6 @@
 #ifndef __EDGEFAST_BT_BLE_QUEUE_H__
 #define __EDGEFAST_BT_BLE_QUEUE_H__
 
-#include <system_c.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
