@@ -624,19 +624,30 @@ static API_RESULT bt_hfp_hp_extract_result(AT_PARSER_RESPONSE *parser_response,
     {
         case AT_PL_CLIP_CL_: /* <CRLF>+CLIP: */
         {
+            size_t number_len = sizeof(parse_result->result_param.cli_info.digits) - 1;
+
+            number_len = MIN(number_len, parser_response->param[index].value_length);
+
             BT_mem_copy(parse_result->result_param.cli_info.digits,
                         &buffer[parser_response->param[index].start_of_value_index],
-                        parser_response->param[index].value_length);
-            parse_result->result_param.cli_info.digits[parser_response->param[index++].value_length] = '\0';
+                        number_len);
+            parse_result->result_param.cli_info.digits[number_len] = '\0';
+            index++;
+
             /* Name from PB */
             if (5 == parser_response->number_of_params)
             {
                 /* Store Name */
                 index = 4;
+
+                number_len = sizeof(parse_result->result_param.cli_info.name) - 1;
+                number_len = MIN(number_len, parser_response->param[index].value_length);
+
                 BT_mem_copy(parse_result->result_param.cli_info.name,
                             &buffer[parser_response->param[index].start_of_value_index],
-                            parser_response->param[index].value_length);
-                parse_result->result_param.cli_info.name[parser_response->param[index++].value_length] = '\0';
+                            number_len);
+                parse_result->result_param.cli_info.name[number_len] = '\0';
+                index++;
             }
             else
             {
@@ -648,11 +659,15 @@ static API_RESULT bt_hfp_hp_extract_result(AT_PARSER_RESPONSE *parser_response,
         case AT_PL_CCWA_CL_: /* <CRLF>+CCWA: */
         {
             /* +CCWA: <number>, <type>, <class>[, <alpha>] */
+            size_t number_len = sizeof(parse_result->result_param.ccwa_result.number) - 1;
+
+            number_len = MIN(number_len, parser_response->param[index].value_length);
 
             BT_mem_copy(parse_result->result_param.ccwa_result.number,
                         &buffer[parser_response->param[index].start_of_value_index],
-                        parser_response->param[index].value_length);
-            parse_result->result_param.ccwa_result.number[parser_response->param[index++].value_length] = '\0';
+                        number_len);
+            parse_result->result_param.ccwa_result.number[number_len] = '\0';
+            index++;
 
             if (parser_response->number_of_params == index)
             {
@@ -679,10 +694,14 @@ static API_RESULT bt_hfp_hp_extract_result(AT_PARSER_RESPONSE *parser_response,
             /* Optional Param */
             if (BT_HFP_HF_MAX_CCWA_PARAMS == parser_response->number_of_params)
             {
+                number_len = sizeof(parse_result->result_param.ccwa_result.alpha) - 1;
+                number_len = MIN(number_len, parser_response->param[index].value_length);
+
                 BT_mem_copy(parse_result->result_param.ccwa_result.alpha,
                             &buffer[parser_response->param[index].start_of_value_index],
-                            parser_response->param[index].value_length);
-                parse_result->result_param.ccwa_result.alpha[parser_response->param[index++].value_length] = '\0';
+                            number_len);
+                parse_result->result_param.ccwa_result.alpha[number_len] = '\0';
+                index++;
             }
             else
             {
@@ -692,15 +711,22 @@ static API_RESULT bt_hfp_hp_extract_result(AT_PARSER_RESPONSE *parser_response,
         break;
 
         case AT_PL_BINP_CL_: /* <CRLF>+BINP: */
+        {
+            size_t number_len = sizeof(parse_result->result_param.digits) - 1;
+
+            number_len = MIN(number_len, parser_response->param[index].value_length);
 
             BT_mem_copy(parse_result->result_param.digits, &buffer[parser_response->param[index].start_of_value_index],
-                        parser_response->param[index].value_length);
-            parse_result->result_param.digits[parser_response->param[index++].value_length] = '\0';
-
-            break;
+                        number_len);
+            parse_result->result_param.digits[number_len] = '\0';
+            index++;
+        }
+        break;
 
         case AT_PL_COPS_CL_: /* <CRLF>+COPS: */
         {
+            size_t number_len;
+
             /* +COPS:<mode>,[0,<operator>] */
             parse_result->result_param.cops_resp_result.mode =
                 (uint8_t)atoi((char const *)&buffer[parser_response->param[index].start_of_value_index]);
@@ -715,12 +741,15 @@ static API_RESULT bt_hfp_hp_extract_result(AT_PARSER_RESPONSE *parser_response,
 
                 index++;
 
+                number_len = sizeof(parse_result->result_param.cops_resp_result.op_name) - 1;
+                number_len = MIN(number_len, parser_response->param[index].value_length);
+
                 BT_mem_copy(parse_result->result_param.cops_resp_result.op_name,
                             &buffer[parser_response->param[index].start_of_value_index],
-                            parser_response->param[index].value_length);
+                            number_len);
 
-                parse_result->result_param.cops_resp_result.op_name[parser_response->param[index++].value_length] =
-                    '\0';
+                parse_result->result_param.cops_resp_result.op_name[number_len] = '\0';
+                index++;
             }
             else
             {
@@ -732,11 +761,18 @@ static API_RESULT bt_hfp_hp_extract_result(AT_PARSER_RESPONSE *parser_response,
 
         case AT_PL_CNUM_CL_: /* <CRLF>+CNUM: */
         {
+            size_t number_len;
+
             index = 0;
+
+            number_len = sizeof(parse_result->result_param.cnum_resp_result.number) - 1;
+            number_len = MIN(number_len, parser_response->param[index].value_length);
+
             BT_mem_copy(parse_result->result_param.cnum_resp_result.number,
                         &buffer[parser_response->param[index].start_of_value_index],
-                        parser_response->param[index].value_length);
-            parse_result->result_param.cnum_resp_result.number[parser_response->param[index++].value_length] = '\0';
+                        number_len);
+            parse_result->result_param.cnum_resp_result.number[number_len] = '\0';
+            index++;
 
             if (parser_response->number_of_params == index)
             {
@@ -801,13 +837,14 @@ static API_RESULT bt_hfp_hp_extract_result(AT_PARSER_RESPONSE *parser_response,
                 break;
             }
 
-            number_len = sizeof(parse_result->result_param.clcc_resp_result.number);
+            number_len = sizeof(parse_result->result_param.clcc_resp_result.number) - 1;
             number_len = MIN(number_len, parser_response->param[index].value_length);
             BT_mem_copy(parse_result->result_param.clcc_resp_result.number,
                         &buffer[parser_response->param[index].start_of_value_index],
                         number_len);
 
-            parse_result->result_param.clcc_resp_result.number[parser_response->param[index++].value_length] = '\0';
+            parse_result->result_param.clcc_resp_result.number[number_len] = '\0';
+            index++;
 
             parse_result->result_param.clcc_resp_result.type =
                 (uint8_t)atoi((char const *)&buffer[parser_response->param[index].start_of_value_index]);
@@ -817,10 +854,14 @@ static API_RESULT bt_hfp_hp_extract_result(AT_PARSER_RESPONSE *parser_response,
             /* Optional Param */
             if (BT_HFP_HF_MAX_CLCC_PARAMS == parser_response->number_of_params)
             {
+                number_len = sizeof(parse_result->result_param.clcc_resp_result.alpha) - 1;
+                number_len = MIN(number_len, parser_response->param[index].value_length);
+
                 BT_mem_copy(parse_result->result_param.clcc_resp_result.alpha,
                             &buffer[parser_response->param[index].start_of_value_index],
-                            parser_response->param[index].value_length);
-                parse_result->result_param.clcc_resp_result.alpha[parser_response->param[index++].value_length] = '\0';
+                            number_len);
+                parse_result->result_param.clcc_resp_result.alpha[number_len] = '\0';
+                index++;
             }
             else
             {
@@ -849,6 +890,8 @@ static API_RESULT bt_hfp_hp_extract_result(AT_PARSER_RESPONSE *parser_response,
             if ((0 != (bt_hfp_hf_local_supported_features_ext & 0x0800)) &&
                 (0 != (bt_hfp_hf_peer_supported_features_ext & 0x2000)) && (parser_response->number_of_params > index))
             {
+                size_t number_len;
+
                 parse_result->result_param.bvra_result.text_rep.text_id =
                     (uint16_t)appl_str_to_num_in_hex_format(&buffer[parser_response->param[index].start_of_value_index],
                                                             parser_response->param[index].value_length);
@@ -865,12 +908,14 @@ static API_RESULT bt_hfp_hp_extract_result(AT_PARSER_RESPONSE *parser_response,
 
                 index++;
 
+                number_len = sizeof(parse_result->result_param.bvra_result.text_rep.str) - 1;
+                number_len = MIN(number_len, parser_response->param[index].value_length);
                 BT_mem_copy(parse_result->result_param.bvra_result.text_rep.str,
                             &buffer[parser_response->param[index].start_of_value_index],
-                            parser_response->param[index].value_length);
+                            number_len);
 
-                parse_result->result_param.bvra_result.text_rep.str[parser_response->param[index++].value_length] =
-                    '\0';
+                parse_result->result_param.bvra_result.text_rep.str[number_len] = '\0';
+                index++;
             }
 
             break;
@@ -984,6 +1029,8 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
     struct bt_hfp_hf_em *hfp_hf = bt_hfp_hf_lookup_bt_handle((uint16_t)handle);
 
     API_RESULT retval;
+
+    size_t number_len;
 
     data_to_app = data;
 
@@ -1361,12 +1408,15 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
             LOG_DBG("\n> Event        : HFP_UNIT_VGM_IND\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
 
+            number_len = sizeof(hfp_hf->bt_hfp_hp_microphone_gain) - 1;
+            number_len = MIN(number_len, data_to_app->parser_resp->param[0].value_length);
+
             /* Store the value of VGM */
             BT_mem_copy(hfp_hf->bt_hfp_hp_microphone_gain,
                         &data_to_app->buffer[data_to_app->parser_resp->param[0].start_of_value_index],
-                        data_to_app->parser_resp->param[0].value_length);
+                        number_len);
             /* NULL terminate the str */
-            hfp_hf->bt_hfp_hp_microphone_gain[data_to_app->parser_resp->param[0].value_length] = '\0';
+            hfp_hf->bt_hfp_hp_microphone_gain[number_len] = '\0';
             if (bt_hf_cb->volume_update)
             {
                 bt_hf_cb->volume_update(hfp_hf->bt_conn, hf_volume_type_mic, atoi((char const *)(const char *)hfp_hf->bt_hfp_hp_microphone_gain));
@@ -1378,12 +1428,16 @@ static API_RESULT bt_hfp_hf_callback_registered_with_hfu(HFP_UNIT_HANDLE handle,
         case HFP_UNIT_VGS_IND:
             LOG_DBG("\n> Event        : HFP_UNIT_VGS_IND\n");
             LOG_DBG("> Instance     : 0x%02X\n", (unsigned int)handle);
+
+            number_len = sizeof(hfp_hf->bt_hfp_hp_speaker_volume) - 1;
+            number_len = MIN(number_len, data_to_app->parser_resp->param[0].value_length);
+
             /* Store the value of VGS */
             BT_mem_copy(hfp_hf->bt_hfp_hp_speaker_volume,
                         &data_to_app->buffer[data_to_app->parser_resp->param[0].start_of_value_index],
-                        data_to_app->parser_resp->param[0].value_length);
+                        number_len);
             /* NULL terminate the str */
-            hfp_hf->bt_hfp_hp_speaker_volume[data_to_app->parser_resp->param[0].value_length] = '\0';
+            hfp_hf->bt_hfp_hp_speaker_volume[number_len] = '\0';
             if (bt_hf_cb->volume_update)
             {
                 bt_hf_cb->volume_update(hfp_hf->bt_conn, hf_volume_type_speaker, atoi((char const *)(const char *)hfp_hf->bt_hfp_hp_speaker_volume));
