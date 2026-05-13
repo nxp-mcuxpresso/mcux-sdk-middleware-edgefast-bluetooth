@@ -683,8 +683,17 @@ static API_RESULT hfp_ag_callback(HFP_AG_HANDLE handle,HFP_AG_EVENTS hfp_ag_even
                             break;
 
                         case AT_BRSF:
-                        hfp_ag->hf_features =
+                        {
+                            int hf_features_val =
                                 atoi((char const *)&at_response.global_at_str[at_response.param->start_of_value_index]);
+
+                            if (hf_features_val < 0) {
+                                bt_hfp_ag_send_at_rsp(hfp_ag, HFAG_ERROR, NULL);
+                                break;
+                            }
+
+                            hfp_ag->hf_features = (uint32_t)hf_features_val;
+
                             LOG_DBG("Get peer brsf: %x\n", hfp_ag->hf_features);
                             bt_hfp_ag_send_at_rsp(hfp_ag, HFAG_BRSF, NULL);
                             bt_hfp_ag_send_at_rsp(hfp_ag, HFAG_OK, NULL);
@@ -698,7 +707,7 @@ static API_RESULT hfp_ag_callback(HFP_AG_HANDLE handle,HFP_AG_EVENTS hfp_ag_even
                                 hfp_ag->bt_hfp_ag_config->bt_hfp_ag_codec_negotiate = 0;
                             }
                             break;
-
+                        }
                         case AT_CMER:
                             bt_hfp_ag_send_at_rsp(hfp_ag, HFAG_OK, NULL);
                             break;
@@ -968,8 +977,8 @@ static API_RESULT hfp_ag_callback(HFP_AG_HANDLE handle,HFP_AG_EVENTS hfp_ag_even
 
                         case AT_BIEV:
                         {
-                            uint16_t anum = 0;
-                            uint32_t value = 0;
+                            int anum = 0;
+                            int value = 0;
 
                             if ((at_response.number_of_params > 0U) && (at_response.param[0].value_length > 0U))
                             {
@@ -979,6 +988,11 @@ static API_RESULT hfp_ag_callback(HFP_AG_HANDLE handle,HFP_AG_EVENTS hfp_ag_even
                             if ((at_response.number_of_params > 1U) && (at_response.param[1].value_length > 0U))
                             {
                                 value = atoi((char const *)&at_response.global_at_str[at_response.param[1].start_of_value_index]);
+                            }
+
+                            if (value < 0 || anum < 0 || anum > UINT16_MAX) {
+                                bt_hfp_ag_send_at_rsp(hfp_ag, HFAG_ERROR, NULL);
+                                break;
                             }
 
                             if ((2 < anum) || (0 == anum) || (at_response.number_of_params < 2U) ||
@@ -996,7 +1010,7 @@ static API_RESULT hfp_ag_callback(HFP_AG_HANDLE handle,HFP_AG_EVENTS hfp_ag_even
 #if (defined CONFIG_BT_HFP_AG_HF_IND) && (CONFIG_BT_HFP_AG_HF_IND)
                                 if ((bt_hfp_ag_cb) && (bt_hfp_ag_cb->hf_indicator))
                                 {
-                                    bt_hfp_ag_cb->hf_indicator(hfp_ag, anum, value);
+                                    bt_hfp_ag_cb->hf_indicator(hfp_ag, (uint16_t)anum, (uint32_t)value);
                                 }
 #endif
                             }
