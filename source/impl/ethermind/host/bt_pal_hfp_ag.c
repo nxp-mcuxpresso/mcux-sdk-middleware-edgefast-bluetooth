@@ -749,12 +749,17 @@ static API_RESULT hfp_ag_callback(HFP_AG_HANDLE handle,HFP_AG_EVENTS hfp_ag_even
 
                         case AT_VTS:
                             LOG_DBG("DTMF codes received \n");
+                            if (at_response.global_at_str[at_response.param->start_of_value_index] > INT8_MAX) {
+                                bt_hfp_ag_send_at_rsp(hfp_ag, HFAG_ERROR, NULL);
+                                break;
+                            }
+
                             bt_hfp_ag_send_at_rsp(hfp_ag, HFAG_OK, NULL);
                             if ((bt_hfp_ag_cb) && (bt_hfp_ag_cb->recv_dtmf_codes))
                             {
                                 bt_hfp_ag_cb->recv_dtmf_codes(
                                     hfp_ag,
-                                    at_response.global_at_str[at_response.param->start_of_value_index]);
+                                    (char)at_response.global_at_str[at_response.param->start_of_value_index]);
                             }
                             break;
 
@@ -1026,6 +1031,11 @@ static API_RESULT hfp_ag_callback(HFP_AG_HANDLE handle,HFP_AG_EVENTS hfp_ag_even
                                 break;
                             }
 
+                            if ((at_response.global_at_str[at_response.param->start_of_value_index] < '0')) {
+                                bt_hfp_ag_send_at_rsp(hfp_ag, HFAG_ERROR, NULL);
+                                break;
+                            }
+
                             if ((bt_hfp_ag_cb) && (bt_hfp_ag_cb->memory_dial))
                             {
                                 bt_hfp_ag_cb->memory_dial(
@@ -1049,6 +1059,11 @@ static API_RESULT hfp_ag_callback(HFP_AG_HANDLE handle,HFP_AG_EVENTS hfp_ag_even
                             break;
 
                          case AT_CHLD:
+                            if ((at_response.global_at_str[at_response.param->start_of_value_index] < '0')) {
+                                bt_hfp_ag_send_at_rsp(hfp_ag, HFAG_ERROR, NULL);
+                                break;
+                            }
+
                             option = at_response.global_at_str[at_response.param->start_of_value_index] - '0';
                             index = at_response.global_at_str[at_response.param->start_of_value_index + 1U];
                             {
