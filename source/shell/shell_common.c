@@ -72,7 +72,7 @@ unsigned long shell_strtoul(const char *str, int base, int *err)
     errno = 0;
     val = strtoul(str, &endptr, base);
 
-    if (errno == ERANGE) {
+    if ((errno == ERANGE) && (val == ULONG_MAX)) {
         *err = -ERANGE;
         return 0UL;
     }
@@ -103,7 +103,7 @@ unsigned long long shell_strtoull(const char *str, int base, int *err)
     errno = 0;
     val = strtoull(str, &endptr, base);
 
-    if (errno == ERANGE) {
+    if ((errno == ERANGE) && (val == ULLONG_MAX)) {
         *err = -ERANGE;
         return 0ULL;
     }
@@ -130,7 +130,7 @@ long shell_strtol(const char *str, int base, int *err)
 
     val = strtol(str, &endptr, base);
 
-    if (errno == ERANGE) {
+    if ((errno == ERANGE) && ((val == LONG_MAX) || (val == LONG_MIN))) {
         *err = -ERANGE;
         return 0L;
     }
