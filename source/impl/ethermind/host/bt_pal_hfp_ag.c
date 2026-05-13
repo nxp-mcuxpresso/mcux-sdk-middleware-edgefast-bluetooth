@@ -963,6 +963,10 @@ static API_RESULT hfp_ag_callback(HFP_AG_HANDLE handle,HFP_AG_EVENTS hfp_ag_even
                                     if (at_response.param[index].value_length > 0U)
                                     {
                                         anum = atoi((char const *)&at_response.global_at_str[at_response.param[index].start_of_value_index]);
+                                        if (anum < 0) {
+                                            continue;
+                                        }
+
                                         if ((anum == HF_INDICATOR_ENHANCED_DRIVER_SAFETY) ||
                                             (anum == HF_INDICATOR_BATTERY_LEVEL))
                                         {
