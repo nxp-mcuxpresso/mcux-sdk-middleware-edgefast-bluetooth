@@ -607,7 +607,7 @@ uint8_t registered_events[13][2];
 
 void register_player_event(uint8_t event_id, uint8_t tl)
 {
-    if (event_id <= 13)
+    if ((event_id <= 13) && (event_id > 0))
     {
         registered_events[event_id - 1][0] = 0x01;
         registered_events[event_id - 1][1] = tl;

@@ -220,8 +220,9 @@ static int cmd_connect(const struct shell *sh, size_t argc, char *argv[])
 static int cmd_send(const struct shell *sh, size_t argc, char *argv[])
 {
 	uint8_t buf_data[DATA_MTU] = { [0 ... (DATA_MTU - 1)] = 0xff };
-	int ret, len, count = 1;
+	int ret, count = 1;
 	struct net_buf *buf;
+	size_t len;
 
 	if (argc > 1) {
 		count = strtoul(argv[1], NULL, 10);
@@ -230,7 +231,7 @@ static int cmd_send(const struct shell *sh, size_t argc, char *argv[])
 	while (count--) {
 		buf = bt_rfcomm_create_pdu(&pool);
 		/* Should reserve one byte in tail for FCS */
-		len = MIN(rfcomm_dlc.mtu, net_buf_tailroom(buf) - 1);
+		len = MIN(rfcomm_dlc.mtu, net_buf_tailroom(buf) > 1 ? net_buf_tailroom(buf) - 1 : 0);
 
 		net_buf_add_mem(buf, buf_data, len);
 		/* Wait for any pending transmission to complete before sending new data */

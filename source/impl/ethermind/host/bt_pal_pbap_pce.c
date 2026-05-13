@@ -79,8 +79,8 @@ static struct bt_pbap_pce s_PbapPceInstances[PBAP_PCE_MAX_ENTITY];
 static char *child_floader[child_floader_count] = {"pb", "ich", "och", "mch", "cch", "spd", "fav"};
 static bool startwith(char *str, char *prefix)
 {
-    uint8_t str_len    = (uint8_t)strlen(str);
-    uint8_t prefix_len = (uint8_t)strlen(prefix);
+    uint32_t str_len    = strlen(str);
+    uint32_t prefix_len = strlen(prefix);
     if (prefix_len > str_len)
     {
         return 0;
@@ -89,8 +89,8 @@ static bool startwith(char *str, char *prefix)
 }
 static bool endwith(char *str, char *suffix)
 {
-    uint8_t str_len    = (uint8_t)strlen(str);
-    uint8_t suffix_len = (uint8_t)strlen(suffix);
+    uint32_t str_len    = strlen(str);
+    uint32_t suffix_len = strlen(suffix);
     if (str_len < suffix_len)
     {
         return 0;

@@ -102,7 +102,7 @@ static uint8_t discover_func(struct bt_conn *conn, const struct bt_gatt_attr *at
 		tmas_found = true;
 		memcpy(&uuid[conn_id], BT_UUID_GATT_TMAPR, sizeof(uuid[conn_id]));
 		discover_params[conn_id].uuid = &uuid[conn_id].uuid;
-		discover_params[conn_id].start_handle = attr->handle + 1;
+		discover_params[conn_id].start_handle = MIN(attr->handle + 1, UINT16_MAX);
 		discover_params[conn_id].type = BT_GATT_DISCOVER_CHARACTERISTIC;
 
 		/* Discovered TMAS - Search for TMAP Role characteristic */
