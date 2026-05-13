@@ -1082,7 +1082,7 @@ static void appl_params_from_stack_to_buf(struct net_buf *buf, PBAP_APPL_PARAMS 
 
 static uint8_t bt_pbap_convert_result(uint16_t event_result)
 {
-    uint8_t result = (uint8_t)event_result;
+    uint8_t result;
 
     switch (event_result)
     {
@@ -1096,12 +1096,13 @@ static uint8_t bt_pbap_convert_result(uint16_t event_result)
         case BT_PBAP_NOT_ACCEPTABLE_RSP:
         case BT_PBAP_NO_SERVICE_RSP:
         case BT_PBAP_FORBIDDEN_RSP:
+            result = (uint8_t)event_result;
             break;
         case API_SUCCESS:
-            result = BT_PBAP_SUCCESS_RSP;
+            result = (uint8_t)BT_PBAP_SUCCESS_RSP;
             break;
         default:
-            result = BT_PBAP_BAD_REQ_RSP;
+            result = (uint8_t)BT_PBAP_BAD_REQ_RSP;
             break;
     }
 
