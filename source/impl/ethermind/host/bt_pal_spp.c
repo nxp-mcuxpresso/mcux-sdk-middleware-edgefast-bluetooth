@@ -1208,7 +1208,7 @@ int bt_spp_request_port_setting(struct bt_conn *conn, uint8_t channel, bt_spp_ro
     spp_control[ctl_hdl].rfcomm_ctr.type = BT_RFCOMM_RPN_REQUEST;
 
     err = bt_rfcomm_send_control(&spp_control[ctl_hdl].rfcomm_ctr);
-    if (API_SUCCESS == err)
+    if (0 == err)
     {
         LOG_INF("[SPP] SPP get remote port setting successfully, waitting for BT_RFCOMM_RPN_REQUEST event.\n");
         return 0;
@@ -1261,7 +1261,7 @@ int bt_spp_negotiate_port_setting(struct bt_conn * conn, uint8_t channel, bt_spp
     memcpy(&spp_control[ctl_hdl].rfcomm_ctr.control_data.rpn, port, sizeof(struct bt_spp_port));
     err = bt_rfcomm_send_control(&spp_control[ctl_hdl].rfcomm_ctr);
 
-    if (API_SUCCESS == err)
+    if (0 == err)
     {
         LOG_INF("[SPP] SPP get remote port setting successfully, waitting for control_message callback.\n");
         return 0;

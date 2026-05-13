@@ -100,7 +100,8 @@ static inline uint32_t ticks_to_msec_safe(uint64_t tick)
 		 */
 		uint64_t q = tick / rate;
 		uint64_t r = ((tick % rate) * multiplier) / rate;
-		return (uint32_t)(q * multiplier + r);
+		uint64_t result = q * multiplier + r;
+		return (result > (uint64_t)UINT32_MAX) ? UINT32_MAX : (uint32_t)result;
 	}
 	return (uint32_t)((tick * multiplier) / rate);
 }
