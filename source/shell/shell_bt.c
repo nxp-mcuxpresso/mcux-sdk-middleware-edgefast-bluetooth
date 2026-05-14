@@ -1316,7 +1316,7 @@ static int cmd_hci_cmd(const struct shell *sh, size_t argc, char *argv[])
 	uint8_t ogf;
 	uint16_t ocf;
 	struct net_buf *buf = NULL, *rsp;
-	int err;
+	int err = 0;
 	static uint8_t hex_data[HCI_CMD_MAX_PARAM];
 	int hex_data_len;
 
@@ -1456,7 +1456,7 @@ static int cmd_id_reset(const struct shell *sh, size_t argc, char *argv[])
 	char addr_str[BT_ADDR_LE_STR_LEN];
 	bt_addr_le_t addr;
 	uint8_t id;
-	int err;
+	int err = 0;
 	unsigned long id_ul;
 
 	if (argc < 2) {
@@ -1496,7 +1496,7 @@ static int cmd_id_reset(const struct shell *sh, size_t argc, char *argv[])
 static int cmd_id_delete(const struct shell *sh, size_t argc, char *argv[])
 {
 	uint8_t id;
-	int err;
+	int err = 0;
 	unsigned long id_ul;
 
 	if (argc < 2) {
@@ -1546,7 +1546,7 @@ static int cmd_id_select(const struct shell *sh, size_t argc, char *argv[])
 	bt_addr_le_t addrs[CONFIG_BT_ID_MAX];
 	size_t count = CONFIG_BT_ID_MAX;
 	uint8_t id;
-	int err;
+	int err = 0;
 	unsigned long id_ul;
 
 	id_ul = shell_strtoul(argv[1], 10, &err);
@@ -2412,7 +2412,7 @@ static int cmd_adv_start(const struct shell *sh, size_t argc, char *argv[])
 	struct bt_le_ext_adv_start_param param;
 	uint8_t num_events = 0;
 	int32_t timeout = 0;
-	int err;
+	int err = 0;
 
 	if (!adv) {
 		shell_print(sh, "Advertiser[%d] not created", selected_adv);
@@ -2756,7 +2756,7 @@ static int cmd_per_adv_sync_create(const struct shell *sh, size_t argc,
 				   char *argv[])
 {
 	struct bt_le_per_adv_sync *per_adv_sync = per_adv_syncs[selected_per_adv_sync];
-	int err;
+	int err = 0;
 	struct bt_le_per_adv_sync_param create_params = { 0 };
 	uint32_t options = 0;
 
@@ -2893,7 +2893,7 @@ static int cmd_past_subscribe(const struct shell *sh, size_t argc,
 				   char *argv[])
 {
 	struct bt_le_per_adv_sync_transfer_param param;
-	int err;
+	int err = 0;
 	int i = 0;
 	bool global = true;
 
@@ -3557,7 +3557,7 @@ static int cmd_conn_update(const struct shell *sh, size_t argc, char *argv[])
 {
 	struct bt_le_conn_param param;
 	unsigned long value_ul;
-	int err;
+	int err = 0;
 
 	if (default_conn == NULL) {
 		shell_error(sh,
@@ -3688,7 +3688,7 @@ static int cmd_conn_phy_update(const struct shell *sh, size_t argc,
 			       char *argv[])
 {
 	struct bt_conn_le_phy_param param;
-	int err;
+	int err = 0;
 	unsigned long temp;
 
 	if (default_conn == NULL) {
@@ -4536,7 +4536,7 @@ static int cmd_fixed_passkey(const struct shell *sh,
 			     size_t argc, char *argv[])
 {
 	unsigned long passkey_ul;
-	int err;
+	int err = 0;
 
 	if (argc < 2) {
 		bt_passkey_set(BT_PASSKEY_INVALID);
@@ -4564,7 +4564,7 @@ static int cmd_auth_passkey(const struct shell *sh,
 			    size_t argc, char *argv[])
 {
 	unsigned long passkey_ul;
-	int err;
+	int err = 0;
 
 	if (!shell_bt_default_conn()) {
 		shell_print(sh, "Not connected");

@@ -798,7 +798,7 @@ static int cmd_tx_sync_read_bis(const struct shell *sh, size_t argc, char *argv[
 #if (defined(CONFIG_BT_ISO_SYNC_RECEIVER) && (CONFIG_BT_ISO_SYNC_RECEIVER > 0))
 static int cmd_big_sync(const struct shell *sh, size_t argc, char *argv[])
 {
-	int err;
+	int err = 0;
 	/* TODO: Add support to select which PA sync to BIG sync to */
 	struct bt_le_per_adv_sync *pa_sync = per_adv_syncs[0];
 	struct bt_iso_big_sync_param param;
