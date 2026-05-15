@@ -3166,7 +3166,14 @@ void avrcp_cover_art_cmd_received(uint8_t handle, struct bt_avrcp_cover_art_cmd 
             }
 
             rsp.get_thumb.data = &image_data[0];
-            sent += rsp.get_thumb.length;
+            if (rsp.get_thumb.length <= (UINT16_MAX - sent))
+            {
+                sent += rsp.get_thumb.length;
+            }
+            else
+            {
+                sent = UINT16_MAX;
+            }
             if (remaining >= rsp.get_thumb.length)
             {
                 remaining -= rsp.get_thumb.length;

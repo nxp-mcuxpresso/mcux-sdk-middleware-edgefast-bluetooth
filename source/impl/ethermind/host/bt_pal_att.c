@@ -2786,7 +2786,7 @@ static uint8_t att_read_group_req(struct bt_att_chan *chan, struct net_buf *buf)
 	uint8_t uuid_len;
 
 	/* avoid narrowing cast of (buf->len - sizeof(*req)). */
-	if (buf->len - sizeof(*req) > UINT8_MAX) {
+	if (buf->len < sizeof(*req) || (buf->len - sizeof(*req)) > UINT8_MAX) {
 		return BT_ATT_ERR_INVALID_PDU;
 	}
 	uuid_len = buf->len - sizeof(*req);
