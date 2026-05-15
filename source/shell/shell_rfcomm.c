@@ -134,6 +134,7 @@ static void rfcomm_sent(struct bt_rfcomm_dlc *dlci, struct net_buf *buf)
 {
 	/* Release transmit semaphore to allow next transmission */
     xSemaphoreGive(rfcomm_tx_sync);
+	/* If buf->len is 0, it indicates that the send operation failed */
 	shell_print(ctx_shell, "Data sent dlc %p len %u", dlci, buf->len);
 }
 
@@ -146,7 +147,7 @@ static void rfcomm_disconnected(struct bt_rfcomm_dlc *dlci)
 {
 	shell_print(ctx_shell, "Dlc %p disconnected", dlci);
     rfcomm_dlc.session = NULL;
-	// Cleanup: reset semaphore on disconnect
+	/* Cleanup: reset semaphore to ensure proper state after disconnection */
     xSemaphoreGive(rfcomm_tx_sync);
 }
 
@@ -305,7 +306,7 @@ void bt_ShellRfcommInit(shell_handle_t shell)
 
 		if (rfcomm_tx_sync != NULL)
 		{
-			// Make it available (initial value = 1)
+			/* Make it available (initial value = 1) */
 			xSemaphoreGive(rfcomm_tx_sync);
 		}
 	}

@@ -441,6 +441,12 @@ int bt_rfcomm_dlc_connect(struct bt_conn *conn, struct bt_rfcomm_dlc *dlc,
  *  Send data from buffer to the dlc. Length should be less than or equal to
  *  mtu.
  *
+ *  Note:
+ *  This API does not support concurrent or multiple pending send operations.
+ *  The application must ensure that a previous send operation has completed
+ *  before invoking this function again. Otherwise, undefined behavior or
+ *  transmission failure may occur.
+ *
  *  @param dlc Dlc object.
  *  @param buf Data buffer.
  *
