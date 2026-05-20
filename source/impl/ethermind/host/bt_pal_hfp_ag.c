@@ -905,11 +905,6 @@ static API_RESULT hfp_ag_callback(HFP_AG_HANDLE handle,HFP_AG_EVENTS hfp_ag_even
                                 if (hfp_ag->bt_hfp_ag_config)
                                 {
                                     hfp_ag->bt_hfp_ag_config->bt_hfp_ag_codec_negotiate = 0;
-                                    /* Trigger codec connection */
-                                    if (codec_id == hfp_ag->bt_hfp_ag_config->bt_hfp_ag_codec)
-                                    {
-                                        bt_hfp_ag_open_audio(hfp_ag, codec_id - 1);
-                                    }
                                 }
                             }
                             break;
