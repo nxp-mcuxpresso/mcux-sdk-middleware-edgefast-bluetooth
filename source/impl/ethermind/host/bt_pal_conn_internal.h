@@ -13,6 +13,8 @@
 #ifndef __CONN_INTERNAL_H__
 #define __CONN_INTERNAL_H__
 
+#include <toolchain.h>
+#include <toolchain/common.h>
 #include <bluetooth/iso.h>
 
 typedef enum __packed {

@@ -16,6 +16,7 @@
 #include <zephyr/types.h>
 #include <sys/util.h>
 #include <toolchain.h>
+#include <toolchain/common.h>
 
 #ifdef __cplusplus
 extern "C" {
