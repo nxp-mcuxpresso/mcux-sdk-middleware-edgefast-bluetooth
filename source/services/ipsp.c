@@ -22,7 +22,7 @@
 #define IPSP_MTU     1280U
 #define INIT_CREDITS 1024U
 
-NET_BUF_POOL_DEFINE(data_pool, 1, BT_L2CAP_SDU_BUF_SIZE(IPSP_MTU), USER_DATA_MIN, NULL);
+static NET_BUF_POOL_DEFINE(data_pool, 1, BT_L2CAP_SDU_BUF_SIZE(IPSP_MTU), USER_DATA_MIN, NULL);
 
 static int l2cap_rx(struct bt_l2cap_chan *chan, struct net_buf *buf);
 static struct net_buf *alloc_buf_cb(struct bt_l2cap_chan *chan);
