@@ -1939,7 +1939,7 @@ void avrcp_control_rsp_received(struct bt_conn *conn, struct bt_avrcp_control_ms
     avrcp_auto_test(0);
 }
 
-static NET_BUF_POOL_FIXED_DEFINE(app_avrcp_continue_pool, 1u, 1024u, CONFIG_NET_BUF_USER_DATA_SIZE, NULL);
+NET_BUF_POOL_FIXED_DEFINE(app_avrcp_continue_pool, 1u, 1024u, CONFIG_NET_BUF_USER_DATA_SIZE, NULL);
 static struct net_buf *continue_rsp_buf;
 static struct bt_avrcp_vendor_header continue_rsp_header;
 #define PARSE_BUF_SIZE (1024u)
@@ -3373,7 +3373,7 @@ static uint8_t app_sdp_avrcp_user(struct bt_conn *conn,
 }
 
 #define SDP_CLIENT_USER_BUF_LEN        512U
-static NET_BUF_POOL_FIXED_DEFINE(app_sdp_client_pool, CONFIG_BT_MAX_CONN,
+NET_BUF_POOL_FIXED_DEFINE(app_sdp_client_pool, CONFIG_BT_MAX_CONN,
               SDP_CLIENT_USER_BUF_LEN, CONFIG_NET_BUF_USER_DATA_SIZE, NULL);
 
 static uint8_t app_sdp_avrcp_user(struct bt_conn *conn, struct bt_sdp_client_result *result);
