@@ -244,6 +244,12 @@ int bt_spp_client_connect(struct bt_conn *conn, uint8_t channel, bt_spp_callback
  *  Once data is sent, will notify application by calling cb->data_sent, which is provided by bt_spp_server_register or bt_spp_client_connect.
  *  If peer spp receives data, will notify application by calling cb->data_received.
  *
+ *  Note:
+ *  This API does not support concurrent or multiple pending send operations.
+ *  The application must ensure that a previous send operation has completed
+ *  before invoking this function again. Otherwise, undefined behavior or
+ *  transmission failure may occur.
+ *
  *  @param spp  SPP handle.
  *  @param data Data buffer.
  *  @param len  Data length.
