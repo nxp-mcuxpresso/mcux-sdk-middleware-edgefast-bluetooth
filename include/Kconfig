@@ -1119,9 +1119,10 @@ config BT_L2CAP_IFRAME_SUPPORT
       Streaming Mode (Extended Flow Sepc) are not supported yet.
       This symbol is a config macro.
 
-config BT_L2CAP_APP_PARAM_UPDATE
+config BT_L2CAP_APP_PARAM_UPDATE_CB
     bool "Application callback for L2CAP connection parameter negotiation"
     depends on BT_CONN
+    depends on BT_CENTRAL
     default n
     help
       Enable application-level negotiation of L2CAP LE connection

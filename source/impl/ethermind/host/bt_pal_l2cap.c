@@ -4086,7 +4086,7 @@ static void ethermind_l2cap_le_callback
     UCHAR     bd_addr_type;
     API_RESULT retval;
     UINT16 reason;
-#if defined(CONFIG_BT_L2CAP_APP_PARAM_UPDATE)
+#if defined(CONFIG_BT_L2CAP_APP_PARAM_UPDATE_CB)
     struct bt_conn *conn;
     struct bt_le_conn_param app_param;
 #endif
@@ -4159,7 +4159,7 @@ static void ethermind_l2cap_le_callback
                 else
                 {
 
-#if defined(CONFIG_BT_L2CAP_APP_PARAM_UPDATE)
+#if defined(CONFIG_BT_L2CAP_APP_PARAM_UPDATE_CB)
                     conn = bt_conn_lookup_device_id(*handle);
                     if (NULL == conn)
                     {
@@ -4217,7 +4217,7 @@ static void ethermind_l2cap_le_callback
 #else
                     /* Default behavior: auto-accept after basic validation */
                     result = L2CAP_CONNECTION_PARAMETERS_ACCEPTED;
-#endif /* CONFIG_BT_L2CAP_APP_PARAM_UPDATE */
+#endif /* CONFIG_BT_L2CAP_APP_PARAM_UPDATE_CB */
                 }
             }
         }

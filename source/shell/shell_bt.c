@@ -908,9 +908,9 @@ static bool le_param_req(struct bt_conn *conn, struct bt_le_conn_param *param)
 		    " to %d", param->interval_min, param->interval_max,
 		    param->latency, param->timeout);
 
-#if defined(CONFIG_BT_L2CAP_APP_PARAM_UPDATE)
+#if defined(CONFIG_BT_L2CAP_APP_PARAM_UPDATE_CB)
 	/*
-	 * CONFIG_BT_L2CAP_APP_PARAM_UPDATE is enabled.
+	 * CONFIG_BT_L2CAP_APP_PARAM_UPDATE_CB is enabled.
 	 *
 	 * The application can negotiate connection parameters here before
 	 * the stack responds to the remote device's L2CAP parameter update
@@ -931,7 +931,7 @@ static bool le_param_req(struct bt_conn *conn, struct bt_le_conn_param *param)
 	 *   Apply role-specific policy:
 	 *     if (conn->role == BT_CONN_ROLE_CENTRAL) { ... }
 	 */
-#endif /* CONFIG_BT_L2CAP_APP_PARAM_UPDATE */
+#endif /* CONFIG_BT_L2CAP_APP_PARAM_UPDATE_CB */
 
 	return true;
 }
