@@ -908,6 +908,31 @@ static bool le_param_req(struct bt_conn *conn, struct bt_le_conn_param *param)
 		    " to %d", param->interval_min, param->interval_max,
 		    param->latency, param->timeout);
 
+#if defined(CONFIG_BT_L2CAP_APP_PARAM_UPDATE)
+	/*
+	 * CONFIG_BT_L2CAP_APP_PARAM_UPDATE is enabled.
+	 *
+	 * The application can negotiate connection parameters here before
+	 * the stack responds to the remote device's L2CAP parameter update
+	 * request. Modify param values and return true to accept, or return
+	 * false to reject.
+	 *
+	 * This shell callback serves as a reference implementation.
+	 * For production use, implement negotiation logic in your application's
+	 * le_param_req() callback registered via bt_conn_cb_register().
+	 *
+	 * Example policies:
+	 *   Enforce minimum supervision timeout:
+	 *     if (param->timeout < 200) { param->timeout = 200; }
+	 *
+	 *   Reject overly aggressive intervals (< 7.5ms = 6 units):
+	 *     if (param->interval_min < 6) { return false; }
+	 *
+	 *   Apply role-specific policy:
+	 *     if (conn->role == BT_CONN_ROLE_CENTRAL) { ... }
+	 */
+#endif /* CONFIG_BT_L2CAP_APP_PARAM_UPDATE */
+
 	return true;
 }
 

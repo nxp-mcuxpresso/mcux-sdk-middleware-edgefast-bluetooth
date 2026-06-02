@@ -1119,6 +1119,23 @@ config BT_L2CAP_IFRAME_SUPPORT
       Streaming Mode (Extended Flow Sepc) are not supported yet.
       This symbol is a config macro.
 
+config BT_L2CAP_APP_PARAM_UPDATE
+    bool "Application callback for L2CAP connection parameter negotiation"
+    depends on BT_CONN
+    default n
+    help
+      Enable application-level negotiation of L2CAP LE connection
+      parameter update requests from remote devices.
+      When enabled, the stack invokes the le_param_req() callback
+      registered via bt_conn_cb_register() before responding to
+      the remote. The callback can accept parameters as-is, modify
+      them, or reject the request entirely.
+      When disabled (default), all valid parameter update requests
+      are automatically accepted by the stack without application
+      involvement.
+      See include/bluetooth/conn.h for the le_param_req() callback
+      signature.
+
 config BT_ATT_PREPARE_COUNT
     int "BT_ATT_PREPARE_COUNT"
     default 0

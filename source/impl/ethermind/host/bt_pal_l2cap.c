@@ -4086,6 +4086,10 @@ static void ethermind_l2cap_le_callback
     UCHAR     bd_addr_type;
     API_RESULT retval;
     UINT16 reason;
+#if defined(CONFIG_BT_L2CAP_APP_PARAM_UPDATE)
+    struct bt_conn *conn;
+    struct bt_le_conn_param app_param;
+#endif
 
     retval = device_queue_get_remote_addr (handle,&peer_bd_addr);
 
@@ -4154,7 +4158,66 @@ static void ethermind_l2cap_le_callback
                 }
                 else
                 {
+
+#if defined(CONFIG_BT_L2CAP_APP_PARAM_UPDATE)
+                    conn = bt_conn_lookup_device_id(*handle);
+                    if (NULL == conn)
+                    {
+                        LOG_ERR("No bt_conn for device id %u\n", *handle);
+                        result = L2CAP_CONNECTION_PARAMETERS_REJECTED;
+                    }
+                    else
+                    {
+                        /* Prepare parameters for application callback */
+                        app_param.interval_min = min_interval;
+                        app_param.interval_max = max_interval;
+                        app_param.latency = slave_latency;
+                        app_param.timeout = supervision_timeout;
+
+                        if (le_param_req(conn, &app_param))
+                        {
+                            /* Re-validate modified parameters */
+                            if ((app_param.interval_min < HCI_LE_MIN_CONN_INTRVL_MIN_RANGE) ||
+                                (app_param.interval_min > HCI_LE_MIN_CONN_INTRVL_MAX_RANGE) ||
+                                (app_param.interval_max < HCI_LE_MAX_CONN_INTRVL_MIN_RANGE) ||
+                                (app_param.interval_max > HCI_LE_MAX_CONN_INTRVL_MAX_RANGE) ||
+                                (app_param.interval_min > app_param.interval_max) ||
+                                (app_param.latency > HCI_LE_CONN_LATENCY_MAX_RANGE) ||
+                                (app_param.timeout < HCI_LE_SUPERVISION_TO_MIN_RANGE) ||
+                                (app_param.timeout > HCI_LE_SUPERVISION_TO_MAX_RANGE))
+                            {
+                                LOG_ERR("App returned invalid parameters, rejecting\n");
+                                result = L2CAP_CONNECTION_PARAMETERS_REJECTED;
+                            }
+                            else
+                            {
+                                /* Application accepted */
+                                min_interval = app_param.interval_min;
+                                max_interval = app_param.interval_max;
+                                slave_latency = app_param.latency;
+                                supervision_timeout = app_param.timeout;
+                                result = L2CAP_CONNECTION_PARAMETERS_ACCEPTED;
+
+                                LOG_DBG("App accepted conn params (modified)\n");
+                                LOG_DBG("\tNegotiated Interval : 0x%04X-0x%04X\n",
+                                       min_interval, max_interval);
+                                LOG_DBG("\tNegotiated Latency : 0x%04X\n", slave_latency);
+                                LOG_DBG("\tNegotiated Timeout : 0x%04X\n", supervision_timeout);
+                            }
+                        }
+                        else
+                        {
+                            /* Application rejected */
+                            LOG_WRN("App rejected conn param update\n");
+                            result = L2CAP_CONNECTION_PARAMETERS_REJECTED;
+                        }
+
+                        bt_conn_unref(conn);
+                    }
+#else
+                    /* Default behavior: auto-accept after basic validation */
                     result = L2CAP_CONNECTION_PARAMETERS_ACCEPTED;
+#endif /* CONFIG_BT_L2CAP_APP_PARAM_UPDATE */
                 }
             }
         }
