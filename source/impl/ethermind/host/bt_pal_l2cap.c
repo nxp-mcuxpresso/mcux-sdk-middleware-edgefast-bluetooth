@@ -4166,6 +4166,12 @@ static void ethermind_l2cap_le_callback
                         LOG_ERR("No bt_conn for device id %u\n", *handle);
                         result = L2CAP_CONNECTION_PARAMETERS_REJECTED;
                     }
+					else if(conn->role != BT_CONN_ROLE_CENTRAL)
+					{
+						LOG_ERR("Device is not Central, rejecting L2CAP Connection Parameter Update Request\n");
+						result = L2CAP_CONNECTION_PARAMETERS_REJECTED;
+						bt_conn_unref(conn);
+					}
                     else
                     {
                         /* Prepare parameters for application callback */
